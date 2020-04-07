@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import wolfshotz.dml.client.anim.DragonAnimator;
+import wolfshotz.dml.entity.dragons.DragonEntityType;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
 
@@ -53,9 +54,12 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     public float size;
     // delegates
     private TameableDragonEntity dragon;
+    private final DragonEntityType type;
 
-    public DragonModel()
+    public DragonModel(DragonEntityType type)
     {
+        this.type = type;
+
         textureWidth = 256;
         textureHeight = 256;
 
@@ -134,12 +138,11 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         tailScaleMiddle = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, 0);
         tailScaleRight = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, -scaleRotZ);
 
-//        TODO
-//        boolean fire = breed == EnumDragonBreed.FIRE;
-//
-//        tailScaleMiddle.showModel = !fire;
-//        tailScaleLeft.showModel = fire;
-//        tailScaleRight.showModel = fire;
+        boolean show = !type.tailScales();
+
+        tailScaleMiddle.showModel = !show;
+        tailScaleLeft.showModel = show;
+        tailScaleRight.showModel = show;
 
         buildTailHorn(false);
         buildTailHorn(true);
@@ -176,8 +179,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         ModelPart horn = tail.addChildBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength, 0, 117);
         horn.setRotationPoint(hornPosX, hornPosY, hornPosZ);
         horn.setAngles(hornRotX, hornRotY, hornRotZ);
-//        horn.isHidden = true; TODO
-//        horn.showModel = breed == EnumDragonBreed.WATER;
+        horn.showModel = type.tailHorns();
 
         if (mirror)
         {
@@ -253,10 +255,8 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     private void buildLeg(boolean hind)
     {
         // thinner legs for skeletons
-//        boolean skeleton = breed == EnumDragonBreed.GHOST; TODO
-
+        boolean thin = type.thinLegs();
         float baseLength = 26;
-        String baseName = hind ? "hind" : "fore";
         int texY = hind ? 29 : 0;
 
         // thigh variables
@@ -264,7 +264,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         float thighPosY = 18;
         float thighPosZ = 4;
 
-        int thighThick = 9/* - (skeleton ? 2 : 0)*/;
+        int thighThick = 9 - (thin ? 2 : 0);
         int thighLength = (int) (baseLength * (hind ? 0.9f : 0.77f));
 
         if (hind)
@@ -305,7 +305,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         float footPosY = crusLength + (crusOfs / 2f);
         float footPosZ = 0;
 
-        int footWidth = crusThick + 2/* + (skeleton ? 2 : 0)*/;
+        int footWidth = crusThick + 2 + (thin ? 2 : 0);
         int footHeight = 4;
         int footLength = (int) (baseLength * (hind ? 0.67f : 0.34f));
 

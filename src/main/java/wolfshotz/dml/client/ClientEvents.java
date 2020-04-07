@@ -10,7 +10,7 @@ public class ClientEvents
     public static void registerRenders()
     {
         RenderingRegistry.registerEntityRenderingHandler(DMLEntities.AETHER_DAGON.get(), DragonRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(DMLEntities.END_DRAGON.get(), DragonRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(DMLEntities.ENDER_DRAGON.get(), DragonRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(DMLEntities.FIRE_DRAGON.get(), DragonRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(DMLEntities.GHOST_DRAGON.get(), DragonRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(DMLEntities.FOREST_DRAGON.get(), DragonRenderer::new);

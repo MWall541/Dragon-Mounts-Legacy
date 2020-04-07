@@ -3,7 +3,6 @@ package wolfshotz.dml.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.StateContainer;
@@ -17,8 +16,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.ObjectHolder;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
-import wolfshotz.dml.entity.dragonegg.EggBreedTypes;
-import wolfshotz.dml.entity.dragons.TameableDragonEntity;
+import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
 
 /**
  * OG Dragon Mounts used meta-data to differentiate between the different egg breed types
@@ -29,12 +27,12 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
     @ObjectHolder(DragonMountsLegacy.MOD_ID + ":dragon_egg")
     public static final Block DRAGON_EGG = null;
 
-    public static final EnumProperty<EggBreedTypes> BREED = EnumProperty.create("breed", EggBreedTypes.class);
+    public static final EnumProperty<EnumEggTypes> BREED = EnumProperty.create("breed", EnumEggTypes.class);
 
     public DragonEggBlock(Properties properties)
     {
         super(properties);
-        setDefaultState(getStateContainer().getBaseState().with(BREED, EggBreedTypes.AETHER));
+        setDefaultState(getStateContainer().getBaseState().with(BREED, EnumEggTypes.AETHER));
     }
 
     public static void register(IEventBus bus)
@@ -51,15 +49,17 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
     }
 
     @Override
-    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {}
+    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player)
+    {
+        if (state.get(BREED) == EnumEggTypes.ENDER) super.onBlockClicked(state, worldIn, pos, player);
+    }
 
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_)
     {
         if (!worldIn.isRemote)
         {
-            EntityType<TameableDragonEntity> type = EggBreedTypes.getTypeByBlockState(state);
-            DragonEggEntity egg = new DragonEggEntity(type, worldIn);
+            DragonEggEntity egg = new DragonEggEntity(state.get(BREED), worldIn);
             egg.setPosition(pos.getX() + 0.5d, pos.getY() + 0.1d, pos.getZ() + 0.5d);
             worldIn.addEntity(egg);
             worldIn.setBlockState(pos, Blocks.AIR.getDefaultState());

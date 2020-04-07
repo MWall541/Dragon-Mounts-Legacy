@@ -31,7 +31,7 @@ public class EggRenderer extends EntityRenderer<DragonEggEntity>
     {
         // prepare egg rendering
         BlockPos blockpos = entityIn.getPosition();
-        BlockState state = DragonEggBlock.DRAGON_EGG.getDefaultState().with(DragonEggBlock.BREED, entityIn.breed);
+        BlockState state = DragonEggBlock.DRAGON_EGG.getDefaultState().with(DragonEggBlock.BREED, entityIn.eggType);
 
         if (state.getRenderType() == BlockRenderType.MODEL)
         {

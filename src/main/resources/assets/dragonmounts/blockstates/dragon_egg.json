@@ -1,7 +1,28 @@
 {
   "variants": {
-    "": {
-      "model": "dragonmounts:block/dragon_egg"
+    "breed=aether": {
+      "model": "dragonmounts:block/aether_egg"
+    },
+    "breed=ender": {
+      "model": "dragonmounts:block/ender_egg"
+    },
+    "breed=fire": {
+      "model": "dragonmounts:block/fire_egg"
+    },
+    "breed=forest": {
+      "model": "dragonmounts:block/forest_egg"
+    },
+    "breed=ghost": {
+      "model": "dragonmounts:block/ghost_egg"
+    },
+    "breed=ice": {
+      "model": "dragonmounts:block/ice_egg"
+    },
+    "breed=nether": {
+      "model": "dragonmounts:block/nether_egg"
+    },
+    "breed=water": {
+      "model": "dragonmounts:block/water_egg"
     }
   }
 }

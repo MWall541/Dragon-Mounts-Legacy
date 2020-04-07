@@ -1,0 +1,6 @@
+{
+  "parent": "block/dragon_egg",
+  "textures": {
+    "all": "dragonmounts:block/ice_egg"
+  }
+}

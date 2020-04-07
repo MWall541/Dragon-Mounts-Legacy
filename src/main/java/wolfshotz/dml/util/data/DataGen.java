@@ -16,7 +16,7 @@ public class DataGen
 
         if (evt.includeClient())
         {
-            gen.addProvider(new BlockModels(gen, evt.getExistingFileHelper()));
+            gen.addProvider(new BlockModelGen(gen, evt.getExistingFileHelper()));
         }
     }
 }

@@ -27,17 +27,17 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
-import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.entity.dragons.ai.DragonBodyController;
 import wolfshotz.dml.entity.dragons.ai.DragonBrainController;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
+import wolfshotz.dml.entity.dragons.ai.goals.DragonBreedGoal;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static net.minecraft.entity.SharedMonsterAttributes.*;
 
@@ -64,7 +64,6 @@ public class TameableDragonEntity extends TameableEntity
     public static final int HOME_RADIUS = 64;
     public static final double ALTITUDE_FLYING_THRESHOLD = 2;
     public static final int REPRO_LIMIT = 2;
-    private static final Logger L = Logger.getLogger(DragonMountsLegacy.MOD_ID);
     // data value IDs
     private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> DATA_SADDLED = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.BOOLEAN);
@@ -167,6 +166,11 @@ public class TameableDragonEntity extends TameableEntity
     {
         dataManager.set(DATA_TICKS_ALIVE, ticksAlive);
         lifeStageController.setTicksAlive(ticksAlive);
+    }
+
+    public void addReproCount()
+    {
+        reproCount++;
     }
 
     public boolean canFly()
@@ -284,7 +288,28 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     public void travel(Vec3d vec3d)
     {
-        // todo: try to solve shitty server-sided movement by using travel.
+        PlayerEntity rider;
+        if ((rider = getRidingPlayer()) != null)
+        {
+            float f = rider.moveForward, s = rider.moveStrafing;
+            boolean moving = (f != 0 || s != 0);
+            float speed = (float) (getAttribute(MOVEMENT_SPEED).getValue());
+            Vec3d wp = rider.getLookVec();
+            vec3d = new Vec3d(s, vec3d.y, f);
+
+            setAIMoveSpeed(speed);
+
+            if (!isFlying() && rider.isJumping) liftOff();
+
+            if (moving)
+            {
+                prevRotationYaw = rotationYaw = rider.rotationYaw;
+                rotationPitch = rider.rotationPitch * 0.5f;
+                setRotation(rotationYaw, rotationPitch);
+                renderYawOffset = rotationYaw;
+                rotationYawHead = renderYawOffset;
+            }
+        }
         super.travel(vec3d);
     }
 
@@ -301,7 +326,6 @@ public class TameableDragonEntity extends TameableEntity
         setMotion(Vec3d.ZERO);
         rotationYaw = prevRotationYaw;
         rotationYawHead = prevRotationYawHead;
-
 
         if (deathTime >= getMaxDeathTime()) remove(); // actually delete entity after the time is up
 
@@ -671,63 +695,59 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     public AgeableEntity createChild(AgeableEntity mate)
     {
-        return null; // TODO
-//        if (!(mate instanceof AbstractTameableDragonEntity))
-//            throw new IllegalArgumentException("The mate isn't a dragon");
-//
-//        AbstractTameableDragonEntity parent1 = this;
-//        AbstractTameableDragonEntity parent2 = (AbstractTameableDragonEntity) mate;
-//        AbstractTameableDragonEntity baby = null;
-//
-//        // mix the custom names in case both parents have one
-//        if (parent1.hasCustomName() && parent2.hasCustomName()) {
-//            String p1Name = parent1.getCustomName().getString();
-//            String p2Name = parent2.getCustomName().getString();
-//            String babyName;
-//
-//            if (p1Name.contains(" ") || p2Name.contains(" ")) {
-//                // combine two words with space
-//                // "Tempor Invidunt Dolore" + "Magna"
-//                // = "Tempor Magna" or "Magna Tempor"
-//                String[] p1Names = p1Name.split(" ");
-//                String[] p2Names = p2Name.split(" ");
-//
-//                p1Name = fixChildName(p1Names[rand.nextInt(p1Names.length)]);
-//                p2Name = fixChildName(p2Names[rand.nextInt(p2Names.length)]);
-//
-//                babyName = rand.nextBoolean() ? p1Name + " " + p2Name : p2Name + " " + p1Name;
-//            } else {
-//                // scramble two words
-//                // "Eirmod" + "Voluptua"
-//                // = "Eirvolu" or "Volueir" or "Modptua" or "Ptuamod" or ...
-//                if (rand.nextBoolean()) {
-//                    p1Name = p1Name.substring(0, (p1Name.length() - 1) / 2);
-//                } else {
-//                    p1Name = p1Name.substring((p1Name.length() - 1) / 2);
-//                }
-//
-//                if (rand.nextBoolean()) {
-//                    p2Name = p2Name.substring(0, (p2Name.length() - 1) / 2);
-//                } else {
-//                    p2Name = p2Name.substring((p2Name.length() - 1) / 2);
-//                }
-//
-//                p2Name = fixChildName(p2Name);
-//
-//                babyName = rand.nextBoolean() ? p1Name + p2Name : p2Name + p1Name;
-//            }
-//
-//            baby.setCustomNameTag(babyName);
-//        }
-//
-//        // inherit the baby's breed from its parents
-//        baby.getBreedHelper().inheritBreed(parent1, parent2);
-//
-//        // increase reproduction counter
-//        parent1.getReproductionHelper().addReproduced();
-//        parent2.getReproductionHelper().addReproduced();
-//
-//        return baby;
+        if (!(mate instanceof TameableDragonEntity))
+            throw new IllegalArgumentException("The mate isn't a dragon");
+
+        TameableDragonEntity baby;
+
+        // pick a breed to inherit from
+        if (getRNG().nextBoolean()) baby = (TameableDragonEntity) getType().create(world);
+        else baby = (TameableDragonEntity) mate.getType().create(world);
+
+        // mix the custom names in case both parents have one
+        if (hasCustomName() && mate.hasCustomName())
+        {
+            String p1Name = getCustomName().getString();
+            String p2Name = mate.getCustomName().getString();
+            String babyName;
+
+            if (p1Name.contains(" ") || p2Name.contains(" "))
+            {
+                // combine two words with space
+                // "Tempor Invidunt Dolore" + "Magna"
+                // = "Tempor Magna" or "Magna Tempor"
+                String[] p1Names = p1Name.split(" ");
+                String[] p2Names = p2Name.split(" ");
+
+                p1Name = DragonBreedGoal.fixChildName(p1Names[rand.nextInt(p1Names.length)]);
+                p2Name = DragonBreedGoal.fixChildName(p2Names[rand.nextInt(p2Names.length)]);
+
+                babyName = rand.nextBoolean() ? p1Name + " " + p2Name : p2Name + " " + p1Name;
+            }
+            else
+            {
+                // scramble two words
+                // "Eirmod" + "Voluptua"
+                // = "Eirvolu" or "Volueir" or "Modptua" or "Ptuamod" or ...
+                if (rand.nextBoolean()) p1Name = p1Name.substring(0, (p1Name.length() - 1) / 2);
+                else p1Name = p1Name.substring((p1Name.length() - 1) / 2);
+
+                if (rand.nextBoolean()) p2Name = p2Name.substring(0, (p2Name.length() - 1) / 2);
+                else p2Name = p2Name.substring((p2Name.length() - 1) / 2);
+
+                p2Name = DragonBreedGoal.fixChildName(p2Name);
+
+                babyName = rand.nextBoolean() ? p1Name + p2Name : p2Name + p1Name;
+            }
+
+            baby.setCustomName(new StringTextComponent(babyName));
+        }
+
+        // increase reproduction counter
+        addReproCount();
+        ((TameableDragonEntity) mate).addReproCount();
+
+        return baby;
     }
 
     public LifeStageController getLifeStageController()

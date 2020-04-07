@@ -25,11 +25,6 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         addLayer(new DragonGlowLayer(this));
     }
 
-    public static ResourceLocation rl(String path)
-    {
-        return DragonMountsLegacy.rl(TEX_PATH + path);
-    }
-
     @Override
     protected void preRenderCallback(TameableDragonEntity dragon, MatrixStack ms, float partialTickTime)
     {
@@ -63,5 +58,10 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         if (glowTexture == null)
             glowTexture = rl(entity.getType().getRegistryName().getPath() + "/glow.png");
         return glowTexture;
+    }
+
+    public static ResourceLocation rl(String path)
+    {
+        return DragonMountsLegacy.rl(TEX_PATH + path);
     }
 }

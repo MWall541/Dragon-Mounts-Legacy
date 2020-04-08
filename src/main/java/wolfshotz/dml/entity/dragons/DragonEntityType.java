@@ -9,13 +9,11 @@ import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
 import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
 
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Predicate;
 
 public class DragonEntityType extends EntityType<TameableDragonEntity>
 {
     private static final Map<Predicate<DragonEggEntity>, EnumEggTypes> HABITATS = Maps.newHashMap();
-    private static final Random RAND = new Random();
     private final EnumEggTypes breedType;
     private boolean thinLegs, tailScales, tailHorns;
     private int color1, color2;
@@ -99,21 +97,21 @@ public class DragonEntityType extends EntityType<TameableDragonEntity>
         return this;
     }
 
-    public float getRColor()
+    public float getRColor(boolean primary)
     {
-        int color = RAND.nextBoolean() ? color1 : color2;
+        int color = primary ? color1 : color2;
         return ((color >> 16) & 0xFF) / 255f;
     }
 
-    public float getGColor()
+    public float getGColor(boolean primary)
     {
-        int color = RAND.nextBoolean() ? color1 : color2;
+        int color = primary ? color1 : color2;
         return ((color >> 8) & 0xFF) / 255f;
     }
 
-    public float getBColor()
+    public float getBColor(boolean primary)
     {
-        int color = RAND.nextBoolean() ? color1 : color2;
+        int color = primary ? color1 : color2;
         return (color & 0xFF) / 255f;
     }
 

@@ -50,7 +50,7 @@ public class DragonBrainController
             dragon.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(dragon));
             dragon.targetSelector.addGoal(1, new OwnerHurtTargetGoal(dragon));
             dragon.targetSelector.addGoal(2, new HurtByTargetGoal(dragon));
-            dragon.targetSelector.addGoal(3, new NonTamedTargetGoal<>(dragon, AnimalEntity.class, false, null));
+            dragon.targetSelector.addGoal(3, new NonTamedTargetGoal<>(dragon, AnimalEntity.class, false, e -> !(e instanceof TameableDragonEntity)));
         }
     }
 }

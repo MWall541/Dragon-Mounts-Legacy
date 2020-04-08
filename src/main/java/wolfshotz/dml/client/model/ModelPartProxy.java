@@ -46,7 +46,7 @@ public class ModelPartProxy
     {
         this.part = part;
 
-        if (part != null)
+        if (part.childModels != null)
         {
             childs = new ArrayList<>();
             for (Object childModel : part.childModels) childs.add(new ModelPartProxy((ModelPart) childModel));

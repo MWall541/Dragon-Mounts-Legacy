@@ -1,13 +1,17 @@
 package wolfshotz.dml.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.util.ResourceLocation;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.model.DragonModel;
+import wolfshotz.dml.entity.dragons.DragonEntityType;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
+
+import javax.annotation.Nullable;
 
 public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonModel>
 {
@@ -18,11 +22,18 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     public ResourceLocation saddleTexture;
     public ResourceLocation glowTexture;
 
-    public DragonRenderer(EntityRendererManager renderManagerIn)
+    public DragonRenderer(EntityRendererManager renderManagerIn, DragonEntityType type)
     {
-        super(renderManagerIn, new DragonModel(), 2);
+        super(renderManagerIn, new DragonModel(type), 2);
         addLayer(new DragonSaddleLayer(this));
         addLayer(new DragonGlowLayer(this));
+    }
+
+    @Nullable
+    @Override
+    protected RenderType func_230042_a_(TameableDragonEntity entity, boolean p_230042_2_, boolean p_230042_3_)
+    {
+        return super.func_230042_a_(entity, p_230042_2_, p_230042_3_);
     }
 
     @Override

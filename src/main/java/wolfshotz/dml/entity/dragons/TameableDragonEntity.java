@@ -31,10 +31,13 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
+import wolfshotz.dml.client.anim.DragonAnimator;
 import wolfshotz.dml.entity.dragons.ai.DragonBodyController;
 import wolfshotz.dml.entity.dragons.ai.DragonBrainController;
+import wolfshotz.dml.entity.dragons.ai.DragonMoveController;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
 import wolfshotz.dml.entity.dragons.ai.goals.DragonBreedGoal;
+import wolfshotz.dml.util.MathX;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -54,7 +57,7 @@ public class TameableDragonEntity extends TameableEntity
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3;
-    public static final double BASE_SPEED_FLYING = 0.4;
+    public static final double BASE_SPEED_FLYING = 0.6;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
     public static final float BASE_WIDTH = 2.75f; // adult sizes
@@ -73,11 +76,15 @@ public class TameableDragonEntity extends TameableEntity
     private static final String NBT_SADDLED = "Saddle";
     private static final String NBT_TICKS_ALIVE = "TicksAlive";
     private static final String NBT_REPRO_COUNT = "ReproCount";
-    public final List<DamageSource> damageImmunities = Lists.newArrayList();
+
+
     // server/client delegates
     public LifeStageController lifeStageController;
     public DragonBrainController dragonBrainController;
+    public final List<DamageSource> damageImmunities = Lists.newArrayList();
+
     public int reproCount;
+    public DragonAnimator animator;
 
     public TameableDragonEntity(EntityType<? extends TameableDragonEntity> type, World world)
     {
@@ -86,6 +93,8 @@ public class TameableDragonEntity extends TameableEntity
         // enables walking over blocks
         stepHeight = 1;
         ignoreFrustumCheck = true;
+        moveController = new DragonMoveController(this);
+        if (isClient()) this.animator = new DragonAnimator(this);
     }
 
     @Override
@@ -103,7 +112,7 @@ public class TameableDragonEntity extends TameableEntity
         getAttribute(MAX_HEALTH).setBaseValue(BASE_HEALTH);
         getAttribute(FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
         getAttributes().registerAttribute(ATTACK_DAMAGE).setBaseValue(BASE_DAMAGE);
-        getAttributes().registerAttribute(FLYING_SPEED).setBaseValue(BASE_SPEED_FLYING);
+        getAttributes().registerAttribute(FLYING_SPEED).setBaseValue(0.6);
     }
 
     @Override
@@ -137,7 +146,7 @@ public class TameableDragonEntity extends TameableEntity
     {
         super.readAdditional(compound);
         setSaddled(compound.getBoolean(NBT_SADDLED));
-        setTicksAlive(compound.getInt(NBT_TICKS_ALIVE));
+        if (compound.contains(NBT_TICKS_ALIVE)) setTicksAlive(compound.getInt(NBT_TICKS_ALIVE));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
     }
 
@@ -265,6 +274,7 @@ public class TameableDragonEntity extends TameableEntity
                 getDragonBrainController().updateGoals();
             }
         }
+        else animator.tick();
 
         super.livingTick();
     }
@@ -288,29 +298,44 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     public void travel(Vec3d vec3d)
     {
-        PlayerEntity rider;
-        if ((rider = getRidingPlayer()) != null)
+        if (!isFlying()) super.travel(vec3d);
+
+        if (world.isRemote) return;
+        PlayerEntity rider = getRidingPlayer();
+        if (rider == null) return;
+
+        double x = getPosX();
+        double y = getPosY();
+        double z = getPosZ();
+
+        // control direction with movement keys
+        if (rider.moveStrafing != 0 || rider.moveForward != 0)
         {
-            float f = rider.moveForward, s = rider.moveStrafing;
-            boolean moving = (f != 0 || s != 0);
-            float speed = (float) (getAttribute(MOVEMENT_SPEED).getValue());
             Vec3d wp = rider.getLookVec();
-            vec3d = new Vec3d(s, vec3d.y, f);
 
-            setAIMoveSpeed(speed);
-
-            if (!isFlying() && rider.isJumping) liftOff();
-
-            if (moving)
+            if (rider.moveForward < 0)
             {
-                prevRotationYaw = rotationYaw = rider.rotationYaw;
-                rotationPitch = rider.rotationPitch * 0.5f;
-                setRotation(rotationYaw, rotationPitch);
-                renderYawOffset = rotationYaw;
-                rotationYawHead = renderYawOffset;
+                wp = wp.rotateYaw(MathX.PI_F);
             }
+            else if (rider.moveStrafing > 0)
+            {
+                wp = wp.rotateYaw(MathX.PI_F * 0.5f);
+            }
+            else if (rider.moveStrafing < 0)
+            {
+                wp = wp.rotateYaw(MathX.PI_F * -0.5f);
+            }
+
+            x += wp.x * 10;
+            y += wp.y * 10;
+            z += wp.z * 10;
         }
-        super.travel(vec3d);
+
+        // lift off with a jump
+        if (!isFlying() && rider.isJumping) liftOff();
+
+        getMoveHelper().setMoveTo(x, y, z, 1);
+
     }
 
     /**
@@ -559,7 +584,7 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     public double getMountedYOffset()
     {
-        return (isSitting() ? 1.7f : 2.2f) * getScale();
+        return (isSitting() ? 1.7f : 2f) * getScale();
     }
 
     /**
@@ -795,32 +820,28 @@ public class TameableDragonEntity extends TameableEntity
         player.startRiding(this);
     }
 
-//    @Override
+    @Override
+    public void updatePassenger(Entity passenger)
+    {
+        Entity riddenByEntity = getControllingPassenger();
+        if (riddenByEntity != null)
+        {
+            Vec3d pos = new Vec3d(0, getMountedYOffset() + riddenByEntity.getYOffset(), 0.8 * getScale()).rotateYaw((float) Math.toRadians(-renderYawOffset)).add(getPositionVec());
+            passenger.setPosition(pos.x, pos.y, pos.z);
+
+            // fix rider rotation
+            if (getRidingEntity() instanceof LivingEntity)
+            {
+                LivingEntity rider = ((LivingEntity) riddenByEntity);
+                rider.prevRotationPitch = rider.rotationPitch;
+                rider.prevRotationYaw = rider.rotationYaw;
+                rider.renderYawOffset = renderYawOffset;
+            }
+        }
+    }
+
+    //    @Override
 //    public void updateRiderPosition() {
-//        if (riddenByEntity != null) {
-//            double px = posX;
-//            double py = posY + getMountedYOffset() + riddenByEntity.getYOffset();
-//            double pz = posZ;
-//
-//            // dragon position is the middle of the model and the saddle is on
-//            // the shoulders, so move player forwards on Z axis relative to the
-//            // dragon's rotation to fix that
-//            Vec3 pos = new Vec3(0, 0, 0.8 * getScale());
-//            pos = pos.rotateYaw((float) Math.toRadians(-renderYawOffset)); // oops
-//            px += pos.xCoord;
-//            py += pos.yCoord;
-//            pz += pos.zCoord;
-//
-//            riddenByEntity.setPosition(px, py, pz);
-//
-//            // fix rider rotation
-//            if (riddenByEntity instanceof EntityLiving) {
-//                EntityLiving rider = ((EntityLiving) riddenByEntity);
-//                rider.prevRotationPitch = rider.rotationPitch;
-//                rider.prevRotationYaw = rider.rotationYaw;
-//                rider.renderYawOffset = renderYawOffset;
-//            }
-//        }
 //    }
 
     public boolean isInvulnerableTo(DamageSource src)

@@ -3,6 +3,7 @@ package wolfshotz.dml.entity.dragonegg;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
@@ -39,10 +40,9 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
     public EnumEggTypes eggType;
     float eggWiggleX, eggWiggleZ;
 
-    // used for client garbage. Yes I hate it to.
-    public DragonEggEntity(World world)
+    public DragonEggEntity(EntityType<? extends DragonEggEntity> type, World world)
     {
-        super(DMLEntities.EGG.get(), world);
+        super(type, world);
     }
 
     public DragonEggEntity(EnumEggTypes type, World world)
@@ -90,6 +90,12 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
     }
 
     @Override
+    public boolean canBePushed() { return isAlive(); }
+
+    @Override
+    public boolean canBeCollidedWith() { return isAlive(); }
+
+    @Override
     public void tick()
     {
         super.tick();
@@ -117,30 +123,30 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
             // update motion - should fall
             if (!hasNoGravity())
             {
-                setMotion(getMotion().add(0, -0.04d, 0));
+//                setMotion(getMotion().add(0, -0.04d, 0));
                 move(MoverType.SELF, getMotion());
+                setMotion(getMotion().scale(0.1f));
             }
 
-            // wiggle
-            if (hatchTime > EGG_WIGGLE_THRESHOLD)
-            {
-                float wiggleChance = (hatchTime - EGG_WIGGLE_THRESHOLD) / EGG_WIGGLE_BASE_CHANCE * (1 - EGG_WIGGLE_THRESHOLD);
-
-                if (eggWiggleX > 0) eggWiggleX--;
-                else if (rand.nextFloat() < wiggleChance)
-                {
-                    eggWiggleX = rand.nextBoolean() ? 10 : 20;
-                    if (hatchTime > EGG_CRACK_THRESHOLD) crack();
-                }
-
-                if (eggWiggleZ > 0) eggWiggleZ--;
-                else if (rand.nextFloat() < wiggleChance)
-                {
-                    eggWiggleZ = rand.nextBoolean() ? 10 : 20;
-                    if (hatchTime > EGG_CRACK_THRESHOLD) crack();
-                }
-            }
-
+//            // wiggle todo
+//            if (hatchTime > EGG_WIGGLE_THRESHOLD)
+//            {
+//                float wiggleChance = (hatchTime - EGG_WIGGLE_THRESHOLD) / EGG_WIGGLE_BASE_CHANCE * (1 - EGG_WIGGLE_THRESHOLD);
+//
+//                if (eggWiggleX > 0) eggWiggleX--;
+//                else if (rand.nextFloat() < wiggleChance)
+//                {
+//                    eggWiggleX = rand.nextBoolean() ? 10 : 20;
+//                    if (hatchTime > EGG_CRACK_THRESHOLD) crack();
+//                }
+//
+//                if (eggWiggleZ > 0) eggWiggleZ--;
+//                else if (rand.nextFloat() < wiggleChance)
+//                {
+//                    eggWiggleZ = rand.nextBoolean() ? 10 : 20;
+//                    if (hatchTime > EGG_CRACK_THRESHOLD) crack();
+//                }
+//            }
         }
         else
         {
@@ -159,15 +165,16 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
             }
             else
             {
-                float r = eggType.getType().getRColor();
-                float g = eggType.getType().getGColor();
-                float b = eggType.getType().getBColor();
+                boolean primary = rand.nextInt(3) != 0;
+                float r = eggType.getType().getRColor(primary);
+                float g = eggType.getType().getGColor(primary);
+                float b = eggType.getType().getBColor(primary);
                 world.addParticle(new RedstoneParticleData(r, g, b, 1), px, py + 1, pz, 0, 0, 0);
             }
         }
     }
 
-    public void updateHabitat()
+    public void updateHabitat() // todo: make a better system for this, currently gets the first accepted predicate
     {
         DragonEntityType type = DragonEntityType.getByHabitat(this);
         if (type == null) return;

@@ -7,10 +7,11 @@ import wolfshotz.dml.util.MathX;
 
 public class DragonAnimator
 {
-
     // constants
     private static final int JAW_OPENING_TIME_FOR_ATTACK = 5;
-    public DragonModel model;
+
+    public TameableDragonEntity dragon;
+
     // entity parameters
     private float partialTicks;
     private float moveTime;
@@ -97,9 +98,9 @@ public class DragonAnimator
     // Y rotation angles for air, thigh only
     private float[] yAirAll = {-0.1f, 0.1f};
 
-    public DragonAnimator(DragonModel model)
+    public DragonAnimator(TameableDragonEntity dragon)
     {
-        this.model = model;
+        this.dragon = dragon;
     }
 
     public void setPartialTicks(float partialTicks)
@@ -123,10 +124,8 @@ public class DragonAnimator
     /**
      * Applies the animations on the model. Called every frame before the model
      * is rendered.
-     *
-     * @param dragon dragon we're animating
      */
-    public void animate(TameableDragonEntity dragon)
+    public void animate(DragonModel model)
     {
         anim = animTimer.get(partialTicks);
         ground = groundTimer.get(partialTicks);
@@ -145,7 +144,7 @@ public class DragonAnimator
         wingsDown = newWingsDown;
 
         // update flags
-        model.back.showModel = dragon.isSaddled();
+        model.back.showModel = !dragon.isSaddled();
 
         cycleOfs = (cycleOfs * cycleOfs + cycleOfs * 2) * 0.05f;
 
@@ -162,16 +161,16 @@ public class DragonAnimator
         model.pitch = getModelPitch();
 
         // animate body parts
-        animHeadAndNeck(dragon);
-        animTail();
-        animWings();
-        animLegs();
+        animHeadAndNeck(model);
+        animTail(model);
+        animWings(model);
+        animLegs(model);
     }
 
     /**
      * Updates the animation state. Called on every tick.
      */
-    public void tick(TameableDragonEntity dragon)
+    public void tick()
     {
         setOnGround(!dragon.isFlying());
 
@@ -240,13 +239,13 @@ public class DragonAnimator
         sitTimer.set(sitVal);
 
         // update jaw opening transition
-        //int ticksSinceLastAttack = dragon.getTicksSinceLastAttack();
-
-        // TODO: find better attack animation method
-        int ticksSinceLastAttack = -1;
-
-        boolean jawFlag = (ticksSinceLastAttack >= 0 && ticksSinceLastAttack < JAW_OPENING_TIME_FOR_ATTACK);
-        jawTimer.add(jawFlag ? 0.2f : -0.2f);
+//        int ticksSinceLastAttack = dragon.getLastAttackedEntityTime();
+//
+//        // TODO: find better attack animation method
+////        int ticksSinceLastAttack = -1;
+////
+//        boolean jawFlag = (ticksSinceLastAttack >= 0 && ticksSinceLastAttack < JAW_OPENING_TIME_FOR_ATTACK);
+//        jawTimer.add(jawFlag ? 0.2f : -0.2f);
 
         // update speed transition
         boolean nearGround = dragon.getAltitude() < dragon.getHeight() * 2;
@@ -271,27 +270,7 @@ public class DragonAnimator
         pitchTrail.update(getModelPitch());
     }
 
-    public float getAnimTime()
-    {
-        return anim;
-    }
-
-    public float getGroundTime()
-    {
-        return ground;
-    }
-
-    public float getFlutterTime()
-    {
-        return flutter;
-    }
-
-    public float getWalkTime()
-    {
-        return walk;
-    }
-
-    protected void animHeadAndNeck(TameableDragonEntity dragon)
+    protected void animHeadAndNeck(DragonModel model)
     {
         model.neck.rotationPointX = 0;
         model.neck.rotationPointY = 14;
@@ -353,7 +332,7 @@ public class DragonAnimator
         model.jaw.rotateAngleX += (1 - MathX.sin(animBase)) * 0.1f * flutter;
     }
 
-    protected void animWings()
+    protected void animWings(DragonModel model)
     {
         // move wings slower while sitting
         float aSpeed = sit > 0 ? 0.6f : 1;
@@ -435,7 +414,7 @@ public class DragonAnimator
         }
     }
 
-    protected void animTail()
+    protected void animTail(DragonModel model)
     {
         model.tail.rotationPointX = 0;
         model.tail.rotationPointY = 16;
@@ -486,8 +465,11 @@ public class DragonAnimator
             model.tail.rotateAngleY += MathX.toRadians(180 - yawOfs);
 
             // display horns near the tip
-            boolean horn = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
-            model.tailHornLeft.showModel = model.tailHornRight.showModel = horn;
+            if (model.tailHornLeft.showModel)
+            {
+                boolean horn = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
+                model.tailHornLeft.showModel = model.tailHornRight.showModel = horn;
+            }
 
             // update scale
             float neckScale = MathX.terpLinear(1.5f, 0.3f, vertMulti);
@@ -504,7 +486,7 @@ public class DragonAnimator
         }
     }
 
-    protected void animLegs()
+    protected void animLegs(DragonModel model)
     {
         // dangling legs for flying
         if (ground < 1)

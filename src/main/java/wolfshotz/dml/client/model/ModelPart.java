@@ -1,5 +1,7 @@
 package wolfshotz.dml.client.model;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
 /**
@@ -29,6 +31,30 @@ public class ModelPart extends ModelRenderer
     {
         super(model, texX, texY);
         this.base = model;
+    }
+
+    @Override
+    public void translateRotate(MatrixStack ms)
+    {
+//        super.translateRotate(ms);
+        // skip if hidden
+        if (!showModel) return;
+
+        // translate
+        ms.translate(rotationPointX / 16f, rotationPointY / 16f, rotationPointZ / 16f);
+
+        // rotate
+        if (preRotateAngleZ != 0) ms.rotate(Vector3f.ZP.rotation(preRotateAngleZ));
+        if (preRotateAngleY != 0) ms.rotate(Vector3f.YP.rotation(preRotateAngleY));
+        if (preRotateAngleX != 0) ms.rotate(Vector3f.XP.rotation(preRotateAngleX));
+
+        if (rotateAngleZ != 0.0F) ms.rotate(Vector3f.ZP.rotation(rotateAngleZ));
+        if (rotateAngleY != 0.0F) ms.rotate(Vector3f.YP.rotation(rotateAngleY));
+        if (rotateAngleX != 0.0F) ms.rotate(Vector3f.XP.rotation(rotateAngleX));
+
+        // scale
+        if (renderScaleX != 0 || renderScaleY != 0 || renderScaleZ != 0)
+            ms.scale(renderScaleX, renderScaleY, renderScaleZ);
     }
 
     public ModelPart addBox(float x, float y, float z, int width, int height, int depth, int textureOffsetX, int textureOffsetY)

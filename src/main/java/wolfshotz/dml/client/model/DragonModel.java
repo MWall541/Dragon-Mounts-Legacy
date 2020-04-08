@@ -1,11 +1,9 @@
 package wolfshotz.dml.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.EntityModel;
-import wolfshotz.dml.client.anim.DragonAnimator;
 import wolfshotz.dml.entity.dragons.DragonEntityType;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
@@ -18,7 +16,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     public static final int VERTS_NECK = 7;
     public static final int VERTS_TAIL = 12;
     public static final int HEAD_OFS = -16;
-    public final DragonAnimator animator;
+
     // model parts
     public ModelPart head;
     public ModelPart neck;
@@ -69,8 +67,6 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         buildTail();
         buildWing();
         buildLegs();
-
-        this.animator = new DragonAnimator(this);
     }
 
     private void buildHead()
@@ -138,7 +134,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         tailScaleMiddle = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, 0);
         tailScaleRight = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, -scaleRotZ);
 
-        boolean show = !type.tailScales();
+        boolean show = type.tailScales();
 
         tailScaleMiddle.showModel = !show;
         tailScaleLeft.showModel = show;
@@ -181,14 +177,8 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         horn.setAngles(hornRotX, hornRotY, hornRotZ);
         horn.showModel = type.tailHorns();
 
-        if (mirror)
-        {
-            tailHornLeft = horn;
-        }
-        else
-        {
-            tailHornRight = horn;
-        }
+        if (mirror) tailHornLeft = horn;
+        else tailHornRight = horn;
     }
 
     private void buildBody()
@@ -357,8 +347,8 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     public void setLivingAnimations(TameableDragonEntity dragon, float limbSwing, float limbSwingAmount, float partialTick)
     {
         this.dragon = dragon;
-        animator.setPartialTicks(partialTick);
-        animator.setMovement(limbSwing, limbSwingAmount * dragon.getScale());
+        dragon.animator.setPartialTicks(partialTick);
+        dragon.animator.setMovement(limbSwing, limbSwingAmount * dragon.getScale());
         size = dragon.getScale();
     }
 
@@ -366,9 +356,8 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     @Override
     public void setRotationAngles(TameableDragonEntity dragon, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        animator.setLook(netHeadYaw, headPitch);
-        animator.tick(dragon);
-        animator.animate(dragon);
+        dragon.animator.setLook(netHeadYaw, headPitch);
+        dragon.animator.animate(this);
     }
 
     @Override
@@ -414,8 +403,6 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     protected void renderWings(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
         ms.push();
-        RenderSystem.enableCull();
-//        GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
 
         for (int i = 0; i < 2; i++)
         {
@@ -425,19 +412,15 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
             {
                 // mirror next wing
                 ms.scale(-1, 1, 1);
-                // switch to back face culling
-//                GlStateManager.cullFace(GlStateManager.CullFace.BACK);
             }
         }
 
-        RenderSystem.disableCull();
+
         ms.pop();
     }
 
     protected void renderLegs(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
-        RenderSystem.enableCull();
-//        GlStateManager.cullFace(GlStateManager.CullFace.BACK);
 
         for (int i = 0; i < thighProxy.length; i++)
         {
@@ -448,11 +431,9 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
                 // mirror next legs
                 ms.scale(-1, 1, 1);
                 // switch to front face culling
-//                GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
             }
         }
-
-//        GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-        RenderSystem.disableCull();
     }
+
+
 }

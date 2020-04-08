@@ -7,6 +7,9 @@ import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 
 import java.util.Random;
 
+/**
+ * @deprecated - might remove - not in use.
+ */
 public class ParticleHelper
 {
     public static void spawnBodyParticle(TameableDragonEntity dragon, IParticleData type)

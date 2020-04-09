@@ -12,6 +12,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.DragonSpawnEggItem;
 import wolfshotz.dml.client.render.DragonRenderer;
@@ -25,6 +26,7 @@ public class ClientEvents
     public static void clientSetup(FMLClientSetupEvent evt)
     {
         ClientEvents.registerRenders();
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEvents::itemColors);
 
         DragonMountsLegacy.ITEMS.getEntries()
                 .stream()
@@ -64,7 +66,6 @@ public class ClientEvents
         }
     }
 
-    @SubscribeEvent
     public static void itemColors(ColorHandlerEvent.Item evt)
     {
         DragonSpawnEggItem.getEggs().forEach(i -> evt.getItemColors().register((s, c) -> i.getColor(c)));

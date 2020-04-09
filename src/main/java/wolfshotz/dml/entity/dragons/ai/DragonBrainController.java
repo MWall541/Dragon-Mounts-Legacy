@@ -2,6 +2,7 @@ package wolfshotz.dml.entity.dragons.ai;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.entity.dragons.ai.goals.DragonLandGoal;
@@ -50,7 +51,7 @@ public class DragonBrainController
             dragon.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(dragon));
             dragon.targetSelector.addGoal(1, new OwnerHurtTargetGoal(dragon));
             dragon.targetSelector.addGoal(2, new HurtByTargetGoal(dragon));
-            dragon.targetSelector.addGoal(3, new NonTamedTargetGoal<>(dragon, AnimalEntity.class, false, e -> !(e instanceof TameableDragonEntity)));
+            dragon.targetSelector.addGoal(3, new NonTamedTargetGoal<>(dragon, AnimalEntity.class, false, e -> !(e instanceof TameableDragonEntity) && !(e instanceof CreeperEntity)));
         }
     }
 }

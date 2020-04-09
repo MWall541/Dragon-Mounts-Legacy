@@ -1,0 +1,39 @@
+{
+  "entity.dragon.breathe": {
+    "sounds": [
+      {
+        "name": "minecraft:mob/cow/say2",
+        "volume": 0.5,
+        "pitch": 0.5
+      },
+      {
+        "name": "minecraft:mob/cow/say4",
+        "volume": 0.5,
+        "pitch": 0.5
+      }
+    ]
+  },
+  "entity.dragon.step": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/step1"
+      },
+      {
+        "name": "dragonmounts:entity/dragon/step2"
+      },
+      {
+        "name": "dragonmounts:entity/dragon/step3"
+      },
+      {
+        "name": "dragonmounts:entity/dragon/step4"
+      }
+    ]
+  },
+  "entity.dragon.death": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/death"
+      }
+    ]
+  }
+}

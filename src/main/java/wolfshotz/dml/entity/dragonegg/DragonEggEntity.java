@@ -7,23 +7,24 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
+import wolfshotz.dml.DragonEggBlock;
 import wolfshotz.dml.DragonMountsLegacy;
-import wolfshotz.dml.block.DragonEggBlock;
 import wolfshotz.dml.entity.DMLEntities;
-import wolfshotz.dml.entity.dragons.DragonEntityType;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
 import wolfshotz.dml.util.network.NetworkUtils;
 
-public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnData
+
+public class DragonEggEntity extends Entity
 {
     // constants
     public static final float WIDTH = 0.9f; // Roughly the same size as the dragon egg block box
@@ -36,9 +37,11 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
     private static final float EGG_CRACK_THRESHOLD = EGG_WIGGLE_THRESHOLD * 0.9f;
     private static final float EGG_WIGGLE_BASE_CHANCE = 20;
 
+    public static final DataParameter<String> EGG_TYPE = EntityDataManager.createKey(DragonEggEntity.class, DataSerializers.STRING);
+
     public int hatchTime;
     public EnumEggTypes eggType;
-    float eggWiggleX, eggWiggleZ;
+//    float eggWiggleX, eggWiggleZ;
 
     public DragonEggEntity(EntityType<? extends DragonEggEntity> type, World world)
     {
@@ -48,18 +51,21 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
     public DragonEggEntity(EnumEggTypes type, World world)
     {
         super(DMLEntities.EGG.get(), world);
-        this.eggType = type;
+        setEggType(type);
         this.hatchTime = DEFAULT_HATCH_TIME;
     }
 
     @Override
-    protected void registerData() {}
+    protected void registerData()
+    {
+        dataManager.register(EGG_TYPE, "");
+    }
 
     @Override
     protected void readAdditional(CompoundNBT compound)
     {
         this.hatchTime = compound.getInt(NBT_HATCH_TIME);
-        this.eggType = EnumEggTypes.valueOf(NBT_TYPE);
+        setEggType(EnumEggTypes.valueOf(compound.getString(NBT_TYPE)));
     }
 
     @Override
@@ -69,24 +75,18 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
         compound.putString(NBT_TYPE, eggType.name());
     }
 
-    public EnumEggTypes getEggType() { return eggType; }
+    @Override
+    public void notifyDataManagerChange(DataParameter<?> key)
+    {
+        if (key.equals(EGG_TYPE)) eggType = EnumEggTypes.valueOf(dataManager.get(EGG_TYPE));
+    }
+
+    public void setEggType(EnumEggTypes type) { dataManager.set(EGG_TYPE, type.name()); }
 
     @Override
     public IPacket<?> createSpawnPacket()
     {
         return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
-    @Override
-    public void writeSpawnData(PacketBuffer buf)
-    {
-        buf.writeEnumValue(eggType);
-    }
-
-    @Override
-    public void readSpawnData(PacketBuffer buf)
-    {
-        this.eggType = buf.readEnumValue(EnumEggTypes.class);
     }
 
     @Override
@@ -123,9 +123,9 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
             // update motion - should fall
             if (!hasNoGravity())
             {
-//                setMotion(getMotion().add(0, -0.04d, 0));
+                setMotion(getMotion().add(0, -0.04d, 0));
                 move(MoverType.SELF, getMotion());
-                setMotion(getMotion().scale(0.1f));
+                setMotion(getMotion().mul(0.3d, 0, 0.3d));
             }
 
 //            // wiggle todo
@@ -150,8 +150,6 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
         }
         else
         {
-            if (ticksExisted % CHECK_HABITAT_INTERVAL == 0) updateHabitat(); // Shouldn't particularly matter afaik
-
             double px = getPosX() + (rand.nextDouble() - 0.5);
             double py = getPosY() + (rand.nextDouble() - 0.5);
             double pz = getPosZ() + (rand.nextDouble() - 0.5);
@@ -166,9 +164,9 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
             else
             {
                 boolean primary = rand.nextInt(3) != 0;
-                float r = eggType.getType().getRColor(primary);
-                float g = eggType.getType().getGColor(primary);
-                float b = eggType.getType().getBColor(primary);
+                float r = eggType.getRColor(primary);
+                float g = eggType.getGColor(primary);
+                float b = eggType.getBColor(primary);
                 world.addParticle(new RedstoneParticleData(r, g, b, 1), px, py + 1, pz, 0, 0, 0);
             }
         }
@@ -176,9 +174,9 @@ public class DragonEggEntity extends Entity implements IEntityAdditionalSpawnDat
 
     public void updateHabitat() // todo: make a better system for this, currently gets the first accepted predicate
     {
-        DragonEntityType type = DragonEntityType.getByHabitat(this);
+        EnumEggTypes type = EnumEggTypes.getByHabitat(this);
         if (type == null) return;
-        eggType = type.getBreedType();
+        setEggType(type);
     }
 
     public void hatch()

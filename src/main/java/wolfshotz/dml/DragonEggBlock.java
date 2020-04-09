@@ -1,4 +1,4 @@
-package wolfshotz.dml.block;
+package wolfshotz.dml;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -12,9 +12,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.ObjectHolder;
-import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
 import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
 
@@ -22,6 +25,7 @@ import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
  * OG Dragon Mounts used meta-data to differentiate between the different egg breed types
  * Here, we will use blockstates.
  */
+@EventBusSubscriber(modid = DragonMountsLegacy.MOD_ID)
 public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
 {
     @ObjectHolder(DragonMountsLegacy.MOD_ID + ":dragon_egg")
@@ -54,17 +58,34 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
         if (state.get(BREED) == EnumEggTypes.ENDER) super.onBlockClicked(state, worldIn, pos, player);
     }
 
+    public static void startHatching(BlockState state, World world, BlockPos pos)
+    {
+        if (!world.isRemote)
+        {
+            DragonEggEntity egg = new DragonEggEntity(state.get(BREED), world);
+            egg.setPosition(pos.getX() + 0.5d, pos.getY() + 0.1d, pos.getZ() + 0.5d);
+            world.addEntity(egg);
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onVanillaEggActivate(PlayerInteractEvent.RightClickBlock evt)
+    {
+        World world = evt.getWorld();
+        Block block = world.getBlockState(evt.getPos()).getBlock();
+        if (block instanceof net.minecraft.block.DragonEggBlock)
+        {
+            evt.setCanceled(true);
+            evt.setUseBlock(Event.Result.DENY);
+            startHatching(DRAGON_EGG.getDefaultState().with(BREED, EnumEggTypes.ENDER), world, evt.getPos());
+        }
+    }
+
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_)
     {
-        if (!worldIn.isRemote)
-        {
-            DragonEggEntity egg = new DragonEggEntity(state.get(BREED), worldIn);
-            egg.setPosition(pos.getX() + 0.5d, pos.getY() + 0.1d, pos.getZ() + 0.5d);
-            worldIn.addEntity(egg);
-            worldIn.setBlockState(pos, Blocks.AIR.getDefaultState());
-        }
-
+        startHatching(state, worldIn, pos);
         return ActionResultType.SUCCESS;
     }
 }

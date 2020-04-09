@@ -4,7 +4,8 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.EntityModel;
-import wolfshotz.dml.entity.dragons.DragonEntityType;
+import net.minecraft.entity.EntityType;
+import wolfshotz.dml.entity.DMLEntities;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
 
@@ -52,9 +53,9 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     public float size;
     // delegates
     private TameableDragonEntity dragon;
-    private final DragonEntityType type;
+    private final EntityType<TameableDragonEntity> type;
 
-    public DragonModel(DragonEntityType type)
+    public DragonModel(EntityType<TameableDragonEntity> type)
     {
         this.type = type;
 
@@ -134,7 +135,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         tailScaleMiddle = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, 0);
         tailScaleRight = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, -scaleRotZ);
 
-        boolean show = type.tailScales();
+        boolean show = type == DMLEntities.FIRE_DRAGON.get();
 
         tailScaleMiddle.showModel = !show;
         tailScaleLeft.showModel = show;
@@ -175,7 +176,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         ModelPart horn = tail.addChildBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength, 0, 117);
         horn.setRotationPoint(hornPosX, hornPosY, hornPosZ);
         horn.setAngles(hornRotX, hornRotY, hornRotZ);
-        horn.showModel = type.tailHorns();
+        horn.showModel = type == DMLEntities.WATER_DRAGON.get();
 
         if (mirror) tailHornLeft = horn;
         else tailHornRight = horn;
@@ -245,7 +246,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     private void buildLeg(boolean hind)
     {
         // thinner legs for skeletons
-        boolean thin = type.thinLegs();
+        boolean thin = type == DMLEntities.GHOST_DRAGON.get();
         float baseLength = 26;
         int texY = hind ? 29 : 0;
 

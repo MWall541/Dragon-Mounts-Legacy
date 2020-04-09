@@ -12,7 +12,7 @@ public class EndDragonEntity extends TameableDragonEntity
     {
         super(type, world);
 
-        damageImmunities.add(DamageSource.MAGIC);
+        addImmunities(DamageSource.DRAGON_BREATH);
     }
 
     public static boolean isHabitat(DragonEggEntity egg) { return BiomeDictionary.hasType(egg.world.getBiome(egg.getPosition()), BiomeDictionary.Type.END); }

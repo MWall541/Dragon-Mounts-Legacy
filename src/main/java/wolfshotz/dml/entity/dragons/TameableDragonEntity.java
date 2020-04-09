@@ -29,8 +29,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
+import wolfshotz.dml.DMLSounds;
 import wolfshotz.dml.client.anim.DragonAnimator;
 import wolfshotz.dml.entity.dragons.ai.DragonBodyController;
 import wolfshotz.dml.entity.dragons.ai.DragonBrainController;
@@ -40,6 +40,7 @@ import wolfshotz.dml.entity.dragons.ai.goals.DragonBreedGoal;
 import wolfshotz.dml.util.MathX;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 
 import static net.minecraft.entity.SharedMonsterAttributes.*;
@@ -64,7 +65,6 @@ public class TameableDragonEntity extends TameableEntity
     public static final float BASE_HEIGHT = 2.75f;
     public static final double BASE_FOLLOW_RANGE = 16;
     public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
-    public static final int HOME_RADIUS = 64;
     public static final double ALTITUDE_FLYING_THRESHOLD = 2;
     public static final int REPRO_LIMIT = 2;
     // data value IDs
@@ -111,8 +111,9 @@ public class TameableDragonEntity extends TameableEntity
         getAttribute(MOVEMENT_SPEED).setBaseValue(BASE_SPEED_GROUND);
         getAttribute(MAX_HEALTH).setBaseValue(BASE_HEALTH);
         getAttribute(FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
+        getAttribute(KNOCKBACK_RESISTANCE).setBaseValue(10);
         getAttributes().registerAttribute(ATTACK_DAMAGE).setBaseValue(BASE_DAMAGE);
-        getAttributes().registerAttribute(FLYING_SPEED).setBaseValue(0.6);
+        getAttributes().registerAttribute(FLYING_SPEED).setBaseValue(BASE_SPEED_FLYING);
     }
 
     @Override
@@ -204,35 +205,16 @@ public class TameableDragonEntity extends TameableEntity
         dataManager.set(DATA_FLYING, flying);
     }
 
-    /**
-     * Returns the distance to the ground while the entity is flying.
-     */
-    public double getAltitude()
+    public LifeStageController getLifeStageController()
     {
-        BlockPos groundPos = world.getHeight(Heightmap.Type.WORLD_SURFACE, getPosition());
-        return getPosY() - groundPos.getY();
+        if (lifeStageController == null) lifeStageController = new LifeStageController(this);
+        return lifeStageController;
     }
 
-    /**
-     * Causes this entity to lift off if it can fly.
-     */
-    public void liftOff()
+    public DragonBrainController getDragonBrainController()
     {
-        if (canFly()) jump();
-    }
-
-    @Override
-    protected float getJumpUpwardsMotion()
-    {
-        // stronger jumps for easier lift-offs
-        return canFly() ? 1 : super.getJumpUpwardsMotion();
-    }
-
-    @Override
-    public boolean onLivingFall(float distance, float damageMultiplier)
-    {
-        if (canFly()) return false;
-        return super.onLivingFall(distance, damageMultiplier);
+        if (dragonBrainController == null) dragonBrainController = new DragonBrainController(this);
+        return dragonBrainController;
     }
 
     @Override
@@ -264,7 +246,7 @@ public class TameableDragonEntity extends TameableEntity
 
                 // update AI follow range (needs to be updated before creating
                 // new PathNavigate!)
-                getAttribute(FOLLOW_RANGE).setBaseValue(flying ? BASE_FOLLOW_RANGE_FLYING : BASE_FOLLOW_RANGE);
+                getAttribute(FOLLOW_RANGE).setBaseValue(flying? BASE_FOLLOW_RANGE_FLYING : BASE_FOLLOW_RANGE);
 
                 // update pathfinding method
                 if (flying) navigator = new FlyingPathNavigator(this, world);
@@ -278,22 +260,6 @@ public class TameableDragonEntity extends TameableEntity
 
         super.livingTick();
     }
-
-
-//    yeah lol no this caused a shit ton of lag. lets try and handle this on both sides BY using this.
-//
-//    @Override
-//    public void moveEntityWithHeading(float strafe, float forward)
-//    {
-//        // disable method while flying, the movement is done entirely by
-//        // moveEntity() and this one just makes the dragon to fall slowly when
-//        // hovering
-//        if (!isFlying())
-//        {
-//            super.moveEntityWithHeading(strafe, forward);
-//        }
-//    }
-//
 
     @Override
     public void travel(Vec3d vec3d)
@@ -339,6 +305,39 @@ public class TameableDragonEntity extends TameableEntity
     }
 
     /**
+     * Returns the distance to the ground while the entity is flying.
+     */
+    public double getAltitude()
+    {
+        BlockPos.Mutable pos = new BlockPos.Mutable(getPosition());
+        while (pos.getY() > 0 && !world.getBlockState(pos).getMaterial().isSolid()) pos.move(0, -1, 0).getY();
+
+        return getPosY() - pos.getY();
+    }
+
+    /**
+     * Causes this entity to lift off if it can fly.
+     */
+    public void liftOff()
+    {
+        if (canFly()) jump();
+    }
+
+    @Override
+    protected float getJumpUpwardsMotion()
+    {
+        // stronger jumps for easier lift-offs
+        return canFly()? 1 : super.getJumpUpwardsMotion();
+    }
+
+    @Override
+    public boolean onLivingFall(float distance, float damageMultiplier)
+    {
+        if (canFly()) return false;
+        return super.onLivingFall(distance, damageMultiplier);
+    }
+
+    /**
      * Handles entity death timer, experience orb and particle creation
      */
     @Override
@@ -357,57 +356,90 @@ public class TameableDragonEntity extends TameableEntity
         deathTime++;
     }
 
+    @Override
+    public boolean processInteract(PlayerEntity player, Hand hand)
+    {
+        ItemStack stack = player.getHeldItem(hand);
+
+        if (isServer())
+        {
+            // heal
+            if (getHealthRelative() < 1 && isFoodItem(stack))
+            {
+                stack.shrink(1);
+                heal(stack.getItem().getFood().getHealing());
+                playSound(getEatSound(stack), 0.7f, 1);
+                return true;
+            }
+
+            // tame
+            if (isBreedingItem(stack) && !isTamed())
+            {
+                stack.shrink(1);
+                tamedFor(player, getRNG().nextInt(5) == 0);
+                return true;
+            }
+
+            // sit!
+            if (isTamedFor(player) && player.isShiftKeyDown())
+            {
+                navigator.clearPath();
+                if (!isSitting()) setAttackTarget(null);
+                sitGoal.setSitting(!isSitting());
+                return true;
+            }
+
+            // ride on
+            if (isTamed() && isSaddled() && !isChild())
+            {
+                setRidingPlayer(player);
+                sitGoal.setSitting(!isSitting());
+                navigator.clearPath();
+                setAttackTarget(null);
+                return true;
+            }
+
+            // saddle up!
+            if (isTamedFor(player) && !isChild() && !isSaddled() && stack.getItem() instanceof SaddleItem)
+            {
+                stack.shrink(1);
+                setSaddled(true);
+                playSound(SoundEvents.ENTITY_HORSE_SADDLE, 1, 1);
+                return true;
+            }
+        }
+
+        return super.processInteract(player, hand);
+    }
+
     /**
      * Returns the sound this mob makes while it's alive.
      */
     @Override
     protected SoundEvent getAmbientSound()
     {
-        if (getRNG().nextInt(3) == 0) return SoundEvents.ENTITY_ENDER_DRAGON_GROWL;
-        return null;
-//                DragonMountsSoundEvents.ENTITY_DRAGON_MOUNT_BREATHE; TODO: custom sounds
-
+        if (getRNG().nextInt(5) == 0) return SoundEvents.ENTITY_ENDER_DRAGON_GROWL;
+        return DMLSounds.DRAGON_BREATHE.get();
     }
 
     @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
-    {
-        return SoundEvents.ENTITY_ENDER_DRAGON_HURT;
-    }
+    protected SoundEvent getHurtSound(DamageSource damageSourceIn) { return SoundEvents.ENTITY_ENDER_DRAGON_HURT; }
 
-    public SoundEvent getStepSound()
-    {
-        return null;
-//        DragonMountsSoundEvents.ENTITY_DRAGON_MOUNT_STEP; TODO: custom sounds
-
-    }
+    public SoundEvent getStepSound() { return DMLSounds.DRAGON_STEP.get(); }
 
     /**
      * Returns the sound this mob makes on death.
      */
     @Override
-    protected SoundEvent getDeathSound()
-    {
-        return null;
-//                DragonMountsSoundEvents.ENTITY_DRAGON_MOUNT_DEATH; TODO: custom sounds
-    }
+    protected SoundEvent getDeathSound() { return DMLSounds.DRAGON_DEATH.get(); }
 
     @Override
-    public SoundEvent getEatSound(ItemStack itemStackIn)
-    {
-        return SoundEvents.ENTITY_GENERIC_EAT;
-    }
+    public SoundEvent getEatSound(ItemStack itemStackIn) { return SoundEvents.ENTITY_GENERIC_EAT; }
 
-    public SoundEvent getAttackSound()
-    {
-        return SoundEvents.ENTITY_GENERIC_EAT;
-    }
+    public SoundEvent getAttackSound() { return SoundEvents.ENTITY_GENERIC_EAT; }
 
-    public SoundEvent getWingsSound()
-    {
-        return SoundEvents.ENTITY_ENDER_DRAGON_FLAP;
-    }
+    public SoundEvent getWingsSound() { return SoundEvents.ENTITY_ENDER_DRAGON_FLAP; }
 
     /**
      * Plays step sound at given x, y, z for the entity
@@ -433,38 +465,16 @@ public class TameableDragonEntity extends TameableEntity
      * Get number of ticks, at least during which the living entity will be silent.
      */
     @Override
-    public int getTalkInterval()
-    {
-        return 240;
-    }
-
-//    todo: handle this in subclasses!
-//    /**
-//     * Get this Entity's EnumCreatureAttribute
-//     */
-//    @Override
-//    public EnumCreatureAttribute getCreatureAttribute()
-//    {
-//        return getBreed().getCreatureAttribute();
-//    }
+    public int getTalkInterval() { return 240; }
 
     @Override
-    protected float getSoundVolume()
-    {
-        return getScale();
-    }
+    protected float getSoundVolume() { return getScale(); }
 
     @Override
-    protected float getSoundPitch()
-    {
-        return getScale() - 2f;
-    }
+    protected float getSoundPitch() { return getScale(); }
 
     @Override
-    public void playSound(SoundEvent soundIn, float volume, float pitch)
-    {
-        playSound(soundIn, volume, pitch, false);
-    }
+    public void playSound(SoundEvent soundIn, float volume, float pitch) { playSound(soundIn, volume, pitch, false); }
 
     public void playSound(SoundEvent sound, float volume, float pitch, boolean local)
     {
@@ -480,57 +490,6 @@ public class TameableDragonEntity extends TameableEntity
     /**
      * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
      */
-    @Override
-    public boolean processInteract(PlayerEntity player, Hand hand)
-    {
-        ItemStack stack = player.getHeldItem(hand);
-
-        if (isServer())
-        {
-            // heal
-            if (getHealthRelative() < 1 && isFoodItem(stack))
-            {
-                stack.shrink(1);
-                heal(stack.getItem().getFood().getHealing());
-                playSound(getEatSound(stack), 0.7f, 1);
-                return true;
-            }
-
-            // tame
-            if (isBreedingItem(stack) && !isTamed())
-            {
-                stack.shrink(1);
-                tamedFor(player, getRNG().nextInt(5) == 0);
-                return true;
-            }
-
-            // saddle up!
-            if (isTamedFor(player) && !isSaddled() && stack.getItem() instanceof SaddleItem)
-            {
-                stack.shrink(1);
-                setSaddled(true);
-                return true;
-            }
-
-            // sit!
-            if (isTamedFor(player) && player.isShiftKeyDown())
-            {
-                sitGoal.setSitting(!isSitting());
-                navigator.clearPath();
-                return true;
-            }
-
-            // ride on
-            if (isTamed() && isSaddled())
-            {
-                setRidingPlayer(player);
-                return true;
-            }
-        }
-
-        return super.processInteract(player, hand);
-    }
-
     public boolean isFoodItem(ItemStack stack)
     {
         return stack.getItem().isFood() && stack.getItem().getFood().isMeat();
@@ -565,6 +524,11 @@ public class TameableDragonEntity extends TameableEntity
         return isTamed() && isOwner(player);
     }
 
+    public void addImmunities(DamageSource... sources)
+    {
+        damageImmunities.addAll(Arrays.asList(sources));
+    }
+
     /**
      * Returns the height of the eyes. Used for looking at other entities.
      */
@@ -584,7 +548,7 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     public double getMountedYOffset()
     {
-        return (isSitting() ? 1.7f : 2f) * getScale();
+        return (isSitting()? 1.7f : 2f) * getScale();
     }
 
     /**
@@ -747,7 +711,7 @@ public class TameableDragonEntity extends TameableEntity
                 p1Name = DragonBreedGoal.fixChildName(p1Names[rand.nextInt(p1Names.length)]);
                 p2Name = DragonBreedGoal.fixChildName(p2Names[rand.nextInt(p2Names.length)]);
 
-                babyName = rand.nextBoolean() ? p1Name + " " + p2Name : p2Name + " " + p1Name;
+                babyName = rand.nextBoolean()? p1Name + " " + p2Name : p2Name + " " + p1Name;
             }
             else
             {
@@ -762,7 +726,7 @@ public class TameableDragonEntity extends TameableEntity
 
                 p2Name = DragonBreedGoal.fixChildName(p2Name);
 
-                babyName = rand.nextBoolean() ? p1Name + p2Name : p2Name + p1Name;
+                babyName = rand.nextBoolean()? p1Name + p2Name : p2Name + p1Name;
             }
 
             baby.setCustomName(new StringTextComponent(babyName));
@@ -775,18 +739,6 @@ public class TameableDragonEntity extends TameableEntity
         return baby;
     }
 
-    public LifeStageController getLifeStageController()
-    {
-        if (lifeStageController == null) lifeStageController = new LifeStageController(this);
-        return lifeStageController;
-    }
-
-    public DragonBrainController getDragonBrainController()
-    {
-        if (dragonBrainController == null) dragonBrainController = new DragonBrainController(this);
-        return dragonBrainController;
-    }
-
     /**
      * For vehicles, the first passenger is generally considered the controller and "drives" the vehicle. For example,
      * Pigs, Horses, and Boats are generally "steered" by the controlling passenger.
@@ -795,7 +747,7 @@ public class TameableDragonEntity extends TameableEntity
     public Entity getControllingPassenger()
     {
         List<Entity> list = getPassengers();
-        return list.isEmpty() ? null : list.get(0);
+        return list.isEmpty()? null : list.get(0);
     }
 
     @Override
@@ -826,7 +778,9 @@ public class TameableDragonEntity extends TameableEntity
         Entity riddenByEntity = getControllingPassenger();
         if (riddenByEntity != null)
         {
-            Vec3d pos = new Vec3d(0, getMountedYOffset() + riddenByEntity.getYOffset(), 0.8 * getScale()).rotateYaw((float) Math.toRadians(-renderYawOffset)).add(getPositionVec());
+            Vec3d pos = new Vec3d(0, getMountedYOffset() + riddenByEntity.getYOffset(), 0.8 * getScale())
+                    .rotateYaw((float) Math.toRadians(-renderYawOffset))
+                    .add(getPositionVec());
             passenger.setPosition(pos.x, pos.y, pos.z);
 
             // fix rider rotation
@@ -839,10 +793,6 @@ public class TameableDragonEntity extends TameableEntity
             }
         }
     }
-
-    //    @Override
-//    public void updateRiderPosition() {
-//    }
 
     public boolean isInvulnerableTo(DamageSource src)
     {
@@ -905,7 +855,7 @@ public class TameableDragonEntity extends TameableEntity
     public int getGrowingAge()
     {
         // adapter for vanilla code to enable breeding interaction
-        return isAdult() ? 0 : -1;
+        return isAdult()? 0 : -1;
     }
 
     /**
@@ -913,10 +863,7 @@ public class TameableDragonEntity extends TameableEntity
      * positive, it get's decremented each tick. With a negative value the Entity is considered a child.
      */
     @Override
-    public void setGrowingAge(int age)
-    {
-        // managed by DragonLifeStageHelper, so this is a no-op
-    }
+    public void setGrowingAge(int age) {/* managed by DragonLifeStageHelper, so this is a no-op*/}
 
     @Override
     public EntitySize getSize(Pose poseIn) { return new EntitySize(BASE_WIDTH * getScale(), BASE_HEIGHT * getScale(), false); }
@@ -926,31 +873,16 @@ public class TameableDragonEntity extends TameableEntity
      *
      * @return scale
      */
-    public float getScale()
-    {
-        return getLifeStageController().getScale();
-    }
+    public float getScale() { return getLifeStageController().getScale(); }
 
-    public boolean isHatchling()
-    {
-        return getLifeStageController().isHatchling();
-    }
+    public boolean isHatchling() { return getLifeStageController().isHatchling(); }
 
-    public boolean isJuvenile()
-    {
-        return getLifeStageController().isJuvenile();
-    }
+    public boolean isJuvenile() { return getLifeStageController().isJuvenile(); }
 
-    public boolean isAdult()
-    {
-        return getLifeStageController().isAdult();
-    }
+    public boolean isAdult() { return getLifeStageController().isAdult(); }
 
     @Override
-    public boolean isChild()
-    {
-        return !isAdult();
-    }
+    public boolean isChild() { return !isAdult(); }
 
     /**
      * Checks if this entity is running on a client.

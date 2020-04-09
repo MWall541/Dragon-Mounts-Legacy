@@ -5,8 +5,8 @@ import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
+import wolfshotz.dml.DragonEggBlock;
 import wolfshotz.dml.DragonMountsLegacy;
-import wolfshotz.dml.block.DragonEggBlock;
 
 public class BlockModelGen extends BlockStateProvider
 {

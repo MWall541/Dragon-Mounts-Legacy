@@ -2,6 +2,7 @@ package wolfshotz.dml.entity.dragons;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -13,6 +14,16 @@ public class FireDragonEntity extends TameableDragonEntity
     public FireDragonEntity(EntityType<? extends TameableDragonEntity> type, World world)
     {
         super(type, world);
+
+        addImmunities(DamageSource.ON_FIRE, DamageSource.IN_FIRE, DamageSource.LAVA);
+    }
+
+    @Override
+    public void tick()
+    {
+        super.tick();
+
+        if (isInWater()) attackEntityFrom(DamageSource.DROWN, 4.0f);
     }
 
     public static boolean isHabitat(DragonEggEntity egg)

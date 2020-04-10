@@ -6,7 +6,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.controller.BodyController;
-import net.minecraft.entity.ai.goal.SitGoal;
+import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,16 +33,19 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import wolfshotz.dml.DMLSounds;
 import wolfshotz.dml.client.anim.DragonAnimator;
+import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
+import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
 import wolfshotz.dml.entity.dragons.ai.DragonBodyController;
-import wolfshotz.dml.entity.dragons.ai.DragonBrainController;
 import wolfshotz.dml.entity.dragons.ai.DragonMoveController;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
 import wolfshotz.dml.entity.dragons.ai.goals.DragonBreedGoal;
+import wolfshotz.dml.entity.dragons.ai.goals.DragonLandGoal;
 import wolfshotz.dml.util.MathX;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static net.minecraft.entity.SharedMonsterAttributes.*;
 
@@ -80,7 +84,6 @@ public class TameableDragonEntity extends TameableEntity
 
     // server/client delegates
     public LifeStageController lifeStageController;
-    public DragonBrainController dragonBrainController;
     public final List<DamageSource> damageImmunities = Lists.newArrayList();
 
     public int reproCount;
@@ -119,8 +122,37 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     protected void registerGoals()
     {
-        sitGoal = new SitGoal(this);
-        getDragonBrainController().updateGoals();
+        goalSelector.addGoal(0, new SwimGoal(this));
+        goalSelector.addGoal(1, new DragonLandGoal(this));
+        goalSelector.addGoal(2, sitGoal = new SitGoal(this));
+        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
+        goalSelector.addGoal(5, new FollowOwnerGoal(this, 1, 10f, 2f, false));
+        goalSelector.addGoal(5, new DragonBreedGoal(this));
+        goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1));
+        goalSelector.addGoal(7, new LookAtGoal(this, LivingEntity.class, 10f));
+        goalSelector.addGoal(8, new LookRandomlyGoal(this));
+
+        targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this)
+        {
+            @Override
+            public boolean shouldExecute() { return !isHatchling() && super.shouldExecute(); }
+        });
+        targetSelector.addGoal(1, new OwnerHurtTargetGoal(this)
+        {
+            @Override
+            public boolean shouldExecute() { return !isHatchling() && super.shouldExecute(); }
+        });
+        targetSelector.addGoal(2, new HurtByTargetGoal(this)
+        {
+            @Override
+            public boolean shouldExecute() { return !isHatchling() && super.shouldExecute(); }
+        });
+        targetSelector.addGoal(3, new NonTamedTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, e -> !(e instanceof TameableDragonEntity) && !(e instanceof CreeperEntity))
+        {
+            @Override
+            public boolean shouldExecute() { return !isHatchling() && super.shouldExecute(); }
+        });
+
     }
 
     @Override
@@ -154,39 +186,27 @@ public class TameableDragonEntity extends TameableEntity
     /**
      * Returns true if the dragon is saddled.
      */
-    public boolean isSaddled()
-    {
-        return dataManager.get(DATA_SADDLED);
-    }
+    public boolean isSaddled() { return dataManager.get(DATA_SADDLED); }
 
     /**
      * Set or remove the saddle of the dragon.
      */
-    public void setSaddled(boolean saddled)
-    {
-        dataManager.set(DATA_SADDLED, saddled);
-    }
+    public void setSaddled(boolean saddled) { dataManager.set(DATA_SADDLED, saddled); }
 
-    public int getTicksAlive()
-    {
-        return dataManager.get(DATA_TICKS_ALIVE);
-    }
+    public int getTicksAlive() { return dataManager.get(DATA_TICKS_ALIVE); }
 
     public void setTicksAlive(int ticksAlive)
     {
         dataManager.set(DATA_TICKS_ALIVE, ticksAlive);
-        lifeStageController.setTicksAlive(ticksAlive);
+        getLifeStageController().setTicksAlive(ticksAlive);
     }
 
-    public void addReproCount()
-    {
-        reproCount++;
-    }
+    public void addReproCount() { reproCount++; }
 
     public boolean canFly()
     {
-        // hatchlings can't fly
-        return !isHatchling();
+        // hatchling's can't fly and we can't fly in water!
+        return !isHatchling() && !isInWater();
     }
 
     /**
@@ -200,21 +220,12 @@ public class TameableDragonEntity extends TameableEntity
     /**
      * Set the flying flag of the entity.
      */
-    public void setFlying(boolean flying)
-    {
-        dataManager.set(DATA_FLYING, flying);
-    }
+    public void setFlying(boolean flying) { dataManager.set(DATA_FLYING, flying); }
 
     public LifeStageController getLifeStageController()
     {
         if (lifeStageController == null) lifeStageController = new LifeStageController(this);
         return lifeStageController;
-    }
-
-    public DragonBrainController getDragonBrainController()
-    {
-        if (dragonBrainController == null) dragonBrainController = new DragonBrainController(this);
-        return dragonBrainController;
     }
 
     @Override
@@ -224,25 +235,12 @@ public class TameableDragonEntity extends TameableEntity
 
         if (isServer())
         {
-            // set home position near owner when tamed
-//            if (isTamed())
-//            {
-//                Entity owner = getOwner();
-//                if (owner != null)
-//                {
-//                    setHomePosAndDistance(owner.getPosition(), HOME_RADIUS);
-//                }
-//            }
-
             // update flying state based on the distance to the ground
             boolean flying = canFly() && getAltitude() > ALTITUDE_FLYING_THRESHOLD;
             if (flying != isFlying())
             {
                 // notify client
                 setFlying(flying);
-
-                // clear tasks (needs to be done before switching the navigator!)
-                getDragonBrainController().clearGoals();
 
                 // update AI follow range (needs to be updated before creating
                 // new PathNavigate!)
@@ -251,9 +249,6 @@ public class TameableDragonEntity extends TameableEntity
                 // update pathfinding method
                 if (flying) navigator = new FlyingPathNavigator(this, world);
                 else navigator = new GroundPathNavigator(this, world);
-
-                // tasks need to be updated after switching modes
-                getDragonBrainController().updateGoals();
             }
         }
         else animator.tick();
@@ -301,7 +296,6 @@ public class TameableDragonEntity extends TameableEntity
         if (!isFlying() && rider.isJumping) liftOff();
 
         getMoveHelper().setMoveTo(x, y, z, 1);
-
     }
 
     /**
@@ -361,17 +355,26 @@ public class TameableDragonEntity extends TameableEntity
     {
         ItemStack stack = player.getHeldItem(hand);
 
+        // heal
+        if (getHealthRelative() < 1 && isFoodItem(stack))
+        {
+            stack.shrink(1);
+            heal(stack.getItem().getFood().getHealing());
+            playSound(getEatSound(stack), 0.7f, 1);
+            return true;
+        }
+
+        // saddle up!
+        if (isTamedFor(player) && !isChild() && !isSaddled() && stack.getItem() instanceof SaddleItem)
+        {
+            stack.shrink(1);
+            setSaddled(true);
+            playSound(SoundEvents.ENTITY_HORSE_SADDLE, 1, 1);
+            return true;
+        }
+
         if (isServer())
         {
-            // heal
-            if (getHealthRelative() < 1 && isFoodItem(stack))
-            {
-                stack.shrink(1);
-                heal(stack.getItem().getFood().getHealing());
-                playSound(getEatSound(stack), 0.7f, 1);
-                return true;
-            }
-
             // tame
             if (isBreedingItem(stack) && !isTamed())
             {
@@ -390,21 +393,12 @@ public class TameableDragonEntity extends TameableEntity
             }
 
             // ride on
-            if (isTamed() && isSaddled() && !isChild())
+            if (isTamed() && isSaddled() && !isChild() && (!isBreedingItem(stack) && canReproduce()))
             {
                 setRidingPlayer(player);
-                sitGoal.setSitting(!isSitting());
+                sitGoal.setSitting(false);
                 navigator.clearPath();
                 setAttackTarget(null);
-                return true;
-            }
-
-            // saddle up!
-            if (isTamedFor(player) && !isChild() && !isSaddled() && stack.getItem() instanceof SaddleItem)
-            {
-                stack.shrink(1);
-                setSaddled(true);
-                playSound(SoundEvents.ENTITY_HORSE_SADDLE, 1, 1);
                 return true;
             }
         }
@@ -519,15 +513,9 @@ public class TameableDragonEntity extends TameableEntity
         }
     }
 
-    public boolean isTamedFor(PlayerEntity player)
-    {
-        return isTamed() && isOwner(player);
-    }
+    public boolean isTamedFor(PlayerEntity player) { return isTamed() && isOwner(player); }
 
-    public void addImmunities(DamageSource... sources)
-    {
-        damageImmunities.addAll(Arrays.asList(sources));
-    }
+    public void addImmunities(DamageSource... sources) { damageImmunities.addAll(Arrays.asList(sources)); }
 
     /**
      * Returns the height of the eyes. Used for looking at other entities.
@@ -642,24 +630,6 @@ public class TameableDragonEntity extends TameableEntity
     }
 
     /**
-     * Return whether we should be able to render tail scales.
-     * Used for fire dragons
-     */
-    public boolean renderTailScales() { return false; }
-
-    /**
-     * Return whether we should be able to render tail scales.
-     * Used for ghost dragons
-     */
-    public boolean renderThinLegs() { return false; }
-
-    /**
-     * Return whether we should be able to render tail scales.
-     * Used for water dragons
-     */
-    public boolean renderTailHorns() { return false; }
-
-    /**
      * Returns true if the mob is currently able to mate with the specified mob.
      */
     @Override
@@ -687,11 +657,11 @@ public class TameableDragonEntity extends TameableEntity
         if (!(mate instanceof TameableDragonEntity))
             throw new IllegalArgumentException("The mate isn't a dragon");
 
-        TameableDragonEntity baby;
+        DragonEggEntity egg;
 
         // pick a breed to inherit from
-        if (getRNG().nextBoolean()) baby = (TameableDragonEntity) getType().create(world);
-        else baby = (TameableDragonEntity) mate.getType().create(world);
+        if (getRNG().nextBoolean()) egg = new DragonEggEntity(EnumEggTypes.getByType(getType()), world);
+        else egg = new DragonEggEntity(EnumEggTypes.getByType(mate.getType()), world);
 
         // mix the custom names in case both parents have one
         if (hasCustomName() && mate.hasCustomName())
@@ -729,14 +699,23 @@ public class TameableDragonEntity extends TameableEntity
                 babyName = rand.nextBoolean()? p1Name + p2Name : p2Name + p1Name;
             }
 
-            baby.setCustomName(new StringTextComponent(babyName));
+            egg.setCustomName(new StringTextComponent(babyName));
         }
 
         // increase reproduction counter
         addReproCount();
         ((TameableDragonEntity) mate).addReproCount();
+        egg.setPosition(getPosX(), getPosY(), getPosZ());
+        world.addEntity(egg);
 
-        return baby;
+        return null; // An egg isnt an ageable!
+    }
+
+    @Override
+    public boolean shouldAttackEntity(LivingEntity target, LivingEntity owner)
+    {
+        if (target instanceof TameableEntity) return Objects.equals(((TameableEntity) target).getOwner(), owner);
+        return true;
     }
 
     /**

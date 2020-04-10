@@ -25,7 +25,7 @@ public class DMLEntities
     public static final RegistryObject<EntityType<TameableDragonEntity>> NETHER_DRAGON = dragon("nether_dragon", NetherDragonEntity::new);
     public static final RegistryObject<EntityType<TameableDragonEntity>> WATER_DRAGON = dragon("water_dragon", WaterDragonEntity::new);
 
-    public static final RegistryObject<EntityType<DragonEggEntity>> EGG = ENTITIES.register("egg", () -> EntityType.Builder.<DragonEggEntity>create(DragonEggEntity::new, EntityClassification.MISC).size(DragonEggEntity.WIDTH, DragonEggEntity.HEIGHT).setShouldReceiveVelocityUpdates(true).setUpdateInterval(2).setTrackingRange(10).disableSummoning().immuneToFire().build(DragonMountsLegacy.MOD_ID + ":egg"));
+    public static final RegistryObject<EntityType<DragonEggEntity>> EGG = ENTITIES.register("egg", () -> EntityType.Builder.<DragonEggEntity>create(DragonEggEntity::new, EntityClassification.MISC).size(DragonEggEntity.WIDTH, DragonEggEntity.HEIGHT).setShouldReceiveVelocityUpdates(true).setUpdateInterval(20).setTrackingRange(10).disableSummoning().immuneToFire().build(DragonMountsLegacy.MOD_ID + ":egg"));
 
     public static <T extends Entity> RegistryObject<EntityType<T>> register(String name, Supplier<EntityType<T>> type)
     {

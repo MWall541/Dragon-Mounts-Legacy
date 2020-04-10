@@ -2,7 +2,9 @@ package wolfshotz.dml;
 
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -31,7 +33,11 @@ public class DragonMountsLegacy
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         bus.addListener(DragonMountsLegacy::commonSetup);
-        bus.addListener(ClientEvents::clientSetup);
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () ->
+        {
+            bus.addListener(ClientEvents::clientSetup);
+            bus.addListener(ClientEvents::itemColors);
+        });
 
         DragonEggBlock.register(bus);
         DMLEntities.ENTITIES.register(bus);

@@ -84,10 +84,7 @@ public class DragonEggEntity extends Entity
     public void setEggType(EnumEggTypes type) { dataManager.set(EGG_TYPE, type.name()); }
 
     @Override
-    public IPacket<?> createSpawnPacket()
-    {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
+    public IPacket<?> createSpawnPacket() { return NetworkHooks.getEntitySpawningPacket(this); }
 
     @Override
     public boolean canBePushed() { return isAlive(); }
@@ -98,7 +95,14 @@ public class DragonEggEntity extends Entity
     @Override
     public void tick()
     {
-        super.tick();
+        // update motion - should fall
+        if (!hasNoGravity())
+        {
+            setMotion(getMotion().add(0, -0.04d, 0));
+        }
+
+        move(MoverType.SELF, getMotion());
+        setMotion(getMotion().mul(0.3d, 0.98d, 0.3d));
 
         if (!world.isRemote)
         {
@@ -118,14 +122,6 @@ public class DragonEggEntity extends Entity
                 NetworkUtils.sendEggHatchPacket(this); // notify clients
                 hatch();
                 return; // Were hatching! drop the cock and lets go!
-            }
-
-            // update motion - should fall
-            if (!hasNoGravity())
-            {
-                setMotion(getMotion().add(0, -0.04d, 0));
-                move(MoverType.SELF, getMotion());
-                setMotion(getMotion().mul(0.3d, 0, 0.3d));
             }
 
 //            // wiggle todo
@@ -170,6 +166,8 @@ public class DragonEggEntity extends Entity
                 world.addParticle(new RedstoneParticleData(r, g, b, 1), px, py + 1, pz, 0, 0, 0);
             }
         }
+
+        super.tick();
     }
 
     public void updateHabitat() // todo: make a better system for this, currently gets the first accepted predicate
@@ -185,8 +183,9 @@ public class DragonEggEntity extends Entity
         else
         {
             TameableDragonEntity dragon = eggType.getType().create(world);
-            dragon.lifeStageController.setLifeStage(LifeStageController.EnumLifeStage.HATCHLING);
+            dragon.getLifeStageController().setLifeStage(LifeStageController.EnumLifeStage.HATCHLING);
             dragon.setPosition(getPosX(), getPosY(), getPosZ());
+            dragon.setCustomName(getCustomName());
             world.addEntity(dragon);
         }
 

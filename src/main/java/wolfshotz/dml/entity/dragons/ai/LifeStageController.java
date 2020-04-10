@@ -40,8 +40,8 @@ public class LifeStageController
         {
             if (dragon.isServer())
             {
-                dragon.getDragonBrainController().updateGoals();
                 applyStageAttributeModifiers();
+                dragon.getNavigator().getNodeProcessor().setCanEnterDoors(isHatchling());
             }
             prevStage = currentStage;
         }

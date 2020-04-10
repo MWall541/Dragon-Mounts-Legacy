@@ -14,26 +14,26 @@ import java.util.function.Supplier;
 
 public enum EnumEggTypes implements IStringSerializable
 {
-    AETHER(DMLEntities.AETHER_DAGON, AetherDragonEntity::isHabitat, 0x11d6d0, 0xd3d611),
-    ENDER(DMLEntities.ENDER_DRAGON, EndDragonEntity::isHabitat, 0x37036b, 0xd3f2f2),
+    AETHER(DMLEntities.AETHER_DAGON, AetherDragonEntity::isHabitat, 0x11d6d0, 0xffff00),
+    ENDER(DMLEntities.ENDER_DRAGON, EndDragonEntity::isHabitat, 0x161616, 0xff63e8),
     FIRE(DMLEntities.FIRE_DRAGON, FireDragonEntity::isHabitat, 0x912400, 0xff9819),
     FOREST(DMLEntities.FOREST_DRAGON, ForestDragonEntity::isHabitat, 0x054a00, 0x0a9600),
-    GHOST(DMLEntities.GHOST_DRAGON, GhostDragonEntity::isHabitat, 0xc4c4c4, 0x292929),
+    GHOST(DMLEntities.GHOST_DRAGON, GhostDragonEntity::isHabitat, 0xc4c4c4, 0xbafffe),
     ICE(DMLEntities.ICE_DRAGON, IceDragonEntity::isHabitat, 0xcfcfcf, 0xaefcfb),
     NETHER(DMLEntities.NETHER_DRAGON, NetherDragonEntity::isHabitat, 0x912400, 0x2e0b00),
     WATER(DMLEntities.WATER_DRAGON, WaterDragonEntity::isHabitat, 0x0062ff, 0x5999ff);
 
     public static final EnumEggTypes[] VALUES = values(); // cache for speed
 
+    private final Supplier<EntityType<TameableDragonEntity>> type;
+    private final Predicate<DragonEggEntity> habitatCheck;
+    private final int primColor, secColor;
+
     static
     {
         for (EnumEggTypes value : VALUES)
             DragonMountsLegacy.ITEMS.register(value.getName() + "_dragon_spawn_egg", () -> new DragonSpawnEggItem(value));
     }
-
-    private final Supplier<EntityType<TameableDragonEntity>> type;
-    private final Predicate<DragonEggEntity> habitatCheck;
-    private final int primColor, secColor;
 
     EnumEggTypes(Supplier<EntityType<TameableDragonEntity>> type, Predicate<DragonEggEntity> habitatCheck, int primColor, int secColor)
     {
@@ -46,6 +46,12 @@ public enum EnumEggTypes implements IStringSerializable
     public static EnumEggTypes getByHabitat(DragonEggEntity egg)
     {
         return Arrays.stream(VALUES).filter(v -> v.habitatCheck.test(egg)).findFirst().orElse(null);
+    }
+
+    public static EnumEggTypes getByType(EntityType<?> type)
+    {
+        for (EnumEggTypes value : VALUES) if (value.getType().equals(type)) return value;
+        return AETHER;  // FALLBACK!
     }
 
     public EntityType<TameableDragonEntity> getType() { return type.get(); }

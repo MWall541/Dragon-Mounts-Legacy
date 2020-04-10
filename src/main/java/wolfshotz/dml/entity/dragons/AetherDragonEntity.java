@@ -1,8 +1,6 @@
 package wolfshotz.dml.entity.dragons;
 
 import net.minecraft.entity.EntityType;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
 import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
 
@@ -25,17 +23,5 @@ public class AetherDragonEntity extends TameableDragonEntity
         super.registerAttributes();
 
         getAttribute(FLYING_SPEED).setBaseValue(AETHER_BASE_SPEED_FLYING);
-    }
-
-    @Override
-    protected SoundEvent getAmbientSound()
-    {
-        return getRNG().nextBoolean()? super.getAmbientSound() : SoundEvents.ENTITY_SKELETON_AMBIENT;
-    }
-
-    @Override
-    protected float getSoundPitch()
-    {
-        return super.getSoundPitch();
     }
 }

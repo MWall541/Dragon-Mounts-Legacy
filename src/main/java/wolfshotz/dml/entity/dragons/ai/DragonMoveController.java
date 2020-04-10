@@ -38,7 +38,7 @@ public class DragonMoveController extends MovementController
         double dist = dragonPos.distanceTo(movePos);
 
         // move towards target if it's far enough away
-        if (dist > dragon.getWidth())
+        if (dist > 1.5)
         {
             double flySpeed = dragon.getAttribute(SharedMonsterAttributes.FLYING_SPEED).getValue();
 

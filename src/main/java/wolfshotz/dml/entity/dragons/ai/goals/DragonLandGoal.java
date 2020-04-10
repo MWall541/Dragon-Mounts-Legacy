@@ -7,6 +7,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.gen.Heightmap;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 
+import java.util.EnumSet;
 import java.util.Random;
 
 public class DragonLandGoal extends Goal
@@ -17,6 +18,7 @@ public class DragonLandGoal extends Goal
     public DragonLandGoal(TameableDragonEntity dragon)
     {
         this.dragon = dragon;
+        setMutexFlags(EnumSet.of(Flag.MOVE, Flag.JUMP, Flag.TARGET));
     }
 
     @Override
@@ -32,10 +34,17 @@ public class DragonLandGoal extends Goal
     }
 
     @Override
+    public void tick()
+    {
+        if (dragon.getNavigator().noPath()) startExecuting();
+    }
+
+    @Override
     public void startExecuting()
     {
         if (!dragon.getNavigator().tryMoveToXYZ(landingPos.getX(), landingPos.getY(), landingPos.getZ(), 1))
-            dragon.getNavigator().tryMoveToXYZ(landingPos.getX(), landingPos.getY() - 4, landingPos.getZ(), 1);
+            // can't seem to get to it, just float down.
+            dragon.getNavigator().tryMoveToXYZ(dragon.getPosX(), dragon.getPosY() - 4, dragon.getPosZ(), 1);
     }
 
     private boolean findLandingBlock()

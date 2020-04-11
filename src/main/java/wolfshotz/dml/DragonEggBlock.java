@@ -74,7 +74,7 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
     {
         World world = evt.getWorld();
         Block block = world.getBlockState(evt.getPos()).getBlock();
-        if (block instanceof net.minecraft.block.DragonEggBlock)
+        if (block == Blocks.DRAGON_EGG)
         {
             evt.setCanceled(true);
             evt.setUseBlock(Event.Result.DENY);

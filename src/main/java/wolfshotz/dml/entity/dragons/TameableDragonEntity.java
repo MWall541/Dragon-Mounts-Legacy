@@ -452,7 +452,7 @@ public class TameableDragonEntity extends TameableEntity
         SoundEvent stepSound = getStepSound();
         if (isHatchling()) stepSound = soundType.getStepSound();
 
-        playSound(stepSound, soundType.getVolume(), soundType.getPitch());
+        playSound(stepSound, soundType.getVolume(), -1f);
     }
 
     /**
@@ -465,7 +465,7 @@ public class TameableDragonEntity extends TameableEntity
     protected float getSoundVolume() { return getScale(); }
 
     @Override
-    protected float getSoundPitch() { return getScale(); }
+    protected float getSoundPitch() { return getScale() - 2; }
 
     @Override
     public void playSound(SoundEvent soundIn, float volume, float pitch) { playSound(soundIn, volume, pitch, false); }

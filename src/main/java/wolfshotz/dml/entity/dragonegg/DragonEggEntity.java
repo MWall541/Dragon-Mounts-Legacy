@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.DataParameter;
@@ -103,6 +104,8 @@ public class DragonEggEntity extends Entity
 
         move(MoverType.SELF, getMotion());
         setMotion(getMotion().mul(0.3d, 0.98d, 0.3d));
+        world.getEntitiesInAABBexcluding(this, getBoundingBox(), e -> !(e instanceof PlayerEntity))
+                .forEach(this::applyEntityCollision);
 
         if (!world.isRemote)
         {

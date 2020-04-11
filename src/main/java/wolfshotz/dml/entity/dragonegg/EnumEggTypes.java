@@ -16,11 +16,11 @@ public enum EnumEggTypes implements IStringSerializable
 {
     AETHER(DMLEntities.AETHER_DAGON, AetherDragonEntity::isHabitat, 0x11d6d0, 0xffff00),
     ENDER(DMLEntities.ENDER_DRAGON, EndDragonEntity::isHabitat, 0x161616, 0xff63e8),
+    NETHER(DMLEntities.NETHER_DRAGON, NetherDragonEntity::isHabitat, 0x912400, 0x2e0b00),
     FIRE(DMLEntities.FIRE_DRAGON, FireDragonEntity::isHabitat, 0x912400, 0xff9819),
     FOREST(DMLEntities.FOREST_DRAGON, ForestDragonEntity::isHabitat, 0x054a00, 0x0a9600),
-    GHOST(DMLEntities.GHOST_DRAGON, GhostDragonEntity::isHabitat, 0xc4c4c4, 0xbafffe),
-    ICE(DMLEntities.ICE_DRAGON, IceDragonEntity::isHabitat, 0xcfcfcf, 0xaefcfb),
-    NETHER(DMLEntities.NETHER_DRAGON, NetherDragonEntity::isHabitat, 0x912400, 0x2e0b00),
+    GHOST(DMLEntities.GHOST_DRAGON, GhostDragonEntity::isHabitat, 0xc4c4c4, 0xc2f8ff),
+    ICE(DMLEntities.ICE_DRAGON, IceDragonEntity::isHabitat, 0xffffff, 0x00b7ff),
     WATER(DMLEntities.WATER_DRAGON, WaterDragonEntity::isHabitat, 0x0062ff, 0x5999ff);
 
     public static final EnumEggTypes[] VALUES = values(); // cache for speed

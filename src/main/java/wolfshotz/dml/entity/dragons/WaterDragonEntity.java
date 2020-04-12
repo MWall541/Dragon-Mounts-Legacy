@@ -24,10 +24,10 @@ public class WaterDragonEntity extends TameableDragonEntity
     @Override
     public boolean canBreatheUnderwater() { return true; }
 
-    @Override
-    public boolean canFly()
-    {
-        // Water Dragons *can* fly in water
-        return !isHatchling();
-    }
+    // todo: water dragons aren't affected by water?
+//    @Override
+//    public boolean handleFluidAcceleration(Tag<Fluid> fluid)
+//    {
+//        return fluid == FluidTags.WATER;
+//    }
 }

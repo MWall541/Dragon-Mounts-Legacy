@@ -1,7 +1,6 @@
 package wolfshotz.dml.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Vector3f;
@@ -11,6 +10,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.model.DragonModel;
+import wolfshotz.dml.client.render.layer.DragonDeathLayer;
+import wolfshotz.dml.client.render.layer.DragonGlowLayer;
+import wolfshotz.dml.client.render.layer.DragonSaddleLayer;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 
 import javax.annotation.Nullable;
@@ -18,7 +20,7 @@ import javax.annotation.Nullable;
 public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonModel>
 {
     public static final String TEX_PATH = "textures/entity/dragon/";
-    public static final ResourceLocation DISSOLVE_TEXTURE = rl(TEX_PATH + "dissolve.png");
+    public static final ResourceLocation DISSOLVE_TEXTURE = rl("dissolve.png");
 
     public ResourceLocation bodyTexture;
     public ResourceLocation saddleTexture;
@@ -29,6 +31,7 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         super(renderManagerIn, new DragonModel(type), 2);
         addLayer(new DragonSaddleLayer(this));
         addLayer(new DragonGlowLayer(this));
+        addLayer(new DragonDeathLayer(this));
     }
 
     @Nullable
@@ -48,12 +51,6 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     @Override
     public void render(TameableDragonEntity dragon, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn)
     {
-        float death = dragon.getDeathTime() / (float) dragon.getMaxDeathTime();
-        IVertexBuilder buffer = bufferIn.getBuffer(RenderStates.getDissolve(death));
-
-        if (death > 0)
-            getEntityModel().render(matrixStackIn, buffer, packedLightIn, getPackedOverlay(dragon, partialTicks), 1, 1, 1, 1);
-
         super.render(dragon, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
     }
 

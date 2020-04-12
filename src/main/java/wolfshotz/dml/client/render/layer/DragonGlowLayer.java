@@ -1,4 +1,4 @@
-package wolfshotz.dml.client.render;
+package wolfshotz.dml.client.render.layer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -6,6 +6,8 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import wolfshotz.dml.client.model.DragonModel;
+import wolfshotz.dml.client.render.DragonRenderer;
+import wolfshotz.dml.client.render.RenderStates;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 
 public class DragonGlowLayer extends LayerRenderer<TameableDragonEntity, DragonModel>

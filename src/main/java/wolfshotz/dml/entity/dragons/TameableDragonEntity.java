@@ -40,6 +40,7 @@ import wolfshotz.dml.entity.dragons.ai.DragonMoveController;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
 import wolfshotz.dml.entity.dragons.ai.goals.DragonBreedGoal;
 import wolfshotz.dml.entity.dragons.ai.goals.DragonLandGoal;
+import wolfshotz.dml.entity.dragons.ai.goals.DragonLookAtGoal;
 import wolfshotz.dml.util.MathX;
 
 import javax.annotation.Nullable;
@@ -122,14 +123,18 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     protected void registerGoals()
     {
-        goalSelector.addGoal(0, new SwimGoal(this));
+        goalSelector.addGoal(0, new SwimGoal(this)
+        {
+            @Override
+            public boolean shouldExecute() { return getSubmergedHeight() > 1 || isInLava(); }
+        });
         goalSelector.addGoal(1, new DragonLandGoal(this));
         goalSelector.addGoal(2, sitGoal = new SitGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
         goalSelector.addGoal(5, new FollowOwnerGoal(this, 1, 10f, 2f, false));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1));
-        goalSelector.addGoal(7, new LookAtGoal(this, LivingEntity.class, 10f));
+        goalSelector.addGoal(7, new DragonLookAtGoal(this));
         goalSelector.addGoal(8, new LookRandomlyGoal(this));
 
         targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this)
@@ -206,8 +211,10 @@ public class TameableDragonEntity extends TameableEntity
     public boolean canFly()
     {
         // hatchling's can't fly and we can't fly in water!
-        return !isHatchling() && !isInWater();
+        return !isHatchling();
     }
+
+    public boolean shouldFly() { return canFly() && !isInWater() && getAltitude() > ALTITUDE_FLYING_THRESHOLD; }
 
     /**
      * Returns true if the entity is flying.
@@ -236,7 +243,7 @@ public class TameableDragonEntity extends TameableEntity
         if (isServer())
         {
             // update flying state based on the distance to the ground
-            boolean flying = canFly() && getAltitude() > ALTITUDE_FLYING_THRESHOLD;
+            boolean flying = shouldFly();
             if (flying != isFlying())
             {
                 // notify client
@@ -304,7 +311,7 @@ public class TameableDragonEntity extends TameableEntity
     public double getAltitude()
     {
         BlockPos.Mutable pos = new BlockPos.Mutable(getPosition());
-        while (pos.getY() > 0 && !world.getBlockState(pos).getMaterial().isSolid()) pos.move(0, -1, 0).getY();
+        while (pos.getY() > 0 && !world.getBlockState(pos).isSolid()) pos.move(0, -1, 0).getY();
 
         return getPosY() - pos.getY();
     }
@@ -714,7 +721,7 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     public boolean shouldAttackEntity(LivingEntity target, LivingEntity owner)
     {
-        if (target instanceof TameableEntity) return Objects.equals(((TameableEntity) target).getOwner(), owner);
+        if (target instanceof TameableEntity) return !Objects.equals(((TameableEntity) target).getOwner(), owner);
         return true;
     }
 

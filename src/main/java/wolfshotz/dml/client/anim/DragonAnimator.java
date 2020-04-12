@@ -2,6 +2,7 @@ package wolfshotz.dml.client.anim;
 
 import wolfshotz.dml.client.model.DragonModel;
 import wolfshotz.dml.client.model.ModelPart;
+import wolfshotz.dml.entity.DMLEntities;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
 
@@ -465,7 +466,7 @@ public class DragonAnimator
             model.tail.rotateAngleY += MathX.toRadians(180 - yawOfs);
 
             // display horns near the tip
-            if (model.tailHornLeft.showModel)
+            if (dragon.getType() == DMLEntities.WATER_DRAGON.get())
             {
                 boolean horn = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
                 model.tailHornLeft.showModel = model.tailHornRight.showModel = horn;

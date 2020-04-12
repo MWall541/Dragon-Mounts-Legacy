@@ -404,6 +404,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     protected void renderWings(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
         ms.push();
+//        buffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer()).getBuffer(RenderType.makeType("test", DefaultVertexFormats.ENTITY, 7, 256, true, false, RenderType.State.getBuilder().))
 
         for (int i = 0; i < 2; i++)
         {
@@ -416,12 +417,12 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
             }
         }
 
-
         ms.pop();
     }
 
     protected void renderLegs(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
+
 
         for (int i = 0; i < thighProxy.length; i++)
         {

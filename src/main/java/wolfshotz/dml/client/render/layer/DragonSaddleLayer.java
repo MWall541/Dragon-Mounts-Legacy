@@ -1,9 +1,10 @@
-package wolfshotz.dml.client.render;
+package wolfshotz.dml.client.render.layer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import wolfshotz.dml.client.model.DragonModel;
+import wolfshotz.dml.client.render.DragonRenderer;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 
 public class DragonSaddleLayer extends LayerRenderer<TameableDragonEntity, DragonModel>

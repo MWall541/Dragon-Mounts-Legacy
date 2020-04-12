@@ -15,16 +15,16 @@ public class RenderStates extends RenderType
         RenderState.TextureState textureState = new RenderState.TextureState(locationIn, false, false);
         return makeType("glow", DefaultVertexFormats.ENTITY, 7, 256, false, true, State.getBuilder()
                 .texture(textureState)
-                .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-                .writeMask(RenderState.COLOR_DEPTH_WRITE)
-                .alpha(AlphaState.DEFAULT_ALPHA)
+                .transparency(TRANSLUCENT_TRANSPARENCY)
+                .writeMask(COLOR_DEPTH_WRITE)
+                .alpha(DEFAULT_ALPHA)
                 .cull(CULL_DISABLED)
                 .build(false));
     }
 
     public static RenderType getDissolve(float amount)
     {
-        TextureState texture = new RenderState.TextureState(DragonRenderer.DISSOLVE_TEXTURE, true, false);
+        TextureState texture = new RenderState.TextureState(DragonRenderer.DISSOLVE_TEXTURE, false, false);
         return makeType("dissolve", DefaultVertexFormats.ENTITY, 7, 262144, State.getBuilder()
                 .texture(texture)
                 .depthTest(DEPTH_LEQUAL)

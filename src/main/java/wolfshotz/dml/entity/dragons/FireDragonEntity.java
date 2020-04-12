@@ -23,7 +23,7 @@ public class FireDragonEntity extends TameableDragonEntity
     {
         super.tick();
 
-        if (isInWater()) attackEntityFrom(DamageSource.DROWN, 4.0f);
+        if (isInWater()) attackEntityFrom(DamageSource.DROWN, 2.0f);
     }
 
     public static boolean isHabitat(DragonEggEntity egg)

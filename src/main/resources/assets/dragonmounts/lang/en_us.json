@@ -1,0 +1,19 @@
+{
+"entity.dragonmounts.aether_dragon": "Aether Dragon",
+"entity.dragonmounts.ender_dragon": "End Dragon",
+"entity.dragonmounts.fire_dragon": "Fire Dragon",
+"entity.dragonmounts.forest_dragon": "Forest Dragon",
+"entity.dragonmounts.ghost_dragon": "Ghost Dragon",
+"entity.dragonmounts.ice_dragon": "Ice Dragon",
+"entity.dragonmounts.nether_dragon": "Nether Dragon",
+"entity.dragonmounts.water_dragon": "Water Dragon",
+
+"item.dragonmounts.aether_dragon_spawn_egg": "Aether Dragon Spawn Egg",
+"item.dragonmounts.ender_dragon_spawn_egg": "End Dragon Spawn Egg",
+"item.dragonmounts.fire_dragon_spawn_egg": "Fire Dragon Spawn Egg",
+"item.dragonmounts.forest_dragon_spawn_egg": "Forest Dragon Spawn Egg",
+"item.dragonmounts.ghost_dragon_spawn_egg": "Ghost Dragon Spawn Egg",
+"item.dragonmounts.ice_dragon_spawn_egg": "Ice Dragon Spawn Egg",
+"item.dragonmounts.nether_dragon_spawn_egg": "Nether Dragon Spawn Egg",
+"item.dragonmounts.water_dragon_spawn_egg": "Water Dragon Spawn Egg",
+}

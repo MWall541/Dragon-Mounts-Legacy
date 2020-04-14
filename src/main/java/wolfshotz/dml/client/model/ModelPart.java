@@ -1,6 +1,7 @@
 package wolfshotz.dml.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
@@ -27,10 +28,10 @@ public class ModelPart extends ModelRenderer
         this.base = base;
     }
 
-    public ModelPart(DragonModel model, int texX, int texY)
+    @Override
+    public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn)
     {
-        super(model, texX, texY);
-        this.base = model;
+        super.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn);
     }
 
     @Override

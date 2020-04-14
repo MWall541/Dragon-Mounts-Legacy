@@ -6,6 +6,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.BiomeDictionary;
 import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
 
+/**
+ * TODO in 1.16: walk on lava!
+ */
 public class NetherDragonEntity extends TameableDragonEntity
 {
     public NetherDragonEntity(EntityType<? extends TameableDragonEntity> type, World world)

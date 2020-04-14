@@ -52,9 +52,9 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     public float pitch;
     public float size;
     // delegates
-    private TameableDragonEntity dragon;
     private final EntityType<TameableDragonEntity> type;
 
+    // RenderType: EntityCutoutNoCull
     public DragonModel(EntityType<TameableDragonEntity> type)
     {
         this.type = type;
@@ -159,7 +159,6 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         float hornOfs = -(hornThick / 2f);
 
         float hornPosX = 0;
-        float hornPosY = hornOfs;
         float hornPosZ = TAIL_SIZE / 2f;
 
         float hornRotX = MathX.toRadians(-15);
@@ -174,7 +173,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
 
         tail.mirror = mirror;
         ModelPart horn = tail.addChildBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength, 0, 117);
-        horn.setRotationPoint(hornPosX, hornPosY, hornPosZ);
+        horn.setRotationPoint(hornPosX, hornOfs, hornPosZ);
         horn.setAngles(hornRotX, hornRotY, hornRotZ);
         horn.showModel = type == DMLEntities.WATER_DRAGON.get();
 
@@ -232,14 +231,8 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         // initialize model proxies
         for (int i = 0; i < 4; i++)
         {
-            if (i % 2 == 0)
-            {
-                thighProxy[i] = new ModelPartProxy(forethigh);
-            }
-            else
-            {
-                thighProxy[i] = new ModelPartProxy(hindthigh);
-            }
+            if (i % 2 == 0) thighProxy[i] = new ModelPartProxy(forethigh);
+            else thighProxy[i] = new ModelPartProxy(hindthigh);
         }
     }
 
@@ -306,25 +299,23 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
 
         ModelPart foot = new ModelPart(this);
         foot.setRotationPoint(footPosX, footPosY, footPosZ);
-        foot.addBox(footOfsX, footOfsY, footOfsZ, footWidth, footHeight, footLength, hind ? 180 : 210, texY);
+        foot.addBox(footOfsX, footOfsY, footOfsZ, footWidth, footHeight, footLength, hind? 180 : 210, texY);
         crus.addChild(foot);
 
         // toe variables
-        int toeWidth = footWidth;
-        int toeHeight = footHeight;
-        int toeLength = (int) (baseLength * (hind ? 0.27f : 0.33f));
+        int toeLength = (int) (baseLength * (hind? 0.27f : 0.33f));
 
         float toePosX = 0;
         float toePosY = 0;
         float toePosZ = footOfsZ - (footOfsY / 2f);
 
-        float toeOfsX = -(toeWidth / 2f);
-        float toeOfsY = -(toeHeight / 2f);
+        float toeOfsX = -(footWidth / 2f);
+        float toeOfsY = -(footHeight / 2f);
         float toeOfsZ = -toeLength;
 
         ModelPart toe = new ModelPart(this);
         toe.setRotationPoint(toePosX, toePosY, toePosZ);
-        toe.addBox(toeOfsX, toeOfsY, toeOfsZ, toeWidth, toeHeight, toeLength, hind ? 215 : 176, texY);
+        toe.addBox(toeOfsX, toeOfsY, toeOfsZ, footWidth, footHeight, toeLength, hind? 215 : 176, texY);
         foot.addChild(toe);
 
         if (hind)
@@ -347,7 +338,6 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     @Override
     public void setLivingAnimations(TameableDragonEntity dragon, float limbSwing, float limbSwingAmount, float partialTick)
     {
-        this.dragon = dragon;
         dragon.animator.setPartialTicks(partialTick);
         dragon.animator.setMovement(limbSwing, limbSwingAmount * dragon.getScale());
         size = dragon.getScale();
@@ -404,29 +394,19 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     protected void renderWings(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
         ms.push();
-//        buffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer()).getBuffer(RenderType.makeType("test", DefaultVertexFormats.ENTITY, 7, 256, true, false, RenderType.State.getBuilder().))
 
-        for (int i = 0; i < 2; i++)
-        {
-            wingArm.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-
-            if (i == 0)
-            {
-                // mirror next wing
-                ms.scale(-1, 1, 1);
-            }
-        }
+        wingArm.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
+        ms.scale(-1, 1, 1);
+        wingArm.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
 
         ms.pop();
     }
 
     protected void renderLegs(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
-
-
         for (int i = 0; i < thighProxy.length; i++)
         {
-            thighProxy[i].render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
+            thighProxy[i].render(ms, i > 1? buffer : buffer, packedLight, packedOverlay, r, g, b, a);
 
             if (i == 1)
             {
@@ -435,7 +415,6 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
                 // switch to front face culling
             }
         }
+
     }
-
-
 }

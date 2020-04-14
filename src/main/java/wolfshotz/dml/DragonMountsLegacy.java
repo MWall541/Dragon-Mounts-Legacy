@@ -45,10 +45,7 @@ public class DragonMountsLegacy
         ITEMS.register(bus);
     }
 
-    public static void commonSetup(FMLCommonSetupEvent evt)
-    {
-        NetworkUtils.registerPackets();
-    }
+    public static void commonSetup(FMLCommonSetupEvent evt) { NetworkUtils.registerPackets(); }
 
     public static ResourceLocation rl(String path) { return new ResourceLocation(MOD_ID, path); }
 }

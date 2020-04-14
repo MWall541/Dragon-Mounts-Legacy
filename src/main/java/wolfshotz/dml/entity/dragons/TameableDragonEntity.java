@@ -7,7 +7,6 @@ import net.minecraft.block.SoundType;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.controller.BodyController;
 import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,14 +32,13 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import wolfshotz.dml.DMLSounds;
 import wolfshotz.dml.client.anim.DragonAnimator;
+import wolfshotz.dml.entity.DMLEntities;
 import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
 import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
 import wolfshotz.dml.entity.dragons.ai.DragonBodyController;
 import wolfshotz.dml.entity.dragons.ai.DragonMoveController;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
-import wolfshotz.dml.entity.dragons.ai.goals.DragonBreedGoal;
-import wolfshotz.dml.entity.dragons.ai.goals.DragonLandGoal;
-import wolfshotz.dml.entity.dragons.ai.goals.DragonLookAtGoal;
+import wolfshotz.dml.entity.dragons.ai.goals.*;
 import wolfshotz.dml.util.MathX;
 
 import javax.annotation.Nullable;
@@ -123,19 +121,24 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     protected void registerGoals()
     {
-        goalSelector.addGoal(0, new SwimGoal(this)
-        {
-            @Override
-            public boolean shouldExecute() { return getSubmergedHeight() > 1 || isInLava(); }
-        });
         goalSelector.addGoal(1, new DragonLandGoal(this));
         goalSelector.addGoal(2, sitGoal = new SitGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
-        goalSelector.addGoal(5, new FollowOwnerGoal(this, 1, 10f, 2f, false));
+        goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
+        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 10f, 20f, 250f));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1));
         goalSelector.addGoal(7, new DragonLookAtGoal(this));
         goalSelector.addGoal(8, new LookRandomlyGoal(this));
+
+        if (getType() != DMLEntities.WATER_DRAGON.get())
+        {
+            goalSelector.addGoal(0, new SwimGoal(this)
+            {
+                @Override
+                public boolean shouldExecute() { return getSubmergedHeight() > getScale() || isInLava(); }
+            });
+        }
 
         targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this)
         {
@@ -152,12 +155,11 @@ public class TameableDragonEntity extends TameableEntity
             @Override
             public boolean shouldExecute() { return !isHatchling() && super.shouldExecute(); }
         });
-        targetSelector.addGoal(3, new NonTamedTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, e -> !(e instanceof TameableDragonEntity) && !(e instanceof CreeperEntity))
+        targetSelector.addGoal(3, new NonTamedTargetGoal<AnimalEntity>(this, AnimalEntity.class, false, e -> !(e instanceof TameableDragonEntity))
         {
             @Override
             public boolean shouldExecute() { return !isHatchling() && super.shouldExecute(); }
         });
-
     }
 
     @Override
@@ -238,7 +240,7 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     public void livingTick()
     {
-        lifeStageController.tick();
+        getLifeStageController().tick();
 
         if (isServer())
         {
@@ -380,34 +382,34 @@ public class TameableDragonEntity extends TameableEntity
             return true;
         }
 
-        if (isServer())
+        // tame
+        if (isBreedingItem(stack) && !isTamed())
         {
-            // tame
-            if (isBreedingItem(stack) && !isTamed())
-            {
-                stack.shrink(1);
-                tamedFor(player, getRNG().nextInt(5) == 0);
-                return true;
-            }
+            stack.shrink(1);
+            if (isServer()) tamedFor(player, getRNG().nextInt(5) == 0);
+            return true;
+        }
 
-            // sit!
-            if (isTamedFor(player) && player.isShiftKeyDown())
+        // sit!
+        if (isTamedFor(player) && player.isShiftKeyDown())
+        {
+            if (isServer())
             {
                 navigator.clearPath();
                 if (!isSitting()) setAttackTarget(null);
                 sitGoal.setSitting(!isSitting());
-                return true;
             }
+            return true;
+        }
 
-            // ride on
-            if (isTamed() && isSaddled() && !isChild() && (!isBreedingItem(stack) && canReproduce()))
-            {
-                setRidingPlayer(player);
-                sitGoal.setSitting(false);
-                navigator.clearPath();
-                setAttackTarget(null);
-                return true;
-            }
+        // ride on
+        if (isServer() && isTamed() && isSaddled() && !isChild() && (!isBreedingItem(stack) && canReproduce()))
+        {
+            setRidingPlayer(player);
+            sitGoal.setSitting(false);
+            navigator.clearPath();
+            setAttackTarget(null);
+            return true;
         }
 
         return super.processInteract(player, hand);
@@ -559,10 +561,7 @@ public class TameableDragonEntity extends TameableEntity
      * Determines if an entity can be despawned, used on idle far away entities
      */
     @Override
-    public boolean canDespawn(double distanceToClosestPlayer)
-    {
-        return false;
-    }
+    public boolean canDespawn(double distanceToClosestPlayer) { return false; }
 
     /**
      * returns true if this entity is by a ladder, false otherwise

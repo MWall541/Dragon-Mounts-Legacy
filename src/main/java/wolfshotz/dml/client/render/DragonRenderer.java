@@ -29,16 +29,16 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     public DragonRenderer(EntityRendererManager renderManagerIn, EntityType<TameableDragonEntity> type)
     {
         super(renderManagerIn, new DragonModel(type), 2);
-        addLayer(new DragonSaddleLayer(this));
         addLayer(new DragonGlowLayer(this));
+        addLayer(new DragonSaddleLayer(this));
         addLayer(new DragonDeathLayer(this));
     }
 
     @Nullable
     @Override
-    protected RenderType func_230042_a_(TameableDragonEntity entity, boolean p_230042_2_, boolean p_230042_3_)
+    protected RenderType func_230042_a_(TameableDragonEntity dragon, boolean p_230042_2_, boolean p_230042_3_)
     {
-        return super.func_230042_a_(entity, p_230042_2_, p_230042_3_);
+        return super.func_230042_a_(dragon, p_230042_2_, p_230042_3_);
     }
 
     @Override
@@ -49,9 +49,19 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     }
 
     @Override
-    public void render(TameableDragonEntity dragon, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn)
+    public void render(TameableDragonEntity dragon, float entityYaw, float partialTicks, MatrixStack ms, IRenderTypeBuffer bufferIn, int packedLightIn)
     {
-        super.render(dragon, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
+        // TODO death
+/*        float death = 100 / (float) dragon.getMaxDeathTime();
+        if (death > 0)
+        {
+            IVertexBuilder builder = bufferIn.getBuffer(RenderStates.getEntityAlpha(DISSOLVE_TEXTURE, death));
+            entityModel.render(ms, builder, packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+            IVertexBuilder builder1 = bufferIn.getBuffer(RenderStates.getEntityDecal(getEntityTexture(dragon)));
+            entityModel.render(ms, builder1, packedLightIn, OverlayTexture.getPackedUV(0, false), 1, 1, 1, 1);
+        }
+        else */
+        super.render(dragon, entityYaw, partialTicks, ms, bufferIn, packedLightIn);
     }
 
     @Override

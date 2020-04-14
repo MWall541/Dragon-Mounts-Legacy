@@ -197,7 +197,7 @@ public class DragonEggEntity extends Entity
 
     public void crack()
     {
-        world.playEvent(2001, getPosition(), Block.getStateId(DragonEggBlock.DRAGON_EGG.getDefaultState().with(DragonEggBlock.BREED, eggType)));
+        world.playEvent(2001, getPosition(), Block.getStateId(DragonEggBlock.INSTANCE.getDefaultState().with(DragonEggBlock.BREED, eggType)));
         world.playSound(getPosX(), getPosY(), getPosZ(), SoundEvents.ENTITY_TURTLE_EGG_HATCH, SoundCategory.BLOCKS, 1, 1, false);
     }
 }

@@ -16,19 +16,19 @@ public class RenderStates extends RenderType
         return makeType("glow", DefaultVertexFormats.ENTITY, 7, 256, false, true, State.getBuilder()
                 .texture(textureState)
                 .transparency(TRANSLUCENT_TRANSPARENCY)
-                .writeMask(COLOR_DEPTH_WRITE)
                 .alpha(DEFAULT_ALPHA)
-                .cull(CULL_DISABLED)
                 .build(false));
     }
 
-    public static RenderType getDissolve(float amount)
+    public static RenderType getDecal(ResourceLocation loc)
     {
-        TextureState texture = new RenderState.TextureState(DragonRenderer.DISSOLVE_TEXTURE, false, false);
-        return makeType("dissolve", DefaultVertexFormats.ENTITY, 7, 262144, State.getBuilder()
-                .texture(texture)
-                .depthTest(DEPTH_LEQUAL)
-                .alpha(new AlphaState(amount))
-                .build(false));
+        RenderType.State rendertype$state = RenderType.State.getBuilder().texture(new RenderState.TextureState(loc, false, false))
+                .diffuseLighting(DIFFUSE_LIGHTING_ENABLED)
+                .alpha(DEFAULT_ALPHA)
+                .depthTest(DEPTH_EQUAL)
+                .lightmap(LIGHTMAP_ENABLED)
+                .overlay(OVERLAY_ENABLED)
+                .build(false);
+        return makeType("entity_decal", DefaultVertexFormats.ENTITY, 7, 256, rendertype$state);
     }
 }

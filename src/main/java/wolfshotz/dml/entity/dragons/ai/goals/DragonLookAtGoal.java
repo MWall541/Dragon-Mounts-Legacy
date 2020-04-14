@@ -3,7 +3,6 @@ package wolfshotz.dml.entity.dragons.ai.goals;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.EntityPredicates;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 
@@ -28,12 +27,8 @@ public class DragonLookAtGoal extends LookAtGoal
         else
         {
             if (entity.getAttackTarget() != null) closestEntity = entity.getAttackTarget();
-
-            if (watchedClass == PlayerEntity.class)
-                closestEntity = entity.world.getClosestPlayer(predicate, entity, entity.getPosX(), entity.getPosYEye(), entity.getPosZ());
             else
                 closestEntity = entity.world.func_225318_b(watchedClass, predicate, entity, entity.getPosX(), entity.getPosYEye(), entity.getPosZ(), entity.getBoundingBox().grow(maxDistance, 3.0D, maxDistance));
-
             return closestEntity != null;
         }
     }

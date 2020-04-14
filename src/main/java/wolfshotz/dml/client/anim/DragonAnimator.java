@@ -137,6 +137,7 @@ public class DragonAnimator
         speed = speedTimer.get(partialTicks);
 
         animBase = anim * MathX.PI_F * 2;
+//        if (dragon.isInWater()) animBase *= 0.4;
         cycleOfs = MathX.sin(animBase - 1) + 1;
 
         // check if the wings are moving down and trigger the event

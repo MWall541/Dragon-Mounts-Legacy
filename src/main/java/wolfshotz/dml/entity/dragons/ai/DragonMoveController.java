@@ -49,7 +49,7 @@ public class DragonMoveController extends MovementController
         {
             // just slow down and hover at current location
             dragon.setMotion(dragon.getMotion().scale(0.8d));
-            dragon.setMotion(dragon.getMotion().add(0, Math.sin(dragon.ticksExisted / 5) * 0.03, 0));
+            dragon.setMotion(dragon.getMotion().add(0, Math.sin((dragon.ticksExisted / 5)) * 0.03, 0));
         }
 
         // face entity towards target

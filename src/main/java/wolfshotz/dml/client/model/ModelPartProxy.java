@@ -83,10 +83,7 @@ public class ModelPartProxy
 
         if (childs != null)
         {
-            for (ModelPartProxy child : childs)
-            {
-                child.update();
-            }
+            for (ModelPartProxy child : childs) child.update();
         }
     }
 

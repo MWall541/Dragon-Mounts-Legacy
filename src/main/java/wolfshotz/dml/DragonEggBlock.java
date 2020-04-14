@@ -29,7 +29,7 @@ import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
 public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
 {
     @ObjectHolder(DragonMountsLegacy.MOD_ID + ":dragon_egg")
-    public static final Block DRAGON_EGG = null;
+    public static final Block INSTANCE = null;
 
     public static final EnumProperty<EnumEggTypes> BREED = EnumProperty.create("breed", EnumEggTypes.class);
 
@@ -78,7 +78,7 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
         {
             evt.setCanceled(true);
             evt.setUseBlock(Event.Result.DENY);
-            startHatching(DRAGON_EGG.getDefaultState().with(BREED, EnumEggTypes.ENDER), world, evt.getPos());
+            startHatching(INSTANCE.getDefaultState().with(BREED, EnumEggTypes.ENDER), world, evt.getPos());
         }
     }
 

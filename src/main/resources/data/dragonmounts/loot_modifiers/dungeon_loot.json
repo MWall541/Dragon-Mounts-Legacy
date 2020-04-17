@@ -2,7 +2,8 @@
   "type": "dragonmounts:dungeon_loot",
   "conditions": [
     {
-      "condition": "minecraft:block_state_property"
+      "condition": "minecraft:block_state_property",
+      "block": "dragonmounts:dragon_egg"
     }
   ],
   "add_loot": "dragonmounts:chests/dungeon_additions"

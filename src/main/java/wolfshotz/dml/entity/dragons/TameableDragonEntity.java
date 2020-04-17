@@ -514,12 +514,12 @@ public class TameableDragonEntity extends TameableEntity
             navigator.clearPath();
             setAttackTarget(null);
             setOwnerId(player.getUniqueID());
-            playTameEffect(true);
+            if (world.isRemote) playTameEffect(true);
             world.setEntityState(this, (byte) 7);
         }
         else
         {
-            playTameEffect(false);
+            if (world.isRemote) playTameEffect(false);
             world.setEntityState(this, (byte) 6);
         }
     }

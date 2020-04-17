@@ -5,8 +5,8 @@ import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
-import wolfshotz.dml.DragonEggBlock;
 import wolfshotz.dml.DragonMountsLegacy;
+import wolfshotz.dml.block.DragonEggBlock;
 
 public class BlockModelGen extends BlockStateProvider
 {
@@ -18,12 +18,13 @@ public class BlockModelGen extends BlockStateProvider
     @Override
     protected void registerStatesAndModels()
     {
-        getVariantBuilder(DragonEggBlock.DRAGON_EGG)
+        getVariantBuilder(DragonEggBlock.INSTANCE)
                 .forAllStates(blockState ->
                 {
                     String name = blockState.get(DragonEggBlock.BREED).getName();
                     BlockModelBuilder model = models().withExistingParent(String.format("block/%s_egg", name), "dragon_egg");
-                    if (!name.equals("ender")) model.texture("all", String.format("block/%s_egg", name));
+                    String textureName = String.format("block/%s_egg", name);
+                    if (!name.equals("ender")) model.texture("all", textureName).texture("particle", textureName);
                     return ConfiguredModel.builder().modelFile(model).build();
                 });
     }

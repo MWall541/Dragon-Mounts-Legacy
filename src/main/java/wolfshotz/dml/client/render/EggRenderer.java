@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.ForgeHooksClient;
-import wolfshotz.dml.DragonEggBlock;
+import wolfshotz.dml.block.DragonEggBlock;
 import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
 
 import java.util.Random;
@@ -56,8 +56,5 @@ public class EggRenderer extends EntityRenderer<DragonEggEntity>
     }
 
     @Override
-    public ResourceLocation getEntityTexture(DragonEggEntity entity)
-    {
-        return null;
-    }
+    public ResourceLocation getEntityTexture(DragonEggEntity entity) { return null; }
 }

@@ -15,7 +15,7 @@ public class RenderStates extends RenderType
         RenderState.TextureState textureState = new RenderState.TextureState(locationIn, false, false);
         return makeType("glow", DefaultVertexFormats.ENTITY, 7, 256, false, true, State.getBuilder()
                 .texture(textureState)
-                .transparency(TRANSLUCENT_TRANSPARENCY)
+                .transparency(RenderState.ADDITIVE_TRANSPARENCY)
                 .alpha(DEFAULT_ALPHA)
                 .build(false));
     }

@@ -4,9 +4,10 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.IStringSerializable;
 import org.apache.commons.lang3.tuple.Pair;
 import wolfshotz.dml.DragonMountsLegacy;
-import wolfshotz.dml.DragonSpawnEggItem;
 import wolfshotz.dml.entity.DMLEntities;
 import wolfshotz.dml.entity.dragons.*;
+import wolfshotz.dml.item.DragonEggBlockItem;
+import wolfshotz.dml.item.DragonSpawnEggItem;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -29,18 +30,15 @@ public enum EnumEggTypes implements IStringSerializable
     private final Predicate<DragonEggEntity> habitatCheck;
     private final int primColor, secColor;
 
-    static
-    {
-        for (EnumEggTypes value : VALUES)
-            DragonMountsLegacy.ITEMS.register(value.getName() + "_dragon_spawn_egg", () -> new DragonSpawnEggItem(value));
-    }
-
     EnumEggTypes(Supplier<EntityType<TameableDragonEntity>> type, Predicate<DragonEggEntity> habitatCheck, int primColor, int secColor)
     {
         this.type = type;
         this.habitatCheck = habitatCheck;
         this.primColor = primColor;
         this.secColor = secColor;
+
+        DragonMountsLegacy.ITEMS.register(getName() + "_dragon_spawn_egg", () -> new DragonSpawnEggItem(this)); // Spawn Eggs
+        DragonMountsLegacy.ITEMS.register(getName() + "_dragon_egg", () -> new DragonEggBlockItem(this)); // Egg BlockItems
     }
 
     public static EnumEggTypes getByHabitat(DragonEggEntity egg)

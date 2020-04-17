@@ -3,6 +3,7 @@ package wolfshotz.dml.entity.dragons.ai.goals;
 import net.minecraft.entity.ai.goal.Goal;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class DragonBabuFollowParent extends Goal
@@ -24,28 +25,15 @@ public class DragonBabuFollowParent extends Goal
         if (!babu.isHatchling() || babu.getOwner() != null) return false;
 
         List<TameableDragonEntity> list = babu.world.getEntitiesWithinAABB(TameableDragonEntity.class, babu.getBoundingBox().grow(searchDistance, searchDistance * 0.5f, searchDistance), TameableDragonEntity::isAdult);
-        if (list.isEmpty()) return false;
-        TameableDragonEntity potentialParent = null;
-        double distance = Double.MAX_VALUE;
-        for (TameableDragonEntity dagin : list)
-        {
-            double d1 = babu.getDistanceSq(dagin);
-            if (!(d1 > distance))
-            {
-                distance = d1;
-                potentialParent = dagin;
-            }
-        }
-
-        if (potentialParent == null) return false;
-        this.adultParent = potentialParent;
-        return true;
+        this.adultParent = list.stream().min(Comparator.comparingDouble(babu::getDistanceSq)).orElse(null);
+        return adultParent != null;
     }
 
     @Override
     public boolean shouldContinueExecuting()
     {
         if (!babu.isHatchling()) return false;
+        if (babu.getOwner() != null) return false;
         if (adultParent.isAlive()) return false;
         return babu.getDistanceSq(adultParent) < 256d;
     }
@@ -59,7 +47,7 @@ public class DragonBabuFollowParent extends Goal
     @Override
     public void tick()
     {
-        if (--delayCounter <= 0)
+        if (--delayCounter <= 0 && babu.getDistance(adultParent) > 4)
         {
             delayCounter = 10;
             babu.getNavigator().tryMoveToEntityLiving(adultParent, 1);

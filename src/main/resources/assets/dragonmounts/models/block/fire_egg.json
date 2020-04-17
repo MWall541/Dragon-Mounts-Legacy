@@ -1,6 +1,7 @@
 {
   "parent": "block/dragon_egg",
   "textures": {
-    "all": "dragonmounts:block/fire_egg"
+    "all": "dragonmounts:block/fire_egg",
+    "particle": "dragonmounts:block/fire_egg"
   }
 }

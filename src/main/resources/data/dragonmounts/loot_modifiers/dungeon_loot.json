@@ -1,0 +1,9 @@
+{
+  "type": "dragonmounts:dungeon_loot",
+  "conditions": [
+    {
+      "condition": "minecraft:block_state_property"
+    }
+  ],
+  "add_loot": "dragonmounts:chests/dungeon_additions"
+}

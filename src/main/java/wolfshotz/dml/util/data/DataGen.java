@@ -14,10 +14,14 @@ public class DataGen
     {
         DataGenerator gen = evt.getGenerator();
 
-        if (evt.includeClient())
+//        if (evt.includeClient())
+//        {
+//            gen.addProvider(new BlockModelGen(gen, evt.getExistingFileHelper()));
+//            gen.addProvider(new ItemModelGen(gen, evt.getExistingFileHelper()));
+//        }
+        if (evt.includeServer())
         {
-            gen.addProvider(new BlockModelGen(gen, evt.getExistingFileHelper()));
-            gen.addProvider(new ItemModelGen(gen, evt.getExistingFileHelper()));
+            gen.addProvider(new LootTableGen(gen));
         }
     }
 }

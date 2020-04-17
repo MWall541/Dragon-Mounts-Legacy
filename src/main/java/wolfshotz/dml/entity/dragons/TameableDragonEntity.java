@@ -119,7 +119,7 @@ public class TameableDragonEntity extends TameableEntity
     }
 
     @Override
-    protected void registerGoals()
+    protected void registerGoals() // TODO: Much Smarter AI and features
     {
         goalSelector.addGoal(1, new DragonLandGoal(this));
         goalSelector.addGoal(2, sitGoal = new SitGoal(this));
@@ -476,6 +476,8 @@ public class TameableDragonEntity extends TameableEntity
     @Override
     protected float getSoundPitch() { return getScale() - 2; }
 
+    public float getSoundPitch(SoundEvent sound) { return getSoundPitch(); }
+
     @Override
     public void playSound(SoundEvent soundIn, float volume, float pitch) { playSound(soundIn, volume, pitch, false); }
 
@@ -484,7 +486,7 @@ public class TameableDragonEntity extends TameableEntity
         if (isSilent()) return;
 
         volume *= getSoundVolume();
-        pitch *= getSoundPitch();
+        pitch *= getSoundPitch(sound);
 
         if (local) world.playSound(getPosX(), getPosY(), getPosZ(), sound, getSoundCategory(), volume, pitch, false);
         else world.playSound(null, getPosX(), getPosY(), getPosZ(), sound, getSoundCategory(), volume, pitch);

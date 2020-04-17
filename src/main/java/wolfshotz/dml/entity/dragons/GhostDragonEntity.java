@@ -37,4 +37,10 @@ public class GhostDragonEntity extends TameableDragonEntity
     {
         return getRNG().nextBoolean()? super.getAmbientSound() : SoundEvents.ENTITY_SKELETON_AMBIENT;
     }
+
+    @Override
+    public float getSoundPitch(SoundEvent sound)
+    { // THICC BONE SOUNDS
+        return sound == SoundEvents.ENTITY_SKELETON_AMBIENT? 2 : super.getSoundPitch(sound);
+    }
 }

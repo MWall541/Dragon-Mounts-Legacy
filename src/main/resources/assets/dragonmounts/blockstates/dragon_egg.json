@@ -6,6 +6,9 @@
     "breed=ender": {
       "model": "dragonmounts:block/ender_egg"
     },
+    "breed=nether": {
+      "model": "dragonmounts:block/nether_egg"
+    },
     "breed=fire": {
       "model": "dragonmounts:block/fire_egg"
     },
@@ -17,9 +20,6 @@
     },
     "breed=ice": {
       "model": "dragonmounts:block/ice_egg"
-    },
-    "breed=nether": {
-      "model": "dragonmounts:block/nether_egg"
     },
     "breed=water": {
       "model": "dragonmounts:block/water_egg"

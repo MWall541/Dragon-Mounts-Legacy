@@ -3,15 +3,16 @@ package wolfshotz.dml.client;
 import net.minecraft.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import wolfshotz.dml.DragonMountsLegacy;
-import wolfshotz.dml.DragonSpawnEggItem;
 import wolfshotz.dml.client.render.DragonRenderer;
 import wolfshotz.dml.client.render.EggRenderer;
 import wolfshotz.dml.entity.DMLEntities;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
+import wolfshotz.dml.item.DragonSpawnEggItem;
 
 @EventBusSubscriber(modid = DragonMountsLegacy.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents
@@ -55,6 +56,11 @@ public class ClientEvents
 
     public static void itemColors(ColorHandlerEvent.Item evt)
     {
-        DragonSpawnEggItem.getEggs().forEach(i -> evt.getItemColors().register((s, c) -> i.getColor(c), i));
+        DragonMountsLegacy.ITEMS.getEntries()
+                .stream()
+                .map(RegistryObject::get)
+                .filter(DragonSpawnEggItem.class::isInstance)
+                .map(DragonSpawnEggItem.class::cast)
+                .forEach(i -> evt.getItemColors().register((s, c) -> i.getColor(c), i));
     }
 }

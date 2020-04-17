@@ -359,18 +359,13 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         ms.rotate(Vector3f.XP.rotationDegrees(-pitch));
 
         renderHead(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-        renderNeck(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-        renderBody(ms, buffer, packedLight, packedOverlay, r, g, b, a);
+        for (ModelPartProxy proxy : neckProxy) proxy.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
+        body.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
         renderWings(ms, buffer, packedLight, packedOverlay, r, g, b, a);
         renderLegs(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-        renderTail(ms, buffer, packedLight, packedOverlay, r, g, b, a);
+        for (ModelPartProxy proxy : tailProxy) proxy.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
 
         ms.pop();
-    }
-
-    protected void renderBody(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
-    {
-        body.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
     }
 
     protected void renderHead(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
@@ -379,16 +374,6 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
 
         head.setRenderScale(headScale);
         head.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-    }
-
-    protected void renderNeck(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
-    {
-        for (ModelPartProxy proxy : neckProxy) proxy.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-    }
-
-    protected void renderTail(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
-    {
-        for (ModelPartProxy proxy : tailProxy) proxy.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
     }
 
     protected void renderWings(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
@@ -406,15 +391,13 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     {
         for (int i = 0; i < thighProxy.length; i++)
         {
-            thighProxy[i].render(ms, i > 1? buffer : buffer, packedLight, packedOverlay, r, g, b, a);
+            thighProxy[i].render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
 
+            // mirror next legs
             if (i == 1)
             {
-                // mirror next legs
                 ms.scale(-1, 1, 1);
-                // switch to front face culling
             }
         }
-
     }
 }

@@ -1,6 +1,7 @@
 {
   "parent": "block/dragon_egg",
   "textures": {
-    "all": "dragonmounts:block/aether_egg"
+    "all": "dragonmounts:block/aether_egg",
+    "particle": "dragonmounts:block/aether_egg"
   }
 }

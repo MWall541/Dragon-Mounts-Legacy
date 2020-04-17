@@ -13,12 +13,13 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.particles.RedstoneParticleData;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
-import wolfshotz.dml.DragonEggBlock;
 import wolfshotz.dml.DragonMountsLegacy;
+import wolfshotz.dml.block.DragonEggBlock;
 import wolfshotz.dml.entity.DMLEntities;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
@@ -171,6 +172,15 @@ public class DragonEggEntity extends Entity
         }
 
         super.tick();
+    }
+
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float amount)
+    {
+        super.attackEntityFrom(source, amount);
+        entityDropItem(DragonEggBlock.toItem(DragonEggBlock.INSTANCE.getDefaultState().with(DragonEggBlock.BREED, eggType)));
+        remove();
+        return false;
     }
 
     public void updateHabitat() // todo: make a better system for this, currently gets the first accepted predicate

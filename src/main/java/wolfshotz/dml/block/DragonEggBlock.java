@@ -1,25 +1,34 @@
-package wolfshotz.dml;
+package wolfshotz.dml.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.ObjectHolder;
+import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.entity.dragonegg.DragonEggEntity;
 import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
+import wolfshotz.dml.item.DragonEggBlockItem;
+
+import javax.annotation.Nullable;
 
 /**
  * OG Dragon Mounts used meta-data to differentiate between the different egg breed types
@@ -39,13 +48,6 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
         setDefaultState(getStateContainer().getBaseState().with(BREED, EnumEggTypes.AETHER));
     }
 
-    public static void register(IEventBus bus)
-    {
-        bus.addGenericListener(Block.class, (RegistryEvent.Register<Block> e) -> e.getRegistry().register(
-                new DragonEggBlock(Block.Properties.from(Blocks.DRAGON_EGG)).setRegistryName("dragon_egg")
-        ));
-    }
-
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
     {
@@ -56,6 +58,40 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
     public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player)
     {
         if (state.get(BREED) == EnumEggTypes.ENDER) super.onBlockClicked(state, worldIn, pos, player);
+    }
+
+    public static void register(IEventBus bus)
+    {
+        bus.addGenericListener(Block.class, (RegistryEvent.Register<Block> e) -> e.getRegistry().register(
+                new DragonEggBlock(Block.Properties.from(Blocks.DRAGON_EGG)).setRegistryName("dragon_egg")
+        ));
+    }
+
+    public static ItemStack toItem(BlockState state)
+    {
+        return new ItemStack(DragonMountsLegacy.ITEMS
+                .getEntries()
+                .stream()
+                .map(RegistryObject::get)
+                .filter(DragonEggBlockItem.class::isInstance)
+                .map(DragonEggBlockItem.class::cast)
+                .filter(i -> i.getType() == state.get(BREED))
+                .findFirst().get());
+    }
+
+    @Override
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_)
+    {
+        startHatching(state, worldIn, pos);
+        return ActionResultType.SUCCESS;
+    }
+
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(BlockItemUseContext context)
+    {
+        EnumEggTypes type = ((DragonEggBlockItem) context.getItem().getItem()).getType();
+        return getDefaultState().with(BREED, type);
     }
 
     public static void startHatching(BlockState state, World world, BlockPos pos)
@@ -69,6 +105,12 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
         }
     }
 
+    @Override
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player)
+    {
+        return toItem(state);
+    }
+
     @SubscribeEvent
     public static void onVanillaEggActivate(PlayerInteractEvent.RightClickBlock evt)
     {
@@ -80,12 +122,5 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
             evt.setUseBlock(Event.Result.DENY);
             startHatching(INSTANCE.getDefaultState().with(BREED, EnumEggTypes.ENDER), world, evt.getPos());
         }
-    }
-
-    @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_)
-    {
-        startHatching(state, worldIn, pos);
-        return ActionResultType.SUCCESS;
     }
 }

@@ -1,4 +1,4 @@
-package wolfshotz.dml;
+package wolfshotz.dml.item;
 
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.item.Item;
@@ -9,12 +9,10 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.RegistryObject;
 import org.apache.commons.lang3.tuple.Pair;
 import wolfshotz.dml.entity.dragonegg.EnumEggTypes;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public class DragonSpawnEggItem extends Item
 {
@@ -24,15 +22,6 @@ public class DragonSpawnEggItem extends Item
     {
         super(new Item.Properties().group(ItemGroup.MISC));
         this.dragonType = type;
-    }
-
-    public static Stream<DragonSpawnEggItem> getEggs()
-    {
-        return DragonMountsLegacy.ITEMS.getEntries()
-                .stream()
-                .map(RegistryObject::get)
-                .filter(DragonSpawnEggItem.class::isInstance)
-                .map(DragonSpawnEggItem.class::cast);
     }
 
     /**

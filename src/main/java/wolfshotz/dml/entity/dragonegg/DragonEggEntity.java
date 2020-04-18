@@ -23,7 +23,7 @@ import wolfshotz.dml.block.DragonEggBlock;
 import wolfshotz.dml.entity.DMLEntities;
 import wolfshotz.dml.entity.dragons.TameableDragonEntity;
 import wolfshotz.dml.entity.dragons.ai.LifeStageController;
-import wolfshotz.dml.util.network.NetworkUtils;
+import wolfshotz.dml.util.network.EggHatchPacket;
 
 
 public class DragonEggEntity extends Entity
@@ -123,7 +123,7 @@ public class DragonEggEntity extends Entity
             // hatch!
             if (--hatchTime <= 0)
             {
-                NetworkUtils.sendEggHatchPacket(this); // notify clients
+                EggHatchPacket.send(this); // notify clients
                 hatch();
                 return; // Were hatching! drop the cock and lets go!
             }

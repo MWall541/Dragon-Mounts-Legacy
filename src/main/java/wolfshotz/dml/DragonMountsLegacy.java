@@ -6,14 +6,13 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
@@ -24,7 +23,9 @@ import wolfshotz.dml.block.DragonEggBlock;
 import wolfshotz.dml.client.ClientEvents;
 import wolfshotz.dml.cmd.DragonSetAgeCommand;
 import wolfshotz.dml.entity.DMLEntities;
-import wolfshotz.dml.util.network.NetworkUtils;
+import wolfshotz.dml.util.network.EggHatchPacket;
+
+import java.util.Optional;
 
 @Mod(DragonMountsLegacy.MOD_ID)
 public class DragonMountsLegacy
@@ -47,7 +48,6 @@ public class DragonMountsLegacy
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         bus.addListener(this::commonSetup);
-        bus.addGenericListener(GlobalLootModifierSerializer.class, this::lootModifiers);
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () ->
         {
             bus.addListener(ClientEvents::clientSetup);
@@ -62,7 +62,11 @@ public class DragonMountsLegacy
         MinecraftForge.EVENT_BUS.addListener(this::startingServer);
     }
 
-    public void commonSetup(FMLCommonSetupEvent evt) { NetworkUtils.registerPackets(); }
+    public void commonSetup(FMLCommonSetupEvent evt)
+    {
+        int index = 0;
+        DragonMountsLegacy.NETWORK.registerMessage(++index, EggHatchPacket.class, EggHatchPacket::encode, EggHatchPacket::new, EggHatchPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+    }
 
     public void startingServer(FMLServerStartingEvent evt)
     {
@@ -70,11 +74,6 @@ public class DragonMountsLegacy
                 LiteralArgumentBuilder.<CommandSource>literal("dragon")
                         .then(DragonSetAgeCommand.register())
         );
-    }
-
-    public void lootModifiers(RegistryEvent.Register<GlobalLootModifierSerializer<?>> evt)
-    {
-        evt.getRegistry().register(new DungeonLootModifier.Serializer().setRegistryName(rl("dungeon_loot")));
     }
 
     public static ResourceLocation rl(String path) { return new ResourceLocation(MOD_ID, path); }

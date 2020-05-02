@@ -212,7 +212,7 @@ public class TameableDragonEntity extends TameableEntity
 
     public boolean canFly()
     {
-        // hatchling's can't fly and we can't fly in water!
+        // hatchling's can't fly
         return !isHatchling();
     }
 
@@ -313,11 +313,10 @@ public class TameableDragonEntity extends TameableEntity
     public double getAltitude()
     {
         BlockPos.Mutable pos = new BlockPos.Mutable(getPosition());
-        while (pos.getY() > 0 && !world.getBlockState(pos).isSolid()) pos.move(0, -1, 0).getY();
+        while (pos.getY() > 0 && !world.getBlockState(pos).isSolid()) pos.move(0, -1, 0);
 
         return getPosY() - pos.getY();
     }
-
     /**
      * Causes this entity to lift off if it can fly.
      */
@@ -367,9 +366,9 @@ public class TameableDragonEntity extends TameableEntity
         // heal
         if (getHealthRelative() < 1 && isFoodItem(stack))
         {
-            stack.shrink(1);
             heal(stack.getItem().getFood().getHealing());
             playSound(getEatSound(stack), 0.7f, 1);
+            stack.shrink(1);
             return true;
         }
 

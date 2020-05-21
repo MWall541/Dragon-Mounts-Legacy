@@ -2,10 +2,13 @@ package wolfshotz.dml;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
-import net.minecraft.item.Item;
+import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.storage.loot.*;
+import net.minecraft.world.storage.loot.conditions.RandomChance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -15,15 +18,13 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import wolfshotz.dml.block.DragonEggBlock;
 import wolfshotz.dml.client.ClientEvents;
 import wolfshotz.dml.cmd.DragonSetAgeCommand;
-import wolfshotz.dml.entity.DMLEntities;
-import wolfshotz.dml.util.network.EggHatchPacket;
+import wolfshotz.dml.dragons.TameableDragonEntity;
+import wolfshotz.dml.egg.DragonEggType;
+import wolfshotz.dml.network.EggHatchPacket;
 
 import java.util.Optional;
 
@@ -40,9 +41,6 @@ public class DragonMountsLegacy
             .networkProtocolVersion(() -> PROTOCOL_VER)
             .simpleChannel();
 
-    // registry
-    public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, MOD_ID);
-
     public DragonMountsLegacy()
     {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -54,12 +52,13 @@ public class DragonMountsLegacy
             bus.addListener(ClientEvents::itemColors);
         });
 
-        DragonEggBlock.register(bus);
-        DMLEntities.ENTITIES.register(bus);
-        DMLSounds.SOUNDS.register(bus);
-        ITEMS.register(bus);
-
         MinecraftForge.EVENT_BUS.addListener(this::startingServer);
+        MinecraftForge.EVENT_BUS.addListener(this::loadLootTables);
+
+        DMLRegistry.BLOCKS.register(bus);
+        DMLRegistry.ITEMS.register(bus);
+        DMLRegistry.ENTITIES.register(bus);
+        DMLRegistry.SOUNDS.register(bus);
     }
 
     public void commonSetup(FMLCommonSetupEvent evt)
@@ -74,6 +73,38 @@ public class DragonMountsLegacy
                 LiteralArgumentBuilder.<CommandSource>literal("dragon")
                         .then(DragonSetAgeCommand.register())
         );
+    }
+
+    public void loadLootTables(LootTableLoadEvent evt)
+    {
+        ResourceLocation table = evt.getName();
+        if (table == LootTables.CHESTS_END_CITY_TREASURE)
+            makePool(evt.getTable(), 0.7f, DMLRegistry.ENDER_DRAGON.get());
+        else if (table == LootTables.CHESTS_WOODLAND_MANSION)
+            makePool(evt.getTable(), 0.7f, DMLRegistry.GHOST_DRAGON.get());
+        else if (table == LootTables.CHESTS_JUNGLE_TEMPLE)
+            makePool(evt.getTable(), 0.8f, DMLRegistry.FOREST_DRAGON.get());
+        else if (table == LootTables.CHESTS_DESERT_PYRAMID)
+            makePool(evt.getTable(), 0.15f, DMLRegistry.FIRE_DRAGON.get());
+        else if (table == LootTables.CHESTS_IGLOO_CHEST) makePool(evt.getTable(), 0.5f, DMLRegistry.ICE_DRAGON.get());
+        else if (table == LootTables.CHESTS_NETHER_BRIDGE)
+            makePool(evt.getTable(), 0.15f, DMLRegistry.NETHER_DRAGON.get());
+        else if (table == LootTables.CHESTS_UNDERWATER_RUIN_BIG)
+            makePool(evt.getTable(), 0.4f, DMLRegistry.WATER_DRAGON.get());
+        else if (table == LootTables.CHESTS_BURIED_TREASURE)
+            makePool(evt.getTable(), 0.9f, DMLRegistry.WATER_DRAGON.get());
+        else if (table == LootTables.CHESTS_SIMPLE_DUNGEON)
+            makePool(evt.getTable(), 0.25f, DMLRegistry.AETHER_DAGON.get());
+    }
+
+    private static void makePool(LootTable table, float chance, EntityType<? extends TameableDragonEntity> type)
+    {
+        table.addPool(LootPool.builder()
+                .name("dragonmounts_added_eggs")
+                .rolls(ConstantRange.of(1))
+                .acceptCondition(RandomChance.builder(chance))
+                .addEntry(ItemLootEntry.builder(DragonEggType.lookUp(type).getEggBlock()))
+                .build());
     }
 
     public static ResourceLocation rl(String path) { return new ResourceLocation(MOD_ID, path); }

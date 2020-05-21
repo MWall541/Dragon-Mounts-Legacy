@@ -8,8 +8,8 @@ import net.minecraft.command.Commands;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.server.command.EnumArgument;
-import wolfshotz.dml.entity.dragons.TameableDragonEntity;
-import wolfshotz.dml.entity.dragons.ai.LifeStageController;
+import wolfshotz.dml.dragons.TameableDragonEntity;
+import wolfshotz.dml.dragons.ai.LifeStageController;
 
 import java.util.Comparator;
 import java.util.List;

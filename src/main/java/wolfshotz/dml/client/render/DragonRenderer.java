@@ -18,7 +18,7 @@ import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.model.DragonModel;
 import wolfshotz.dml.client.render.layer.DragonGlowLayer;
 import wolfshotz.dml.client.render.layer.DragonSaddleLayer;
-import wolfshotz.dml.entity.dragons.TameableDragonEntity;
+import wolfshotz.dml.dragons.TameableDragonEntity;
 
 public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonModel>
 {
@@ -29,7 +29,7 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     public ResourceLocation saddleTexture;
     public ResourceLocation glowTexture;
 
-    public DragonRenderer(EntityRendererManager renderManagerIn, EntityType<TameableDragonEntity> type)
+    public DragonRenderer(EntityRendererManager renderManagerIn, EntityType<? extends TameableDragonEntity> type)
     {
         super(renderManagerIn, new DragonModel(type), 2);
         addLayer(new DragonGlowLayer(this));

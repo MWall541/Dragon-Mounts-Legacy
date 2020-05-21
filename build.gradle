@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.0'
+version = '1.0.3'
 group = 'wolfshotz.dml' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'dragonmounts'
 
@@ -71,7 +71,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.2-31.1.43'
+    minecraft 'net.minecraftforge:forge:1.15.2-31.1.87'
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

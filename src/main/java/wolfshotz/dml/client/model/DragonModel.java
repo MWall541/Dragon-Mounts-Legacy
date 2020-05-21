@@ -5,8 +5,8 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.EntityType;
-import wolfshotz.dml.entity.DMLEntities;
-import wolfshotz.dml.entity.dragons.TameableDragonEntity;
+import wolfshotz.dml.DMLRegistry;
+import wolfshotz.dml.dragons.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
 
 public class DragonModel extends EntityModel<TameableDragonEntity>
@@ -52,10 +52,10 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     public float pitch;
     public float size;
     // delegates
-    private final EntityType<TameableDragonEntity> type;
+    private final EntityType<? extends TameableDragonEntity> type;
 
     // RenderType: EntityCutoutNoCull
-    public DragonModel(EntityType<TameableDragonEntity> type)
+    public DragonModel(EntityType<? extends TameableDragonEntity> type)
     {
         this.type = type;
 
@@ -135,7 +135,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         tailScaleMiddle = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, 0);
         tailScaleRight = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, -scaleRotZ);
 
-        boolean show = type == DMLEntities.FIRE_DRAGON.get();
+        boolean show = type == DMLRegistry.FIRE_DRAGON.get();
 
         tailScaleMiddle.showModel = !show;
         tailScaleLeft.showModel = show;
@@ -175,7 +175,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         ModelPart horn = tail.addChildBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength, 0, 117);
         horn.setRotationPoint(hornPosX, hornOfs, hornPosZ);
         horn.setAngles(hornRotX, hornRotY, hornRotZ);
-        horn.showModel = type == DMLEntities.WATER_DRAGON.get();
+        horn.showModel = type == DMLRegistry.WATER_DRAGON.get();
 
         if (mirror) tailHornLeft = horn;
         else tailHornRight = horn;
@@ -239,7 +239,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     private void buildLeg(boolean hind)
     {
         // thinner legs for skeletons
-        boolean thin = type == DMLEntities.GHOST_DRAGON.get();
+        boolean thin = type == DMLRegistry.GHOST_DRAGON.get();
         float baseLength = 26;
         int texY = hind ? 29 : 0;
 

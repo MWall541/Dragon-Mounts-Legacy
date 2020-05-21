@@ -7,36 +7,33 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import wolfshotz.dml.DMLRegistry;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.render.DragonRenderer;
 import wolfshotz.dml.client.render.EggRenderer;
-import wolfshotz.dml.entity.DMLEntities;
-import wolfshotz.dml.entity.dragons.TameableDragonEntity;
-import wolfshotz.dml.item.DragonSpawnEggItem;
+import wolfshotz.dml.dragons.TameableDragonEntity;
+import wolfshotz.dml.egg.DragonSpawnEggItem;
 
 @EventBusSubscriber(modid = DragonMountsLegacy.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents
 {
-    public static void clientSetup(FMLClientSetupEvent evt)
-    {
-        ClientEvents.registerRenders();
-    }
+    public static void clientSetup(FMLClientSetupEvent evt) { ClientEvents.registerRenders(); }
 
     public static void registerRenders()
     {
-        registerRenderer(DMLEntities.AETHER_DAGON.get());
-        registerRenderer(DMLEntities.ENDER_DRAGON.get());
-        registerRenderer(DMLEntities.FIRE_DRAGON.get());
-        registerRenderer(DMLEntities.GHOST_DRAGON.get());
-        registerRenderer(DMLEntities.FOREST_DRAGON.get());
-        registerRenderer(DMLEntities.ICE_DRAGON.get());
-        registerRenderer(DMLEntities.NETHER_DRAGON.get());
-        registerRenderer(DMLEntities.WATER_DRAGON.get());
+        registerRenderer(DMLRegistry.AETHER_DAGON.get());
+        registerRenderer(DMLRegistry.ENDER_DRAGON.get());
+        registerRenderer(DMLRegistry.FIRE_DRAGON.get());
+        registerRenderer(DMLRegistry.GHOST_DRAGON.get());
+        registerRenderer(DMLRegistry.FOREST_DRAGON.get());
+        registerRenderer(DMLRegistry.ICE_DRAGON.get());
+        registerRenderer(DMLRegistry.NETHER_DRAGON.get());
+        registerRenderer(DMLRegistry.WATER_DRAGON.get());
 
-        RenderingRegistry.registerEntityRenderingHandler(DMLEntities.EGG.get(), EggRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(DMLRegistry.EGG.get(), EggRenderer::new);
     }
 
-    public static void registerRenderer(EntityType<TameableDragonEntity> type)
+    public static void registerRenderer(EntityType<? extends TameableDragonEntity> type)
     {
         RenderingRegistry.registerEntityRenderingHandler(type, rm -> new DragonRenderer(rm, type));
     }
@@ -56,7 +53,7 @@ public class ClientEvents
 
     public static void itemColors(ColorHandlerEvent.Item evt)
     {
-        DragonMountsLegacy.ITEMS.getEntries()
+        DMLRegistry.ITEMS.getEntries()
                 .stream()
                 .map(RegistryObject::get)
                 .filter(DragonSpawnEggItem.class::isInstance)

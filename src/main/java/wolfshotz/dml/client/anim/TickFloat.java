@@ -10,7 +10,6 @@ import wolfshotz.dml.util.MathX;
  */
 public class TickFloat
 {
-
     private float min;
     private float max;
     private boolean clamp = false;

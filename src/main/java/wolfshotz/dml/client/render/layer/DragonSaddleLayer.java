@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import wolfshotz.dml.client.model.DragonModel;
 import wolfshotz.dml.client.render.DragonRenderer;
-import wolfshotz.dml.entity.dragons.TameableDragonEntity;
+import wolfshotz.dml.dragons.TameableDragonEntity;
 
 public class DragonSaddleLayer extends LayerRenderer<TameableDragonEntity, DragonModel>
 {

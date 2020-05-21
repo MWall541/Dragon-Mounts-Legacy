@@ -1,0 +1,7 @@
+{
+  "parent": "block/dragon_egg",
+  "textures": {
+    "all": "dragonmounts:block/forest_dragon_egg",
+    "particle": "dragonmounts:block/forest_dragon_egg"
+  }
+}

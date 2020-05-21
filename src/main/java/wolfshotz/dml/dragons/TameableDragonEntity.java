@@ -312,7 +312,7 @@ public class TameableDragonEntity extends TameableEntity
     public double getAltitude()
     {
         BlockPos.Mutable pos = new BlockPos.Mutable(getPosition());
-        while (pos.getY() > 0 && !world.getBlockState(pos).isSolid()) pos.move(0, -1, 0);
+        while (pos.getY() > 0 && !world.getBlockState(pos).getMaterial().isSolid()) pos.move(0, -1, 0);
 
         return getPosY() - pos.getY();
     }

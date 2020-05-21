@@ -271,7 +271,7 @@ public class TameableDragonEntity extends TameableEntity
 
         if (world.isRemote) return;
         PlayerEntity rider = getRidingPlayer();
-        if (rider == null) return;
+        if (rider == null || !isOwner(rider)) return;
 
         double x = getPosX();
         double y = getPosY();
@@ -282,18 +282,9 @@ public class TameableDragonEntity extends TameableEntity
         {
             Vec3d wp = rider.getLookVec();
 
-            if (rider.moveForward < 0)
-            {
-                wp = wp.rotateYaw(MathX.PI_F);
-            }
-            else if (rider.moveStrafing > 0)
-            {
-                wp = wp.rotateYaw(MathX.PI_F * 0.5f);
-            }
-            else if (rider.moveStrafing < 0)
-            {
-                wp = wp.rotateYaw(MathX.PI_F * -0.5f);
-            }
+            if (rider.moveForward < 0) wp = wp.rotateYaw(MathX.PI_F);
+            else if (rider.moveStrafing > 0) wp = wp.rotateYaw(MathX.PI_F * 0.5f);
+            else if (rider.moveStrafing < 0) wp = wp.rotateYaw(MathX.PI_F * -0.5f);
 
             x += wp.x * 10;
             y += wp.y * 10;

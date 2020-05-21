@@ -316,13 +316,11 @@ public class TameableDragonEntity extends TameableEntity
 
         return getPosY() - pos.getY();
     }
+
     /**
      * Causes this entity to lift off if it can fly.
      */
-    public void liftOff()
-    {
-        if (canFly()) jump();
-    }
+    public void liftOff() { if (canFly()) jump(); }
 
     @Override
     protected float getJumpUpwardsMotion()

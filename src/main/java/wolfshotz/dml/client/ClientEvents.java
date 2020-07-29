@@ -1,42 +1,48 @@
 package wolfshotz.dml.client;
 
 import net.minecraft.entity.EntityType;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import wolfshotz.dml.DMLRegistry;
-import wolfshotz.dml.DragonMountsLegacy;
+import wolfshotz.dml.LazySpawnEggItem;
 import wolfshotz.dml.client.render.DragonRenderer;
 import wolfshotz.dml.client.render.EggRenderer;
-import wolfshotz.dml.dragons.TameableDragonEntity;
-import wolfshotz.dml.egg.DragonSpawnEggItem;
+import wolfshotz.dml.entities.TameableDragonEntity;
 
-@EventBusSubscriber(modid = DragonMountsLegacy.MOD_ID, value = Dist.CLIENT)
 public class ClientEvents
 {
-    public static void clientSetup(FMLClientSetupEvent evt) { ClientEvents.registerRenders(); }
+    public static void init()
+    {
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        bus.addListener(ClientEvents::setup);
+        bus.addListener(ClientEvents::itemColors);
+    }
+
+    public static void setup(FMLClientSetupEvent evt)
+    {
+        ClientEvents.registerRenders();
+    }
 
     public static void registerRenders()
     {
-        registerRenderer(DMLRegistry.AETHER_DAGON.get());
-        registerRenderer(DMLRegistry.ENDER_DRAGON.get());
-        registerRenderer(DMLRegistry.FIRE_DRAGON.get());
-        registerRenderer(DMLRegistry.GHOST_DRAGON.get());
-        registerRenderer(DMLRegistry.FOREST_DRAGON.get());
-        registerRenderer(DMLRegistry.ICE_DRAGON.get());
-        registerRenderer(DMLRegistry.NETHER_DRAGON.get());
-        registerRenderer(DMLRegistry.WATER_DRAGON.get());
+        renderer(DMLRegistry.AETHER_DRAGON_ENTITY.get());
+        renderer(DMLRegistry.ENDER_DRAGON_ENTITY.get());
+        renderer(DMLRegistry.FIRE_DRAGON_ENTITY.get());
+        renderer(DMLRegistry.GHOST_DRAGON_ENTITY.get());
+        renderer(DMLRegistry.FOREST_DRAGON_ENTITY.get());
+        renderer(DMLRegistry.ICE_DRAGON_ENTITY.get());
+        renderer(DMLRegistry.NETHER_DRAGON_ENTITY.get());
+        renderer(DMLRegistry.WATER_DRAGON_ENTITY.get());
 
-        RenderingRegistry.registerEntityRenderingHandler(DMLRegistry.EGG.get(), EggRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(DMLRegistry.EGG_ENTITY.get(), EggRenderer::new);
     }
 
-    public static void registerRenderer(EntityType<? extends TameableDragonEntity> type)
-    {
-        RenderingRegistry.registerEntityRenderingHandler(type, rm -> new DragonRenderer(rm, type));
-    }
+    private static void renderer(EntityType<? extends TameableDragonEntity> type) { RenderingRegistry.registerEntityRenderingHandler(type, rm -> new DragonRenderer(rm, type)); }
 
 //    TODO: Fix when forge provides a matrix stack
 //    @SubscribeEvent
@@ -56,8 +62,8 @@ public class ClientEvents
         DMLRegistry.ITEMS.getEntries()
                 .stream()
                 .map(RegistryObject::get)
-                .filter(DragonSpawnEggItem.class::isInstance)
-                .map(DragonSpawnEggItem.class::cast)
-                .forEach(i -> evt.getItemColors().register((s, c) -> i.getColor(c), i));
+                .filter(LazySpawnEggItem.class::isInstance)
+                .map(LazySpawnEggItem.class::cast)
+                .forEach(item -> evt.getItemColors().register((s, index) -> item.getColor(index), item));
     }
 }

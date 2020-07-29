@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import wolfshotz.dml.client.model.DragonModel;
 import wolfshotz.dml.client.render.DragonRenderer;
 import wolfshotz.dml.client.render.RenderStates;
-import wolfshotz.dml.dragons.TameableDragonEntity;
+import wolfshotz.dml.entities.TameableDragonEntity;
 
 public class DragonGlowLayer extends LayerRenderer<TameableDragonEntity, DragonModel>
 {

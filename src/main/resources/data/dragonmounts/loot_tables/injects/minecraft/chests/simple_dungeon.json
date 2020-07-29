@@ -1,17 +1,16 @@
 {
-  "type": "minecraft:chest",
   "pools": [
     {
-      "rolls": 1,
+      "rolls": 1.0,
       "entries": [
         {
           "type": "minecraft:item",
+          "weight": 10,
           "name": "dragonmounts:aether_dragon_egg"
-        }
-      ],
-      "conditions": [
+        },
         {
-          "condition": "minecraft:survives_explosion"
+          "type": "minecraft:empty",
+          "weight": 90
         }
       ]
     }

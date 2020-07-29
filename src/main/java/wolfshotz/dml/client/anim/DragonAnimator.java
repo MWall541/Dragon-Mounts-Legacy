@@ -3,7 +3,7 @@ package wolfshotz.dml.client.anim;
 import wolfshotz.dml.DMLRegistry;
 import wolfshotz.dml.client.model.DragonModel;
 import wolfshotz.dml.client.model.ModelPart;
-import wolfshotz.dml.dragons.TameableDragonEntity;
+import wolfshotz.dml.entities.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
 
 public class DragonAnimator
@@ -32,41 +32,41 @@ public class DragonAnimator
     private float jaw;
     private float speed;
     // timing interp vars
-    private TickFloat animTimer = new TickFloat();
-    private TickFloat groundTimer = new TickFloat(1).setLimit(0, 1);
-    private TickFloat flutterTimer = new TickFloat().setLimit(0, 1);
-    private TickFloat walkTimer = new TickFloat().setLimit(0, 1);
-    private TickFloat sitTimer = new TickFloat().setLimit(0, 1);
-    private TickFloat jawTimer = new TickFloat().setLimit(0, 1);
-    private TickFloat speedTimer = new TickFloat(1).setLimit(0, 1);
+    private final TickFloat animTimer = new TickFloat();
+    private final TickFloat groundTimer = new TickFloat(1).setLimit(0, 1);
+    private final TickFloat flutterTimer = new TickFloat().setLimit(0, 1);
+    private final TickFloat walkTimer = new TickFloat().setLimit(0, 1);
+    private final TickFloat sitTimer = new TickFloat().setLimit(0, 1);
+    private final TickFloat jawTimer = new TickFloat().setLimit(0, 1);
+    private final TickFloat speedTimer = new TickFloat(1).setLimit(0, 1);
     // trails
     private boolean initTrails = true;
-    private CircularBuffer yTrail = new CircularBuffer(8);
-    private CircularBuffer yawTrail = new CircularBuffer(16);
-    private CircularBuffer pitchTrail = new CircularBuffer(16);
+    private final CircularBuffer yTrail = new CircularBuffer(8);
+    private final CircularBuffer yawTrail = new CircularBuffer(16);
+    private final CircularBuffer pitchTrail = new CircularBuffer(16);
     // model flags
     private boolean onGround;
     private boolean openJaw;
     private boolean wingsDown;
     // animation parameters
-    private float[] wingArm = new float[3];
-    private float[] wingForearm = new float[3];
-    private float[] wingArmFlutter = new float[3];
-    private float[] wingForearmFlutter = new float[3];
-    private float[] wingArmGlide = new float[3];
-    private float[] wingForearmGlide = new float[3];
-    private float[] wingArmGround = new float[3];
-    private float[] wingForearmGround = new float[3];
+    private final float[] wingArm = new float[3];
+    private final float[] wingForearm = new float[3];
+    private final float[] wingArmFlutter = new float[3];
+    private final float[] wingForearmFlutter = new float[3];
+    private final float[] wingArmGlide = new float[3];
+    private final float[] wingForearmGlide = new float[3];
+    private final float[] wingArmGround = new float[3];
+    private final float[] wingForearmGround = new float[3];
     // final X rotation angles for ground
-    private float[] xGround = {0, 0, 0, 0};
+    private final float[] xGround = {0, 0, 0, 0};
     // X rotation angles for ground
     // 1st dim - front, hind
     // 2nd dim - thigh, crus, foot, toe
-    private float[][] xGroundStand = {
+    private final float[][] xGroundStand = {
             {0.8f, -1.5f, 1.3f, 0},
             {-0.3f, 1.5f, -0.2f, 0},
     };
-    private float[][] xGroundSit = {
+    private final float[][] xGroundSit = {
             {0.3f, -1.8f, 1.8f, 0},
             {-0.8f, 1.8f, -0.9f, 0},
     };
@@ -74,7 +74,7 @@ public class DragonAnimator
     // 1st dim - animation keyframe
     // 2nd dim - front, hind
     // 3rd dim - thigh, crus, foot, toe
-    private float[][][] xGroundWalk = {{
+    private final float[][][] xGroundWalk = {{
             {0.4f, -1.4f, 1.3f, 0},    // move down and forward
             {0.1f, 1.2f, -0.5f, 0}     // move back
     }, {
@@ -85,19 +85,19 @@ public class DragonAnimator
             {-0.7f, 1.4f, -0.2f, 0}    // move down and forward
     }};
     // final X rotation angles for walking
-    private float[] xGroundWalk2 = {0, 0, 0, 0};
+    private final float[] xGroundWalk2 = {0, 0, 0, 0};
     // Y rotation angles for ground, thigh only
-    private float[] yGroundStand = {-0.25f, 0.25f};
-    private float[] yGroundSit = {0.1f, 0.35f};
-    private float[] yGroundWalk = {-0.1f, 0.1f};
+    private final float[] yGroundStand = {-0.25f, 0.25f};
+    private final float[] yGroundSit = {0.1f, 0.35f};
+    private final float[] yGroundWalk = {-0.1f, 0.1f};
     // final X rotation angles for air
     private float[] xAir;
     // X rotation angles for air
     // 1st dim - front, hind
     // 2nd dim - thigh, crus, foot, toe
-    private float[][] xAirAll = {{0, 0, 0, 0}, {0, 0, 0, 0}};
+    private final float[][] xAirAll = {{0, 0, 0, 0}, {0, 0, 0, 0}};
     // Y rotation angles for air, thigh only
-    private float[] yAirAll = {-0.1f, 0.1f};
+    private final float[] yAirAll = {-0.1f, 0.1f};
 
     public DragonAnimator(TameableDragonEntity dragon)
     {
@@ -467,7 +467,7 @@ public class DragonAnimator
             model.tail.rotateAngleY += MathX.toRadians(180 - yawOfs);
 
             // display horns near the tip
-            if (dragon.getType() == DMLRegistry.WATER_DRAGON.get())
+            if (dragon.getType() == DMLRegistry.WATER_DRAGON_ENTITY.get())
             {
                 boolean horn = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
                 model.tailHornLeft.showModel = model.tailHornRight.showModel = horn;

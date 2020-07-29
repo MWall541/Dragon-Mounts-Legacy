@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.ForgeHooksClient;
-import wolfshotz.dml.egg.DragonEggEntity;
+import wolfshotz.dml.entities.DragonEggEntity;
 
 import java.util.Random;
 
@@ -32,7 +32,7 @@ public class EggRenderer extends EntityRenderer<DragonEggEntity>
     {
         // prepare egg rendering
         BlockPos blockpos = entity.getPosition();
-        BlockState state = entity.egg.getEggBlock().getDefaultState();
+        BlockState state = entity.egg.getDefaultState();
 
         if (state.getRenderType() == BlockRenderType.MODEL)
         {

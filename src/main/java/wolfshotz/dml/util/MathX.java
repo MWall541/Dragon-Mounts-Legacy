@@ -1,13 +1,5 @@
 package wolfshotz.dml.util;
 
-import com.google.common.collect.Lists;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-
 /**
  * Math helper class.
  *
@@ -216,36 +208,5 @@ public class MathX
 
             result[i] = ((c3 * x + c2) * x + c1) * x + c0;
         }
-    }
-
-    /**
-     * This is expensive... keep the area rather small
-     */
-    public static boolean findBlockstateInArea(World world, AxisAlignedBB area, Block... blocks)
-    {
-        int i = MathHelper.floor(area.minX);
-        int j = MathHelper.ceil(area.maxX);
-        int k = MathHelper.floor(area.minY);
-        int l = MathHelper.ceil(area.maxY);
-        int i1 = MathHelper.floor(area.minZ);
-        int j1 = MathHelper.ceil(area.maxZ);
-        if (world.isAreaLoaded(i, k, i1, j, l, j1))
-        {
-            try (BlockPos.PooledMutable mutable = BlockPos.PooledMutable.retain())
-            {
-                for (int k1 = i; k1 < j; ++k1)
-                {
-                    for (int l1 = k; l1 < l; ++l1)
-                    {
-                        for (int i2 = i1; i2 < j1; ++i2)
-                        {
-                            BlockState blockstate = world.getBlockState(mutable.setPos(k1, l1, i2));
-                            return Lists.newArrayList(blocks).contains(blockstate.getBlock());
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 }

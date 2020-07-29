@@ -24,7 +24,7 @@ import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.model.DragonModel;
 import wolfshotz.dml.client.render.layer.DragonGlowLayer;
 import wolfshotz.dml.client.render.layer.DragonSaddleLayer;
-import wolfshotz.dml.dragons.TameableDragonEntity;
+import wolfshotz.dml.entities.TameableDragonEntity;
 
 public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonModel>
 {
@@ -118,8 +118,10 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     @Override
     protected void preRenderCallback(TameableDragonEntity dragon, MatrixStack ms, float partialTickTime)
     {
-        float scale = dragon.getScale() * 0.8f;
-        ms.scale(scale, scale, scale);
+        float scale = dragon.getScale();
+        float matrixScale = scale * 0.8f;
+        ms.scale(matrixScale, matrixScale, matrixScale);
+        shadowSize = scale * 2f;
     }
 
     @Override

@@ -81,10 +81,7 @@ public class ModelPartProxy
         hidden = !part.showModel;
         showModel = part.showModel;
 
-        if (childs != null)
-        {
-            for (ModelPartProxy child : childs) child.update();
-        }
+        if (childs != null) for (ModelPartProxy child : childs) child.update();
     }
 
     /**

@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.EntityType;
 import wolfshotz.dml.DMLRegistry;
-import wolfshotz.dml.dragons.TameableDragonEntity;
+import wolfshotz.dml.entities.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
 
 public class DragonModel extends EntityModel<TameableDragonEntity>
@@ -135,7 +135,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         tailScaleMiddle = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, 0);
         tailScaleRight = tail.addChildBox(-1, -8, -3, 2, 4, 6, 0, 0).setAngles(0, 0, -scaleRotZ);
 
-        boolean show = type == DMLRegistry.FIRE_DRAGON.get();
+        boolean show = type == DMLRegistry.FIRE_DRAGON_ENTITY.get();
 
         tailScaleMiddle.showModel = !show;
         tailScaleLeft.showModel = show;
@@ -175,7 +175,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         ModelPart horn = tail.addChildBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength, 0, 117);
         horn.setRotationPoint(hornPosX, hornOfs, hornPosZ);
         horn.setAngles(hornRotX, hornRotY, hornRotZ);
-        horn.showModel = type == DMLRegistry.WATER_DRAGON.get();
+        horn.showModel = type == DMLRegistry.WATER_DRAGON_ENTITY.get();
 
         if (mirror) tailHornLeft = horn;
         else tailHornRight = horn;
@@ -239,7 +239,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     private void buildLeg(boolean hind)
     {
         // thinner legs for skeletons
-        boolean thin = type == DMLRegistry.GHOST_DRAGON.get();
+        boolean thin = type == DMLRegistry.GHOST_DRAGON_ENTITY.get();
         float baseLength = 26;
         int texY = hind ? 29 : 0;
 

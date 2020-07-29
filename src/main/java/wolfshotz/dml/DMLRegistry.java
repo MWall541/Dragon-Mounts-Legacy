@@ -12,6 +12,8 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import wolfshotz.dml.entities.*;
+import wolfshotz.dml.misc.DragonEggBlock;
+import wolfshotz.dml.misc.LazySpawnEggItem;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

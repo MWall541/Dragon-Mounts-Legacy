@@ -1,4 +1,4 @@
-package wolfshotz.dml;
+package wolfshotz.dml.misc;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.commons.lang3.tuple.Pair;
+import wolfshotz.dml.DMLRegistry;
 import wolfshotz.dml.entities.DragonEggEntity;
 import wolfshotz.dml.entities.TameableDragonEntity;
 
@@ -104,6 +105,7 @@ public class DragonEggBlock extends net.minecraft.block.DragonEggBlock
     // todo clean all this up
     public static DragonEggBlock lookUp(EntityType<?> dragonType)
     {
+        // lazily instatiate, for registry reasons
         if (LOOK_UP == null) LOOK_UP = ImmutableMap.<EntityType<?>, Block>builder()
                 .put(DMLRegistry.AETHER_DRAGON_ENTITY.get(), DMLRegistry.AETHER_EGG_BLOCK.get())
                 .put(DMLRegistry.ENDER_DRAGON_ENTITY.get(), DMLRegistry.ENDER_EGG_BLOCK.get())

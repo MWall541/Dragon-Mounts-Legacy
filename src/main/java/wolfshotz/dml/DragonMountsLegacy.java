@@ -13,16 +13,24 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import wolfshotz.dml.client.BreathKeybind;
 import wolfshotz.dml.client.ClientEvents;
 import wolfshotz.dml.cmd.DragonSetAgeCommand;
 import wolfshotz.dml.data.DataHandler;
+import wolfshotz.dml.misc.DragonEggBlock;
+
+import java.util.Optional;
 
 @Mod(DragonMountsLegacy.MOD_ID)
 public class DragonMountsLegacy
 {
     public static final String MOD_ID = "dragonmounts";
+    public static final SimpleChannel NETWORK = buildChannel();
     public static final Logger LOG = LogManager.getLogger(MOD_ID);
 
     public DragonMountsLegacy()
@@ -57,4 +65,18 @@ public class DragonMountsLegacy
     }
 
     public static ResourceLocation rl(String path) { return new ResourceLocation(MOD_ID, path); }
+
+    private static SimpleChannel buildChannel()
+    {
+        final String PROTOCOL_VER = "1.0";
+        SimpleChannel channel = NetworkRegistry.ChannelBuilder
+                .named(rl("network"))
+                .clientAcceptedVersions(PROTOCOL_VER::equals)
+                .serverAcceptedVersions(PROTOCOL_VER::equals)
+                .networkProtocolVersion(() -> PROTOCOL_VER)
+                .simpleChannel();
+
+        channel.registerMessage(1, BreathKeybind.Packet.class, BreathKeybind.Packet::encode, BreathKeybind.Packet::new, BreathKeybind.Packet::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        return channel;
+    }
 }

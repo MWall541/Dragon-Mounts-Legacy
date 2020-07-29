@@ -1,4 +1,4 @@
-package wolfshotz.dml;
+package wolfshotz.dml.misc;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

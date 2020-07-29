@@ -20,10 +20,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import wolfshotz.dml.DMLRegistry;
-import wolfshotz.dml.DragonEggBlock;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.anim.TickFloat;
 import wolfshotz.dml.entities.ai.LifeStageController;
+import wolfshotz.dml.misc.DragonEggBlock;
 
 import java.util.Comparator;
 

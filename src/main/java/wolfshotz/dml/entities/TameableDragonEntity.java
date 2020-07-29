@@ -34,13 +34,13 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistries;
 import wolfshotz.dml.DMLRegistry;
-import wolfshotz.dml.DragonEggBlock;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.anim.DragonAnimator;
 import wolfshotz.dml.entities.ai.DragonBodyController;
 import wolfshotz.dml.entities.ai.DragonMoveController;
 import wolfshotz.dml.entities.ai.LifeStageController;
 import wolfshotz.dml.entities.ai.goals.*;
+import wolfshotz.dml.misc.DragonEggBlock;
 import wolfshotz.dml.util.MathX;
 
 import javax.annotation.Nullable;
@@ -75,6 +75,7 @@ public class TameableDragonEntity extends TameableEntity
     // data value IDs
     private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> DATA_SADDLED = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> DATA_BREATHING = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> DATA_TICKS_ALIVE = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.VARINT);
 
     // data NBT IDs
@@ -82,12 +83,11 @@ public class TameableDragonEntity extends TameableEntity
     private static final String NBT_TICKS_ALIVE = "TicksAlive";
     private static final String NBT_REPRO_COUNT = "ReproCount";
 
-
     // server/client delegates
     public LifeStageController lifeStageController;
+    public DragonAnimator animator;
     public final List<DamageSource> damageImmunities = Lists.newArrayList();
     public int reproCount;
-    public DragonAnimator animator;
 
     public TameableDragonEntity(EntityType<? extends TameableDragonEntity> type, World world)
     {
@@ -154,6 +154,7 @@ public class TameableDragonEntity extends TameableEntity
 
         dataManager.register(DATA_FLYING, false);
         dataManager.register(DATA_SADDLED, false);
+        dataManager.register(DATA_BREATHING, false);
         dataManager.register(DATA_TICKS_ALIVE, LifeStageController.EnumLifeStage.ADULT.startTicks()); // default to adult stage
     }
 
@@ -213,6 +214,10 @@ public class TameableDragonEntity extends TameableEntity
      */
     public void setFlying(boolean flying) { dataManager.set(DATA_FLYING, flying); }
 
+    public boolean isBreathing() { return dataManager.get(DATA_BREATHING); }
+
+    public void setBreathing(boolean breathing) { dataManager.set(DATA_BREATHING, breathing); }
+
     public LifeStageController getLifeStageController()
     {
         if (lifeStageController == null) lifeStageController = new LifeStageController(this);
@@ -241,11 +246,16 @@ public class TameableDragonEntity extends TameableEntity
                 if (flying) navigator = new FlyingPathNavigator(this, world);
                 else navigator = new GroundPathNavigator(this, world);
             }
+
+            // update breath state
+            tickBreath();
         }
-        else animator.tick();
+        else animator.tick(); // update animations on the client
 
         super.livingTick();
     }
+
+    private void tickBreath() {}
 
     @Override
     public void travel(Vec3d vec3d)

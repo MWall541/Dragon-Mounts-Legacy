@@ -7,7 +7,7 @@ import net.minecraftforge.client.model.generators.*;
 import net.minecraftforge.fml.RegistryObject;
 import wolfshotz.dml.DMLRegistry;
 import wolfshotz.dml.DragonMountsLegacy;
-import wolfshotz.dml.LazySpawnEggItem;
+import wolfshotz.dml.misc.LazySpawnEggItem;
 
 class Models
 {

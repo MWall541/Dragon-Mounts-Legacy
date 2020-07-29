@@ -232,13 +232,15 @@ public class DragonAnimator
         // update walking transition
         boolean walkFlag = moveSpeed > 0.1 && !dragon.isSitting();
         float walkVal = 0.1f;
-        walkTimer.add(walkFlag ? walkVal : -walkVal);
+        walkTimer.add(walkFlag? walkVal : -walkVal);
 
         // update sitting transisiton
         float sitVal = sitTimer.get();
-        sitVal += dragon.isSitting() ? 0.1f : -0.1f;
+        sitVal += dragon.isSitting()? 0.1f : -0.1f;
         sitVal *= 0.95f;
         sitTimer.set(sitVal);
+
+        jawTimer.add(dragon.isBreathing()? 0.2f : -0.2f);
 
         // update jaw opening transition
 //        int ticksSinceLastAttack = dragon.getLastAttackedEntityTime();

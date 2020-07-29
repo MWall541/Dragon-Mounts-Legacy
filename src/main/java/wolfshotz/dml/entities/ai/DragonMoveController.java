@@ -6,6 +6,7 @@ import net.minecraft.entity.ai.controller.MovementController;
 import net.minecraft.util.math.Vec3d;
 import wolfshotz.dml.entities.TameableDragonEntity;
 
+//todo ditch this in favor of common-sided movement. Smoother on client
 public class DragonMoveController extends MovementController
 {
     private final float YAW_SPEED = 5;

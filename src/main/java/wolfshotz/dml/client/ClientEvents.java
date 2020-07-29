@@ -4,14 +4,15 @@ import net.minecraft.entity.EntityType;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import wolfshotz.dml.DMLRegistry;
-import wolfshotz.dml.LazySpawnEggItem;
 import wolfshotz.dml.client.render.DragonRenderer;
 import wolfshotz.dml.client.render.EggRenderer;
 import wolfshotz.dml.entities.TameableDragonEntity;
+import wolfshotz.dml.misc.LazySpawnEggItem;
 
 public class ClientEvents
 {
@@ -26,6 +27,7 @@ public class ClientEvents
     public static void setup(FMLClientSetupEvent evt)
     {
         ClientEvents.registerRenders();
+        ClientRegistry.registerKeyBinding(new BreathKeybind());
     }
 
     public static void registerRenders()

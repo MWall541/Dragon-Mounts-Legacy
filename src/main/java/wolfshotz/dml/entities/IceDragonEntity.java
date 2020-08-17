@@ -46,7 +46,7 @@ public class IceDragonEntity extends TameableDragonEntity
 
                 BlockState blockstate2 = world.getBlockState(blockpos);
                 boolean isFull = blockstate2.getBlock() == Blocks.WATER && blockstate2.get(FlowingFluidBlock.LEVEL) == 0;
-                if (isFull && world.func_226663_a_(blockstate, blockpos, ISelectionContext.dummy()))
+                if (isFull && world.placedBlockWouldCollide(blockstate, blockpos, ISelectionContext.dummy()))
                 {
                     world.setBlockState(blockpos, blockstate);
                     world.getPendingBlockTicks().scheduleTick(blockpos, Blocks.FROSTED_ICE, MathHelper.nextInt(getRNG(), 60, 120));

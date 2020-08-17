@@ -60,8 +60,27 @@ public class DragonMountsLegacy
     public void injectLootTables(LootTableLoadEvent evt)
     {
         ResourceLocation name = evt.getName();
-        ResourceLocation path = rl(String.format("injects/%s/%s", name.getNamespace(), name.getPath()));
-        evt.getTable().addPool(LootPool.builder().name("dragonmounts_injects").addEntry(TableLootEntry.builder(path).weight(1)).build());
+        String path = name.getPath();
+        if (!path.contains("chests/")) return;
+
+        switch (path.replace("chests/", ""))
+        {
+            case "buried_treasure":
+            case "desert_pyramid":
+            case "end_city_treasure":
+            case "igloo_chest":
+            case "jungle_temple":
+            case "nether_bridge":
+            case "simple_dungeon":
+            case "underwater_ruin_big":
+            case "woodland_mansion":
+                break;
+            default:
+                return;
+        }
+
+        ResourceLocation inject = rl(String.format("injects/%s/%s", name.getNamespace(), name.getPath()));
+        evt.getTable().addPool(LootPool.builder().name("dragonmounts_injects").addEntry(TableLootEntry.builder(inject).weight(1)).build());
     }
 
     public static ResourceLocation rl(String path) { return new ResourceLocation(MOD_ID, path); }

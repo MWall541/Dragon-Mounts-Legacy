@@ -5,12 +5,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 3,
+          "weight": 5,
           "name": "dragonmounts:ender_dragon_egg"
         },
         {
           "type": "minecraft:empty",
-          "weight": 97
+          "weight": 95
         }
       ]
     }

@@ -5,12 +5,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 10,
+          "weight": 40,
           "name": "dragonmounts:aether_dragon_egg"
         },
         {
           "type": "minecraft:empty",
-          "weight": 90
+          "weight": 60
         }
       ]
     }

@@ -5,12 +5,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 10,
+          "weight": 20,
           "name": "dragonmounts:ice_dragon_egg"
         },
         {
           "type": "minecraft:empty",
-          "weight": 90
+          "weight": 80
         }
       ]
     }

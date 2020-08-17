@@ -5,12 +5,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 8,
+          "weight": 12,
           "name": "dragonmounts:water_dragon_egg"
         },
         {
           "type": "minecraft:empty",
-          "weight": 92
+          "weight": 88
         }
       ]
     }

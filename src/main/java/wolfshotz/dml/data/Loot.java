@@ -70,13 +70,13 @@ public class Loot extends LootTableProvider
     {
         // weights add up to 100... I think....
         inject(LootTables.CHESTS_END_CITY_TREASURE, LootPool.builder()
-                .addEntry(ItemLootEntry.builder(DMLRegistry.ENDER_EGG_BLOCK.get()).weight(3))
-                .addEntry(EmptyLootEntry.func_216167_a().weight(97))
+                .addEntry(ItemLootEntry.builder(DMLRegistry.ENDER_EGG_BLOCK.get()).weight(5))
+                .addEntry(EmptyLootEntry.func_216167_a().weight(95))
                 .build());
 
         inject(LootTables.CHESTS_WOODLAND_MANSION, LootPool.builder()
-                .addEntry(ItemLootEntry.builder(DMLRegistry.GHOST_EGG_BLOCK.get()).weight(10))
-                .addEntry(EmptyLootEntry.func_216167_a().weight(90))
+                .addEntry(ItemLootEntry.builder(DMLRegistry.GHOST_EGG_BLOCK.get()).weight(13))
+                .addEntry(EmptyLootEntry.func_216167_a().weight(87))
                 .build());
 
         inject(LootTables.CHESTS_JUNGLE_TEMPLE, LootPool.builder()
@@ -85,23 +85,23 @@ public class Loot extends LootTableProvider
                 .build());
 
         inject(LootTables.CHESTS_DESERT_PYRAMID, LootPool.builder()
-                .addEntry(ItemLootEntry.builder(DMLRegistry.FIRE_EGG_BLOCK.get()).weight(10))
-                .addEntry(EmptyLootEntry.func_216167_a().weight(90))
+                .addEntry(ItemLootEntry.builder(DMLRegistry.FIRE_EGG_BLOCK.get()).weight(13))
+                .addEntry(EmptyLootEntry.func_216167_a().weight(87))
                 .build());
 
         inject(LootTables.CHESTS_IGLOO_CHEST, LootPool.builder()
-                .addEntry(ItemLootEntry.builder(DMLRegistry.ICE_EGG_BLOCK.get()).weight(10))
-                .addEntry(EmptyLootEntry.func_216167_a().weight(90))
+                .addEntry(ItemLootEntry.builder(DMLRegistry.ICE_EGG_BLOCK.get()).weight(20))
+                .addEntry(EmptyLootEntry.func_216167_a().weight(80))
                 .build());
 
         inject(LootTables.CHESTS_NETHER_BRIDGE, LootPool.builder()
-                .addEntry(ItemLootEntry.builder(DMLRegistry.NETHER_EGG_BLOCK.get()).weight(3))
-                .addEntry(EmptyLootEntry.func_216167_a().weight(97))
+                .addEntry(ItemLootEntry.builder(DMLRegistry.NETHER_EGG_BLOCK.get()).weight(8))
+                .addEntry(EmptyLootEntry.func_216167_a().weight(92))
                 .build());
 
         inject(LootTables.CHESTS_UNDERWATER_RUIN_BIG, LootPool.builder()
-                .addEntry(ItemLootEntry.builder(DMLRegistry.WATER_EGG_BLOCK.get()).weight(8))
-                .addEntry(EmptyLootEntry.func_216167_a().weight(92))
+                .addEntry(ItemLootEntry.builder(DMLRegistry.WATER_EGG_BLOCK.get()).weight(12))
+                .addEntry(EmptyLootEntry.func_216167_a().weight(88))
                 .build());
 
         inject(LootTables.CHESTS_BURIED_TREASURE, LootPool.builder()
@@ -110,8 +110,8 @@ public class Loot extends LootTableProvider
                 .build());
 
         inject(LootTables.CHESTS_SIMPLE_DUNGEON, LootPool.builder()
-                .addEntry(ItemLootEntry.builder(DMLRegistry.AETHER_EGG_BLOCK.get()).weight(10))
-                .addEntry(EmptyLootEntry.func_216167_a().weight(90))
+                .addEntry(ItemLootEntry.builder(DMLRegistry.AETHER_EGG_BLOCK.get()).weight(40))
+                .addEntry(EmptyLootEntry.func_216167_a().weight(60))
                 .build());
     }
 

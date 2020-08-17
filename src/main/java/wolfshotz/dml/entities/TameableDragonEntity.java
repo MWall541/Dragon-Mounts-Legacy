@@ -346,6 +346,8 @@ public abstract class TameableDragonEntity extends TameableEntity
     {
         ItemStack stack = player.getHeldItem(hand);
 
+        if (stack.interactWithEntity(player, this, hand)) return true;
+
         // heal
         if (getHealthRelative() < 1 && isFoodItem(stack))
         {

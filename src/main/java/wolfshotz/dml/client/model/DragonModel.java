@@ -361,9 +361,9 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         renderHead(ms, buffer, packedLight, packedOverlay, r, g, b, a);
         for (ModelPartProxy proxy : neckProxy) proxy.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
         body.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
+        for (ModelPartProxy proxy : tailProxy) proxy.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
         renderWings(ms, buffer, packedLight, packedOverlay, r, g, b, a);
         renderLegs(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-        for (ModelPartProxy proxy : tailProxy) proxy.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
 
         ms.pop();
     }

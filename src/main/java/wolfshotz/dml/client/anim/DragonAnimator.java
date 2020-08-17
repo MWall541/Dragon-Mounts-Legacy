@@ -240,7 +240,7 @@ public class DragonAnimator
         sitVal *= 0.95f;
         sitTimer.set(sitVal);
 
-        jawTimer.add(dragon.isBreathing()? 0.2f : -0.2f);
+//        jawTimer.add(dragon.isBreathing()? 0.2f : -0.2f);
 
         // update jaw opening transition
 //        int ticksSinceLastAttack = dragon.getLastAttackedEntityTime();

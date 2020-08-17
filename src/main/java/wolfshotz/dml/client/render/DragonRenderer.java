@@ -162,22 +162,22 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         double d4 = Math.sin(d1);
         if (leashHolder instanceof HangingEntity)
         {
-            d2 = 0;
-            d3 = 0;
-            d4 = -1d;
+            d2 = 0.0D;
+            d3 = 0.0D;
+            d4 = -1.0D;
         }
 
         double d5 = Math.cos(d1);
         double d6 = MathHelper.lerp(partialTicks, leashHolder.prevPosX, leashHolder.getPosX()) - d2 * 0.7D - d3 * 0.5D * d5;
         double d7 = MathHelper.lerp(partialTicks, leashHolder.prevPosY + leashHolder.getEyeHeight() * 0.7D, leashHolder.getPosY() + leashHolder.getEyeHeight() * 0.7D) - d4 * 0.5D - 0.25D;
         double d8 = MathHelper.lerp(partialTicks, leashHolder.prevPosZ, leashHolder.getPosZ()) - d3 * 0.7D + d2 * 0.5D * d5;
-        double d9 = (double) (MathHelper.lerp(partialTicks, entity.renderYawOffset, entity.prevRenderYawOffset) * ((float) Math.PI / 180F)) + (Math.PI / 2D);
-        d2 = Math.cos(d9) * (double) entity.getWidth() * 0.4d;
-        d3 = Math.sin(d9) * (double) entity.getWidth() * 0.4d;
+        double d9 = (MathHelper.lerp(partialTicks, entity.renderYawOffset, entity.prevRenderYawOffset) * ((float) Math.PI / 180F)) + (Math.PI / 2D);
+        d2 = Math.cos(d9) * entity.getWidth() * 0.4D;
+        d3 = Math.sin(d9) * entity.getWidth() * 0.4D;
         double d10 = MathHelper.lerp(partialTicks, entity.prevPosX, entity.getPosX()) + d2;
         double d11 = MathHelper.lerp(partialTicks, entity.prevPosY, entity.getPosY());
         double d12 = MathHelper.lerp(partialTicks, entity.prevPosZ, entity.getPosZ()) + d3;
-        matrixStackIn.translate(d2, -(1.6d - entity.getHeight()) * 0.5d, d3);
+        matrixStackIn.translate(d2, -(1.6D - entity.getHeight()) * 0.5D, d3);
         float f = (float) (d6 - d10);
         float f1 = (float) (d7 - d11);
         float f2 = (float) (d8 - d12);

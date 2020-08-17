@@ -154,7 +154,7 @@ public abstract class TameableDragonEntity extends TameableEntity
 
         dataManager.register(DATA_FLYING, false);
         dataManager.register(DATA_SADDLED, false);
-        dataManager.register(DATA_BREATHING, false);
+//        dataManager.register(DATA_BREATHING, false);
         dataManager.register(DATA_TICKS_ALIVE, LifeStageController.EnumLifeStage.ADULT.startTicks()); // default to adult stage
     }
 
@@ -362,7 +362,8 @@ public abstract class TameableDragonEntity extends TameableEntity
         {
             stack.shrink(1);
             setSaddled(true);
-            playSound(SoundEvents.ENTITY_HORSE_SADDLE, 1, 1);
+            world.playSound(null, getPosX(), getPosY(), getPosZ(), SoundEvents.ENTITY_HORSE_SADDLE, getSoundCategory(), 1, 1);
+
             return true;
         }
 

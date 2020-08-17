@@ -59,7 +59,7 @@ import static net.minecraft.entity.SharedMonsterAttributes.*;
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  * @author WolfShotz
  */
-public class TameableDragonEntity extends TameableEntity
+public abstract class TameableDragonEntity extends TameableEntity
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3;
@@ -247,15 +247,17 @@ public class TameableDragonEntity extends TameableEntity
                 else navigator = new GroundPathNavigator(this, world);
             }
 
-            // update breath state
-            tickBreath();
+//            // update breath state
+//            if (isBreathing())
+//            {
+//                if (getControllingPassenger() == null) setBreathing(false);
+//                else tickBreathWeapon();
+//            }
         }
         else animator.tick(); // update animations on the client
 
         super.livingTick();
     }
-
-    private void tickBreath() {}
 
     @Override
     public void travel(Vec3d vec3d)
@@ -383,7 +385,7 @@ public class TameableDragonEntity extends TameableEntity
         }
 
         // ride on
-        if (isServer() && isTamed() && isSaddled() && !isChild() && (!isBreedingItem(stack) && canReproduce()))
+        if (isServer() && isTamed() && isSaddled() && !isChild())
         {
             setRidingPlayer(player);
             sitGoal.setSitting(false);
@@ -614,15 +616,6 @@ public class TameableDragonEntity extends TameableEntity
         if (isServer()) sitGoal.setSitting(false);
 
         return super.attackEntityFrom(src, par2);
-    }
-
-    /**
-     * Return whether this entity should be rendered as on fire.
-     */
-    @Override
-    public boolean canRenderOnFire()
-    {
-        return super.canRenderOnFire() && !isImmuneToFire() && !isInvulnerableTo(DamageSource.IN_FIRE);
     }
 
     /**
@@ -879,5 +872,10 @@ public class TameableDragonEntity extends TameableEntity
     public final boolean isServer()
     {
         return !world.isRemote;
+    }
+
+    public Vec3d getMouthPos()
+    {
+        return null;
     }
 }

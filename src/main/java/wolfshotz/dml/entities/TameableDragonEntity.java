@@ -388,12 +388,15 @@ public abstract class TameableDragonEntity extends TameableEntity
         }
 
         // ride on
-        if (isServer() && isTamed() && isSaddled() && !isChild())
+        if (isTamed() && isSaddled() && !isChild())
         {
-            setRidingPlayer(player);
-            sitGoal.setSitting(false);
-            navigator.clearPath();
-            setAttackTarget(null);
+            if (isServer())
+            {
+                setRidingPlayer(player);
+                sitGoal.setSitting(false);
+                navigator.clearPath();
+                setAttackTarget(null);
+            }
             return true;
         }
 

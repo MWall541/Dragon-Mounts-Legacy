@@ -26,12 +26,11 @@ public class FireDragonEntity extends TameableDragonEntity
 
     public static int getHabitatPoints(DragonEggEntity egg) // todo: make a base method and have it take in a tag for basic habitat points
     {
-        int points;
+        int points = 0;
         BlockPos basePos = egg.getPosition();
         BetterBlockMatcher matcher = new BetterBlockMatcher(Blocks.FIRE, Blocks.LAVA, Blocks.MAGMA_BLOCK, Blocks.CAMPFIRE);
-        points = +(int) BlockPos.getAllInBox(basePos.add(1, 1, 1), basePos.add(-1, -1, -1))
-                .filter(pos -> matcher.test(egg.world.getBlockState(pos).getBlock()))
-                .count();
+        for (BlockPos pos : BlockPos.getAllInBoxMutable(basePos.add(1, 1, 1), basePos.add(-1, -1, -1)))
+            if (matcher.test(egg.world.getBlockState(pos))) ++points;
         if (egg.isInLava()) ++points;
         return points;
     }

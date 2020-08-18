@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.controller.BodyController;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -21,13 +22,10 @@ import net.minecraft.network.play.server.SAnimateHandPacket;
 import net.minecraft.pathfinding.FlyingPathNavigator;
 import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -48,7 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static net.minecraft.entity.SharedMonsterAttributes.*;
+import static net.minecraft.entity.ai.attributes.Attributes.*;
 
 /**
  * Here be dragons.
@@ -66,12 +64,13 @@ public abstract class TameableDragonEntity extends TameableEntity
     public static final double BASE_SPEED_FLYING = 0.6;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
-    public static final float BASE_WIDTH = 2.75f; // adult sizes
-    public static final float BASE_HEIGHT = 2.75f;
     public static final double BASE_FOLLOW_RANGE = 16;
     public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
     public static final double ALTITUDE_FLYING_THRESHOLD = 2;
     public static final int REPRO_LIMIT = 2;
+    public static final int BASE_KB_RESISTANCE = 1;
+    public static final float BASE_WIDTH = 2.75f; // adult sizes
+    public static final float BASE_HEIGHT = 2.75f;
     // data value IDs
     private static final DataParameter<Boolean> DATA_FLYING = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> DATA_SADDLED = EntityDataManager.createKey(TameableDragonEntity.class, DataSerializers.BOOLEAN);
@@ -106,24 +105,23 @@ public abstract class TameableDragonEntity extends TameableEntity
         return new DragonBodyController(this);
     }
 
-    @Override
-    protected void registerAttributes()
+    public static AttributeModifierMap.MutableAttribute getAttributes()
     {
-        super.registerAttributes();
-
-        getAttribute(MOVEMENT_SPEED).setBaseValue(BASE_SPEED_GROUND);
-        getAttribute(MAX_HEALTH).setBaseValue(BASE_HEALTH);
-        getAttribute(FOLLOW_RANGE).setBaseValue(BASE_FOLLOW_RANGE);
-        getAttribute(KNOCKBACK_RESISTANCE).setBaseValue(10);
-        getAttributes().registerAttribute(ATTACK_DAMAGE).setBaseValue(BASE_DAMAGE);
-        getAttributes().registerAttribute(FLYING_SPEED).setBaseValue(BASE_SPEED_FLYING);
+        return MobEntity.func_233666_p_()
+                .createMutableAttribute(MOVEMENT_SPEED, BASE_SPEED_GROUND)
+                .createMutableAttribute(MAX_HEALTH, BASE_HEALTH)
+                .createMutableAttribute(ATTACK_DAMAGE, BASE_FOLLOW_RANGE)
+                .createMutableAttribute(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
+                .createMutableAttribute(ATTACK_DAMAGE, BASE_DAMAGE)
+                .createMutableAttribute(FLYING_SPEED, BASE_SPEED_FLYING);
     }
+
 
     @Override
     protected void registerGoals() // TODO: Much Smarter AI and features
     {
         goalSelector.addGoal(1, new DragonLandGoal(this));
-        goalSelector.addGoal(2, sitGoal = new SitGoal(this));
+        goalSelector.addGoal(2, new SitGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
         goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
         goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 10f, 20f, 250f));
@@ -131,15 +129,6 @@ public abstract class TameableDragonEntity extends TameableEntity
         goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1));
         goalSelector.addGoal(7, new DragonLookAtGoal(this));
         goalSelector.addGoal(8, new LookRandomlyGoal(this));
-
-        if (getType() != DMLRegistry.WATER_DRAGON_ENTITY.get())
-        {
-            goalSelector.addGoal(0, new SwimGoal(this)
-            {
-                @Override
-                public boolean shouldExecute() { return getSubmergedHeight() > getScale() || isInLava(); }
-            });
-        }
 
         targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
@@ -260,7 +249,7 @@ public abstract class TameableDragonEntity extends TameableEntity
     }
 
     @Override
-    public void travel(Vec3d vec3d)
+    public void travel(Vector3d vec3d)
     {
         if (!isFlying()) super.travel(vec3d);
 
@@ -275,7 +264,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         // control direction with movement keys
         if (rider.moveStrafing != 0 || rider.moveForward != 0)
         {
-            Vec3d wp = rider.getLookVec();
+            Vector3d wp = rider.getLookVec();
 
             if (rider.moveForward < 0) wp = wp.rotateYaw(MathX.PI_F);
             else if (rider.moveStrafing > 0) wp = wp.rotateYaw(MathX.PI_F * 0.5f);
@@ -297,7 +286,7 @@ public abstract class TameableDragonEntity extends TameableEntity
      */
     public double getAltitude()
     {
-        BlockPos.Mutable pos = new BlockPos.Mutable(getPosition());
+        BlockPos.Mutable pos = getPosition().toMutable();
         while (pos.getY() > 0 && !world.getBlockState(pos).getMaterial().isSolid()) pos.move(0, -1, 0);
 
         return getPosY() - pos.getY();
@@ -332,7 +321,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         removePassengers();
 
         // freeze at place
-        setMotion(Vec3d.ZERO);
+        setMotion(Vector3d.ZERO);
         rotationYaw = prevRotationYaw;
         rotationYawHead = prevRotationYawHead;
 
@@ -341,12 +330,25 @@ public abstract class TameableDragonEntity extends TameableEntity
         deathTime++;
     }
 
+    // Ok so some basic notes here:
+    // if the action result is a SUCCESS, the player swings its arm.
+    // however, itll send that arm swing twice if we aren't careful.
+    // essentially, returning SUCCESS on server will send a swing arm packet to notify the client to animate the arm swing
+    // client tho, it will just animate it.
+    // so if we aren't careful, both will happen. So its important to do the following for common execution:
+    // ActionResultType.func_233537_a_(World::isRemote)
+    // essentially, if the provided boolean is true, it will return SUCCESS, else CONSUME.
+    // so since the world is client, it will be SUCCESS on client and CONSUME on server.
+    // That way, the server never sends the arm swing packet.
     @Override
-    public boolean processInteract(PlayerEntity player, Hand hand)
+    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand)
     {
         ItemStack stack = player.getHeldItem(hand);
 
-        if (stack.interactWithEntity(player, this, hand)) return true;
+        ActionResultType stackResult = stack.interactWithEntity(player, this, hand);
+        if (stackResult.isSuccessOrConsume()) return stackResult;
+
+        final ActionResultType SUCCESS = ActionResultType.func_233537_a_(isClient());
 
         // heal
         if (getHealthRelative() < 1 && isFoodItem(stack))
@@ -354,7 +356,7 @@ public abstract class TameableDragonEntity extends TameableEntity
             heal(stack.getItem().getFood().getHealing());
             playSound(getEatSound(stack), 0.7f, 1);
             stack.shrink(1);
-            return true;
+            return SUCCESS;
         }
 
         // saddle up!
@@ -363,8 +365,7 @@ public abstract class TameableDragonEntity extends TameableEntity
             stack.shrink(1);
             setSaddled(true);
             world.playSound(null, getPosX(), getPosY(), getPosZ(), SoundEvents.ENTITY_HORSE_SADDLE, getSoundCategory(), 1, 1);
-
-            return true;
+            return SUCCESS;
         }
 
         // tame
@@ -372,7 +373,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         {
             stack.shrink(1);
             if (isServer()) tamedFor(player, getRNG().nextInt(5) == 0);
-            return true;
+            return SUCCESS;
         }
 
         // sit!
@@ -381,10 +382,10 @@ public abstract class TameableDragonEntity extends TameableEntity
             if (isServer())
             {
                 navigator.clearPath();
-                if (!isSitting()) setAttackTarget(null);
-                sitGoal.setSitting(!isSitting());
+                if (func_233685_eM_()) setAttackTarget(null);
+                func_233687_w_(!func_233685_eM_());
             }
-            return true;
+            return SUCCESS;
         }
 
         // ride on
@@ -393,14 +394,14 @@ public abstract class TameableDragonEntity extends TameableEntity
             if (isServer())
             {
                 setRidingPlayer(player);
-                sitGoal.setSitting(false);
                 navigator.clearPath();
                 setAttackTarget(null);
             }
-            return true;
+            func_233686_v_(false);
+            return SUCCESS;
         }
 
-        return super.processInteract(player, hand);
+        return super.func_230254_b_(player, hand);
     }
 
     /**
@@ -532,7 +533,7 @@ public abstract class TameableDragonEntity extends TameableEntity
     {
         float eyeHeight = super.getStandingEyeHeight(poseIn, sizeIn);
 
-        if (isSitting()) eyeHeight *= 0.8f;
+        if (func_233685_eM_()) eyeHeight *= 0.8f;
 
         return eyeHeight;
     }
@@ -543,7 +544,7 @@ public abstract class TameableDragonEntity extends TameableEntity
     @Override
     public double getMountedYOffset()
     {
-        return (isSitting()? 1.7f : 2f) * getScale();
+        return (func_233685_eM_()? 1.7f : 2f) * getScale();
     }
 
     /**
@@ -619,7 +620,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         if (isInvulnerableTo(src)) return false;
 
         // don't just sit there!
-        if (isServer()) sitGoal.setSitting(false);
+        func_233687_w_(false);
 
         return super.attackEntityFrom(src, par2);
     }
@@ -643,14 +644,10 @@ public abstract class TameableDragonEntity extends TameableEntity
 
     public boolean canReproduce() { return isTamed() && reproCount < REPRO_LIMIT; }
 
-    /**
-     * This function is used when two same-species animals in 'love mode' breed to generate the new baby animal.
-     */
     @Override
-    public AgeableEntity createChild(AgeableEntity mate)
+    public void func_234177_a_(ServerWorld world, AnimalEntity mate)
     {
-        if (!(mate instanceof TameableDragonEntity))
-            throw new IllegalArgumentException("The mate isn't a dragon");
+        if (!(mate instanceof TameableDragonEntity)) throw new IllegalArgumentException("The mate isn't a dragon");
 
         // pick a breed to inherit from
         DragonEggEntity egg = DMLRegistry.EGG_ENTITY.get().create(world);
@@ -701,9 +698,11 @@ public abstract class TameableDragonEntity extends TameableEntity
         ((TameableDragonEntity) mate).addReproCount();
         egg.setPosition(getPosX(), getPosY(), getPosZ());
         world.addEntity(egg);
-
-        return null; // An egg isnt an ageable!
     }
+
+    @Nullable
+    @Override
+    public AgeableEntity func_241840_a(ServerWorld p_241840_1_, AgeableEntity p_241840_2_) { return null; }
 
     @Override
     public boolean shouldAttackEntity(LivingEntity target, LivingEntity owner)
@@ -757,7 +756,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         Entity riddenByEntity = getControllingPassenger();
         if (riddenByEntity != null)
         {
-            Vec3d pos = new Vec3d(0, getMountedYOffset() + riddenByEntity.getYOffset(), 0.8 * getScale())
+            Vector3d pos = new Vector3d(0, getMountedYOffset() + riddenByEntity.getYOffset(), 0.8 * getScale())
                     .rotateYaw((float) Math.toRadians(-renderYawOffset))
                     .add(getPositionVec());
             passenger.setPosition(pos.x, pos.y, pos.z);
@@ -878,10 +877,5 @@ public abstract class TameableDragonEntity extends TameableEntity
     public final boolean isServer()
     {
         return !world.isRemote;
-    }
-
-    public Vec3d getMouthPos()
-    {
-        return null;
     }
 }

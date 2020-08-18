@@ -1,6 +1,7 @@
 package wolfshotz.dml.util;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,5 +38,10 @@ public class BetterBlockMatcher implements Predicate<Block>
     public boolean test(Block block)
     {
         return blocks.contains(block);
+    }
+
+    public boolean test(BlockState state)
+    {
+        return test(state.getBlock());
     }
 }

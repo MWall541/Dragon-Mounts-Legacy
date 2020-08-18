@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -92,5 +93,17 @@ public class DMLRegistry
     {
         String registryName = "entity." + name;
         return SOUNDS.register(registryName, () -> new SoundEvent(DragonMountsLegacy.rl(registryName)));
+    }
+
+    public static void registerEntityAttributes()
+    {
+        GlobalEntityTypeAttributes.put(DMLRegistry.AETHER_DRAGON_ENTITY.get(), AetherDragonEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(DMLRegistry.ENDER_DRAGON_ENTITY.get(), TameableDragonEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(DMLRegistry.FIRE_DRAGON_ENTITY.get(), TameableDragonEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(DMLRegistry.FOREST_DRAGON_ENTITY.get(), TameableDragonEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(DMLRegistry.GHOST_DRAGON_ENTITY.get(), TameableDragonEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(DMLRegistry.ICE_DRAGON_ENTITY.get(), TameableDragonEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(DMLRegistry.NETHER_DRAGON_ENTITY.get(), TameableDragonEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(DMLRegistry.WATER_DRAGON_ENTITY.get(), TameableDragonEntity.getAttributes().create());
     }
 }

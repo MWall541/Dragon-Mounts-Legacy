@@ -42,7 +42,7 @@ public class DragonSetAgeCommand
         LifeStageController.EnumLifeStage stage = ctx.getArgument("age", LifeStageController.EnumLifeStage.class);
 
         closest.get().getLifeStageController().setLifeStage(stage);
-        executor.sendMessage(new TranslationTextComponent("commands.dragonmounts.setage.success", closest.get().getName().getFormattedText(), stage));
+        executor.sendMessage(new TranslationTextComponent("commands.dragonmounts.setage.success", closest.get().getName().toString(), stage), executor.getUniqueID());
 
         return 0;
     }

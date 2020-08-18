@@ -3,6 +3,7 @@ package wolfshotz.dml.entities.ai.goals;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import wolfshotz.dml.entities.TameableDragonEntity;
@@ -72,7 +73,7 @@ public class DragonBreedGoal extends BreedGoal
 
         animal.resetInLove();
         targetMate.resetInLove();
-        dragon.createChild(targetMate);
+        dragon.func_234177_a_((ServerWorld) world, targetMate);
         world.setEntityState(this.animal, (byte) 18);
         if (world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT))
             world.addEntity(new ExperienceOrbEntity(world, animal.getPosX(), animal.getPosY(), animal.getPosZ(), animal.getRNG().nextInt(7) + 1));

@@ -226,17 +226,17 @@ public class DragonAnimator
         groundTimer.set(groundVal);
 
         // update flutter transition
-        boolean flutterFlag = !onGround && (dragon.collided || dragon.getMotion().y > -0.1 || speedEnt < speedMax);
+        boolean flutterFlag = !onGround && (dragon.collidedVertically || dragon.getMotion().y > -0.1 || speedEnt < speedMax);
         flutterTimer.add(flutterFlag ? 0.1f : -0.1f);
 
         // update walking transition
-        boolean walkFlag = moveSpeed > 0.1 && !dragon.isSitting();
+        boolean walkFlag = moveSpeed > 0.1 && !dragon.func_233684_eK_();
         float walkVal = 0.1f;
         walkTimer.add(walkFlag? walkVal : -walkVal);
 
         // update sitting transisiton
         float sitVal = sitTimer.get();
-        sitVal += dragon.isSitting()? 0.1f : -0.1f;
+        sitVal += dragon.func_233684_eK_()? 0.1f : -0.1f;
         sitVal *= 0.95f;
         sitTimer.set(sitVal);
 

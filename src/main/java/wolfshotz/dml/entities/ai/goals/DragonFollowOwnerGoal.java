@@ -31,7 +31,7 @@ public class DragonFollowOwnerGoal extends Goal
     @Override
     public boolean shouldExecute()
     {
-        if (dragon.isSitting()) return false;
+        if (dragon.func_233685_eM_()) return false;
         if (dragon.getLeashed()) return false;
         LivingEntity owner = dragon.getOwner();
         if (owner == null) return false;
@@ -46,7 +46,7 @@ public class DragonFollowOwnerGoal extends Goal
     public boolean shouldContinueExecuting()
     {
         if (dragon.getNavigator().noPath()) return false;
-        if (dragon.isSitting()) return false;
+        if (dragon.func_233685_eM_()) return false;
         return dragon.getDistanceSq(owner) <= maxDist * maxDist;
     }
 
@@ -74,10 +74,10 @@ public class DragonFollowOwnerGoal extends Goal
         for (int i = 0; i < 10; ++i)
         {
             double x = MathHelper.nextInt(rng, -3, 3);
-            double y = owner.onGround? 0 : MathHelper.nextInt(rng, -1, 1);
+            double y = owner.isOnGround()? 0 : MathHelper.nextInt(rng, -1, 1);
             double z = MathHelper.nextInt(rng, -3, 3);
             potentialPos.setPos(owner.getPosX() + x, owner.getPosY() + y, owner.getPosZ() + z);
-            if (WalkNodeProcessor.func_227480_b_(dragon.world, potentialPos.getX(), potentialPos.getY(), potentialPos.getZ()) != PathNodeType.WALKABLE)
+            if (WalkNodeProcessor.func_237231_a_(dragon.world, dragon.getPosition().toMutable()) != PathNodeType.WALKABLE)
                 continue;
             if (dragon.world.hasNoCollisions(dragon, dragon.getBoundingBox().offset(potentialPos.subtract(dragon.getPosition()))))
             {

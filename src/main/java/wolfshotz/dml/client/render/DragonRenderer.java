@@ -4,9 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
@@ -17,6 +15,9 @@ import net.minecraft.entity.item.HangingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.LightType;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -87,7 +88,7 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
 
         // render name
         if (canRenderName(dragon))
-            renderName(dragon, dragon.getDisplayName().getFormattedText(), ms, bufferIn, packedLightIn);
+            renderName(dragon, dragon.getDisplayName(), ms, bufferIn, packedLightIn);
 
         // render leash
         Entity entity = dragon.getLeashHolder();
@@ -102,7 +103,7 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         float deathTime = dragon.getDeathTime() / (float) dragon.getMaxDeathTime();
         if (deathTime > 0)
         {
-            IVertexBuilder dissolve = buffer.getBuffer(RenderStates.getEntityAlpha(DISSOLVE_TEXTURE, deathTime));
+            IVertexBuilder dissolve = buffer.getBuffer(RenderStates.func_239264_a_(DISSOLVE_TEXTURE, deathTime));
             entityModel.render(ms, dissolve, packedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
             IVertexBuilder decal = buffer.getBuffer(RenderStates.getEntityDecal(texture));
             entityModel.render(ms, decal, packedLight, OverlayTexture.getPackedUV(0, true), 1f, 1f, 1f, 1f);
@@ -111,7 +112,7 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         }
 
         boolean visibleToPlayer = !isVisible(dragon) && !dragon.isInvisibleToPlayer(Minecraft.getInstance().player);
-        IVertexBuilder ivertexbuilder = buffer.getBuffer(func_230042_a_(dragon, isVisible(dragon), visibleToPlayer));
+        IVertexBuilder ivertexbuilder = buffer.getBuffer(func_230496_a_(dragon, isVisible(dragon), visibleToPlayer, Minecraft.getInstance().func_238206_b_(dragon)));
         entityModel.render(ms, ivertexbuilder, packedLight, packedOverlay, 1f, 1f, 1f, visibleToPlayer? 0.15f : 1f);
     }
 
@@ -155,42 +156,29 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     private <E extends Entity> void renderLeash(TameableDragonEntity entity, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, E leashHolder)
     {
         matrixStackIn.push();
-        double d0 = (MathHelper.lerp(partialTicks * 0.5F, leashHolder.rotationYaw, leashHolder.prevRotationYaw) * ((float) Math.PI / 180F));
-        double d1 = (MathHelper.lerp(partialTicks * 0.5F, leashHolder.rotationPitch, leashHolder.prevRotationPitch) * ((float) Math.PI / 180F));
-        double d2 = Math.cos(d0);
-        double d3 = Math.sin(d0);
-        double d4 = Math.sin(d1);
-        if (leashHolder instanceof HangingEntity)
-        {
-            d2 = 0.0D;
-            d3 = 0.0D;
-            d4 = -1.0D;
-        }
-
-        double d5 = Math.cos(d1);
-        double d6 = MathHelper.lerp(partialTicks, leashHolder.prevPosX, leashHolder.getPosX()) - d2 * 0.7D - d3 * 0.5D * d5;
-        double d7 = MathHelper.lerp(partialTicks, leashHolder.prevPosY + leashHolder.getEyeHeight() * 0.7D, leashHolder.getPosY() + leashHolder.getEyeHeight() * 0.7D) - d4 * 0.5D - 0.25D;
-        double d8 = MathHelper.lerp(partialTicks, leashHolder.prevPosZ, leashHolder.getPosZ()) - d3 * 0.7D + d2 * 0.5D * d5;
-        double d9 = (MathHelper.lerp(partialTicks, entity.renderYawOffset, entity.prevRenderYawOffset) * ((float) Math.PI / 180F)) + (Math.PI / 2D);
-        d2 = Math.cos(d9) * entity.getWidth() * 0.4D;
-        d3 = Math.sin(d9) * entity.getWidth() * 0.4D;
-        double d10 = MathHelper.lerp(partialTicks, entity.prevPosX, entity.getPosX()) + d2;
-        double d11 = MathHelper.lerp(partialTicks, entity.prevPosY, entity.getPosY());
-        double d12 = MathHelper.lerp(partialTicks, entity.prevPosZ, entity.getPosZ()) + d3;
-        matrixStackIn.translate(d2, -(1.6D - entity.getHeight()) * 0.5D, d3);
-        float f = (float) (d6 - d10);
-        float f1 = (float) (d7 - d11);
-        float f2 = (float) (d8 - d12);
-        float f3 = 0.025F;
+        Vector3d vector3d = leashHolder.func_241843_o(partialTicks);
+        double d0 = (MathHelper.lerp(partialTicks, entity.renderYawOffset, entity.prevRenderYawOffset) * ((float)Math.PI / 180F)) + (Math.PI / 2D);
+        Vector3d vector3d1 = entity.func_241205_ce_();
+        double d1 = Math.cos(d0) * vector3d1.z + Math.sin(d0) * vector3d1.x;
+        double d2 = Math.sin(d0) * vector3d1.z - Math.cos(d0) * vector3d1.x;
+        double d3 = MathHelper.lerp(partialTicks, entity.prevPosX, entity.getPosX()) + d1;
+        double d4 = MathHelper.lerp(partialTicks, entity.prevPosY, entity.getPosY()) + vector3d1.y;
+        double d5 = MathHelper.lerp(partialTicks, entity.prevPosZ, entity.getPosZ()) + d2;
+        matrixStackIn.translate(d1, vector3d1.y, d2);
+        float f = (float)(vector3d.x - d3);
+        float f1 = (float)(vector3d.y - d4);
+        float f2 = (float)(vector3d.z - d5);
         IVertexBuilder ivertexbuilder = bufferIn.getBuffer(RenderType.getLeash());
         Matrix4f matrix4f = matrixStackIn.getLast().getMatrix();
         float f4 = MathHelper.fastInvSqrt(f * f + f2 * f2) * 0.025F / 2.0F;
         float f5 = f2 * f4;
         float f6 = f * f4;
-        int i = getBlockLight(entity, partialTicks);
-        int j = entity.isBurning()? 15 : entity.world.getLightFor(LightType.BLOCK, new BlockPos(entity.getEyePosition(partialTicks)));
-        int k = entity.world.getLightFor(LightType.SKY, new BlockPos(entity.getEyePosition(partialTicks)));
-        int l = entity.world.getLightFor(LightType.SKY, new BlockPos(leashHolder.getEyePosition(partialTicks)));
+        BlockPos blockpos = new BlockPos(entity.getEyePosition(partialTicks));
+        BlockPos blockpos1 = new BlockPos(leashHolder.getEyePosition(partialTicks));
+        int i = getBlockLight(entity, blockpos);
+        int j = leashHolder.isBurning() ? 15 : leashHolder.world.getLightFor(LightType.BLOCK, blockpos1);
+        int k = entity.world.getLightFor(LightType.SKY, blockpos);
+        int l = entity.world.getLightFor(LightType.SKY, blockpos1);
         renderSide(ivertexbuilder, matrix4f, f, f1, f2, i, j, k, l, 0.025F, 0.025F, f5, f6);
         renderSide(ivertexbuilder, matrix4f, f, f1, f2, i, j, k, l, 0.025F, 0.0F, f5, f6);
         matrixStackIn.pop();

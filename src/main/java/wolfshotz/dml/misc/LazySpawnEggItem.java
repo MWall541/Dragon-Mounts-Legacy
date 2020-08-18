@@ -24,6 +24,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.spawner.AbstractSpawner;
 
 import javax.annotation.Nullable;
@@ -73,7 +74,7 @@ public class LazySpawnEggItem extends Item
             else blockpos1 = blockpos.offset(direction);
 
             EntityType<?> entitytype = this.getType(itemstack.getTag());
-            if (entitytype.spawn(world, itemstack, context.getPlayer(), blockpos1, SpawnReason.SPAWN_EGG, true, !Objects.equals(blockpos, blockpos1) && direction == Direction.UP) != null)
+            if (entitytype.spawn((ServerWorld) world, itemstack, context.getPlayer(), blockpos1, SpawnReason.SPAWN_EGG, true, !Objects.equals(blockpos, blockpos1) && direction == Direction.UP) != null)
                 itemstack.shrink(1);
 
         }
@@ -87,19 +88,17 @@ public class LazySpawnEggItem extends Item
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn)
     {
         ItemStack itemstack = playerIn.getHeldItem(handIn);
-        RayTraceResult raytraceresult = rayTrace(worldIn, playerIn, RayTraceContext.FluidMode.SOURCE_ONLY);
-        if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) return ActionResult.resultPass(itemstack);
-        else if (worldIn.isRemote) return ActionResult.resultSuccess(itemstack);
+        BlockRayTraceResult raytraceresult = rayTrace(worldIn, playerIn, RayTraceContext.FluidMode.SOURCE_ONLY);
+        if (worldIn.isRemote) return ActionResult.resultSuccess(itemstack);
         else
         {
-            BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
-            BlockPos blockpos = blockraytraceresult.getPos();
+            BlockPos blockpos = raytraceresult.getPos();
             if (!(worldIn.getBlockState(blockpos).getBlock() instanceof FlowingFluidBlock))
                 return ActionResult.resultPass(itemstack);
-            else if (worldIn.isBlockModifiable(playerIn, blockpos) && playerIn.canPlayerEdit(blockpos, blockraytraceresult.getFace(), itemstack))
+            else if (worldIn.isBlockModifiable(playerIn, blockpos) && playerIn.canPlayerEdit(blockpos, raytraceresult.getFace(), itemstack))
             {
                 EntityType<?> entitytype = this.getType(itemstack.getTag());
-                if (entitytype.spawn(worldIn, itemstack, playerIn, blockpos, SpawnReason.SPAWN_EGG, false, false) == null)
+                if (entitytype.spawn((ServerWorld) worldIn, itemstack, playerIn, blockpos, SpawnReason.SPAWN_EGG, false, false) == null)
                     return ActionResult.resultPass(itemstack);
                 else
                 {

@@ -2,9 +2,9 @@ package wolfshotz.dml.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.EntityType;
+import net.minecraft.util.math.vector.Vector3f;
 import wolfshotz.dml.DMLRegistry;
 import wolfshotz.dml.entities.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;

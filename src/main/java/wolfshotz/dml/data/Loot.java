@@ -2,7 +2,6 @@ package wolfshotz.dml.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -12,12 +11,10 @@ import net.minecraft.data.DirectoryCache;
 import net.minecraft.data.IDataProvider;
 import net.minecraft.data.LootTableProvider;
 import net.minecraft.data.loot.BlockLootTables;
+import net.minecraft.loot.*;
+import net.minecraft.loot.functions.ILootFunction;
+import net.minecraft.loot.functions.LootFunctionManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.loot.*;
-import net.minecraft.world.storage.loot.conditions.ILootCondition;
-import net.minecraft.world.storage.loot.conditions.LootConditionManager;
-import net.minecraft.world.storage.loot.functions.ILootFunction;
-import net.minecraft.world.storage.loot.functions.LootFunctionManager;
 import net.minecraftforge.fml.RegistryObject;
 import wolfshotz.dml.DMLRegistry;
 
@@ -32,7 +29,7 @@ import java.util.stream.Collectors;
 public class Loot extends LootTableProvider
 {
     // taken from LootTableManager
-    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(RandomValueRange.class, new RandomValueRange.Serializer()).registerTypeAdapter(BinomialRange.class, new BinomialRange.Serializer()).registerTypeAdapter(ConstantRange.class, new ConstantRange.Serializer()).registerTypeAdapter(IntClamper.class, new IntClamper.Serializer()).registerTypeAdapter(LootPool.class, new LootPool.Serializer()).registerTypeAdapter(LootTable.class, new LootTable.Serializer()).registerTypeHierarchyAdapter(LootEntry.class, new LootEntryManager.Serializer()).registerTypeHierarchyAdapter(ILootFunction.class, new LootFunctionManager.Serializer()).registerTypeHierarchyAdapter(ILootCondition.class, new LootConditionManager.Serializer()).registerTypeHierarchyAdapter(LootContext.EntityTarget.class, new LootContext.EntityTarget.Serializer()).setPrettyPrinting().create();
+    private static final Gson GSON = LootSerializers.func_237387_b_().setPrettyPrinting().create();
     private final DataGenerator dataGen;
     private DirectoryCache cache;
 

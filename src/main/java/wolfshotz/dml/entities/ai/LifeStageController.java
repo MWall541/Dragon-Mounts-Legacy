@@ -1,8 +1,8 @@
 package wolfshotz.dml.entities.ai;
 
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.util.math.MathHelper;
 import wolfshotz.dml.entities.TameableDragonEntity;
 import wolfshotz.dml.util.MathX;
@@ -13,6 +13,7 @@ import static wolfshotz.dml.entities.ai.LifeStageController.EnumLifeStage.*;
 
 public class LifeStageController
 {
+    private static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b");
     private static final int TICKS_SINCE_CREATION_UPDATE_INTERVAL = 100;
 
     private final TameableDragonEntity dragon;
@@ -50,14 +51,14 @@ public class LifeStageController
 
     public void applyStageAttributeModifiers()
     {
-        AttributeModifier scaleModifier = new AttributeModifier(UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"), "Dragon size modifier", getScale(), AttributeModifier.Operation.ADDITION);
-        IAttributeInstance health = dragon.getAttribute(SharedMonsterAttributes.MAX_HEALTH);
-        IAttributeInstance damage = dragon.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
+        AttributeModifier scaleModifier = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", getScale(), AttributeModifier.Operation.ADDITION);
+        ModifiableAttributeInstance health = dragon.getAttribute(Attributes.MAX_HEALTH);
+        ModifiableAttributeInstance damage = dragon.getAttribute(Attributes.ATTACK_DAMAGE);
 
         health.removeModifier(scaleModifier);
-        health.applyModifier(scaleModifier);
+        health.applyNonPersistentModifier(scaleModifier);
         damage.removeModifier(scaleModifier);
-        damage.applyModifier(scaleModifier);
+        damage.applyNonPersistentModifier(scaleModifier);
     }
 
     public EnumLifeStage getLifeStage()

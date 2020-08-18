@@ -36,7 +36,7 @@ public class EggRenderer extends EntityRenderer<DragonEggEntity>
 
         if (state.getRenderType() == BlockRenderType.MODEL)
         {
-            if (state != entity.world.getBlockState(new BlockPos(entity)) && state.getRenderType() != BlockRenderType.INVISIBLE)
+            if (state != entity.world.getBlockState(entity.getPosition()) && state.getRenderType() != BlockRenderType.INVISIBLE)
             {
                 ms.push();
                 ms.translate(-0.5D, 0.0D, -0.5D);

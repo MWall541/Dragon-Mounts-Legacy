@@ -27,8 +27,6 @@ public class GhostDragonEntity extends TameableDragonEntity
 
     public static int getHabitatPoints(DragonEggEntity egg)
     {
-        int points = 0;
-
         // woah dude, too high!
         if (egg.getPosY() > egg.world.getHeight() * 0.25) return 0;
 

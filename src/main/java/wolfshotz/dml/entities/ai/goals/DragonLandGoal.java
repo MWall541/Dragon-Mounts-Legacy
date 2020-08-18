@@ -1,6 +1,6 @@
 package wolfshotz.dml.entities.ai.goals;
 
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -54,7 +54,7 @@ public class DragonLandGoal extends Goal
         landingPos = dragon.getPosition();
 
         // add some variance
-        int followRange = MathHelper.floor(dragon.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).getValue());
+        int followRange = MathHelper.floor(dragon.getAttribute(Attributes.FOLLOW_RANGE).getValue());
         int ox = followRange - rand.nextInt(followRange) * 2;
         int oz = followRange - rand.nextInt(followRange) * 2;
         landingPos = landingPos.add(ox, 0, oz);

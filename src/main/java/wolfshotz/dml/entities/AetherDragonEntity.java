@@ -1,9 +1,9 @@
 package wolfshotz.dml.entities;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.world.World;
-
-import static net.minecraft.entity.SharedMonsterAttributes.FLYING_SPEED;
 
 public class AetherDragonEntity extends TameableDragonEntity
 {
@@ -14,12 +14,9 @@ public class AetherDragonEntity extends TameableDragonEntity
         super(type, world);
     }
 
-    @Override
-    protected void registerAttributes()
+    public static AttributeModifierMap.MutableAttribute getAttributes()
     {
-        super.registerAttributes();
-
-        getAttribute(FLYING_SPEED).setBaseValue(AETHER_BASE_SPEED_FLYING);
+        return TameableDragonEntity.getAttributes().createMutableAttribute(Attributes.FLYING_SPEED, AETHER_BASE_SPEED_FLYING);
     }
 
     public static int getHabitatPoints(DragonEggEntity egg)

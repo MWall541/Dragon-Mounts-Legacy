@@ -3,23 +3,21 @@ package wolfshotz.dml.util;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class BetterBlockMatcher implements Predicate<Block>
 {
-    private final Collection<Block> blocks;
+    private final Set<Block> blocks = new HashSet<>();
 
     public BetterBlockMatcher(Block... blocks)
     {
-        this(Arrays.asList(blocks));
+        add(blocks);
     }
 
     public BetterBlockMatcher(Collection<Block> blocks)
     {
-        this.blocks = blocks;
+        add(blocks);
     }
 
     public BetterBlockMatcher add(Block... additional)

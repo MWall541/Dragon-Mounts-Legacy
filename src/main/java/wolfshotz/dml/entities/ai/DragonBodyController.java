@@ -27,7 +27,7 @@ public class DragonBodyController extends BodyController
         float yawSpeed = 90;
 
         // rotate instantly if flying, sitting or moving
-        if (dragon.isFlying() || dragon.func_233685_eM_() || dist > 0.0001)
+        if (dragon.isFlying() || dragon.func_233684_eK_() || dist > 0.0001)
         {
             dragon.renderYawOffset = dragon.rotationYaw;
             dragon.rotationYawHead = MathX.updateRotation(dragon.renderYawOffset, dragon.rotationYawHead, yawSpeed);

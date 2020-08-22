@@ -1,7 +1,8 @@
 {
   "pools": [
     {
-      "lootEntries": [
+      "rolls": 1.0,
+      "entries": [
         {
           "type": "minecraft:item",
           "weight": 8,
@@ -11,14 +12,7 @@
           "type": "minecraft:empty",
           "weight": 92
         }
-      ],
-      "conditions": [],
-      "combinedConditions": {},
-      "functions": [],
-      "combinedFunctions": {},
-      "rolls": 1.0,
-      "bonusRolls": 0.0,
-      "isFrozen": false
+      ]
     }
   ]
 }

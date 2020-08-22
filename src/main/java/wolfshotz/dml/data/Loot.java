@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class Loot extends LootTableProvider
 {
     // taken from LootTableManager
-    private static final Gson GSON = LootSerializers.func_237387_b_().setPrettyPrinting().create();
+    private static final Gson GSON = LootSerializers.func_237387_b_().registerTypeAdapter(LootPool.class, new LootPool.Serializer()).registerTypeAdapter(LootTable.class, new LootTable.Serializer()).setPrettyPrinting().create();
     private final DataGenerator dataGen;
     private DirectoryCache cache;
 

@@ -124,7 +124,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         goalSelector.addGoal(2, new SitGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
         goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
-        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 10f, 20f, 250f));
+        goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1d, 10f, 3.5f, true));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1));
         goalSelector.addGoal(7, new DragonLookAtGoal(this));
@@ -389,7 +389,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         }
 
         // ride on
-        if (isTamed() && isSaddled() && !isChild())
+        if (isTamed() && isSaddled() && !isChild() && !isBreedingItem(stack))
         {
             if (isServer())
             {
@@ -484,9 +484,7 @@ public abstract class TameableDragonEntity extends TameableEntity
     @Override
     public ItemStack getPickedResult(RayTraceResult target)
     {
-        return RegistryObject.of(DragonMountsLegacy.rl(getType().getRegistryName().getPath() + "_spawn_egg"), ForgeRegistries.ITEMS)
-                .map(ItemStack::new)
-                .orElse(ItemStack.EMPTY);
+        return new ItemStack(ForgeRegistries.ITEMS.getValue(DragonMountsLegacy.rl(getType().getRegistryName().getPath() + "_spawn_egg")));
     }
 
     /**

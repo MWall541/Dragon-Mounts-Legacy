@@ -13,14 +13,15 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.0.7'
+version = '1.0.8'
 group = 'wolfshotz.dml' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'DragonMountsLegacy'
+archivesBaseName = 'Dragon Mounts Legacy'
+jar.archiveName = "[$game_version-$version] $archivesBaseName.${jar.extension}"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
-    mappings channel: 'snapshot', version: '20200723-1.16.1'
+    mappings channel: "$mappings_channel", version: "$mappings_version-$mappings_game_version"
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -69,7 +70,7 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.2-33.0.5'
+    minecraft "net.minecraftforge:forge:${game_version}-${forge_version}"
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

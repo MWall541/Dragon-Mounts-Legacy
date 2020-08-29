@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[32,)"
+loaderVersion="[33,)"
 issueTrackerURL="https://github.com/WolfShotz/DML/issues"
 license="GNU GPLv3"
 
@@ -17,13 +17,13 @@ description='''This is a mod that allows you to hatch previously useless dragon 
 [[dependencies.dragonmounts]]
     modId="forge"
     mandatory=true
-    versionRange="[32,)"
+    versionRange="[33,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.dragonmounts]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.1, 1.16.2]"
+    versionRange="[1.16.2]"
     ordering="NONE"
     side="BOTH"

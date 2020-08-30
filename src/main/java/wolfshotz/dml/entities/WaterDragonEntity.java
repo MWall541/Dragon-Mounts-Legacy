@@ -14,7 +14,7 @@ import net.minecraft.world.gen.layer.LayerUtil;
 
 public class WaterDragonEntity extends TameableDragonEntity
 {
-    private static final ImmutableList<RegistryKey<Biome>> BIOMES = ImmutableList.of(Biomes.OCEAN,
+    private static final ImmutableList<Biome> BIOMES = ImmutableList.of(Biomes.OCEAN,
             Biomes.COLD_OCEAN,
             Biomes.DEEP_COLD_OCEAN,
             Biomes.DEEP_FROZEN_OCEAN,
@@ -57,7 +57,7 @@ public class WaterDragonEntity extends TameableDragonEntity
         for (BlockPos pos : BlockPos.getAllInBoxMutable(basePos.add(1, 1, 1), basePos.add(-1, -1, -1)))
             if (egg.world.getFluidState(pos).isTagged(FluidTags.WATER)) ++points;
         if (egg.isInWater()) ++points;
-        points += egg.world.func_242406_i(egg.getPosition()).map(key -> BIOMES.contains(key)? 0 : 2).orElse(0);
+        if (BIOMES.contains(egg.world.getBiome(egg.getPosition()))) points += 2;
         return points;
     }
 }

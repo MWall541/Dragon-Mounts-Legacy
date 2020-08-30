@@ -29,7 +29,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistries;
 import wolfshotz.dml.DMLRegistry;
 import wolfshotz.dml.DragonMountsLegacy;
@@ -37,7 +36,10 @@ import wolfshotz.dml.client.anim.DragonAnimator;
 import wolfshotz.dml.entities.ai.DragonBodyController;
 import wolfshotz.dml.entities.ai.DragonMoveController;
 import wolfshotz.dml.entities.ai.LifeStageController;
-import wolfshotz.dml.entities.ai.goals.*;
+import wolfshotz.dml.entities.ai.goals.DragonBabuFollowParent;
+import wolfshotz.dml.entities.ai.goals.DragonBreedGoal;
+import wolfshotz.dml.entities.ai.goals.DragonLandGoal;
+import wolfshotz.dml.entities.ai.goals.DragonLookAtGoal;
 import wolfshotz.dml.misc.DragonEggBlock;
 import wolfshotz.dml.util.MathX;
 
@@ -642,8 +644,9 @@ public abstract class TameableDragonEntity extends TameableEntity
 
     public boolean canReproduce() { return isTamed() && reproCount < REPRO_LIMIT; }
 
+    @Nullable
     @Override
-    public void func_234177_a_(ServerWorld world, AnimalEntity mate)
+    public AgeableEntity createChild(AgeableEntity mate)
     {
         if (!(mate instanceof TameableDragonEntity)) throw new IllegalArgumentException("The mate isn't a dragon");
 
@@ -696,11 +699,8 @@ public abstract class TameableDragonEntity extends TameableEntity
         ((TameableDragonEntity) mate).addReproCount();
         egg.setPosition(getPosX(), getPosY(), getPosZ());
         world.addEntity(egg);
+        return null;
     }
-
-    @Nullable
-    @Override
-    public AgeableEntity func_241840_a(ServerWorld p_241840_1_, AgeableEntity p_241840_2_) { return null; }
 
     @Override
     public boolean shouldAttackEntity(LivingEntity target, LivingEntity owner)

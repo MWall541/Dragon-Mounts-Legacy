@@ -16,7 +16,7 @@ import wolfshotz.dml.util.BetterBlockMatcher;
  */
 public class NetherDragonEntity extends TameableDragonEntity
 {
-    private static final ImmutableList<RegistryKey<Biome>> BIOMES = ImmutableList.of(Biomes.NETHER_WASTES,
+    private static final ImmutableList<Biome> BIOMES = ImmutableList.of(Biomes.NETHER_WASTES,
             Biomes.CRIMSON_FOREST,
             Biomes.WARPED_FOREST,
             Biomes.BASALT_DELTAS,
@@ -37,7 +37,7 @@ public class NetherDragonEntity extends TameableDragonEntity
 
         for (BlockPos pos : BlockPos.getAllInBoxMutable(basePose.add(1, 1, 1), basePose.add(-1, -1, -1)))
             if (matcher.test(egg.world.getBlockState(pos))) ++points;
-        points += egg.world.func_242406_i(egg.getPosition()).map(key -> BIOMES.contains(key)? 0 : 2).orElse(0);
+        if (BIOMES.contains(egg.world.getBiome(egg.getPosition()))) points += 2;
 
         return points;
     }

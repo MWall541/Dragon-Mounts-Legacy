@@ -12,7 +12,7 @@ import net.minecraftforge.common.Tags;
 
 public class EndDragonEntity extends TameableDragonEntity
 {
-    private static final ImmutableList<RegistryKey<Biome>> BIOMES = ImmutableList.of(Biomes.END_BARRENS,
+    private static final ImmutableList<Biome> BIOMES = ImmutableList.of(Biomes.END_BARRENS,
             Biomes.END_HIGHLANDS,
             Biomes.END_MIDLANDS,
             Biomes.END_MIDLANDS,
@@ -33,7 +33,7 @@ public class EndDragonEntity extends TameableDragonEntity
 
         for (BlockPos pos : BlockPos.getAllInBoxMutable(basePose.add(1, 1, 1), basePose.add(-1, -1, -1)))
             if (egg.world.getBlockState(pos).getBlock().isIn(Tags.Blocks.END_STONES)) ++points;
-        points += egg.world.func_242406_i(egg.getPosition()).map(key -> BIOMES.contains(key)? 0 : 2).orElse(0);
+        if (BIOMES.contains(egg.world.getBiome(egg.getPosition()))) points += 2;
 
         return points;
     }

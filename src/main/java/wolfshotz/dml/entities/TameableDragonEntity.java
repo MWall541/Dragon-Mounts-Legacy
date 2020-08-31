@@ -39,7 +39,6 @@ import wolfshotz.dml.entities.ai.LifeStageController;
 import wolfshotz.dml.entities.ai.goals.DragonBabuFollowParent;
 import wolfshotz.dml.entities.ai.goals.DragonBreedGoal;
 import wolfshotz.dml.entities.ai.goals.DragonLandGoal;
-import wolfshotz.dml.entities.ai.goals.DragonLookAtGoal;
 import wolfshotz.dml.misc.DragonEggBlock;
 import wolfshotz.dml.util.MathX;
 

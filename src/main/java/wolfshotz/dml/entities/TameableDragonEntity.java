@@ -127,7 +127,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1d, 10f, 3.5f, true));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1));
-        goalSelector.addGoal(7, new DragonLookAtGoal(this));
+        goalSelector.addGoal(7, new LookAtGoal(this, LivingEntity.class, 16f));
         goalSelector.addGoal(8, new LookRandomlyGoal(this));
 
         targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));

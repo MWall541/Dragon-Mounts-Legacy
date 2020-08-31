@@ -59,7 +59,6 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     // delegates
     private final EntityType<? extends TameableDragonEntity> type;
 
-    // RenderType: EntityCutoutNoCull
     public DragonModel(EntityType<? extends TameableDragonEntity> type)
     {
         super(RenderType::getEntityCutout); // back face culling: needed for wings; not ideal but whatever

@@ -464,7 +464,7 @@ public class DragonAnimator
 
             model.tail.rotateAngleX += MathX.toRadians(pitchOfs);
             model.tail.rotateAngleX -= (1 - speed) * vertMulti * 2;
-            model.tail.rotateAngleY += MathX.toRadians(180 - yawOfs);
+            model.tail.rotateAngleY -= MathX.toRadians(180 - yawOfs);
 
             // display horns near the tip
             if (dragon.getType() == DMLRegistry.WATER_DRAGON_ENTITY.get())

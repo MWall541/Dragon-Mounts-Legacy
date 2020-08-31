@@ -103,9 +103,9 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         if (deathTime > 0)
         {
             IVertexBuilder dissolve = buffer.getBuffer(RenderStates.func_239264_a_(DISSOLVE_TEXTURE, deathTime));
-            entityModel.render(ms, dissolve, packedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+            entityModel.render(ms, dissolve, packedLight, OverlayTexture.getPackedUV(0, true), 1f, 1f, 1f, 1f);
             IVertexBuilder decal = buffer.getBuffer(RenderStates.getEntityDecal(texture));
-            entityModel.render(ms, decal, packedLight, OverlayTexture.getPackedUV(0, true), 1f, 1f, 1f, 1f);
+//            entityModel.render(ms, decal, packedLight, OverlayTexture.getPackedUV(0, true), 1f, 1f, 1f, 1f);
 
             return;
         }

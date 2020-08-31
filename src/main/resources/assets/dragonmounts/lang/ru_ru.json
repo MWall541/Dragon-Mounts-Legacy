@@ -23,6 +23,6 @@
   "block.dragonmounts.ice_dragon_egg": "Яйцо ледяного дракона",
   "block.dragonmounts.nether_dragon_egg": "Яйцо дракона Нижнего мира",
   "block.dragonmounts.water_dragon_egg": "Яйцо призыва водного дракона",
-  "commands.dragonmounts.setage.success": "Установите возраст с %s на %s",
+  "commands.dragonmounts.setage.success": "Установите возраст от %s до %s",
   "commands.dragonmounts.setage.nodragons": "Рядом нет драконов..."
 }

@@ -16,7 +16,7 @@ public class ModelPartProxy
 {
 
     // projected parts and part childs
-    private final ModelPart part;
+    public final ModelPart part;
     private final List<ModelPartProxy> childs;
     // scale multiplier
     private float renderScaleX = 1;
@@ -109,12 +109,7 @@ public class ModelPartProxy
         part.showModel = showModel;
 
         if (childs != null)
-        {
-            for (ModelPartProxy child : childs)
-            {
-                child.apply();
-            }
-        }
+            for (ModelPartProxy child : childs) child.apply();
     }
 
     public void render(MatrixStack matrixStack, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)

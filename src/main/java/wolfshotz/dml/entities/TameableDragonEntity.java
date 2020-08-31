@@ -129,7 +129,7 @@ public abstract class TameableDragonEntity extends TameableEntity
         goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1d, 10f, 3.5f, true));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1));
-        goalSelector.addGoal(7, new DragonLookAtGoal(this));
+        goalSelector.addGoal(7, new LookAtGoal(this, LivingEntity.class, 16f));
         goalSelector.addGoal(8, new LookRandomlyGoal(this));
 
         targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
@@ -245,7 +245,12 @@ public abstract class TameableDragonEntity extends TameableEntity
 //                else tickBreathWeapon();
 //            }
         }
-        else animator.tick(); // update animations on the client
+        else
+        {
+            // update animations on the client
+            animator.tick();
+            updateArmSwingProgress();
+        }
 
         super.livingTick();
     }
@@ -255,9 +260,17 @@ public abstract class TameableDragonEntity extends TameableEntity
     {
         if (!isFlying()) super.travel(vec3d);
 
-        if (world.isRemote) return;
         PlayerEntity rider = getRidingPlayer();
         if (rider == null || !isOwner(rider)) return;
+
+        rotationYawHead = rider.rotationYawHead;
+        rotationPitch = rider.rotationPitch / 2;
+
+        if (world.isRemote) return;
+
+
+        // lift off with a jump
+        if (!isFlying() && rider.isJumping) liftOff();
 
         double x = getPosX();
         double y = getPosY();
@@ -275,10 +288,8 @@ public abstract class TameableDragonEntity extends TameableEntity
             x += wp.x * 10;
             y += wp.y * 10;
             z += wp.z * 10;
-        }
 
-        // lift off with a jump
-        if (!isFlying() && rider.isJumping) liftOff();
+        }
 
         getMoveHelper().setMoveTo(x, y, z, 1);
     }
@@ -605,10 +616,7 @@ public abstract class TameableDragonEntity extends TameableEntity
     {
         // play eating sound
         playSound(getAttackSound(), 1, 0.7f);
-
-        // play attack animation
-        if (isServer())
-            ((ServerWorld) world).getChunkProvider().sendToAllTracking(this, new SAnimateHandPacket(this, 0));
+        super.swingArm(hand);
     }
 
     /**

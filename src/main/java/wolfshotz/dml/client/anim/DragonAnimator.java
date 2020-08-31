@@ -1,5 +1,6 @@
 package wolfshotz.dml.client.anim;
 
+import net.minecraft.util.math.MathHelper;
 import wolfshotz.dml.DMLRegistry;
 import wolfshotz.dml.client.model.DragonModel;
 import wolfshotz.dml.client.model.ModelPart;
@@ -8,9 +9,6 @@ import wolfshotz.dml.util.MathX;
 
 public class DragonAnimator
 {
-    // constants
-    private static final int JAW_OPENING_TIME_FOR_ATTACK = 5;
-
     public TameableDragonEntity dragon;
 
     // entity parameters
@@ -240,17 +238,6 @@ public class DragonAnimator
         sitVal *= 0.95f;
         sitTimer.set(sitVal);
 
-//        jawTimer.add(dragon.isBreathing()? 0.2f : -0.2f);
-
-        // update jaw opening transition
-//        int ticksSinceLastAttack = dragon.getLastAttackedEntityTime();
-//
-//        // TODO: find better attack animation method
-////        int ticksSinceLastAttack = -1;
-////
-//        boolean jawFlag = (ticksSinceLastAttack >= 0 && ticksSinceLastAttack < JAW_OPENING_TIME_FOR_ATTACK);
-//        jawTimer.add(jawFlag ? 0.2f : -0.2f);
-
         // update speed transition
         boolean nearGround = dragon.getAltitude() < dragon.getHeight() * 2;
         boolean speedFlag = speedEnt > speedMax || onGround || nearGround;
@@ -333,6 +320,7 @@ public class DragonAnimator
         model.head.rotationPointZ = model.neck.rotationPointZ;
 
         model.jaw.rotateAngleX = jaw * 0.75f;
+        model.jaw.rotateAngleX += MathHelper.sin((1 - (1 - model.swingProgress) * (1 - model.swingProgress)) * MathX.PI_F);
         model.jaw.rotateAngleX += (1 - MathX.sin(animBase)) * 0.1f * flutter;
     }
 
@@ -392,13 +380,21 @@ public class DragonAnimator
         slerpArrays(wingForearm, wingForearmGround, wingForearm, ground);
 
         // apply angles
-        model.wingArm.rotateAngleX = wingArm[0];
-        model.wingArm.rotateAngleY = wingArm[1];
-        model.wingArm.rotateAngleZ = wingArm[2];
-        model.wingArm.preRotateAngleX = 1 - speed;
-        model.wingForearm.rotateAngleX = wingForearm[0];
-        model.wingForearm.rotateAngleY = wingForearm[1];
-        model.wingForearm.rotateAngleZ = wingForearm[2];
+        model.rightWingArm.rotateAngleX = wingArm[0];
+        model.rightWingArm.rotateAngleY = wingArm[1];
+        model.rightWingArm.rotateAngleZ = wingArm[2];
+        model.rightWingArm.preRotateAngleX = 1 - speed;
+        model.rightWingForearm.rotateAngleX = wingForearm[0];
+        model.rightWingForearm.rotateAngleY = wingForearm[1];
+        model.rightWingForearm.rotateAngleZ = wingForearm[2];
+
+        model.leftWingArm.rotateAngleX = wingArm[0];
+        model.leftWingArm.rotateAngleY = -wingArm[1];
+        model.leftWingArm.rotateAngleZ = -wingArm[2];
+        model.leftWingArm.preRotateAngleX = 1 - speed;
+        model.leftWingForearm.rotateAngleX = wingForearm[0];
+        model.leftWingForearm.rotateAngleY = -wingForearm[1];
+        model.leftWingForearm.rotateAngleZ = -wingForearm[2];
 
         // interpolate between folded and unfolded wing angles
         float[] yFold = new float[]{2.7f, 2.8f, 2.9f, 3.0f};
@@ -409,11 +405,13 @@ public class DragonAnimator
         float rotYOfs = MathX.sin(a1) * MathX.sin(a2) * 0.03f;
         float rotYMulti = 1;
 
-        for (int i = 0; i < model.wingFinger.length; i++)
+        for (int i = 0; i < model.rightWingFingers.length; i++)
         {
-            model.wingFinger[i].rotateAngleX = rotX += 0.005f; // reduce Z-fighting
-            model.wingFinger[i].rotateAngleY = MathX.terpSmoothStep(yUnfold[i],
+            model.rightWingFingers[i].rotateAngleX = rotX += 0.005f; // reduce Z-fighting
+            model.rightWingFingers[i].rotateAngleY = MathX.terpSmoothStep(yUnfold[i],
                     yFold[i] + rotYOfs * rotYMulti, ground);
+            model.leftWingFingers[i].rotateAngleX = model.rightWingFingers[i].rotateAngleX;
+            model.leftWingFingers[i].rotateAngleY = -model.rightWingFingers[i].rotateAngleY;
             rotYMulti -= 0.2f;
         }
     }
@@ -466,7 +464,7 @@ public class DragonAnimator
 
             model.tail.rotateAngleX += MathX.toRadians(pitchOfs);
             model.tail.rotateAngleX -= (1 - speed) * vertMulti * 2;
-            model.tail.rotateAngleY += MathX.toRadians(180 - yawOfs);
+            model.tail.rotateAngleY -= MathX.toRadians(180 - yawOfs);
 
             // display horns near the tip
             if (dragon.getType() == DMLRegistry.WATER_DRAGON_ENTITY.get())
@@ -519,19 +517,19 @@ public class DragonAnimator
 
             if (i % 2 == 0)
             {
-                thigh = model.forethigh;
-                crus = model.forecrus;
-                foot = model.forefoot;
-                toe = model.foretoe;
+                thigh = model.foreThigh;
+                crus = model.foreCrus;
+                foot = model.foreFoot;
+                toe = model.foreToe;
 
                 thigh.rotationPointZ = 4;
             }
             else
             {
-                thigh = model.hindthigh;
-                crus = model.hindcrus;
-                foot = model.hindfoot;
-                toe = model.hindtoe;
+                thigh = model.hindThigh;
+                crus = model.hindCrus;
+                foot = model.hindFoot;
+                toe = model.hindToe;
 
                 thigh.rotationPointZ = 46;
             }
@@ -566,7 +564,7 @@ public class DragonAnimator
             yGround = MathX.terpSmoothStep(yGround, yGroundWalk[i % 2], walk);
 
             // interpolate between flying and grounded
-            thigh.rotateAngleY = MathX.terpSmoothStep(yAir, yGround, ground);
+            thigh.rotateAngleY = MathX.terpSmoothStep(yAir, yGround, ground) * (i > 1? -1 : 1);
             thigh.rotateAngleX = MathX.terpSmoothStep(xAir[0], xGround[0], ground);
             crus.rotateAngleX = MathX.terpSmoothStep(xAir[1], xGround[1], ground);
             foot.rotateAngleX = MathX.terpSmoothStep(xAir[2], xGround[2], ground);

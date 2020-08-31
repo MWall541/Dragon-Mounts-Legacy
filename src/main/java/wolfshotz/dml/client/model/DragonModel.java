@@ -2,6 +2,7 @@ package wolfshotz.dml.client.model;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.vector.Vector3f;
@@ -31,17 +32,21 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     public ModelPart jaw;
     public ModelPart body;
     public ModelPart back;
-    public ModelPart forethigh;
-    public ModelPart forecrus;
-    public ModelPart forefoot;
-    public ModelPart foretoe;
-    public ModelPart hindthigh;
-    public ModelPart hindcrus;
-    public ModelPart hindfoot;
-    public ModelPart hindtoe;
-    public ModelPart wingArm;
-    public ModelPart wingForearm;
-    public ModelPart[] wingFinger = new ModelPart[4];
+    public ModelPart foreThigh;
+    public ModelPart foreCrus;
+    public ModelPart foreFoot;
+    public ModelPart foreToe;
+    public ModelPart hindThigh;
+    public ModelPart hindCrus;
+    public ModelPart hindFoot;
+    public ModelPart hindToe;
+    public ModelPart rightWingArm;
+    public ModelPart rightWingForearm;
+    public ModelPart[] rightWingFingers = new ModelPart[4];
+    public ModelPart leftWingArm;
+    public ModelPart leftWingForearm;
+    public ModelPart[] leftWingFingers = new ModelPart[4];
+
     // model attributes
     public ModelPartProxy[] neckProxy = new ModelPartProxy[VERTS_NECK];
     public ModelPartProxy[] tailProxy = new ModelPartProxy[VERTS_TAIL];
@@ -57,6 +62,8 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
     // RenderType: EntityCutoutNoCull
     public DragonModel(EntityType<? extends TameableDragonEntity> type)
     {
+        super(RenderType::getEntityCutout); // back face culling: needed for wings; not ideal but whatever
+
         this.type = type;
 
         textureWidth = 256;
@@ -66,7 +73,7 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         buildNeck();
         buildHead();
         buildTail();
-        buildWing();
+        buildWings();
         buildLegs();
     }
 
@@ -192,33 +199,63 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         back = body.addChildBox(-1, -6, -10, 2, 6, 12, 0, 32);
     }
 
-    private void buildWing()
+    private void buildWings()
     {
-        wingArm = new ModelPart(this);
-        wingArm.setRotationPoint(-10, 5, 4);
-        wingArm.setRenderScale(1.1f);
-        wingArm.addBox(-28, -3, -3, 28, 6, 6, 0, 152);
-        wingArm.addBox(-28, 0, 2, 28, 0, 24, 116, 232);
+        rightWingArm = new ModelPart(this);
+        rightWingArm.setRotationPoint(-10, 5, 4);
+        rightWingArm.setRenderScale(1.1f);
+        rightWingArm.addBox(-28, -3, -3, 28, 6, 6, 0, 152);
+        rightWingArm.addBox(-28, 0, 2, 28, 0, 24, 116, 232);
 
-        wingForearm = new ModelPart(this);
-        wingForearm.setRotationPoint(-28, 0, 0);
-        wingForearm.addBox(-48, -2, -2, 48, 4, 4, 0, 164);
-        wingArm.addChild(wingForearm);
+        rightWingForearm = new ModelPart(this);
+        rightWingForearm.setRotationPoint(-28, 0, 0);
+        rightWingForearm.addBox(-48, -2, -2, 48, 4, 4, 0, 164);
+        rightWingArm.addChild(rightWingForearm);
 
-        wingFinger[0] = buildWingFinger(false);
-        wingFinger[1] = buildWingFinger(false);
-        wingFinger[2] = buildWingFinger(false);
-        wingFinger[3] = buildWingFinger(true);
+        rightWingFingers[0] = buildWingFinger(false, false);
+        rightWingFingers[1] = buildWingFinger(false, false);
+        rightWingFingers[2] = buildWingFinger(false, false);
+        rightWingFingers[3] = buildWingFinger(true, false);
+
+        leftWingArm = new ModelPart(this);
+        leftWingArm.mirror = true;
+        leftWingArm.setRotationPoint(10, 5, 4);
+        leftWingArm.setRenderScale(1.1f);
+        leftWingArm.addBox(0, -3, -3, 28, 6, 6, 0, 152);
+        leftWingArm.addBox(0, 0, 2, 28, 0, 24, 116, 232);
+
+        leftWingForearm = new ModelPart(this);
+        leftWingForearm.mirror = true;
+        leftWingForearm.setRotationPoint(28, 0, 0);
+        leftWingForearm.addBox(0, -2, -2, 48, 4, 4, 0, 164);
+        leftWingArm.addChild(leftWingForearm);
+
+        leftWingFingers[0] = buildWingFinger(false, true);
+        leftWingFingers[1] = buildWingFinger(false, true);
+        leftWingFingers[2] = buildWingFinger(false, true);
+        leftWingFingers[3] = buildWingFinger(true, true);
     }
 
-    private ModelPart buildWingFinger(boolean small)
+    private ModelPart buildWingFinger(boolean small, boolean left)
     {
         ModelPart finger = new ModelPart(this);
-        finger.setRotationPoint(-47, 0, 0);
-        finger.addBox(-70, -1, -1, 70, 2, 2, 0, 172);
-        if (small) finger.addBox(-70, 0, 1, 70, 0, 32, -32, 224);
-        else finger.addBox(-70, 0, 1, 70, 0, 48, -49, 176);
-        wingForearm.addChild(finger);
+        if (left)
+        {
+            finger.mirror = true;
+            finger.setRotationPoint(47, 0, 0);
+            finger.addBox(0, -1, -1, 70, 2, 2, 0, 172);
+            if (small) finger.addBox(0, 0, 1, 70, 0, 32, -32, 224);
+            else finger.addBox(0, 0, 1, 70, 0, 48, -49, 176);
+            leftWingForearm.addChild(finger);
+        }
+        else
+        {
+            finger.setRotationPoint(-47, 0, 0);
+            finger.addBox(-70, -1, -1, 70, 2, 2, 0, 172);
+            if (small) finger.addBox(-70, 0, 1, 70, 0, 32, -32, 224);
+            else finger.addBox(-70, 0, 1, 70, 0, 48, -49, 176);
+            rightWingForearm.addChild(finger);
+        }
 
         return finger;
     }
@@ -231,8 +268,8 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
         // initialize model proxies
         for (int i = 0; i < 4; i++)
         {
-            if (i % 2 == 0) thighProxy[i] = new ModelPartProxy(forethigh);
-            else thighProxy[i] = new ModelPartProxy(hindthigh);
+            if (i % 2 == 0) thighProxy[i] = new ModelPartProxy(foreThigh);
+            else thighProxy[i] = new ModelPartProxy(hindThigh);
         }
     }
 
@@ -320,17 +357,17 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
 
         if (hind)
         {
-            hindthigh = thigh;
-            hindcrus = crus;
-            hindfoot = foot;
-            hindtoe = toe;
+            hindThigh = thigh;
+            hindCrus = crus;
+            hindFoot = foot;
+            hindToe = toe;
         }
         else
         {
-            forethigh = thigh;
-            forecrus = crus;
-            forefoot = foot;
-            foretoe = toe;
+            foreThigh = thigh;
+            foreCrus = crus;
+            foreFoot = foot;
+            foreToe = toe;
         }
     }
 
@@ -378,26 +415,20 @@ public class DragonModel extends EntityModel<TameableDragonEntity>
 
     protected void renderWings(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
-        ms.push();
-
-        wingArm.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-        ms.scale(-1, 1, 1);
-        wingArm.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
-
-        ms.pop();
+        rightWingArm.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
+        leftWingArm.render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
     }
 
     protected void renderLegs(MatrixStack ms, IVertexBuilder buffer, int packedLight, int packedOverlay, float r, float g, float b, float a)
     {
+        ms.push();
         for (int i = 0; i < thighProxy.length; i++)
         {
             thighProxy[i].render(ms, buffer, packedLight, packedOverlay, r, g, b, a);
 
             // mirror next legs
-            if (i == 1)
-            {
-                ms.scale(-1, 1, 1);
-            }
+            if (i == 1) ms.translate(1.38, 0, 0); //todo temp solution?
         }
+        ms.pop();
     }
 }

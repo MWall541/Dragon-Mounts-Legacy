@@ -9,9 +9,6 @@ import wolfshotz.dml.util.MathX;
 
 public class DragonAnimator
 {
-    // constants
-    private static final int JAW_OPENING_TIME_FOR_ATTACK = 5;
-
     public TameableDragonEntity dragon;
 
     // entity parameters

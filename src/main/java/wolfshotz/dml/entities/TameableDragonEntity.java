@@ -258,6 +258,7 @@ public abstract class TameableDragonEntity extends TameableEntity
     {
         if (!isFlying()) super.travel(vec3d);
 
+        if (world.isRemote) return;
         PlayerEntity rider = getRidingPlayer();
         if (rider == null || !isOwner(rider)) return;
 
@@ -650,9 +651,8 @@ public abstract class TameableDragonEntity extends TameableEntity
 
     public boolean canReproduce() { return isTamed() && reproCount < REPRO_LIMIT; }
 
-    @Nullable
     @Override
-    public AgeableEntity createChild(AgeableEntity mate)
+    public void func_234177_a_(ServerWorld world, AnimalEntity mate)
     {
         if (!(mate instanceof TameableDragonEntity)) throw new IllegalArgumentException("The mate isn't a dragon");
 
@@ -705,8 +705,11 @@ public abstract class TameableDragonEntity extends TameableEntity
         ((TameableDragonEntity) mate).addReproCount();
         egg.setPosition(getPosX(), getPosY(), getPosZ());
         world.addEntity(egg);
-        return null;
     }
+
+    @Nullable
+    @Override
+    public AgeableEntity func_241840_a(ServerWorld p_241840_1_, AgeableEntity p_241840_2_) { return null; }
 
     @Override
     public boolean shouldAttackEntity(LivingEntity target, LivingEntity owner)

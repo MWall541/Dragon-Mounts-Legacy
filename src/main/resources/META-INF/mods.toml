@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[33,)"
+loaderVersion="[33.0.34,)"
 issueTrackerURL="https://github.com/WolfShotz/DML/issues"
 license="GNU GPLv3"
 
@@ -11,19 +11,19 @@ displayURL="https://www.curseforge.com/minecraft/mc-mods/dragon-mounts-legacy"
 # logoFile="examplemod.png"
 credits="The Community, for being such an amazing inspiration to keep this project going" #optional
 authors="WolfShotz, Kingdomall"
-description='''This is a mod that allows you to hatch previously useless dragon eggs.
+description='''This is a mod that allows you to hatch previously useless dragon eggs. r\
  Once fostered and tamed, they'll be your faithful companion in all situations and, of course, can be used for a ride!'''
 
 [[dependencies.dragonmounts]]
     modId="forge"
     mandatory=true
-    versionRange="[33,)"
+    versionRange="[33.0.34,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.dragonmounts]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.2]"
+    versionRange="[1.16.2, 1.16.3]"
     ordering="NONE"
     side="BOTH"

@@ -155,7 +155,7 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     private <E extends Entity> void renderLeash(TameableDragonEntity entity, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, E leashHolder)
     {
         matrixStackIn.push();
-        Vector3d vector3d = leashHolder.getLook(partialTicks);
+        Vector3d vector3d = leashHolder.func_241843_o(partialTicks);
         double d0 = (MathHelper.lerp(partialTicks, entity.renderYawOffset, entity.prevRenderYawOffset) * ((float)Math.PI / 180F)) + (Math.PI / 2D);
         Vector3d vector3d1 = entity.func_241205_ce_();
         double d1 = Math.cos(d0) * vector3d1.z + Math.sin(d0) * vector3d1.x;

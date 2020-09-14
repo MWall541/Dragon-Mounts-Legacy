@@ -10,11 +10,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
-import net.minecraft.world.gen.layer.LayerUtil;
 
 public class WaterDragonEntity extends TameableDragonEntity
 {
-    private static final ImmutableList<Biome> BIOMES = ImmutableList.of(Biomes.OCEAN,
+    private static final ImmutableList<RegistryKey<Biome>> BIOMES = ImmutableList.of(Biomes.OCEAN,
             Biomes.COLD_OCEAN,
             Biomes.DEEP_COLD_OCEAN,
             Biomes.DEEP_FROZEN_OCEAN,

@@ -16,7 +16,7 @@ import wolfshotz.dml.util.BetterBlockMatcher;
  */
 public class NetherDragonEntity extends TameableDragonEntity
 {
-    private static final ImmutableList<Biome> BIOMES = ImmutableList.of(Biomes.NETHER_WASTES,
+    private static final ImmutableList<RegistryKey<Biome>> BIOMES = ImmutableList.of(Biomes.NETHER_WASTES,
             Biomes.CRIMSON_FOREST,
             Biomes.WARPED_FOREST,
             Biomes.BASALT_DELTAS,

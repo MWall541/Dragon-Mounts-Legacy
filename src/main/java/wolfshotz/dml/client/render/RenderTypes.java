@@ -5,10 +5,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
-public class RenderStates extends RenderType
+public class RenderTypes extends RenderType
 {
     // dummy
-    private RenderStates() { super(null, null, 0, 0, false, false, null, null); }
+    private RenderTypes() { super(null, null, 0, 0, false, false, null, null); }
 
     public static RenderType getGlow(ResourceLocation locationIn)
     {

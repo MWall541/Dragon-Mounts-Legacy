@@ -22,8 +22,6 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.common.MinecraftForge;
 import wolfshotz.dml.DragonMountsLegacy;
 import wolfshotz.dml.client.model.DragonModel;
-import wolfshotz.dml.client.render.layer.DragonGlowLayer;
-import wolfshotz.dml.client.render.layer.DragonSaddleLayer;
 import wolfshotz.dml.entities.TameableDragonEntity;
 
 public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonModel>
@@ -38,14 +36,14 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     public DragonRenderer(EntityRendererManager renderManagerIn, EntityType<? extends TameableDragonEntity> type)
     {
         super(renderManagerIn, new DragonModel(type), 2);
-        addLayer(new DragonGlowLayer(this));
-        addLayer(new DragonSaddleLayer(this));
+        addLayer(new GlowLayer());
+        addLayer(new SaddleLayer());
     }
 
     @Override
-    public void render(TameableDragonEntity dragon, float entityYaw, float partialTicks, MatrixStack ms, IRenderTypeBuffer bufferIn, int packedLightIn)
+    public void render(TameableDragonEntity dragon, float yaw, float partialTicks, MatrixStack ms, IRenderTypeBuffer buffer, int light)
     {
-        if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(dragon, this, partialTicks, ms, bufferIn, packedLightIn)))
+        if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<>(dragon, this, partialTicks, ms, buffer, light)))
             return;
 
         ms.push();
@@ -78,41 +76,39 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         // finish up; render model and layers
         entityModel.setLivingAnimations(dragon, limbSwing, limbSwingAmount, partialTicks);
         entityModel.setRotationAngles(dragon, limbSwing, limbSwingAmount, rotation, yawDiff, lerpPitch);
-        renderModel(dragon, ms, bufferIn, packedLightIn, partialTicks);
+        renderModel(dragon, ms, buffer, light, getPackedOverlay(dragon, getOverlayProgress(dragon, partialTicks)), getRenderType(dragon, getEntityTexture(dragon)));
         if (!dragon.isSpectator())
             for (LayerRenderer<TameableDragonEntity, DragonModel> layer : layerRenderers)
-                layer.render(ms, bufferIn, packedLightIn, dragon, limbSwing, limbSwingAmount, partialTicks, rotation, yawDiff, lerpPitch);
+                layer.render(ms, buffer, light, dragon, limbSwing, limbSwingAmount, partialTicks, rotation, yawDiff, lerpPitch);
 
         ms.pop();
 
         // render name
         if (canRenderName(dragon))
-            renderName(dragon, dragon.getDisplayName(), ms, bufferIn, packedLightIn);
+            renderName(dragon, dragon.getDisplayName(), ms, buffer, light);
 
         // render leash
         Entity entity = dragon.getLeashHolder();
-        if (entity != null) renderLeash(dragon, partialTicks, ms, bufferIn, entity);
-        MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post<>(dragon, this, partialTicks, ms, bufferIn, packedLightIn));
+        if (entity != null) renderLeash(dragon, partialTicks, ms, buffer, entity);
+        MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post<>(dragon, this, partialTicks, ms, buffer, light));
     }
 
-    public void renderModel(TameableDragonEntity dragon, MatrixStack ms, IRenderTypeBuffer buffer, int packedLight, float partialTicks)
+    public void renderModel(TameableDragonEntity dragon, MatrixStack ms, IRenderTypeBuffer buffer, int packedLight, int overlay, RenderType renderType)
     {
-        ResourceLocation texture = getEntityTexture(dragon);
-        int packedOverlay = getPackedOverlay(dragon, getOverlayProgress(dragon, partialTicks));
         float deathTime = dragon.getDeathTime() / (float) dragon.getMaxDeathTime();
         if (deathTime > 0)
         {
-            IVertexBuilder dissolve = buffer.getBuffer(RenderStates.func_239264_a_(DISSOLVE_TEXTURE, deathTime));
+            IVertexBuilder dissolve = buffer.getBuffer(RenderType.func_239264_a_(DISSOLVE_TEXTURE, deathTime));
             entityModel.render(ms, dissolve, packedLight, OverlayTexture.getPackedUV(0, true), 1f, 1f, 1f, 1f);
-            IVertexBuilder decal = buffer.getBuffer(RenderStates.getEntityDecal(texture));
-//            entityModel.render(ms, decal, packedLight, OverlayTexture.getPackedUV(0, true), 1f, 1f, 1f, 1f);
+            IVertexBuilder decal = buffer.getBuffer(RenderType.getEntityDecal(getEntityTexture(dragon)));
+            entityModel.render(ms, decal, packedLight, OverlayTexture.getPackedUV(0, true), 1f, 1f, 1f, 1f);
 
             return;
         }
 
         boolean visibleToPlayer = !isVisible(dragon) && !dragon.isInvisibleToPlayer(Minecraft.getInstance().player);
-        IVertexBuilder ivertexbuilder = buffer.getBuffer(func_230496_a_(dragon, isVisible(dragon), visibleToPlayer, Minecraft.getInstance().func_238206_b_(dragon)));
-        entityModel.render(ms, ivertexbuilder, packedLight, packedOverlay, 1f, 1f, 1f, visibleToPlayer? 0.15f : 1f);
+        IVertexBuilder builder = buffer.getBuffer(renderType);
+        entityModel.render(ms, builder, packedLight, overlay, 1f, 1f, 1f, visibleToPlayer? 0.15f : 1f);
     }
 
     @Override
@@ -133,30 +129,38 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     @Override
     public ResourceLocation getEntityTexture(TameableDragonEntity entity)
     {
-        if (bodyTexture == null)
-            bodyTexture = rl(entity.getType().getRegistryName().getPath() + "/body.png");
+        if (bodyTexture == null) bodyTexture = rl(entity.getType().getRegistryName().getPath() + "/body.png");
         return bodyTexture;
     }
 
     public ResourceLocation getSaddleTexture(TameableDragonEntity entity)
     {
-        if (saddleTexture == null)
-            saddleTexture = rl(entity.getType().getRegistryName().getPath() + "/saddle.png");
+        if (saddleTexture == null) saddleTexture = rl(entity.getType().getRegistryName().getPath() + "/saddle.png");
         return saddleTexture;
     }
 
     public ResourceLocation getGlowTexture(TameableDragonEntity entity)
     {
-        if (glowTexture == null)
-            glowTexture = rl(entity.getType().getRegistryName().getPath() + "/glow.png");
+        if (glowTexture == null) glowTexture = rl(entity.getType().getRegistryName().getPath() + "/glow.png");
         return glowTexture;
+    }
+
+    public RenderType getRenderType(TameableDragonEntity dragon, ResourceLocation texture)
+    {
+        boolean isVisible = isVisible(dragon);
+
+        if (!isVisible && dragon.isInvisibleToPlayer(Minecraft.getInstance().player))
+            return RenderType.func_239268_f_(texture);
+        if (isVisible) return getEntityModel().getRenderType(texture);
+        if (Minecraft.getInstance().func_238206_b_(dragon)) return RenderType.getOutline(texture);
+        return null;
     }
 
     private <E extends Entity> void renderLeash(TameableDragonEntity entity, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, E leashHolder)
     {
         matrixStackIn.push();
         Vector3d vector3d = leashHolder.func_241843_o(partialTicks);
-        double d0 = (MathHelper.lerp(partialTicks, entity.renderYawOffset, entity.prevRenderYawOffset) * ((float)Math.PI / 180F)) + (Math.PI / 2D);
+        double d0 = (MathHelper.lerp(partialTicks, entity.renderYawOffset, entity.prevRenderYawOffset) * ((float) Math.PI / 180F)) + (Math.PI / 2D);
         Vector3d vector3d1 = entity.func_241205_ce_();
         double d1 = Math.cos(d0) * vector3d1.z + Math.sin(d0) * vector3d1.x;
         double d2 = Math.sin(d0) * vector3d1.z - Math.cos(d0) * vector3d1.x;
@@ -164,9 +168,9 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         double d4 = MathHelper.lerp(partialTicks, entity.prevPosY, entity.getPosY()) + vector3d1.y;
         double d5 = MathHelper.lerp(partialTicks, entity.prevPosZ, entity.getPosZ()) + d2;
         matrixStackIn.translate(d1, vector3d1.y, d2);
-        float f = (float)(vector3d.x - d3);
-        float f1 = (float)(vector3d.y - d4);
-        float f2 = (float)(vector3d.z - d5);
+        float f = (float) (vector3d.x - d3);
+        float f1 = (float) (vector3d.y - d4);
+        float f2 = (float) (vector3d.z - d5);
         IVertexBuilder ivertexbuilder = bufferIn.getBuffer(RenderType.getLeash());
         Matrix4f matrix4f = matrixStackIn.getLast().getMatrix();
         float f4 = MathHelper.fastInvSqrt(f * f + f2 * f2) * 0.025F / 2.0F;
@@ -175,7 +179,7 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
         BlockPos blockpos = new BlockPos(entity.getEyePosition(partialTicks));
         BlockPos blockpos1 = new BlockPos(leashHolder.getEyePosition(partialTicks));
         int i = getBlockLight(entity, blockpos);
-        int j = leashHolder.isBurning() ? 15 : leashHolder.world.getLightFor(LightType.BLOCK, blockpos1);
+        int j = leashHolder.isBurning()? 15 : leashHolder.world.getLightFor(LightType.BLOCK, blockpos1);
         int k = entity.world.getLightFor(LightType.SKY, blockpos);
         int l = entity.world.getLightFor(LightType.SKY, blockpos1);
         renderSide(ivertexbuilder, matrix4f, f, f1, f2, i, j, k, l, 0.025F, 0.025F, f5, f6);
@@ -186,5 +190,34 @@ public class DragonRenderer extends MobRenderer<TameableDragonEntity, DragonMode
     public static ResourceLocation rl(String path)
     {
         return DragonMountsLegacy.rl(TEX_PATH + path);
+    }
+
+    class SaddleLayer extends LayerRenderer<TameableDragonEntity, DragonModel>
+    {
+        public SaddleLayer()
+        {
+            super(DragonRenderer.this);
+        }
+
+        @Override
+        public void render(MatrixStack ms, IRenderTypeBuffer buffer, int packedLight, TameableDragonEntity dragon, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
+        {
+            if (dragon.isSaddled())
+                renderModel(dragon, ms, buffer, packedLight, getPackedOverlay(dragon, 0), getRenderType(dragon, getSaddleTexture(dragon)));
+        }
+    }
+
+    class GlowLayer extends LayerRenderer<TameableDragonEntity, DragonModel>
+    {
+        public GlowLayer()
+        {
+            super(DragonRenderer.this);
+        }
+
+        @Override
+        public void render(MatrixStack ms, IRenderTypeBuffer bufferIn, int light, TameableDragonEntity dragon, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
+        {
+            renderModel(dragon, ms, bufferIn, light, OverlayTexture.NO_OVERLAY, RenderTypes.getGlow(getGlowTexture(dragon)));
+        }
     }
 }

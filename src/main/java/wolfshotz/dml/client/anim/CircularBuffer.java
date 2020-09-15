@@ -11,8 +11,7 @@ import java.util.Arrays;
  */
 public class CircularBuffer
 {
-
-    private float[] buffer;
+    private final float[] buffer;
     private int index = 0;
 
     public CircularBuffer(int size)
@@ -20,7 +19,10 @@ public class CircularBuffer
         buffer = new float[size];
     }
 
-    public void fill(float value) { Arrays.fill(buffer, value); }
+    public void fill(float value)
+    {
+        Arrays.fill(buffer, value);
+    }
 
     public void update(float value)
     {
@@ -40,5 +42,8 @@ public class CircularBuffer
         return MathX.terpLinear(buffer[i - 1 & len], buffer[i & len], x);
     }
 
-    public float get(float x, int offset1, int offset2) { return get(x, offset2) - get(x, offset1); }
+    public float get(float x, int offset1, int offset2)
+    {
+        return get(x, offset2) - get(x, offset1);
+    }
 }

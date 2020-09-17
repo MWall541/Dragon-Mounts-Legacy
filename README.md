@@ -33,7 +33,7 @@ With that said, you are hereby accepting to the following:
 **You MUST**
  * Keep a visible and clear repository of the code of which that is derived/inspried from this repository. Of course, you still maintain rights of your code, however you still need to keep a visible source.
 
-*Code is CODE. NOT ASSETS. You cannot distribute any asset material under any modification or format (this includes remixes, transformations and other modifications of said material) unless explicitly stated.
+*Code is CODE. NOT ASSETS. You cannot distribute/change any asset material under any modification or format (this includes remixes, transformations and other modifications of said material) unless explicitly stated.
 
 **"Portions" can be considered 90% of the outcome of a particular result or function. Should anything surpass that amount, you must provide credit to me.
 

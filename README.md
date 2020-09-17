@@ -39,7 +39,7 @@ With that said, you are hereby accepting to the following:
 
 ***Changing Variable names, adding whitespace, etc. is not different code! Basically, if it achieves the same result, its considered [Functionally Equivalent Statements (Alternate Behavior)](https://link.springer.com/referenceworkentry/10.1007%2F978-1-4419-1698-3_1038) and falls under this category!
 
-####TL;DR
+#### TL;DR
 This is an open source project. You are free to look and reference the code all you want. Learn from it!
 If you think you have improvements, tell me! Submit Pull Requests! I'm all ears!
 Just please, don't be that guy who goes and steals peoples hard work. Seriously, its not that hard.

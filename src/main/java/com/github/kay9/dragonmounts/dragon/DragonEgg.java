@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.util.LerpedFloat;
 import com.mojang.math.Vector3f;
@@ -235,7 +235,7 @@ public class DragonEgg extends Entity
         else
         {
             level.broadcastEntityEvent(this, HATCH_ID);
-            TameableDragon dragon = DragonMountsLegacy.DRAGON.get().create(level);
+            TameableDragon dragon = DMLRegistry.DRAGON.get().create(level);
             dragon.setBreed(breed);
             dragon.setBaby(true);
             dragon.setPos(getX(), getY(), getZ());

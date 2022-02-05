@@ -1,7 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -11,14 +10,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.ForgeI18n;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 
 public class DragonSpawnEgg extends ForgeSpawnEggItem
 {
     public DragonSpawnEgg()
     {
-        super(DragonMountsLegacy.DRAGON, 0, 0, new Item.Properties().tab(CreativeModeTab.TAB_MISC));
+        super(DMLRegistry.DRAGON, 0, 0, new Item.Properties().tab(CreativeModeTab.TAB_MISC));
     }
 
     @Override

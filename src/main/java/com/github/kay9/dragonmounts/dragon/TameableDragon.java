@@ -6,8 +6,6 @@ import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
-import com.mojang.math.Vector3d;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -27,7 +25,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.*;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
@@ -39,7 +40,6 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SaddleItem;
@@ -49,7 +49,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
+import org.codehaus.plexus.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -62,12 +62,12 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 /**
  * Here be dragons.
  * <p>
- * Recreated: 10:50PM, 4/3/2020
- * Let the legacy live on
+ * Let the legacy live on.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  * @author Kay9
  */
+@SuppressWarnings("ConstantConditions")
 public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal
 {
     // base attributes
@@ -354,8 +354,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             {
                 calculateEntityAnimation(this, true);
                 setDeltaMovement(Vec3.ZERO);
-//                if (!level.isClientSide && isFlying)
-//                    ((ServerPlayerEntity) controllingPassenger).connection.aboveGroundVehicleTickCount = 0;
                 return;
             }
         }
@@ -776,8 +774,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 String[] p1Names = p1Name.split(" ");
                 String[] p2Names = p2Name.split(" ");
 
-                p1Name = DragonBreedGoal.fixChildName(p1Names[getRandom().nextInt(p1Names.length)]);
-                p2Name = DragonBreedGoal.fixChildName(p2Names[getRandom().nextInt(p2Names.length)]);
+                p1Name = StringUtils.capitalise(p1Names[getRandom().nextInt(p1Names.length)]);
+                p2Name = StringUtils.capitalise(p2Names[getRandom().nextInt(p2Names.length)]);
 
                 babyName = getRandom().nextBoolean()? p1Name + " " + p2Name : p2Name + " " + p1Name;
             }
@@ -792,7 +790,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 if (getRandom().nextBoolean()) p2Name = p2Name.substring(0, (p2Name.length() - 1) / 2);
                 else p2Name = p2Name.substring((p2Name.length() - 1) / 2);
 
-                p2Name = DragonBreedGoal.fixChildName(p2Name);
+                p2Name = StringUtils.capitalise(p2Name);
 
                 babyName = getRandom().nextBoolean()? p1Name + p2Name : p2Name + p1Name;
             }

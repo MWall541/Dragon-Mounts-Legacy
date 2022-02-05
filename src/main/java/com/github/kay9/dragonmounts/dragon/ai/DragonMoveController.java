@@ -6,10 +6,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.phys.Vec3;
 
-//todo ditch this in favor of common-sided movement. Smoother on client
 public class DragonMoveController extends MoveControl
 {
-    private final float YAW_SPEED = 5;
     private final TameableDragon dragon;
 
     public DragonMoveController(TameableDragon dragon)

@@ -51,30 +51,6 @@ public class BreedManager extends SimpleJsonResourceReloadListener
         DragonMountsLegacy.LOG.info(MARKER, "Loaded {} Dragon Breeds", registry.size());
     }
 
-    /**
-     * Ensure at least ONE dragon is present in the registry, and builds it.
-     * The default fallback will be the DML fire dragon default.
-     * If someone really broke something or is just being a douche, we have our hardcoded version ready.
-     */
-//    private static ImmutableMap<ResourceLocation, DragonBreed> build(Map<ResourceLocation, DragonBreed> map)
-//    {
-//        if (map.isEmpty()) // not a single entry could be parsed. Use the built-in fallback...
-//        {
-//            DragonMountsLegacy.LOG.error(MARKER, "No DragonBreed's have been found. Using FIRE as a single fallback.");
-//
-//            var fire = DragonBreed.INTERNAL_FIRE.get();
-//            fallback = fire;
-//            return ImmutableMap.of(fire.id(), fire);
-//        }
-//        else if ((fallback = getNullable(DragonMountsLegacy.id("fire"))) == null) // attempt fire for fallback
-//        {
-//            fallback = map.values().iterator().next(); // fire doesn't seem to be present, so use the first available entry.
-//        }
-//
-//        return ImmutableMap.copyOf(map);
-//    }
-    // todo: issues arose with syncing to client... we will continue to use a built-in entry for now.
-
     @Nullable
     public static DragonBreed getNullable(ResourceLocation breed)
     {

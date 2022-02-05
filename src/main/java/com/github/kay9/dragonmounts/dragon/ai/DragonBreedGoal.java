@@ -20,19 +20,6 @@ public class DragonBreedGoal extends BreedGoal
         this.dragon = animal;
     }
 
-    public static String fixChildName(String nameOld)
-    {
-        if (nameOld == null || nameOld.isEmpty()) return nameOld;
-
-        // create all lower-case char array
-        char[] chars = nameOld.toLowerCase().toCharArray();
-
-        // convert first char to upper-case
-        chars[0] = Character.toUpperCase(chars[0]);
-
-        return new String(chars);
-    }
-
     @Override
     public boolean canUse()
     {

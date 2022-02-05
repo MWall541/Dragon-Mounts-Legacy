@@ -27,10 +27,10 @@ public class DMLRegistry
 {
     public static void init(IEventBus bus)
     {
-        REGISTRIES.values().forEach(bus::register);
+        REGISTRIES.values().forEach(r -> r.register(bus));
     }
 
-    public static final Map<IForgeRegistry<?>, DeferredRegister<?>> REGISTRIES = new HashMap<>();
+    private static final Map<IForgeRegistry<?>, DeferredRegister<?>> REGISTRIES = new HashMap<>();
 
     public static final RegistryObject<Block> EGG_BLOCK = register("dragon_egg", ForgeRegistries.BLOCKS, DMLEggBlock::new);
 

@@ -17,6 +17,6 @@ public class EnsureSafeFlyingVehicleMixin
     @Redirect(method = "handleMoveVehicle(Lnet/minecraft/network/protocol/game/ServerboundMoveVehiclePacket;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;clientVehicleIsFloating:Z", opcode = Opcodes.PUTFIELD))
     private void dragonmounts_ensureSafeFlyingVehicle(ServerGamePacketListenerImpl impl, boolean flag)
     {
-        clientVehicleIsFloating = impl.getPlayer().getRootVehicle() instanceof FlyingAnimal a && a.isFlying() && flag;
+        clientVehicleIsFloating = (!(impl.getPlayer().getRootVehicle() instanceof FlyingAnimal a) || !a.isFlying()) && flag;
     }
 }

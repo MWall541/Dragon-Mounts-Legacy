@@ -42,7 +42,7 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
-            arg "-mixin.config=dragonmouns.mixins.json"
+            arg "-mixin.config=dragonmounts.mixins.json"
 
             mods {
                 dragonmounts {

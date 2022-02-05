@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -63,5 +64,15 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, DMLRegistry.EGG_BLOCK.get().defaultBlockState(), model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
         ForgeHooksClient.setRenderType(null);
         ps.popPose();
+    }
+
+    /**
+     * Here to provide a way to create a method reference factory to return the instance.
+     * Still confused? I'm exploiting javas shitty class loading ways.
+     */
+    @SuppressWarnings("unused")
+    public static DragonEggRenderer instance(BlockEntityRendererProvider.Context context)
+    {
+        return INSTANCE;
     }
 }

@@ -75,7 +75,7 @@ public class DragonMountsLegacy
     {
         e.registerEntityRenderer(DMLRegistry.DRAGON.get(), DragonRenderer::new);
         e.registerEntityRenderer(DMLRegistry.DRAGON_EGG.get(), EggEntityRenderer::new);
-        e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), c -> DragonEggRenderer.INSTANCE);
+        e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }
 
     public static void cameraAngles(EntityViewRenderEvent.CameraSetup evt)

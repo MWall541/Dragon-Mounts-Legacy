@@ -1,0 +1,15 @@
+{
+  "habitats": [
+    {
+      "fluid_tag": "minecraft:water",
+      "type": "in_fluid"
+    }
+  ],
+  "immunities": [
+    "drown"
+  ],
+  "seconary_color": 5872127,
+  "show_tail_spikes": true,
+  "name": "dragonmounts:water",
+  "primary_color": 25343
+}

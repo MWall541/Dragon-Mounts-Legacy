@@ -1,0 +1,28 @@
+{
+  "habitats": [
+    {
+      "block_tag": "forge:end_stones",
+      "type": "nearby_blocks"
+    },
+    {
+      "biomes": [
+        "minecraft:end_barrens",
+        "minecraft:end_highlands",
+        "minecraft:end_midlands",
+        "minecraft:the_end",
+        "minecraft:small_end_islands"
+      ],
+      "type": "biome"
+    }
+  ],
+  "immunities": [
+    "dragonBreath"
+  ],
+  "is_ender": true,
+  "attributes": {
+    "minecraft:generic.max_health": 75.0
+  },
+  "seconary_color": 16737256,
+  "name": "dragonmounts:end",
+  "primary_color": 1447446
+}

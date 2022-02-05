@@ -1,0 +1,11 @@
+{
+  "habitats": [
+    {
+      "block_tag": "dragonmounts:forest_dragon_habitat_blocks",
+      "type": "nearby_blocks"
+    }
+  ],
+  "seconary_color": 693760,
+  "name": "dragonmounts:forest",
+  "primary_color": 346624
+}

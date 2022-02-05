@@ -1,0 +1,21 @@
+{
+  "habitats": [
+    {
+      "inverse": true,
+      "height": 0,
+      "type": "world_height"
+    },
+    {
+      "inverse": true,
+      "light": 3,
+      "type": "light"
+    }
+  ],
+  "immunities": [
+    "drown"
+  ],
+  "ambient_sound": "minecraft:entity.skeleton.ambient",
+  "seconary_color": 12777727,
+  "name": "dragonmounts:ghost",
+  "primary_color": 12895428
+}

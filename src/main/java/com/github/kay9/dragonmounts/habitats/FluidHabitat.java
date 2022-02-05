@@ -1,0 +1,33 @@
+package com.github.kay9.dragonmounts.habitats;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.SerializationTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+
+public record FluidHabitat(Tag<Fluid> fluidType) implements Habitat
+{
+    public static final Codec<FluidHabitat> CODEC = Tag.codec(() -> SerializationTags.getInstance().getOrEmpty(Registry.FLUID_REGISTRY))
+            .fieldOf("fluid_tag")
+            .xmap(FluidHabitat::new, FluidHabitat::fluidType)
+            .codec();
+
+    @Override
+    public int getHabitatPoints(Level level, BlockPos pos)
+    {
+        return (int) BlockPos.betweenClosedStream(pos.offset(1, 1, 1), pos.offset(-1, -1, -1))
+                .filter(p -> level.getFluidState(p).is(fluidType))
+                .count();
+    }
+
+    @Override
+    public HabitatType type()
+    {
+        return Habitat.IN_FLUID;
+    }
+}

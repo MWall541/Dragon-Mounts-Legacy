@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.kay9.dragonmounts.mixins",
+  "refmap": "dragonmounts.mixins.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+    "client.ModelPartMixin"
+  ]
+}

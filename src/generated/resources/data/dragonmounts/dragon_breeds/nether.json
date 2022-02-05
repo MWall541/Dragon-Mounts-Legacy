@@ -1,0 +1,30 @@
+{
+  "habitats": [
+    {
+      "block_tag": "dragonmounts:nether_dragon_habitat_blocks",
+      "type": "nearby_blocks"
+    },
+    {
+      "biomes": [
+        "minecraft:basalt_deltas",
+        "minecraft:crimson_forest",
+        "minecraft:nether_wastes",
+        "minecraft:soul_sand_valley",
+        "minecraft:warped_forest"
+      ],
+      "type": "biome"
+    }
+  ],
+  "immunities": [
+    "inFire",
+    "onFire",
+    "lava",
+    "hotFloor"
+  ],
+  "attributes": {
+    "minecraft:generic.armor": 8.0
+  },
+  "seconary_color": 3017472,
+  "name": "dragonmounts:nether",
+  "primary_color": 9511936
+}

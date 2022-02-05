@@ -1,0 +1,15 @@
+{
+  "habitats": [
+    {
+      "block_tag": "dragonmounts:ice_dragon_habitat_blocks",
+      "type": "nearby_blocks"
+    }
+  ],
+  "immunities": [
+    "drown",
+    "freeze"
+  ],
+  "seconary_color": 47103,
+  "name": "dragonmounts:ice",
+  "primary_color": 16777215
+}

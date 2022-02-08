@@ -5,15 +5,13 @@ import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Vector3f;
 import net.minecraft.Util;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -47,11 +45,16 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     }
 
     @Override
-    protected void setupRotations(TameableDragon pEntityLiving, PoseStack ps, float pAgeInTicks, float pRotationYaw, float pPartialTicks)
+    protected void setupRotations(TameableDragon dragon, PoseStack ps, float age, float yaw, float partials)
     {
-        super.setupRotations(pEntityLiving, ps, pAgeInTicks, pRotationYaw, pPartialTicks);
-        var scale = pEntityLiving.getScale();
+        super.setupRotations(dragon, ps, age, yaw, partials);
+        var animator = dragon.getAnimator();
+        var scale = dragon.getScale();
         ps.scale(scale, scale, scale);
+        ps.translate(animator.getModelOffsetX(), animator.getModelOffsetY(), animator.getModelOffsetZ());
+        ps.translate(0, 1.5, 0.5); // change rotation point
+        ps.mulPose(Vector3f.XP.rotationDegrees(animator.getModelPitch(partials))); // rotate near the saddle so we can support the player
+        ps.translate(0, -1.5, -0.5); // restore rotation point
     }
 
     // dragons dissolve during death, not flip.
@@ -82,13 +85,6 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         return cache;
     }
 
-    private void renderDeathOverlay(PoseStack ps, MultiBufferSource buffer, int light, TameableDragon dragon, RenderType underDecal)
-    {
-        var delta = dragon.deathTime / (float) dragon.getMaxDeathTime();
-        model.renderToBuffer(ps, buffer.getBuffer(CustomRenderTypes.DISSOLVE), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, delta);
-        model.renderToBuffer(ps, buffer.getBuffer(underDecal), light, OverlayTexture.pack(0, true), 1f, 1f, 1f, 1f);
-    }
-
     public final RenderLayer<TameableDragon, DragonModel> GLOW_LAYER = new RenderLayer<>(this)
     {
         @Override
@@ -116,7 +112,11 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         public void render(PoseStack ps, MultiBufferSource buffer, int light, TameableDragon dragon, float limbSwing, float limbSwingAmount, float partials, float age, float yaw, float pitch)
         {
             if (dragon.deathTime > 0)
-                renderDeathOverlay(ps, buffer, light, dragon, RenderType.entityDecal(getTextureLocation(dragon)));
+            {
+                var delta = dragon.deathTime / (float) dragon.getMaxDeathTime();
+                model.renderToBuffer(ps, buffer.getBuffer(CustomRenderTypes.DISSOLVE), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, delta);
+                model.renderToBuffer(ps, buffer.getBuffer(RenderType.entityDecal(getTextureLocation(dragon))), light, OverlayTexture.pack(0, true), 1f, 1f, 1f, 1f);
+            }
         }
     };
 

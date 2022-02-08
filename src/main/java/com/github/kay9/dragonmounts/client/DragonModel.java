@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -60,15 +59,11 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPartProxy[] tailProxy = new ModelPartProxy[VERTS_TAIL];
     public final ModelPartProxy[] thighProxy = new ModelPartProxy[4];
 
-    public float offsetX;
-    public float offsetY;
-    public float offsetZ;
-    public float pitch;
     public float size;
 
     public DragonModel(ModelPart root)
     {
-        super(RenderType::entityCutout);
+        super(RenderType::entityCutoutNoCull);
 
         this.body = root.getChild("body");
         this.back = body.getChild("back");
@@ -213,8 +208,8 @@ public class DragonModel extends EntityModel<TameableDragon>
         for (int i = 1; i < 4; i++) wingForearm.addOrReplaceChild("wing_finger_" + i, shortSkins, shortSkinsPos);
 
         wingForearm.addOrReplaceChild("wing_finger_4", CubeListBuilder.create()
-                .texOffs(0, 172).addBox(-70, -1, -1, 70, 2, 2) // bone
-                .texOffs(-32, 224).addBox(-70, 0, 1, 70, 0, 32), // shortskin
+                        .texOffs(0, 172).addBox(-70, -1, -1, 70, 2, 2) // bone
+                        .texOffs(-32, 224).addBox(-70, 0, 1, 70, 0, 32), // shortskin
                 shortSkinsPos);
     }
 
@@ -305,6 +300,7 @@ public class DragonModel extends EntityModel<TameableDragon>
         boolean middleScales = dragon.breed.showMiddleTailScales();
         tailScaleMiddle.visible = middleScales;
         tailScaleRight.visible = tailScaleLeft.visible = !middleScales;
+        size = dragon.getScale();
 
         dragon.getAnimator().setPartialTicks(pPartialTick);
     }
@@ -312,58 +308,60 @@ public class DragonModel extends EntityModel<TameableDragon>
     @Override
     public void setupAnim(TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch)
     {
-        size = dragon.getScale();
-
         DragonAnimator animator = dragon.getAnimator();
         animator.setLook(pNetHeadYaw, pHeadPitch);
-        animator.setMovement(pLimbSwing, pLimbSwingAmount * size);
+        animator.setMovement(pLimbSwing, pLimbSwingAmount * dragon.getScale());
         dragon.getAnimator().animate(this);
     }
 
     @Override
     public void renderToBuffer(PoseStack ps, VertexConsumer vertices, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
-        ps.pushPose();
-        ps.translate(offsetX, offsetY, offsetZ);
-        ps.mulPose(Vector3f.XN.rotationDegrees(pitch));
-
         body.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
         renderHead(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-        for (ModelPartProxy proxy : neckProxy) proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-        for (ModelPartProxy proxy : tailProxy) proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+        for (ModelPartProxy proxy : neckProxy)
+            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+        for (ModelPartProxy proxy : tailProxy)
+            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
         renderWings(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
         renderLegs(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-
-        ps.popPose();
     }
 
     protected void renderHead(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
         float headScale = 1.4f / (size + 0.5f);
-        ((ModelPartAccess)(Object) head).setRenderScale(headScale, headScale, headScale);
+        ((ModelPartAccess) (Object) head).setRenderScale(headScale, headScale, headScale);
         head.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
     }
 
-    private static final Matrix4f inverseX = Matrix4f.createScaleMatrix(-1, 1, 1);
-    private static final Matrix3f inverseNormal = new Matrix3f(inverseX);
+    private static final Matrix4f INVERSE_SCALE = Matrix4f.createScaleMatrix(-1, 1, 1);
+    private static final Matrix3f INVERSE_NORMS = new Matrix3f(INVERSE_SCALE);
 
-    protected void renderWings(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
+    public void renderWings(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
         ps.pushPose();
         ps.scale(1.1f, 1.1f, 1.1f);
 
         wingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-//        wingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+        ps.last().pose().multiply(INVERSE_SCALE);
+        ps.last().normal().mul(INVERSE_NORMS);
+        wingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+
         ps.popPose();
     }
 
     protected void renderLegs(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
-        thighProxy[0].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-        thighProxy[1].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-//        for (int i = 0; i < thighProxy.length; i++)
-//        {
-//            thighProxy[i].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-//        }
+        ps.pushPose();
+        for (int i = 0; i < thighProxy.length; i++)
+        {
+            thighProxy[i].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+            if (i == 1)
+            {
+                ps.last().pose().multiply(INVERSE_SCALE);
+                ps.last().normal().mul(INVERSE_NORMS);
+            }
+        }
+        ps.popPose();
     }
 }

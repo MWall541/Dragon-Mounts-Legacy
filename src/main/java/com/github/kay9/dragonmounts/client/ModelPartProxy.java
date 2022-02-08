@@ -18,7 +18,7 @@ public class ModelPartProxy
 {
     // projected parts and part childs
     public final ModelPart part;
-    private final List<ModelPartProxy> childs;
+    private final List<ModelPartProxy> children;
     // scale multiplier
     public float renderScaleX = 1;
     public float renderScaleY = 1;
@@ -43,7 +43,7 @@ public class ModelPartProxy
     {
         this.part = part;
 
-        childs = part.getAllParts().skip(1).map(ModelPartProxy::new).collect(Collectors.toList());
+        children = part.getAllParts().skip(1).map(ModelPartProxy::new).collect(Collectors.toList());
 
         update();
     }
@@ -70,7 +70,7 @@ public class ModelPartProxy
 
         visible = part.visible;
 
-        for (ModelPartProxy child : childs) child.update();
+        for (ModelPartProxy child : children) child.update();
     }
 
     /**
@@ -90,7 +90,7 @@ public class ModelPartProxy
 
         part.visible = visible;
 
-        for (ModelPartProxy child : childs) child.apply();
+        for (ModelPartProxy child : children) child.apply();
     }
 
     public void render(PoseStack ps, VertexConsumer vertices, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)

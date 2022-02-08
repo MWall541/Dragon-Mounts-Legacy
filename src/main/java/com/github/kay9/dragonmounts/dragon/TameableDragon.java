@@ -72,7 +72,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3;
-    public static final double BASE_SPEED_FLYING = 0.6;
+    public static final double BASE_SPEED_FLYING = 0.65;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
     public static final double BASE_FOLLOW_RANGE = 16;
@@ -95,7 +95,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // other constants
     public static final int AGE_UPDATE_INTERVAL = 100;
     public static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"); // just a random uuid I took online
-    public static final double ALTITUDE_FLYING_THRESHOLD = 2;
+    public static final int ALTITUDE_FLYING_THRESHOLD = 2;
     public static final int REPRO_LIMIT = 2;
     public static final int DEFAULT_GROWTH_TIME = 72000;
 
@@ -230,7 +230,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean isSaddleable()
     {
-        return isAlive() && !isBaby() && isTame();
+        return isAlive() && !isHatchling() && isTame();
     }
 
     @Override
@@ -261,7 +261,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public boolean shouldFly()
     {
-        return canFly() && !isInWater() && getAltitude() > ALTITUDE_FLYING_THRESHOLD;
+        return canFly() && !isInWater() && isHighEnough(ALTITUDE_FLYING_THRESHOLD);
     }
 
     /**
@@ -334,7 +334,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
             // rotate head to match driver. yaw is handled relative to this.
             yHeadRot = driver.yHeadRot;
-            setXRot(driver.getXRot() * 0.65f);
+            if (!isFlying) setXRot(driver.getXRot() * 0.68f);
             setYRot(Mth.rotateIfNecessary(yHeadRot, getYRot(), 6));
 
             if (isControlledByLocalInstance())
@@ -363,7 +363,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             // Move relative to yaw - handled in the move controller or by passenger
             moveRelative(speed, vec3);
             move(MoverType.SELF, getDeltaMovement());
-            if (getDeltaMovement().lengthSqr() < 0.1) setDeltaMovement(getDeltaMovement().add(0, Math.sin(tickCount / 4f) * 0.03, 0));
+            if (getDeltaMovement().lengthSqr() < 0.1)
+                setDeltaMovement(getDeltaMovement().add(0, Math.sin(tickCount / 4f) * 0.03, 0));
             setDeltaMovement(getDeltaMovement().scale(0.9f));
 
             calculateEntityAnimation(this, true);
@@ -373,14 +374,34 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     /**
      * Returns the distance to the ground while the entity is flying.
+     * describe a limit to reduce iterations
+     * limit is inclusive
+     */
+    public double getAltitude(int limit)
+    {
+        var pointer = blockPosition().mutable();
+        var i = 0;
+
+        while(i <= limit && pointer.getY() > level.dimensionType().minY() && !level.getBlockState(pointer).getMaterial().isSolid())
+        {
+            pointer.setY(getBlockY() - (i + 1));
+            ++i;
+        }
+
+        return i;
+    }
+
+    /**
+     * Returns the distance to the ground while the entity is flying.
      */
     public double getAltitude()
     {
-        BlockPos.MutableBlockPos pos = blockPosition().mutable();
-        while (pos.getY() > level.dimensionType().minY() && !level.getBlockState(pos).getMaterial().isSolid())
-            pos.move(0, -1, 0);
+        return getAltitude(level.getMaxBuildHeight());
+    }
 
-        return getY() - pos.getY();
+    public boolean isHighEnough(int height)
+    {
+        return getAltitude(height) >= height;
     }
 
     public void liftOff()
@@ -437,7 +458,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // saddle up!
-        if (isTamedFor(player) && !isBaby() && !isSaddled() && stack.getItem() instanceof SaddleItem)
+        if (isTamedFor(player) && isSaddleable() && !isSaddled() && stack.getItem() instanceof SaddleItem)
         {
             stack.shrink(1);
             equipSaddle(getSoundSource());
@@ -465,7 +486,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // ride on
-        if (isTame() && isSaddled() && !isBaby() && !isFood(stack))
+        if (isTame() && isSaddled() && !isHatchling() && !isFood(stack))
         {
             if (isServer())
             {
@@ -860,7 +881,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         Entity riddenByEntity = getControllingPassenger();
         if (riddenByEntity != null)
         {
-            Vec3 pos = new Vec3(0, getPassengersRidingOffset() + riddenByEntity.getMyRidingOffset(), 0.8 * getScale())
+            Vec3 pos = new Vec3(0, getPassengersRidingOffset() + riddenByEntity.getMyRidingOffset(), getScale())
                     .yRot((float) Math.toRadians(-yBodyRot))
                     .add(position());
             passenger.setPos(pos.x, pos.y, pos.z);

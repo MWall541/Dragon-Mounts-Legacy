@@ -50,7 +50,7 @@ public class DragonAnimator
     private final LerpedFloat speedTimer = new LerpedFloat.Clamped(1, 0, 1);
 
     // trails
-    private boolean initTrails = true;
+    private boolean initTrails = false;
     private final CircularBuffer yTrail = new CircularBuffer(8);
     private final CircularBuffer yawTrail = new CircularBuffer(16);
     private final CircularBuffer pitchTrail = new CircularBuffer(16);
@@ -172,14 +172,6 @@ public class DragonAnimator
         cycleOfs *= Mth.clampedLerp(0.5f, 1, flutter);
         cycleOfs *= Mth.clampedLerp(1, 0.5f, ground);
 
-        // update offsets
-        model.offsetX = getModelOffsetX();
-        model.offsetY = getModelOffsetY();
-        model.offsetZ = getModelOffsetZ();
-
-        // update pitch
-        model.pitch = getModelPitch();
-
         // animate body parts
         animHeadAndNeck(model);
         animTail(model);
@@ -192,12 +184,12 @@ public class DragonAnimator
         setOnGround(!dragon.isFlying());
 
         // init trails
-        if (initTrails)
+        if (!initTrails)
         {
             yTrail.fill((float) dragon.getY());
             yawTrail.fill(dragon.yBodyRot);
             pitchTrail.fill(getModelPitch());
-            initTrails = false;
+            initTrails = true;
         }
 
         // don't move anything during death sequence
@@ -263,8 +255,8 @@ public class DragonAnimator
 //        jawTimer.add(jawFlag? 0.2f : -0.2f);
 
         // update speed transition
-        boolean nearGround = dragon.getAltitude() < dragon.getBbHeight() * 2;
-        boolean speedFlag = speedEnt > speedMax || onGround || nearGround;
+        boolean nearGround = onGround || !dragon.isHighEnough(TameableDragon.ALTITUDE_FLYING_THRESHOLD + 2);
+        boolean speedFlag = speedEnt > speedMax || nearGround;
         float speedValue = 0.05f;
         speedTimer.add(speedFlag? speedValue : -speedValue);
 
@@ -275,8 +267,6 @@ public class DragonAnimator
         // filter out 360 degrees wrapping
         if (yawDiff < 180 && yawDiff > -180) yawAbs += yawDiff;
 
-        // TODO: where's yOffset?
-        //yTrail.update(entity.posY - entity.yOffset);
         yTrail.update((float) dragon.getY());
         yawTrail.update((float) -yawAbs);
         pitchTrail.update(getModelPitch());
@@ -312,7 +302,7 @@ public class DragonAnimator
 
             // update scale
             float v = Mth.clampedLerp(1.6f, 1, vertMulti);
-            ((ModelPartAccess)(Object) model.neck).setRenderScale(v, v, 0.6f);
+            ((ModelPartAccess) (Object) model.neck).setRenderScale(v, v, 0.6f);
 
             // hide the first and every second scale
             model.neckScale.visible = i % 2 != 0 || i == 0;
@@ -321,7 +311,7 @@ public class DragonAnimator
             model.neckProxy[i].update();
 
             // move next proxy behind the current one
-            neckSize = DragonModel.NECK_SIZE * ((ModelPartAccess)(Object) model.neck).getZScale() - 1.4f;
+            neckSize = DragonModel.NECK_SIZE * ((ModelPartAccess) (Object) model.neck).getZScale() - 1.4f;
             model.neck.x -= Mth.sin(model.neck.yRot) * Mth.cos(model.neck.xRot) * neckSize;
             model.neck.y += Mth.sin(model.neck.xRot) * neckSize;
             model.neck.z -= Mth.cos(model.neck.yRot) * Mth.cos(model.neck.xRot) * neckSize;
@@ -396,9 +386,10 @@ public class DragonAnimator
 
         // apply angles
         model.wingArm.xRot = wingArm[0];
+//        model.wingArm.xRot += 1 - speed;
         model.wingArm.yRot = wingArm[1];
         model.wingArm.zRot = wingArm[2];
-//        model.wingArm.xRot += 1 - speed;
+
         model.wingForearm.xRot = wingForearm[0];
         model.wingForearm.yRot = wingForearm[1];
         model.wingForearm.zRot = wingForearm[2];
@@ -477,13 +468,13 @@ public class DragonAnimator
 
             // update scale
             float neckScale = Mth.clampedLerp(1.5f, 0.3f, vertMulti);
-            ((ModelPartAccess)(Object) model.tail).setRenderScale(neckScale, neckScale, neckScale);
+            ((ModelPartAccess) (Object) model.tail).setRenderScale(neckScale, neckScale, neckScale);
 
             // update proxy
             model.tailProxy[i].update();
 
             // move next proxy behind the current one
-            float tailSize = DragonModel.TAIL_SIZE * ((ModelPartAccess)(Object) model.tail).getZScale() - 0.7f;
+            float tailSize = DragonModel.TAIL_SIZE * ((ModelPartAccess) (Object) model.tail).getZScale() - 0.7f;
             model.tail.y += Mth.sin(model.tail.xRot) * tailSize;
             model.tail.z -= Mth.cos(model.tail.yRot) * Mth.cos(model.tail.xRot) * tailSize;
             model.tail.x -= Mth.sin(model.tail.yRot) * Mth.cos(model.tail.xRot) * tailSize;
@@ -638,7 +629,7 @@ public class DragonAnimator
 
     public float getModelOffsetY()
     {
-        return -1.5f + (sit * 0.6f);
+        return 1.5f + (-sit * 0.6f);
     }
 
     public float getModelOffsetZ()

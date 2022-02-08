@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.Tags;
 
 import java.io.IOException;
@@ -44,10 +45,12 @@ public class DragonBreedProvider implements DataProvider
                 0xffff00,
                 true,
                 false,
-                ImmutableMap.of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.5),
+                ImmutableMap.of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING + 2),
                 set(new HeightHabitat(false, 200)),
                 set(),
-                Optional.empty()));
+                Optional.empty(),
+                BuiltInLootTables.EMPTY,
+                TameableDragon.DEFAULT_GROWTH_TIME));
 
         add(new DragonBreed(DragonMountsLegacy.id("end"),
                 0x161616,
@@ -57,7 +60,9 @@ public class DragonBreedProvider implements DataProvider
                 ImmutableMap.of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
                 set(new NearbyBlocksHabitat(Tags.Blocks.END_STONES), new BiomeHabitat(set(Biomes.END_BARRENS, Biomes.END_HIGHLANDS, Biomes.END_MIDLANDS, Biomes.END_MIDLANDS, Biomes.THE_END, Biomes.SMALL_END_ISLANDS))),
                 set("dragonBreath"),
-                Optional.empty()));
+                Optional.empty(),
+                BuiltInLootTables.EMPTY,
+                TameableDragon.DEFAULT_GROWTH_TIME));
 
         add(new DragonBreed(DragonMountsLegacy.id("forest"),
                 0x054a00,
@@ -67,7 +72,9 @@ public class DragonBreedProvider implements DataProvider
                 ImmutableMap.of(),
                 set(new NearbyBlocksHabitat(DMLRegistry.FOREST_DRAGON_HABITAT_BLOCKS)),
                 set(),
-                Optional.empty()));
+                Optional.empty(),
+                BuiltInLootTables.EMPTY,
+                TameableDragon.DEFAULT_GROWTH_TIME));
 
         add(new DragonBreed(DragonMountsLegacy.id("ghost"),
                 0xc4c4c4,
@@ -77,7 +84,9 @@ public class DragonBreedProvider implements DataProvider
                 ImmutableMap.of(),
                 set(new HeightHabitat(true, 0), new LightHabitat(true, 3)),
                 set("drown"),
-                Optional.of(SoundEvents.SKELETON_AMBIENT)));
+                Optional.of(SoundEvents.SKELETON_AMBIENT),
+                BuiltInLootTables.EMPTY,
+                TameableDragon.DEFAULT_GROWTH_TIME));
 
         add(new DragonBreed(DragonMountsLegacy.id("ice"),
                 0xffffff,
@@ -87,7 +96,9 @@ public class DragonBreedProvider implements DataProvider
                 ImmutableMap.of(),
                 set(new NearbyBlocksHabitat(DMLRegistry.ICE_DRAGON_HABITAT_BLOCKS)),
                 set("drown", "freeze"),
-                Optional.empty()));
+                Optional.empty(),
+                BuiltInLootTables.EMPTY,
+                TameableDragon.DEFAULT_GROWTH_TIME));
 
         add(new DragonBreed(DragonMountsLegacy.id("nether"),
                 0x912400,
@@ -97,7 +108,9 @@ public class DragonBreedProvider implements DataProvider
                 ImmutableMap.of(Attributes.ARMOR, 8d),
                 set(new NearbyBlocksHabitat(DMLRegistry.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(set(Biomes.BASALT_DELTAS, Biomes.CRIMSON_FOREST, Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST))),
                 set("inFire", "onFire", "lava", "hotFloor"),
-                Optional.empty()));
+                Optional.empty(),
+                BuiltInLootTables.EMPTY,
+                TameableDragon.DEFAULT_GROWTH_TIME));
 
         add(new DragonBreed(DragonMountsLegacy.id("water"),
                 0x0062ff,
@@ -107,7 +120,9 @@ public class DragonBreedProvider implements DataProvider
                 ImmutableMap.of(),
                 set(new FluidHabitat(FluidTags.WATER)),
                 set("drown"),
-                Optional.empty()));
+                Optional.empty(),
+                BuiltInLootTables.EMPTY,
+                TameableDragon.DEFAULT_GROWTH_TIME));
     }
 
     protected void add(DragonBreed breed) throws IOException

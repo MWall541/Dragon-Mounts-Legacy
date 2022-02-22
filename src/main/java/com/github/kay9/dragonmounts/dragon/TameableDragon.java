@@ -95,7 +95,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // other constants
     public static final int AGE_UPDATE_INTERVAL = 100;
     public static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"); // just a random uuid I took online
-    public static final int ALTITUDE_FLYING_THRESHOLD = 2;
+    public static final int ALTITUDE_FLYING_THRESHOLD = 3;
     public static final int REPRO_LIMIT = 2;
     public static final int DEFAULT_GROWTH_TIME = 72000;
 

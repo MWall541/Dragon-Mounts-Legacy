@@ -255,7 +255,7 @@ public class DragonAnimator
 //        jawTimer.add(jawFlag? 0.2f : -0.2f);
 
         // update speed transition
-        boolean nearGround = onGround || !dragon.isHighEnough(TameableDragon.ALTITUDE_FLYING_THRESHOLD + 2);
+        boolean nearGround = onGround || !dragon.isHighEnough((int) (4 * dragon.getScale()));
         boolean speedFlag = speedEnt > speedMax || nearGround;
         float speedValue = 0.05f;
         speedTimer.add(speedFlag? speedValue : -speedValue);

@@ -64,7 +64,7 @@ public class DMLRegistry
     @SuppressWarnings("unchecked")
     private static <T extends IForgeRegistryEntry<T>, I extends T> RegistryObject<I> register(String name, IForgeRegistry<T> forType, Supplier<? extends I> sup)
     {
-        DeferredRegister<T> registry = (DeferredRegister<T>) REGISTRIES.computeIfAbsent(forType, t -> DeferredRegister.create(t, DragonMountsLegacy.MOD_ID));
+        var registry = (DeferredRegister<T>) REGISTRIES.computeIfAbsent(forType, t -> DeferredRegister.create(t, DragonMountsLegacy.MOD_ID));
         return registry.register(name, sup);
     }
 }

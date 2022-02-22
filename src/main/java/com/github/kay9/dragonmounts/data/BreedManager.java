@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.data;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
+import com.github.kay9.dragonmounts.network.UpdateBreedsPacket;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,6 +12,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.network.PacketDistributor;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
@@ -18,6 +21,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class BreedManager extends SimpleJsonResourceReloadListener
 {
@@ -35,20 +39,26 @@ public class BreedManager extends SimpleJsonResourceReloadListener
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> elements, ResourceManager pResourceManager, ProfilerFiller pProfiler)
     {
-        ImmutableMap.Builder<ResourceLocation, DragonBreed> builder = ImmutableMap.builder();
-
-        for (var entry : elements.entrySet())
-        {
-            DragonBreed.CODEC.parse(JsonOps.INSTANCE, entry.getValue())
-                    .resultOrPartial(m -> DragonMountsLegacy.LOG.warn(MARKER, "Failed to load '{}' dragon breed: {}", entry.getKey(), m))
-                    .ifPresent(b -> builder.put(b.id(), b));
-        }
-
-        // Ensure one entry exists in the registry, for safety purposes.
-        builder.put(DragonBreed.FIRE.id(), DragonBreed.FIRE);
-        registry = builder.build();
-
+        update(r -> elements.forEach((key, value) ->
+                DragonBreed.CODEC.parse(JsonOps.INSTANCE, value)
+                        .resultOrPartial(m -> DragonMountsLegacy.LOG.warn(MARKER, "Failed to load '{}' dragon breed: {}", key, m))
+                        .ifPresent(r)));
         DragonMountsLegacy.LOG.info(MARKER, "Loaded {} Dragon Breeds", registry.size());
+    }
+
+    public static void update(Consumer<Consumer<DragonBreed>> consumer)
+    {
+        ImmutableMap.Builder<ResourceLocation, DragonBreed> builder = ImmutableMap.builder();
+        consumer.accept(d -> builder.put(d.id(), d));
+        builder.put(DragonBreed.FIRE.id(), DragonBreed.FIRE); // Ensure one entry exists in the registry, for safety purposes.
+        registry = builder.build();
+    }
+
+    public static void syncClientBreeds(OnDatapackSyncEvent event)
+    {
+        var player = event.getPlayer();
+        var target = player == null? PacketDistributor.ALL.noArg() : PacketDistributor.PLAYER.with(() -> player);
+        DragonMountsLegacy.NETWORK.send(target, new UpdateBreedsPacket(getBreeds()));
     }
 
     @Nullable

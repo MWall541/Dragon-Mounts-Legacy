@@ -8,6 +8,7 @@ import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.network.UpdateBreedsPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,6 +24,8 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,6 +34,7 @@ public class DragonMountsLegacy
 {
     public static final String MOD_ID = "dragonmounts";
     public static final Logger LOG = LogManager.getLogger();
+    public static final SimpleChannel NETWORK = buildNetwork();
 
     public DragonMountsLegacy()
     {
@@ -52,11 +56,29 @@ public class DragonMountsLegacy
             bus.addListener((ColorHandlerEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
             bus.addListener(DragonMountsLegacy::rendererRegistry);
         }
+        else
+        {
+            MinecraftForge.EVENT_BUS.addListener(BreedManager::syncClientBreeds);
+        }
     }
 
     public static ResourceLocation id(String path)
     {
         return new ResourceLocation(MOD_ID, path);
+    }
+
+    private static SimpleChannel buildNetwork()
+    {
+        var PROTOCOL_VERSION = "1.O";
+        var net = NetworkRegistry.ChannelBuilder.named(id("network"))
+                .clientAcceptedVersions(PROTOCOL_VERSION::equals)
+                .serverAcceptedVersions(PROTOCOL_VERSION::equals)
+                .networkProtocolVersion(() -> PROTOCOL_VERSION)
+                .simpleChannel();
+
+        net.registerMessage(1, UpdateBreedsPacket.class, UpdateBreedsPacket::encode, UpdateBreedsPacket::new, UpdateBreedsPacket::handle);
+
+        return net;
     }
 
     public static void modelRegistry(ModelRegistryEvent e)

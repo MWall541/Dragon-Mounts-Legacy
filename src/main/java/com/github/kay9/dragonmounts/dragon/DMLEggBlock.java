@@ -101,6 +101,8 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             {
                 evt.setCanceled(true);
                 evt.setUseBlock(Event.Result.DENY);
+                level.removeBlock(evt.getPos(), false);
+                if (level.isClientSide) evt.getPlayer().swing(InteractionHand.MAIN_HAND);
                 startHatching(end, level, evt.getPos());
             }
         }

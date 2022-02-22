@@ -1,10 +1,8 @@
 package com.github.kay9.dragonmounts.habitats;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.level.Level;
@@ -26,7 +24,7 @@ public record FluidHabitat(Tag<Fluid> fluidType) implements Habitat
     }
 
     @Override
-    public HabitatType type()
+    public String type()
     {
         return Habitat.IN_FLUID;
     }

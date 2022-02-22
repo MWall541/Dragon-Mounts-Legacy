@@ -24,7 +24,7 @@ public record NearbyBlocksHabitat(Tag<Block> tag) implements Habitat
     }
 
     @Override
-    public HabitatType type()
+    public String type()
     {
         return Habitat.NEARBY_BLOCKS;
     }

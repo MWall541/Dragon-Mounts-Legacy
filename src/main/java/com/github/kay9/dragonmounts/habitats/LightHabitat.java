@@ -26,7 +26,7 @@ public record LightHabitat(boolean inverse, int light) implements Habitat
     }
 
     @Override
-    public HabitatType type()
+    public String type()
     {
         return Habitat.LIGHT;
     }

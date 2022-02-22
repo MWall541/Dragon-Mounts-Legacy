@@ -21,7 +21,7 @@ public record HeightHabitat(boolean inverse, int height) implements Habitat
     }
 
     @Override
-    public HabitatType type()
+    public String type()
     {
         return Habitat.WORLD_HEIGHT;
     }

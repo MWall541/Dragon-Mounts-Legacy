@@ -3,7 +3,6 @@ package com.github.kay9.dragonmounts.habitats;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -26,7 +25,7 @@ public record BiomeHabitat(ImmutableSet<ResourceKey<Biome>> biomes) implements H
     }
 
     @Override
-    public HabitatType type()
+    public String type()
     {
         return Habitat.BIOMES;
     }

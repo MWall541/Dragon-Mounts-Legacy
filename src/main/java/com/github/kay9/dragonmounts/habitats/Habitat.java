@@ -9,26 +9,23 @@ import java.util.Map;
 
 public interface Habitat
 {
-    Map<String, HabitatType> REGISTRY = new HashMap<>();
+    Map<String, Codec<? extends Habitat>> REGISTRY = new HashMap<>();
 
-    HabitatType BIOMES = register("biome", BiomeHabitat.CODEC);
-    HabitatType IN_FLUID = register("in_fluid", FluidHabitat.CODEC);
-    HabitatType WORLD_HEIGHT = register("world_height", HeightHabitat.CODEC);
-    HabitatType LIGHT = register("light", LightHabitat.CODEC);
-    HabitatType NEARBY_BLOCKS = register("nearby_blocks", NearbyBlocksHabitat.CODEC);
+    String BIOMES = register("biome", BiomeHabitat.CODEC);
+    String IN_FLUID = register("in_fluid", FluidHabitat.CODEC);
+    String WORLD_HEIGHT = register("world_height", HeightHabitat.CODEC);
+    String LIGHT = register("light", LightHabitat.CODEC);
+    String NEARBY_BLOCKS = register("nearby_blocks", NearbyBlocksHabitat.CODEC);
 
-    Codec<Habitat> CODEC = Codec.STRING.xmap(REGISTRY::get, HabitatType::name).dispatch(Habitat::type, HabitatType::codec);
+    Codec<Habitat> CODEC = Codec.STRING.dispatch(Habitat::type, REGISTRY::get);
 
-    static HabitatType register(String name, Codec<? extends Habitat> codec)
+    static String register(String name, Codec<? extends Habitat> codec)
     {
-        HabitatType habitatType = new HabitatType(name, codec);
-        REGISTRY.put(name, habitatType);
-        return habitatType;
+        REGISTRY.put(name, codec);
+        return name;
     }
 
     int getHabitatPoints(Level level, BlockPos pos);
 
-    HabitatType type();
-
-    record HabitatType(String name, Codec<? extends Habitat> codec) {}
+    String type();
 }

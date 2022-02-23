@@ -1,0 +1,22 @@
+{
+  "habitats": [
+    {
+      "block_tag": "dragonmounts:fire_dragon_habitat_blocks",
+      "type": "nearby_blocks"
+    },
+    {
+      "fluid_tag": "minecraft:lava",
+      "type": "in_fluid"
+    }
+  ],
+  "immunities": [
+    "onFire",
+    "inFire",
+    "lava",
+    "hotFloor"
+  ],
+  "secondary_color": 16750617,
+  "show_middle_tail_scales": false,
+  "name": "dragonmounts:fire",
+  "primary_color": 9511936
+}

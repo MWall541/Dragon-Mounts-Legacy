@@ -5,6 +5,7 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.*;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
@@ -41,8 +42,8 @@ public class DragonBreedProvider implements DataProvider
         this.directory = pCache;
 
         add(new DragonBreed(DragonMountsLegacy.id("aether"),
-                0x11d6d0,
-                0xffff00,
+                0x718AA9,
+                0xE6E6E6,
                 true,
                 false,
                 ImmutableMap.of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING + 2),
@@ -64,6 +65,8 @@ public class DragonBreedProvider implements DataProvider
                 BuiltInLootTables.EMPTY,
                 TameableDragon.DEFAULT_GROWTH_TIME));
 
+        add(DragonBreed.FIRE);
+
         add(new DragonBreed(DragonMountsLegacy.id("forest"),
                 0x054a00,
                 0x0a9600,
@@ -82,7 +85,7 @@ public class DragonBreedProvider implements DataProvider
                 true,
                 false,
                 ImmutableMap.of(),
-                set(new HeightHabitat(true, 0), new LightHabitat(true, 3)),
+                set(new PickyHabitat(ImmutableList.of(new HeightHabitat(true, 0), new LightHabitat(true, 3)))),
                 set("drown"),
                 Optional.of(SoundEvents.SKELETON_AMBIENT),
                 BuiltInLootTables.EMPTY,

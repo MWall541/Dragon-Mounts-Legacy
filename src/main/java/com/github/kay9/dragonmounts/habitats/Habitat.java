@@ -11,13 +11,14 @@ public interface Habitat
 {
     Map<String, Codec<? extends Habitat>> REGISTRY = new HashMap<>();
 
+    Codec<Habitat> CODEC = Codec.STRING.dispatch(Habitat::type, REGISTRY::get);
+
+    String PICKY = register("picky", PickyHabitat.CODEC);
     String BIOMES = register("biome", BiomeHabitat.CODEC);
     String IN_FLUID = register("in_fluid", FluidHabitat.CODEC);
     String WORLD_HEIGHT = register("world_height", HeightHabitat.CODEC);
     String LIGHT = register("light", LightHabitat.CODEC);
     String NEARBY_BLOCKS = register("nearby_blocks", NearbyBlocksHabitat.CODEC);
-
-    Codec<Habitat> CODEC = Codec.STRING.dispatch(Habitat::type, REGISTRY::get);
 
     static String register(String name, Codec<? extends Habitat> codec)
     {

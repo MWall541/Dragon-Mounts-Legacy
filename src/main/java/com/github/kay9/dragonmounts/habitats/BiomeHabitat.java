@@ -13,9 +13,8 @@ public record BiomeHabitat(ImmutableSet<ResourceKey<Biome>> biomes) implements H
 {
     public static final Codec<BiomeHabitat> CODEC = ResourceKey.codec(Registry.BIOME_REGISTRY)
             .listOf()
-            .xmap(ImmutableSet::copyOf, ImmutableList::copyOf)
             .fieldOf("biomes")
-            .xmap(BiomeHabitat::new, BiomeHabitat::biomes)
+            .xmap(l -> new BiomeHabitat(ImmutableSet.copyOf(l)), l -> ImmutableList.copyOf(l.biomes()))
             .codec();
 
     @Override

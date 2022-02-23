@@ -20,7 +20,7 @@ public record FluidHabitat(Tag<Fluid> fluidType) implements Habitat
     {
         return (int) BlockPos.betweenClosedStream(pos.offset(1, 1, 1), pos.offset(-1, -1, -1))
                 .filter(p -> level.getFluidState(p).is(fluidType))
-                .count();
+                .count() / 2;
     }
 
     @Override

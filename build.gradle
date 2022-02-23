@@ -17,7 +17,7 @@ apply plugin: 'idea'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
-version = "$mod_version"
+version = "$game_version-$mod_version"
 group = 'com.github.kay9.dragonmounts'
 archivesBaseName = 'dragonmounts'
 

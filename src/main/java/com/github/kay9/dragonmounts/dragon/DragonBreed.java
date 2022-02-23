@@ -32,7 +32,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(func -> func.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(DragonBreed::id),
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
-            Codec.INT.fieldOf("seconary_color").forGetter(DragonBreed::secondaryColor),
+            Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             Codec.BOOL.optionalFieldOf("show_middle_tail_scales", true).forGetter(DragonBreed::showMiddleTailScales),
             Codec.BOOL.optionalFieldOf("show_tail_spikes", false).forGetter(DragonBreed::showTailSpikes),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),

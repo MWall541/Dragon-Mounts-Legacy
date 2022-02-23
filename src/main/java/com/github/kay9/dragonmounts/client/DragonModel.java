@@ -195,21 +195,21 @@ public class DragonModel extends EntityModel<TameableDragon>
     {
         PartDefinition wingArm = root.addOrReplaceChild("wing_arm", CubeListBuilder.create()
                         .texOffs(0, 152).addBox(-28, -3, -3, 28, 6, 6) // bone
-                        .texOffs(116, 232).addBox(-28, 0, 2, 28, 0, 24), // skin
+                        .texOffs(116, 232).addBox(-28, 0, 2, 28, 0.01f, 24), // skin
                 PartPose.offset(-10, 5, 4));
 
         PartDefinition wingForearm = wingArm.addOrReplaceChild("wing_forearm", CubeListBuilder.create().texOffs(0, 164).addBox(-48, -2, -2, 48, 4, 4), PartPose.offset(-28, 0, 0)); // bone
 
         CubeListBuilder shortSkins = CubeListBuilder.create()
                 .texOffs(0, 172).addBox(-70, -1, -1, 70, 2, 2) // bone
-                .texOffs(-49, 176).addBox(-70, 0, 1, 70, 0, 48); // skin
+                .texOffs(-49, 176).addBox(-70, 0, 1, 70, 0.01f, 48); // skin
 
         PartPose shortSkinsPos = PartPose.offset(-47, 0, 0);
         for (int i = 1; i < 4; i++) wingForearm.addOrReplaceChild("wing_finger_" + i, shortSkins, shortSkinsPos);
 
         wingForearm.addOrReplaceChild("wing_finger_4", CubeListBuilder.create()
                         .texOffs(0, 172).addBox(-70, -1, -1, 70, 2, 2) // bone
-                        .texOffs(-32, 224).addBox(-70, 0, 1, 70, 0, 32), // shortskin
+                        .texOffs(-32, 224).addBox(-70, 0, 1, 70, 0.01f, 32), // shortskin
                 shortSkinsPos);
     }
 

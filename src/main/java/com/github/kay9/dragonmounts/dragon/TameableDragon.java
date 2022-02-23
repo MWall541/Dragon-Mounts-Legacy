@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
@@ -115,7 +116,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
-        breed = DragonBreed.FIRE;
+        breed = BreedManager.getFallback();
     }
 
     @Override
@@ -173,7 +174,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super.defineSynchedData();
 
-        entityData.define(DATA_BREED, DragonBreed.FIRE.id().toString());
+        entityData.define(DATA_BREED, BreedManager.getFallback().id().toString());
         entityData.define(DATA_FLYING, false);
         entityData.define(DATA_SADDLED, false);
         entityData.define(DATA_AGE, 0); // default to adult stage
@@ -774,10 +775,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void spawnChildFromBreeding(ServerLevel level, Animal mate)
     {
-        if (!(mate instanceof TameableDragon)) throw new IllegalArgumentException("The mate isn't a dragon");
+        if (!(mate instanceof TameableDragon))
+        {
+            DragonMountsLegacy.LOG.warn("Tried to mate with non-dragon? Hello? {}", mate);
+            return;
+        }
+
+        DragonEgg egg = DMLRegistry.DRAGON_EGG.get().create(level);
 
         // pick a breed to inherit from
-        DragonEgg egg = DMLRegistry.DRAGON_EGG.get().create(level);
         egg.setEggBreed(getRandom().nextBoolean()? breed : ((TameableDragon) mate).breed);
 
         // mix the custom names in case both parents have one
@@ -827,16 +833,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_)
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob)
     {
-        return null;
+        var offspring = DMLRegistry.DRAGON.get().create(level);
+        offspring.setBreed(getBreed());
+        return offspring;
     }
 
     @Override
     public boolean wantsToAttack(LivingEntity target, LivingEntity owner)
     {
-        if (target instanceof TamableAnimal) return !Objects.equals(((TamableAnimal) target).getOwner(), owner);
-        return true;
+        return !(target instanceof TamableAnimal tameable) || !Objects.equals(tameable.getOwner(), owner);
     }
 
     @Override

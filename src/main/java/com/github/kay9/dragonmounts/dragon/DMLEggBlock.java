@@ -5,6 +5,7 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonEggRenderer;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +16,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
@@ -116,32 +118,49 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         }
 
         @Override
-        public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items)
-        {
-            if (allowdedIn(tab))
-            {
-                for (DragonBreed breed : BreedManager.getBreeds())
-                    items.add(create(breed, DragonEgg.DEFAULT_HATCH_TIME));
-            }
-        }
-
-        @Override
         public Component getName(ItemStack stack)
         {
-            String name = DragonBreed.FIRE.getTranslationKey();
+            String name = BreedManager.getFallback().getTranslationKey();
             CompoundTag tag = stack.getTag();
             if (tag != null) name = tag.getString("ItemName");
             return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
         }
 
         @Override
+        public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items)
+        {
+            if (allowdedIn(tab))
+                for (DragonBreed breed : BreedManager.getBreeds())
+                    items.add(Item.create(breed, DragonEgg.DEFAULT_HATCH_TIME));
+        }
+
+        @Override
         public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltips, TooltipFlag pFlag)
         {
             super.appendHoverText(stack, level, tooltips, pFlag);
+
             var time = DragonEgg.DEFAULT_HATCH_TIME;
             var tag = stack.getTagElement("BlockEntityTag");
             if (tag != null) time = tag.getInt(DragonEgg.NBT_HATCH_TIME);
             tooltips.add(new TranslatableComponent(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
+
+            if (Minecraft.getInstance().player.getAbilities().instabuild)
+                tooltips.add(new TranslatableComponent(getDescriptionId() + ".change_breeds").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        }
+
+        @Override
+        public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand)
+        {
+            if (player.getAbilities().instabuild && target instanceof TameableDragon dragon)
+            {
+                var tag = stack.getTagElement("BlockEntityTag");
+                if (tag != null)
+                {
+                    dragon.setBreed(BreedManager.read(tag.getString(TameableDragon.NBT_BREED)));
+                    return InteractionResult.sidedSuccess(player.level.isClientSide);
+                }
+            }
+            return super.interactLivingEntity(stack, player, target, hand);
         }
 
         @Override
@@ -175,7 +194,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public Entity(BlockPos pWorldPosition, BlockState pBlockState)
         {
             super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
-            setBreed(DragonBreed.FIRE);
+            setBreed(BreedManager.getFallback());
             setHatchTime(DragonEgg.DEFAULT_HATCH_TIME);
         }
 

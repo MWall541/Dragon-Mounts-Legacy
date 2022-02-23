@@ -52,7 +52,7 @@ public class DragonEgg extends Entity
     {
         super(type, level);
 
-        breed = DragonBreed.FIRE;
+        breed = BreedManager.getFallback();
         hatchTime = DEFAULT_HATCH_TIME;
         transitioner = new TransitionHandler();
         wiggleTime = LerpedFloat.unit();

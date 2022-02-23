@@ -92,18 +92,18 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
 
     public static void overrideVanillaDragonEgg(PlayerInteractEvent.RightClickBlock evt)
     {
-        Level level = evt.getWorld();
-        Block block = level.getBlockState(evt.getPos()).getBlock();
-        if (block == Blocks.DRAGON_EGG)
+        var level = evt.getWorld();
+        var pos = evt.getPos();
+        if (level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
             DragonBreed end = BreedManager.getNullable(DragonMountsLegacy.id("end"));
             if (end != null)
             {
                 evt.setCanceled(true);
                 evt.setUseBlock(Event.Result.DENY);
-                level.removeBlock(evt.getPos(), false);
+                level.removeBlock(pos, false);
                 if (level.isClientSide) evt.getPlayer().swing(InteractionHand.MAIN_HAND);
-                startHatching(end, level, evt.getPos());
+                startHatching(end, level, pos);
             }
         }
     }

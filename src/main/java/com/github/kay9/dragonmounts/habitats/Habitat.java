@@ -19,6 +19,7 @@ public interface Habitat
     String WORLD_HEIGHT = register("world_height", HeightHabitat.CODEC);
     String LIGHT = register("light", LightHabitat.CODEC);
     String NEARBY_BLOCKS = register("nearby_blocks", NearbyBlocksHabitat.CODEC);
+    String DRAGON_BREATH = register("dragon_breath", DragonBreathHabitat.CODEC);
 
     static String register(String name, Codec<? extends Habitat> codec)
     {

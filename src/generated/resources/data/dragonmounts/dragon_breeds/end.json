@@ -4,18 +4,7 @@
   },
   "habitats": [
     {
-      "block_tag": "forge:end_stones",
-      "type": "nearby_blocks"
-    },
-    {
-      "biomes": [
-        "minecraft:end_barrens",
-        "minecraft:end_highlands",
-        "minecraft:end_midlands",
-        "minecraft:the_end",
-        "minecraft:small_end_islands"
-      ],
-      "type": "biome"
+      "type": "dragon_breath"
     }
   ],
   "immunities": [

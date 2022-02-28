@@ -17,7 +17,7 @@ public class ModelPartMixin implements ModelPartAccess
     @Unique public float dm_zScale = 1;
 
     @Inject(method = "translateAndRotate(Lcom/mojang/blaze3d/vertex/PoseStack;)V", at = @At(value = "TAIL"))
-    public void scalePoseStack(PoseStack pPoseStack, CallbackInfo cbi)
+    public void dragonmounts_scalePoseStack(PoseStack pPoseStack, CallbackInfo cbi)
     {
         pPoseStack.scale(dm_xScale, dm_yScale, dm_zScale);
     }

@@ -23,8 +23,12 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkRegistry;
@@ -48,7 +52,7 @@ public class DragonMountsLegacy
         bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
 
         MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent e) -> e.addListener(BreedManager.INSTANCE));
-        MinecraftForge.EVENT_BUS.addListener(DMLEggBlock::overrideVanillaDragonEgg);
+        MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
@@ -62,11 +66,22 @@ public class DragonMountsLegacy
         {
             MinecraftForge.EVENT_BUS.addListener((OnDatapackSyncEvent e) -> UpdateBreedsPacket.send(e.getPlayer()));
         }
+
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
     }
 
     public static ResourceLocation id(String path)
     {
         return new ResourceLocation(MOD_ID, path);
+    }
+
+    private static void attemptVanillaEggReplacement(PlayerInteractEvent.RightClickBlock evt)
+    {
+        if (DMLEggBlock.overrideVanillaDragonEgg(evt.getWorld(), evt.getPos(), evt.getPlayer()))
+        {
+            evt.setCanceled(true);
+            evt.setUseBlock(Event.Result.DENY);
+        }
     }
 
     private static void defineBlockModels()

@@ -28,8 +28,6 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.client.IItemRenderProperties;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -39,7 +37,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
 {
     public DMLEggBlock()
     {
-        super(BlockBehaviour.Properties.of(Material.EGG, MaterialColor.COLOR_BLACK).strength(3.0F, 9.0F).lightLevel(s -> 1).noOcclusion());
+        super(BlockBehaviour.Properties.of(Material.EGG, MaterialColor.COLOR_BLACK).strength(3f, 9f).lightLevel(s -> 1).noOcclusion());
     }
 
     @Nullable
@@ -66,7 +64,8 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     public void attack(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer)
     {
         BlockEntity state = pLevel.getBlockEntity(pPos);
-        if (state instanceof Entity e && e.getBreed().id().getPath().equals("end")) super.attack(pState, pLevel, pPos, pPlayer);
+        if (state instanceof Entity e && e.getBreed().id().getPath().equals("end"))
+            super.attack(pState, pLevel, pPos, pPlayer);
     }
 
     @Override
@@ -92,22 +91,20 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         }
     }
 
-    public static void overrideVanillaDragonEgg(PlayerInteractEvent.RightClickBlock evt)
+    public static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
     {
-        var level = evt.getWorld();
-        var pos = evt.getPos();
         if (level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
             DragonBreed end = BreedManager.getNullable(DragonMountsLegacy.id("end"));
             if (end != null)
             {
-                evt.setCanceled(true);
-                evt.setUseBlock(Event.Result.DENY);
                 level.removeBlock(pos, false);
-                if (level.isClientSide) evt.getPlayer().swing(InteractionHand.MAIN_HAND);
+                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
                 startHatching(end, level, pos);
+                return true;
             }
         }
+        return false;
     }
 
     public static class Item extends BlockItem

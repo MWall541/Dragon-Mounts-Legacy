@@ -7,13 +7,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 
-public class DragonBreathHabitat implements Habitat
+public enum DragonBreathHabitat implements Habitat
 {
-    public static final DragonBreathHabitat INSTANCE = new DragonBreathHabitat();
+    INSTANCE;
 
     public static final Codec<DragonBreathHabitat> CODEC = Codec.unit(INSTANCE);
-
-    protected DragonBreathHabitat() {}
 
     @Override
     public int getHabitatPoints(Level level, BlockPos pos)

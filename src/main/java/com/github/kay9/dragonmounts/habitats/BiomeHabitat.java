@@ -14,7 +14,7 @@ public record BiomeHabitat(ImmutableSet<ResourceKey<Biome>> biomes) implements H
     public static final Codec<BiomeHabitat> CODEC = ResourceKey.codec(Registry.BIOME_REGISTRY)
             .listOf()
             .fieldOf("biomes")
-            .xmap(l -> new BiomeHabitat(ImmutableSet.copyOf(l)), l -> ImmutableList.copyOf(l.biomes()))
+            .xmap(l -> new BiomeHabitat(ImmutableSet.copyOf(l)), l -> ImmutableList.copyOf(l.biomes())) // convert to Set for "contains" performance
             .codec();
 
     @Override

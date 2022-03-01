@@ -33,7 +33,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING + 2),
-            set(new HeightHabitat(false, 200)),
+            list(new HeightHabitat(false, 200)),
             set(),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -45,7 +45,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
-            set(DragonBreathHabitat.INSTANCE),
+            list(DragonBreathHabitat.INSTANCE),
             set("dragonBreath"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -59,7 +59,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(),
-            set(new NearbyBlocksHabitat(TagProvider.FOREST_DRAGON_HABITAT_BLOCKS)),
+            list(new NearbyBlocksHabitat(TagProvider.FOREST_DRAGON_HABITAT_BLOCKS)),
             set(),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -71,7 +71,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(),
-            set(new PickyHabitat(ImmutableList.of(new HeightHabitat(true, 0), new LightHabitat(true, 3)))),
+            list(new PickyHabitat(ImmutableList.of(new HeightHabitat(true, 0), new LightHabitat(true, 3)))),
             set("drown"),
             Optional.of(SoundEvents.SKELETON_AMBIENT),
             BuiltInLootTables.EMPTY,
@@ -83,7 +83,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(),
-            set(new NearbyBlocksHabitat(TagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
+            list(new NearbyBlocksHabitat(TagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -95,7 +95,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(Attributes.ARMOR, 8d),
-            set(new NearbyBlocksHabitat(TagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(set(Biomes.BASALT_DELTAS, Biomes.CRIMSON_FOREST, Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST))),
+            list(new NearbyBlocksHabitat(TagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(set(Biomes.BASALT_DELTAS, Biomes.CRIMSON_FOREST, Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST))),
             set("inFire", "onFire", "lava", "hotFloor"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -107,7 +107,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             true,
             of(),
-            set(new FluidHabitat(FluidTags.WATER)),
+            list(new FluidHabitat(FluidTags.WATER)),
             set("drown"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -138,6 +138,11 @@ public class DragonBreedProvider implements DataProvider
     public String getName()
     {
         return "Dragon Breeds";
+    }
+
+    private static <T> ImmutableList<T> list(T... objs)
+    {
+        return ImmutableList.copyOf(objs);
     }
 
     private static <T> ImmutableSet<T> set(T... objs)

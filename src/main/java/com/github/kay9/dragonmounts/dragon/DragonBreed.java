@@ -20,13 +20,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryColor, boolean showMiddleTailScales,
                           boolean showTailSpikes,
                           Map<Attribute, Double> attributes,
-                          ImmutableSet<Habitat> habitats, ImmutableSet<String> immunities,
+                          List<Habitat> habitats, ImmutableSet<String> immunities,
                           Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime)
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(func -> func.group(
@@ -36,8 +37,8 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             Codec.BOOL.optionalFieldOf("show_middle_tail_scales", true).forGetter(DragonBreed::showMiddleTailScales),
             Codec.BOOL.optionalFieldOf("show_tail_spikes", false).forGetter(DragonBreed::showTailSpikes),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
-            Habitat.CODEC.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("habitats", ImmutableSet.of()).forGetter(DragonBreed::habitats),
-            Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities),
+            Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
+            Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.DEFAULT_GROWTH_TIME).forGetter(DragonBreed::growthTime)
@@ -52,7 +53,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             false,
             false,
             ImmutableMap.of(),
-            ImmutableSet.of(new NearbyBlocksHabitat(BlockTags.createOptional(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
+            ImmutableList.of(new NearbyBlocksHabitat(BlockTags.createOptional(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,

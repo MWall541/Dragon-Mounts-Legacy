@@ -36,7 +36,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             Codec.BOOL.optionalFieldOf("show_middle_tail_scales", true).forGetter(DragonBreed::showMiddleTailScales),
             Codec.BOOL.optionalFieldOf("show_tail_spikes", false).forGetter(DragonBreed::showTailSpikes),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
-            Habitat.CODEC.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).fieldOf("habitats").forGetter(DragonBreed::habitats),
+            Habitat.CODEC.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("habitats", ImmutableSet.of()).forGetter(DragonBreed::habitats),
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities),
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),

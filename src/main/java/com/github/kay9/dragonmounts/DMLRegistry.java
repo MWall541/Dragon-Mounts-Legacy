@@ -5,6 +5,8 @@ import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -12,12 +14,16 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.*;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class DMLRegistry
@@ -45,6 +51,8 @@ public class DMLRegistry
 
     public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", ForgeRegistries.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
 
+    public static final BooleanSupplier FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
+
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {
         return register(name, ForgeRegistries.ENTITIES, () -> builder.build(DragonMountsLegacy.MOD_ID + ":" + name));
@@ -53,6 +61,18 @@ public class DMLRegistry
     private static RegistryObject<SoundEvent> sound(String name)
     {
         return register(name, ForgeRegistries.SOUND_EVENTS, () -> new SoundEvent(DragonMountsLegacy.id(name)));
+    }
+
+    @SuppressWarnings({"ConstantConditions"})
+    private static BooleanSupplier keymap(String name, int defaultMapping, String category)
+    {
+        if (FMLLoader.getDist().isClient() && Minecraft.getInstance() != null) // instance is null during datagen
+        {
+            var keymap = new KeyMapping(name, defaultMapping, category);
+            ClientRegistry.registerKeyBinding(keymap);
+            return keymap::isDown;
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")

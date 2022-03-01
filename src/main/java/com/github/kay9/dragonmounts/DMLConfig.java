@@ -26,6 +26,14 @@ public class DMLConfig
         return USE_LOOT_TABLES.get();
     }
 
+    static final ForgeConfigSpec CLIENT;
+
+    private static final ForgeConfigSpec.BooleanValue CAMERA_FLIGHT;
+    public static boolean cameraFlight()
+    {
+        return CAMERA_FLIGHT.get();
+    }
+
     static
     {
         var configurator = new ForgeConfigSpec.Builder();
@@ -49,5 +57,15 @@ public class DMLConfig
                 .define("use_loot_tables", false);
 
         SERVER = configurator.build();
+    }
+
+    static
+    {
+        var configurator = new ForgeConfigSpec.Builder();
+
+        CAMERA_FLIGHT = configurator.comment("Should flight controls use the game camera (true) or vertical keybinds? (false)")
+                .define("camera_flight_controls", true);
+
+        CLIENT = configurator.build();
     }
 }

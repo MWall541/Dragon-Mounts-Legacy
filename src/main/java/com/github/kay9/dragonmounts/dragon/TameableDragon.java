@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
@@ -69,11 +70,11 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * @author Kay9
  */
 @SuppressWarnings("ConstantConditions")
-public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal
+public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3;
-    public static final double BASE_SPEED_FLYING = 0.65;
+    public static final double BASE_SPEED_FLYING = 0.525;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
     public static final double BASE_FOLLOW_RANGE = 16;
@@ -157,7 +158,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
 //        goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
-        goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1d, 10f, 3.5f, true));
+        goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1, 10f, 3.5f, true));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
@@ -318,6 +319,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         updateAgeProgress();
+        for (var ability : getBreed().abilities()) ability.tick(this);
     }
 
     @Override
@@ -329,26 +331,30 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (canBeControlledByRider()) // Were being controlled; override ai movement
         {
             LivingEntity driver = (LivingEntity) getControllingPassenger();
-            double moveX = driver.xxa * 0.5;
+            double moveSideways = vec3.x;
             double moveY = vec3.y;
-            double moveZ = driver.zza;
+            double moveForward = Math.min(Math.abs(driver.zza) + Math.abs(driver.xxa), 1);
 
-            // rotate head to match driver. yaw is handled relative to this.
-            yHeadRot = driver.yHeadRot;
-            if (!isFlying) setXRot(driver.getXRot() * 0.68f);
-            setYRot(Mth.rotateIfNecessary(yHeadRot, getYRot(), 6));
+            // rotate head to match driver.
+            float yaw = driver.yHeadRot;
+            if (moveForward > 0)
+                yaw += (float) Mth.atan2(driver.zza, driver.xxa) * (180f / (float) Math.PI) - 90;
+            yHeadRot = yaw;
+            setXRot(driver.getXRot() * 0.68f);
+            setYRot(Mth.rotateIfNecessary(yHeadRot, getYRot(), 4));
 
             if (isControlledByLocalInstance())
             {
                 if (isFlying)
                 {
-                    moveX = vec3.x;
-                    moveZ = moveZ > 0? moveZ : 0;
-                    if (moveZ > 0) moveY = -driver.getXRot() * (Math.PI / 180);
+                    moveSideways = vec3.x;
+                    moveForward = moveForward > 0? moveForward : 0;
+                    if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
+                    else moveY = driver.jumping? 1 : DMLRegistry.FLIGHT_DESCENT_KEY.getAsBoolean()? -1 : 0;
                 }
                 else if (driver.jumping && canFly()) liftOff();
 
-                vec3 = new Vec3(moveX, moveY, moveZ);
+                vec3 = new Vec3(moveSideways, moveY, moveForward);
                 setSpeed(speed);
             }
             else if (driver instanceof Player)
@@ -594,7 +600,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void playSound(SoundEvent pSound, float pVolume, float pPitch)
     {
-        if (pSound == breed.getAmbientSound()) pPitch += 1;
+        if (pSound == breed.getAmbientSound()) pPitch /= 2;
         super.playSound(pSound, pVolume, pPitch);
     }
 
@@ -1051,5 +1057,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public boolean fireImmune()
     {
         return super.fireImmune() || breed.immunities().contains("onFire");
+    }
+
+    @Override
+    protected void onChangedBlock(BlockPos pos)
+    {
+        super.onChangedBlock(pos);
+        for (var ability : getBreed().abilities()) ability.onMove(this);
     }
 }

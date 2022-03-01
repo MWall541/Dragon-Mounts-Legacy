@@ -1,8 +1,8 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.data.BreedManager;
-import com.github.kay9.dragonmounts.util.LerpedFloat;
 import com.mojang.math.Vector3f;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -45,8 +45,8 @@ public class DragonEgg extends Entity
     public DragonBreed breed;
     public final TransitionHandler transitioner;
     private int hatchTime;
-    private final LerpedFloat wiggleTime;
-    private boolean wiggling;
+//    private final LerpedFloat wiggleTime; todo: wiggle animations
+//    private boolean wiggling;
 
     public DragonEgg(EntityType<? extends Entity> type, Level level)
     {
@@ -55,7 +55,7 @@ public class DragonEgg extends Entity
         breed = BreedManager.getFallback();
         hatchTime = DEFAULT_HATCH_TIME;
         transitioner = new TransitionHandler();
-        wiggleTime = LerpedFloat.unit();
+//        wiggleTime = LerpedFloat.unit();
     }
 
     @Override
@@ -142,7 +142,7 @@ public class DragonEgg extends Entity
         if (!level.isClientSide)
         {
             // Update habitat
-            if (hatchTime > BREED_TRANSITION_TIME && !transitioner.isRunning() && tickCount % HABITAT_UPDATE_INTERVAL == 0)
+            if (DMLConfig.updateHabitats() && hatchTime > BREED_TRANSITION_TIME && !transitioner.isRunning() && tickCount % HABITAT_UPDATE_INTERVAL == 0)
                 updateHabitat();
 
             // hatch!
@@ -156,8 +156,8 @@ public class DragonEgg extends Entity
         }
         else
         {
-            wiggleTime.add(wiggling? 0.1f : -0.1f);
-            if (wiggleTime.get() == 1) wiggling = false;
+//            wiggleTime.add(wiggling? 0.1f : -0.1f);
+//            if (wiggleTime.get() == 1) wiggling = false;
 
             addHatchingParticles(breed, 1);
         }
@@ -250,9 +250,9 @@ public class DragonEgg extends Entity
     {
         if (level.isClientSide)
         {
-            if (wiggling || wiggleTime.get() > 0) return;
+//            if (wiggling || wiggleTime.get() > 0) return;
             level.playLocalSound(getX(), getY(), getZ(), SoundEvents.TURTLE_EGG_CRACK, SoundSource.BLOCKS, 1, 1, false);
-            this.wiggling = true;
+//            this.wiggling = true;
         }
         else level.broadcastEntityEvent(this, WIGGLE_ID);
     }

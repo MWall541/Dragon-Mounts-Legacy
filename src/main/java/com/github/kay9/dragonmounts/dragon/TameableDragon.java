@@ -775,7 +775,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public boolean canReproduce()
     {
-        return isTame() && reproCount < REPRO_LIMIT;
+        return isTame() && reproCount < DMLConfig.reproLimit();
     }
 
     @Override

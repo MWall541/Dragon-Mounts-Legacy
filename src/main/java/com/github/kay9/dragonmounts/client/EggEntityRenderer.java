@@ -4,7 +4,7 @@ import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.BlockPos;
@@ -26,7 +26,7 @@ public class EggEntityRenderer extends EntityRenderer<DragonEgg>
 
         if (state != entity.level.getBlockState(blockpos))
         {
-            DragonEggRenderer.renderEgg(ps, buffer.getBuffer(RenderType.solid()), light, entity.breed, true);
+            DragonEggRenderer.renderEgg(ps, buffer.getBuffer(Sheets.translucentCullBlockSheet()), light, entity.breed, true);
             super.render(entity, yaw, partialTicks, ps, buffer, light);
         }
     }

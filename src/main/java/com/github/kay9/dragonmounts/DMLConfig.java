@@ -4,6 +4,16 @@ import net.minecraftforge.common.ForgeConfigSpec;
 
 public class DMLConfig
 {
+    static final ForgeConfigSpec COMMON;
+
+    private static final ForgeConfigSpec.BooleanValue ALLOW_EGG_OVERRIDE;
+    public static boolean allowEggOverride()
+    {
+        return ALLOW_EGG_OVERRIDE.get();
+    }
+
+    static final ForgeConfigSpec SERVER;
+
     private static final ForgeConfigSpec.BooleanValue REPLENISH_EGGS;
     public static boolean replenishEggs()
     {
@@ -16,11 +26,21 @@ public class DMLConfig
         return USE_LOOT_TABLES.get();
     }
 
-    static final ForgeConfigSpec SERVER;
+    static
+    {
+        var configurator = new ForgeConfigSpec.Builder();
+
+        ALLOW_EGG_OVERRIDE = configurator.comment("Allow the vanilla ender egg to be interacted with? (Hatchable)",
+                "Useful to help with mod compatability")
+                .define("allow_egg_override", true);
+
+        COMMON = configurator.build();
+    }
 
     static
     {
         var configurator = new ForgeConfigSpec.Builder();
+
         REPLENISH_EGGS = configurator.comment("Should Ender Dragon Eggs replenish on the exit portal after a respawned dragon is deafeated?",
                 "Useful for multiplayer scenarios.")
                 .define("replenish_eggs", true);

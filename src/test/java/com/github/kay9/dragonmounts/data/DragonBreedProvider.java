@@ -59,7 +59,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(),
-            list(new NearbyBlocksHabitat(TagProvider.FOREST_DRAGON_HABITAT_BLOCKS)),
+            list(new NearbyBlocksHabitat(TagProvider.FOREST_DRAGON_HABITAT_BLOCKS), list(new BiomeHabitat(set(Biomes.JUNGLE, Biomes.SPARSE_JUNGLE, Biomes.BAMBOO_JUNGLE)))),
             set(),
             Optional.empty(),
             BuiltInLootTables.EMPTY,

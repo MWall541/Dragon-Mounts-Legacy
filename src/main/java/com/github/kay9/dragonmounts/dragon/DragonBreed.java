@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.Habitat;
 import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
@@ -27,7 +28,7 @@ import java.util.Optional;
 public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryColor, boolean showMiddleTailScales,
                           boolean showTailSpikes,
                           Map<Attribute, Double> attributes,
-                          List<Habitat> habitats, ImmutableSet<String> immunities,
+                          List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities,
                           Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime)
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(func -> func.group(
@@ -37,6 +38,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             Codec.BOOL.optionalFieldOf("show_middle_tail_scales", true).forGetter(DragonBreed::showMiddleTailScales),
             Codec.BOOL.optionalFieldOf("show_tail_spikes", false).forGetter(DragonBreed::showTailSpikes),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
+            Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
@@ -53,6 +55,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             false,
             false,
             ImmutableMap.of(),
+            ImmutableList.of(),
             ImmutableList.of(new NearbyBlocksHabitat(BlockTags.createOptional(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
             Optional.empty(),
@@ -68,6 +71,11 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
     public String getTranslationKey()
     {
         return "dragon_breed." + id().getNamespace() + "." + id().getPath();
+    }
+
+    public void tickAbilities(TameableDragon dragon)
+    {
+        for (var ability : abilities()) ability.tick(dragon);
     }
 
     public int getHabitatPoints(Level level, BlockPos pos)

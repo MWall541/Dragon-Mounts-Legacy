@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonEggRenderer;
@@ -93,7 +94,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
 
     public static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
     {
-        if (level.getBlockState(pos).is(Blocks.DRAGON_EGG))
+        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
             DragonBreed end = BreedManager.getNullable(DragonMountsLegacy.id("end"));
             if (end != null)

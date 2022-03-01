@@ -1,6 +1,5 @@
 package com.github.kay9.dragonmounts.dragon;
 
-import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.Habitat;
@@ -14,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.level.Level;
@@ -52,7 +52,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             false,
             false,
             ImmutableMap.of(),
-            ImmutableSet.of(new NearbyBlocksHabitat(DMLRegistry.FIRE_DRAGON_HABITAT_BLOCKS), new FluidHabitat(FluidTags.LAVA)),
+            ImmutableSet.of(new NearbyBlocksHabitat(BlockTags.createOptional(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,

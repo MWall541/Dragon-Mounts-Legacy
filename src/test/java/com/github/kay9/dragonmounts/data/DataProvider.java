@@ -16,7 +16,10 @@ public class DataProvider
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper fileHelper = event.getExistingFileHelper();
 
-        gen.addProvider(new DragonBreedProvider(gen));
-        gen.addProvider(new TagProvider(gen, fileHelper));
+        if (event.includeServer())
+        {
+            gen.addProvider(new DragonBreedProvider(gen));
+            gen.addProvider(new TagProvider(gen, fileHelper));
+        }
     }
 }

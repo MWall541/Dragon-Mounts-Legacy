@@ -24,7 +24,6 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -49,10 +48,10 @@ public class DragonMountsLegacy
 
         DMLRegistry.init(bus);
 
-        bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
-
         MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent e) -> e.addListener(BreedManager.INSTANCE));
         MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
+
+        bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
@@ -77,11 +76,7 @@ public class DragonMountsLegacy
 
     private static void attemptVanillaEggReplacement(PlayerInteractEvent.RightClickBlock evt)
     {
-        if (DMLEggBlock.overrideVanillaDragonEgg(evt.getWorld(), evt.getPos(), evt.getPlayer()))
-        {
-            evt.setCanceled(true);
-            evt.setUseBlock(Event.Result.DENY);
-        }
+        if (DMLEggBlock.overrideVanillaDragonEgg(evt.getWorld(), evt.getPos(), evt.getPlayer())) evt.setCanceled(true);
     }
 
     private static void defineBlockModels()

@@ -1,0 +1,22 @@
+{
+  "rolls": 1.0,
+  "bonus_rolls": 0.0,
+  "entries": [
+    {
+      "type": "minecraft:item",
+      "name": "dragonmounts:dragon_egg"
+    }
+  ],
+  "conditions": [
+    {
+      "condition": "minecraft:random_chance",
+      "chance": 0.2
+    }
+  ],
+  "functions": [
+    {
+      "function": "minecraft:set_nbt",
+      "tag": "{BlockEntityTag:{Breed:\"dragonmounts:aether\",HatchTime:12000},ItemName:\"dragon_breed.dragonmounts.aether\"}"
+    }
+  ]
+}

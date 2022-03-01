@@ -910,6 +910,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         Entity srcEnt = src.getEntity();
         if (srcEnt != null && (srcEnt == this || hasPassenger(srcEnt))) return true;
 
+        if (src == DamageSource.DRAGON_BREATH // inherited from it anyway
+                || src == DamageSource.CACTUS) // assume cactus needles don't hurt thick scaled lizards
+            return true;
+
         return breed.immunities().contains(src.getMsgId()) || super.isInvulnerableTo(src);
     }
 

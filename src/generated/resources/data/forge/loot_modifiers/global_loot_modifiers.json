@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "entries": [
+    "dragonmounts:dragonmounts/fire",
+    "dragonmounts:dragonmounts/ghost",
+    "dragonmounts:dragonmounts/nether",
+    "dragonmounts:dragonmounts/aether",
+    "dragonmounts:dragonmounts/forest",
+    "dragonmounts:dragonmounts/ice",
+    "dragonmounts:dragonmounts/water"
+  ]
+}

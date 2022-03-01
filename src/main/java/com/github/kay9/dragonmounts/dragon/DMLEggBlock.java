@@ -142,7 +142,8 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             tooltips.add(new TranslatableComponent(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
 
             if (Minecraft.getInstance().player.getAbilities().instabuild)
-                tooltips.add(new TranslatableComponent(getDescriptionId() + ".change_breeds").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+                tooltips.add(new TranslatableComponent(getDescriptionId() + ".change_breeds")
+                        .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC, ChatFormatting.UNDERLINE));
         }
 
         @Override

@@ -1,0 +1,14 @@
+{
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/desert_pyramid"
+    },
+    {
+      "condition": "minecraft:random_chance",
+      "chance": 0.085
+    }
+  ],
+  "breed": "dragonmounts:fire",
+  "type": "dragonmounts:dragon_egg_loot"
+}

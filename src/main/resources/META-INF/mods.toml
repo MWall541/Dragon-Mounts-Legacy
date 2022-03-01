@@ -9,8 +9,8 @@ displayName="Dragon Mounts: Legacy"
 #logoFile="examplemod.png"
 credits="ata4/barracuda for the original project and idea."
 authors="Kay9"
-description='''This is a mod that allows you to hatch previously useless dragon eggs. r\
- Once fostered and tamed, they'll be your faithful companion in all situations and, of course, can be used for a ride!'''
+description='''This is a mod that allows you to hatch previously useless dragon eggs.
+Once fostered and tamed, they'll be your faithful companion in all situations and, of course, can be used for a ride!'''
 [[dependencies.dragonmounts]]
     modId="forge"
     mandatory=true

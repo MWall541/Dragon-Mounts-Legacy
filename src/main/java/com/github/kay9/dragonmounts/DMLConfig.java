@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts;
 
+import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class DMLConfig
@@ -26,6 +27,18 @@ public class DMLConfig
         return USE_LOOT_TABLES.get();
     }
 
+    private static final ForgeConfigSpec.BooleanValue UPDATE_HABITATS;
+    public static boolean updateHabitats()
+    {
+        return UPDATE_HABITATS.get();
+    }
+
+    private static final ForgeConfigSpec.IntValue REPRO_LIMIT;
+    public static int reproLimit()
+    {
+        return REPRO_LIMIT.get();
+    }
+
     static final ForgeConfigSpec CLIENT;
 
     private static final ForgeConfigSpec.BooleanValue CAMERA_FLIGHT;
@@ -34,7 +47,7 @@ public class DMLConfig
         return CAMERA_FLIGHT.get();
     }
 
-    static
+    static // common
     {
         var configurator = new ForgeConfigSpec.Builder();
 
@@ -45,7 +58,7 @@ public class DMLConfig
         COMMON = configurator.build();
     }
 
-    static
+    static // server
     {
         var configurator = new ForgeConfigSpec.Builder();
 
@@ -53,13 +66,18 @@ public class DMLConfig
                 "Useful for multiplayer scenarios.")
                 .define("replenish_eggs", true);
         USE_LOOT_TABLES = configurator.comment("Should dragon eggs generate in treasure chest loot tables?",
-                "Useful for multiplayer scenarios and offering alternative ways to obtain eggs.")
+                "Useful for multiplayer scenarios and offering alternative ways to obtain eggs.",
+                "Different types of egg breeds can be found in different chests (if configured.)")
                 .define("use_loot_tables", false);
+        UPDATE_HABITATS = configurator.comment("Should Dragon Eggs adapt to their environments and change breeds?")
+                .define("update_habitats", true);
+        REPRO_LIMIT = configurator.comment("Number of times a dragon is able to breed.")
+                .defineInRange("breed_limit", TameableDragon.REPRO_LIMIT, 0, Integer.MAX_VALUE);
 
         SERVER = configurator.build();
     }
 
-    static
+    static // client
     {
         var configurator = new ForgeConfigSpec.Builder();
 

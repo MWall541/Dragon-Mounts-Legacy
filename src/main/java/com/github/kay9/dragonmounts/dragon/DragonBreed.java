@@ -73,11 +73,6 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
         return "dragon_breed." + id().getNamespace() + "." + id().getPath();
     }
 
-    public void tickAbilities(TameableDragon dragon)
-    {
-        for (var ability : abilities()) ability.tick(dragon);
-    }
-
     public int getHabitatPoints(Level level, BlockPos pos)
     {
         int points = 0;

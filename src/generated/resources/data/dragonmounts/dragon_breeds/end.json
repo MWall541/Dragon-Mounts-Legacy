@@ -1,7 +1,4 @@
 {
-  "attributes": {
-    "minecraft:generic.max_health": 75.0
-  },
   "habitats": [
     {
       "type": "dragon_breath"
@@ -10,7 +7,10 @@
   "immunities": [
     "dragonBreath"
   ],
-  "secondary_color": 16737256,
+  "attributes": {
+    "minecraft:generic.max_health": 75.0
+  },
   "name": "dragonmounts:end",
-  "primary_color": 1447446
+  "primary_color": 1447446,
+  "secondary_color": 16737256
 }

@@ -14,6 +14,7 @@ public interface Ability
 
     String FROST_WALKER = register("frost_walker", FrostWalkerAbility.CODEC);
     String GREEN_TOES = register("green_toes", GreenToesAbility.CODEC);
+    String SNOW_STEPPER = register("snow_stepper", SnowStepperAbility.CODEC);
 
     static String register(String name, Codec<? extends Ability> codec)
     {
@@ -21,7 +22,9 @@ public interface Ability
         return name;
     }
 
-    void tick(TameableDragon dragon);
+    default void tick(TameableDragon dragon) {}
+
+    default void onMove(TameableDragon dragon) {}
 
     String type();
 }

@@ -66,7 +66,9 @@ public class DragonMountsLegacy
             MinecraftForge.EVENT_BUS.addListener((OnDatapackSyncEvent e) -> UpdateBreedsPacket.send(e.getPlayer()));
         }
 
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
     }
 
     public static ResourceLocation id(String path)

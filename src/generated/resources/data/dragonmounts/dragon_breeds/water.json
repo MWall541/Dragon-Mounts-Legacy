@@ -8,8 +8,8 @@
   "immunities": [
     "drown"
   ],
-  "secondary_color": 5872127,
   "show_tail_spikes": true,
   "name": "dragonmounts:water",
-  "primary_color": 25343
+  "primary_color": 25343,
+  "secondary_color": 5872127
 }

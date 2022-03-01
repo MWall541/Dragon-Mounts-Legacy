@@ -1,11 +1,24 @@
 {
+  "abilities": [
+    {
+      "type": "green_toes"
+    }
+  ],
   "habitats": [
     {
       "block_tag": "dragonmounts:forest_dragon_habitat_blocks",
       "type": "nearby_blocks"
+    },
+    {
+      "biomes": [
+        "minecraft:jungle",
+        "minecraft:sparse_jungle",
+        "minecraft:bamboo_jungle"
+      ],
+      "type": "biome"
     }
   ],
-  "secondary_color": 693760,
   "name": "dragonmounts:forest",
-  "primary_color": 346624
+  "primary_color": 346624,
+  "secondary_color": 693760
 }

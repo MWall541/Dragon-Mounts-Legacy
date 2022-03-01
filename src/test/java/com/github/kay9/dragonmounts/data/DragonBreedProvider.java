@@ -1,6 +1,9 @@
 package com.github.kay9.dragonmounts.data;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.FrostWalkerAbility;
+import com.github.kay9.dragonmounts.abilities.GreenToesAbility;
+import com.github.kay9.dragonmounts.abilities.SnowStepperAbility;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.*;
@@ -33,6 +36,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING + 2),
+            list(),
             list(new HeightHabitat(false, 200)),
             set(),
             Optional.empty(),
@@ -45,6 +49,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
+            list(), // teleport ability?
             list(DragonBreathHabitat.INSTANCE),
             set("dragonBreath"),
             Optional.empty(),
@@ -59,7 +64,8 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(),
-            list(new NearbyBlocksHabitat(TagProvider.FOREST_DRAGON_HABITAT_BLOCKS), list(new BiomeHabitat(set(Biomes.JUNGLE, Biomes.SPARSE_JUNGLE, Biomes.BAMBOO_JUNGLE)))),
+            list(GreenToesAbility.INSTANCE),
+            list(new NearbyBlocksHabitat(TagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(set(Biomes.JUNGLE, Biomes.SPARSE_JUNGLE, Biomes.BAMBOO_JUNGLE))),
             set(),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -71,6 +77,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(),
+            list(),
             list(new PickyHabitat(ImmutableList.of(new HeightHabitat(true, 0), new LightHabitat(true, 3)))),
             set("drown"),
             Optional.of(SoundEvents.SKELETON_AMBIENT),
@@ -79,10 +86,11 @@ public class DragonBreedProvider implements DataProvider
 
     static final DragonBreed ICE = new DragonBreed(DragonMountsLegacy.id("ice"),
             0xffffff,
-            0x00b7ff,
+            0x00E1FF,
             true,
             false,
             of(),
+            list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
             list(new NearbyBlocksHabitat(TagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
             Optional.empty(),
@@ -95,6 +103,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             false,
             of(Attributes.ARMOR, 8d),
+            list(),
             list(new NearbyBlocksHabitat(TagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(set(Biomes.BASALT_DELTAS, Biomes.CRIMSON_FOREST, Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST))),
             set("inFire", "onFire", "lava", "hotFloor"),
             Optional.empty(),
@@ -107,6 +116,7 @@ public class DragonBreedProvider implements DataProvider
             true,
             true,
             of(),
+            list(),
             list(new FluidHabitat(FluidTags.WATER)),
             set("drown"),
             Optional.empty(),

@@ -1,4 +1,12 @@
 {
+  "abilities": [
+    {
+      "type": "frost_walker"
+    },
+    {
+      "type": "snow_stepper"
+    }
+  ],
   "habitats": [
     {
       "block_tag": "dragonmounts:ice_dragon_habitat_blocks",
@@ -9,7 +17,7 @@
     "drown",
     "freeze"
   ],
-  "secondary_color": 47103,
   "name": "dragonmounts:ice",
-  "primary_color": 16777215
+  "primary_color": 16777215,
+  "secondary_color": 57855
 }

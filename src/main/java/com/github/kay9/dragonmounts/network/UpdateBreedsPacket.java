@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.network;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.network.FriendlyByteBuf;
@@ -63,7 +64,8 @@ public class UpdateBreedsPacket
                 buf.readBoolean(),
                 buf.readBoolean(),
                 ImmutableMap.of(),
-                ImmutableSet.of(),
+                ImmutableList.of(),
+                ImmutableList.of(),
                 ImmutableSet.of(),
                 Optional.empty(),
                 BuiltInLootTables.EMPTY,

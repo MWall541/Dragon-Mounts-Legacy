@@ -1,46 +1,35 @@
 # Dragon Mounts: Legacy
-[![Discord](https://img.shields.io/discord/593364629489582118.svg?color=%237289da&label=Discord&logo=discord&logoColor=%237289da)](https://discord.gg/h8zRw9H)
+___
+[![CurseForge](https://cf.way2muchnoise.eu/375088.svg)](https://www.curseforge.com/minecraft/mc-mods/dragon-mounts-legacy)
+[![Support me on Patreon](https://img.shields.io/badge/dynamic/json?logo=Patreon&logoColor=f96854&style=flat&color=f96854&label=Patreon&labelColor=052d49&query=data.attributes.patron_count&url=https%3A%2F%2Fwww.patreon.com%2Fapi%2Fcampaigns%2F5686478?)](https://patreon.com/kaynien)
 
 Github Repostory for the Dragon Mounts: Legacy Minecraft Mod.
 
-## Found a bug / issue?
-Thats great but not really! You can report it [here](https://github.com/WolfShotz/DML/issues)
+>> "A Minecraft mod that allows you to breed dragon eggs and foster them to ridable dragons."
+>
+> -- BarracudaAta
 
-## Licensing
-You have probably noticed, atleast by now because your clearly reading this far into things, that the project is All Rights Reserved.
-That is indeed the case, All Rights Reserved, as for code and assets are concerned. However, there are a few exceptions and conditions (As per "All Rights Reserved").
+### About
+___
 
-### Notice
-By Contributing to this project (whether it be code, assets, language entries etc.) you are hereby granting us rights to what you contribute.
-If there is a problem with that, either get in contact with me (WolfShotz) or just dont contribute.
+Dragon Mounts was a mod originally created by BarracudaATA, in an attempt to make the previously useless dragon eggs
+hatchable and implements tameable Ender Dragon-esque creatures. Albeit smaller and weaker, they provide wider ranges
+of utility, and even adapt to their environments!
 
-With that said, you are hereby accepting to the following:
+Dragon Mounts: Legacy is the continuation of this magic in the modern minecraft version. By implementing minor updates
+and expanding on the mechanics, the aim is to upgrade the quality, while maintaining the LEGACY feel.
 
-**You CAN**
- * Modify for private use
- * View and reference the code
- * Copy portions of the code* for use in your own projects**
- * Fork and Modify the code*
- * Submit Pull requests
- * Use this project for commercial use (Monetized media content etc.)
- 
-**You CANNOT**
- * Redstribute this project in its entirity, sourced or compiled.
- * Distribute code that contains 50%+ of this sources code without credit of me***
- * Distribute the project in a different form, or platform. Such as other mod loaders, or games.
- * Claim ownership of partial or total amounts of the original or re-packaged work.
+DM:L features a completely re-done codebase with bits and pieces of the original code here and there.
+Features such as the habitat mechanics and riding have been completely rethought and redesigned, while the model and
+animations have been kept to their original code (mostly) and thus quality.
 
-**You MUST**
- * Keep a visible and clear repository of the code of which that is derived/inspried from this repository. Of course, you still maintain rights of your code, however you still need to keep a visible source.
+> Dragon Mounts by Barracuda can be found [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/wip-mods/1439594-dragon-mounts-r46-wip),
+with the github repo [here](https://github.com/ata4/dragon-mounts).
 
-*Code is CODE. NOT ASSETS. You cannot distribute/change any asset material under any modification or format (this includes remixes, transformations and other modifications of said material) unless explicitly stated.
+### Customization
+___
+**Contributors and Modpack Devs Alike**
 
-**"Portions" can be considered 90% of the outcome of a particular result or function. Should anything surpass that amount, you must provide credit to me.
-
-***Changing Variable names, adding whitespace, etc. is not different code! Basically, if it achieves the same result, its considered [Functionally Equivalent Statements (Alternate Behavior)](https://link.springer.com/referenceworkentry/10.1007%2F978-1-4419-1698-3_1038) and falls under this category!
-
-#### TL;DR
-This is an open source project. You are free to look and reference the code all you want. Learn from it!
-If you think you have improvements, tell me! Submit Pull Requests! I'm all ears!
-Just please, don't be that guy who goes and steals peoples hard work. Seriously, its not that hard.
-Also, redistribution makes it harder for everyone. For the players, and the developers, going around chicken chases for issues that may have already been addressed.
+DM:L was designed with customization in mind. Dragon Breeds can be fully customizable through the use of json files.
+An entirely new breed can be made with a combo of a datapack and resourcepack. *No Code Necessary!* Of course, like
+datapack nature, existing breeds can be edited as well. More info and how to do it is described on the wiki.

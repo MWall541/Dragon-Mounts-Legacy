@@ -13,7 +13,7 @@ Github Repostory for the Dragon Mounts: Legacy Minecraft Mod.
 ___
 
 Dragon Mounts was a mod originally created by BarracudaATA, in an attempt to make the previously useless dragon eggs
-hatchable and implements tameable Ender Dragon-esque creatures. Albeit smaller and weaker, they provide wider ranges
+which hatch tameable Ender Dragon-esque creatures. Albeit smaller and weaker, they provide wider ranges
 of utility, and even adapt to their environments!
 
 Dragon Mounts: Legacy is the continuation of this magic in the modern minecraft version. By implementing minor updates

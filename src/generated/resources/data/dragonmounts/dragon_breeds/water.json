@@ -8,7 +8,12 @@
   "immunities": [
     "drown"
   ],
-  "show_tail_spikes": true,
+  "hatch_particles": {
+    "type": "minecraft:dripping_water"
+  },
+  "model_properties": {
+    "tail_horns": true
+  },
   "name": "dragonmounts:water",
   "primary_color": 25343,
   "secondary_color": 5872127

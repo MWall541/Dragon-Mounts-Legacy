@@ -28,6 +28,7 @@ public class LootModifierProvider extends GlobalLootModifierProvider
         add(FIRE, BuiltInLootTables.DESERT_PYRAMID, 0.085f);
         add(FOREST, BuiltInLootTables.JUNGLE_TEMPLE, 0.3f);
         add(GHOST, BuiltInLootTables.WOODLAND_MANSION, 0.2f);
+        add(GHOST, BuiltInLootTables.ABANDONED_MINESHAFT, 0.075f);
         add(ICE, BuiltInLootTables.IGLOO_CHEST, 0.2f);
         add(NETHER, BuiltInLootTables.BASTION_TREASURE, 0.35f);
         add(WATER, BuiltInLootTables.BURIED_TREASURE, 0.175f);
@@ -35,7 +36,7 @@ public class LootModifierProvider extends GlobalLootModifierProvider
 
     public void add(DragonBreed breed, ResourceLocation table, float chance)
     {
-        var path = breed.id().getNamespace() + "/" + breed.id().getPath();
+        var path = breed.id().getNamespace() + "/" + breed.id().getPath() + "/" + table.getPath();
 
         var conditions = new LootItemCondition[] {
                 LootTableIdCondition.builder(table).build(),

@@ -15,7 +15,12 @@
     "lava",
     "hotFloor"
   ],
-  "show_middle_tail_scales": false,
+  "hatch_particles": {
+    "type": "minecraft:flame"
+  },
+  "model_properties": {
+    "middle_tail_scales": false
+  },
   "name": "dragonmounts:fire",
   "primary_color": 9511936,
   "secondary_color": 16750617

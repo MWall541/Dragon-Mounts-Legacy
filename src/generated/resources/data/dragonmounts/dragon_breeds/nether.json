@@ -21,6 +21,9 @@
     "lava",
     "hotFloor"
   ],
+  "hatch_particles": {
+    "type": "minecraft:soul_fire_flame"
+  },
   "attributes": {
     "minecraft:generic.armor": 8.0
   },

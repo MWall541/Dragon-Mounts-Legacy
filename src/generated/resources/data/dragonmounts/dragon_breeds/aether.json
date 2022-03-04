@@ -6,7 +6,7 @@
     }
   ],
   "attributes": {
-    "minecraft:generic.flying_speed": 2.525
+    "minecraft:generic.flying_speed": 0.76125
   },
   "name": "dragonmounts:aether",
   "primary_color": 7441065,

@@ -7,6 +7,9 @@
   "immunities": [
     "dragonBreath"
   ],
+  "hatch_particles": {
+    "type": "minecraft:portal"
+  },
   "attributes": {
     "minecraft:generic.max_health": 75.0
   },

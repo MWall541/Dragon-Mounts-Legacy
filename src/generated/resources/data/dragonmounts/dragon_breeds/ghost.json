@@ -20,6 +20,9 @@
   "immunities": [
     "drown"
   ],
+  "model_properties": {
+    "thin_legs": true
+  },
   "name": "dragonmounts:ghost",
   "primary_color": 12895428,
   "secondary_color": 12777727

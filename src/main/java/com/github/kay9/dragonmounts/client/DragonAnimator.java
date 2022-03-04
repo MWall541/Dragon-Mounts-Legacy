@@ -463,7 +463,7 @@ public class DragonAnimator
             model.tail.yRot += Math.toRadians(180 - yawOfs);
 
             // display horns near the tip
-            boolean horn = dragon.getBreed().showTailSpikes() && i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
+            boolean horn = dragon.getBreed().modelProperties().tailHorns() && i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
             model.tailHornLeft.visible = model.tailHornRight.visible = horn;
 
             // update scale
@@ -569,46 +569,6 @@ public class DragonAnimator
         }
     }
 
-    private void splineArrays(float x, boolean shift, float[] result, float[]... nodes)
-    {
-        int i1 = (int) x % nodes.length;
-        int i2 = (i1 + 1) % nodes.length;
-        int i3 = (i1 + 2) % nodes.length;
-
-        float[] a1 = nodes[i1];
-        float[] a2 = nodes[i2];
-        float[] a3 = nodes[i3];
-
-        float xn = x % nodes.length - i1;
-
-        if (shift) terpCatmullRomSpline(xn, result, a2, a3, a1, a2);
-        else terpCatmullRomSpline(xn, result, a1, a2, a3, a1);
-    }
-
-    private void slerpArrays(float[] a, float[] b, float[] c, float x)
-    {
-        if (a.length != b.length || b.length != c.length)
-        {
-            throw new IllegalArgumentException();
-        }
-
-        if (x <= 0)
-        {
-            System.arraycopy(a, 0, c, 0, a.length);
-            return;
-        }
-        if (x >= 1)
-        {
-            System.arraycopy(b, 0, c, 0, a.length);
-            return;
-        }
-
-        for (int i = 0; i < c.length; i++)
-        {
-            c[i] = terpSmoothStep(a[i], b[i], x);
-        }
-    }
-
     public float getModelPitch()
     {
         return getModelPitch(partialTicks);
@@ -647,6 +607,30 @@ public class DragonAnimator
         this.openJaw = openJaw;
     }
 
+    private static void slerpArrays(float[] a, float[] b, float[] c, float x)
+    {
+        if (a.length != b.length || b.length != c.length)
+        {
+            throw new IllegalArgumentException();
+        }
+
+        if (x <= 0)
+        {
+            System.arraycopy(a, 0, c, 0, a.length);
+            return;
+        }
+        if (x >= 1)
+        {
+            System.arraycopy(b, 0, c, 0, a.length);
+            return;
+        }
+
+        for (int i = 0; i < c.length; i++)
+        {
+            c[i] = terpSmoothStep(a[i], b[i], x);
+        }
+    }
+
     private static float terpSmoothStep(float a, float b, float x)
     {
         if (x <= 0)
@@ -659,6 +643,22 @@ public class DragonAnimator
         }
         x = x * x * (3 - 2 * x);
         return a * (1 - x) + b * x;
+    }
+
+    private static void splineArrays(float x, boolean shift, float[] result, float[]... nodes)
+    {
+        int i1 = (int) x % nodes.length;
+        int i2 = (i1 + 1) % nodes.length;
+        int i3 = (i1 + 2) % nodes.length;
+
+        float[] a1 = nodes[i1];
+        float[] a2 = nodes[i2];
+        float[] a3 = nodes[i3];
+
+        float xn = x % nodes.length - i1;
+
+        if (shift) terpCatmullRomSpline(xn, result, a2, a3, a1, a2);
+        else terpCatmullRomSpline(xn, result, a1, a2, a3, a1);
     }
 
     private static final float[][] CR = {

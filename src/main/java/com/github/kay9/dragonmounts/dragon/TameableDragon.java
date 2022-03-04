@@ -98,13 +98,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final int AGE_UPDATE_INTERVAL = 100;
     public static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"); // just a random uuid I took online
     public static final int ALTITUDE_FLYING_THRESHOLD = 3;
-    public static final int REPRO_LIMIT = 2;
+    public static final int DEFAULT_REPRO_LIMIT = 2;
     public static final int DEFAULT_GROWTH_TIME = 72000;
 
     // server/client delegates
-    public final DragonAnimator animator;
-    public DragonBreed breed;
-    public int reproCount;
+    private final DragonAnimator animator;
+    private DragonBreed breed;
+    private int reproCount;
     private float ageProgress;
 
     public TameableDragon(EntityType<? extends TameableDragon> type, Level level)
@@ -337,17 +337,18 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
             // rotate head to match driver.
             float yaw = driver.yHeadRot;
-            if (moveForward > 0)
+            if (moveForward > 0) // rotate in the direction of the drivers controls
                 yaw += (float) Mth.atan2(driver.zza, driver.xxa) * (180f / (float) Math.PI) - 90;
             yHeadRot = yaw;
             setXRot(driver.getXRot() * 0.68f);
+
+            // rotate body towards the head
             setYRot(Mth.rotateIfNecessary(yHeadRot, getYRot(), 4));
 
-            if (isControlledByLocalInstance())
+            if (isControlledByLocalInstance()) // Client applies motion
             {
                 if (isFlying)
                 {
-                    moveSideways = vec3.x;
                     moveForward = moveForward > 0? moveForward : 0;
                     if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
                     else moveY = driver.jumping? 1 : DMLRegistry.FLIGHT_DESCENT_KEY.getAsBoolean()? -1 : 0;
@@ -357,7 +358,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 vec3 = new Vec3(moveSideways, moveY, moveForward);
                 setSpeed(speed);
             }
-            else if (driver instanceof Player)
+            else if (driver instanceof Player) // other clients recieve animations
             {
                 calculateEntityAnimation(this, true);
                 setDeltaMovement(Vec3.ZERO);
@@ -367,33 +368,94 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         if (isFlying)
         {
-            // Move relative to yaw - handled in the move controller or by passenger
+            // Move relative to yaw - handled in the move controller or by driver
             moveRelative(speed, vec3);
             move(MoverType.SELF, getDeltaMovement());
-            if (getDeltaMovement().lengthSqr() < 0.1)
+            if (getDeltaMovement().lengthSqr() < 0.1) // we're not actually going anywhere, bob up and down.
                 setDeltaMovement(getDeltaMovement().add(0, Math.sin(tickCount / 4f) * 0.03, 0));
-            setDeltaMovement(getDeltaMovement().scale(0.9f));
+            setDeltaMovement(getDeltaMovement().scale(0.9f)); // smoothly slow down
 
             calculateEntityAnimation(this, true);
         }
         else super.travel(vec3);
     }
 
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand)
+    {
+        ItemStack stack = player.getItemInHand(hand);
+
+        InteractionResult stackResult = stack.interactLivingEntity(player, this, hand);
+        if (stackResult.consumesAction()) return stackResult;
+
+        final InteractionResult SUCCESS = InteractionResult.sidedSuccess(level.isClientSide);
+
+        // heal
+        if (getHealthRelative() < 1 && isFoodItem(stack))
+        {
+            heal(stack.getItem().getFoodProperties().getNutrition());
+            playSound(getEatingSound(stack), 0.7f, 1);
+            stack.shrink(1);
+            return SUCCESS;
+        }
+
+        // saddle up!
+        if (isTamedFor(player) && isSaddleable() && !isSaddled() && stack.getItem() instanceof SaddleItem)
+        {
+            stack.shrink(1);
+            equipSaddle(getSoundSource());
+            return SUCCESS;
+        }
+
+        // tame
+        if (isFood(stack) && !isTame())
+        {
+            stack.shrink(1);
+            if (isServer()) tamedFor(player, getRandom().nextInt(5) == 0);
+            return SUCCESS;
+        }
+
+        // sit!
+        if (isTamedFor(player) && player.isShiftKeyDown())
+        {
+            if (isServer())
+            {
+                navigation.stop();
+                setOrderedToSit(!isOrderedToSit());
+                if (isOrderedToSit()) setTarget(null);
+            }
+            return SUCCESS;
+        }
+
+        // ride on
+        if (isTamedFor(player) && isSaddled() && !isHatchling() && !isFood(stack))
+        {
+            if (isServer())
+            {
+                setRidingPlayer(player);
+                navigation.stop();
+                setTarget(null);
+            }
+            setOrderedToSit(false);
+            setInSittingPose(false);
+            return SUCCESS;
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
     /**
-     * Returns the distance to the ground while the entity is flying.
-     * describe a limit to reduce iterations
-     * limit is inclusive
+     * Returns the int-precision distance to solid ground.
+     * Describe an inclusive limit to reduce iterations.
      */
     public double getAltitude(int limit)
     {
-        var pointer = blockPosition().mutable();
+        var pointer = blockPosition().mutable().move(0, -1, 0);
+        var min = level.dimensionType().minY();
         var i = 0;
 
-        while(i <= limit && pointer.getY() > level.dimensionType().minY() && !level.getBlockState(pointer).getMaterial().isSolid())
-        {
-            pointer.setY(getBlockY() - (i + 1));
-            ++i;
-        }
+        while(i <= limit && pointer.getY() > min && !level.getBlockState(pointer).getMaterial().isSolid())
+            pointer.setY(getBlockY() - ++i);
 
         return i;
     }
@@ -446,76 +508,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand)
-    {
-        ItemStack stack = player.getItemInHand(hand);
-
-        InteractionResult stackResult = stack.interactLivingEntity(player, this, hand);
-        if (stackResult.consumesAction()) return stackResult;
-
-        final InteractionResult SUCCESS = InteractionResult.sidedSuccess(level.isClientSide);
-
-        // heal
-        if (getHealthRelative() < 1 && isFoodItem(stack))
-        {
-            heal(stack.getItem().getFoodProperties().getNutrition());
-            playSound(getEatingSound(stack), 0.7f, 1);
-            stack.shrink(1);
-            return SUCCESS;
-        }
-
-        // saddle up!
-        if (isTamedFor(player) && isSaddleable() && !isSaddled() && stack.getItem() instanceof SaddleItem)
-        {
-            stack.shrink(1);
-            equipSaddle(getSoundSource());
-            return SUCCESS;
-        }
-
-        // tame
-        if (isFood(stack) && !isTame())
-        {
-            stack.shrink(1);
-            if (isServer()) tamedFor(player, getRandom().nextInt(5) == 0);
-            return SUCCESS;
-        }
-
-        // sit!
-        if (isTamedFor(player) && player.isShiftKeyDown())
-        {
-            if (isServer())
-            {
-                navigation.stop();
-                setOrderedToSit(!isOrderedToSit());
-                if (isOrderedToSit()) setTarget(null);
-            }
-            return SUCCESS;
-        }
-
-        // ride on
-        if (isTame() && isSaddled() && !isHatchling() && !isFood(stack))
-        {
-            if (isServer())
-            {
-                setRidingPlayer(player);
-                navigation.stop();
-                setTarget(null);
-            }
-            setOrderedToSit(false);
-            setInSittingPose(false);
-            return SUCCESS;
-        }
-
-        return super.mobInteract(player, hand);
-    }
-
-    @Override
     protected SoundEvent getAmbientSound()
     {
         double random = getRandom().nextDouble();
 
         if (random < 0.2) return SoundEvents.ENDER_DRAGON_GROWL;
-        else if (getBreed().specialSound().isPresent() && random < 0.3) return getBreed().getAmbientSound();
+        else if (getBreed().specialSound().isPresent() && random < 0.5) return getBreed().getAmbientSound();
         return DMLRegistry.DRAGON_BREATHE_SOUND.get();
     }
 
@@ -607,13 +605,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public ItemStack getPickedResult(HitResult target)
     {
-        return DragonSpawnEgg.create(breed);
+        return DragonSpawnEgg.create(getBreed());
     }
 
     @Override
     protected Component getTypeName()
     {
-        return new TranslatableComponent(breed.getTranslationKey());
+        return new TranslatableComponent(getBreed().getTranslationKey());
     }
 
     /**
@@ -779,24 +777,24 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public void spawnChildFromBreeding(ServerLevel level, Animal mate)
+    public void spawnChildFromBreeding(ServerLevel level, Animal animal)
     {
-        if (!(mate instanceof TameableDragon))
+        if (!(animal instanceof TameableDragon mate))
         {
-            DragonMountsLegacy.LOG.warn("Tried to mate with non-dragon? Hello? {}", mate);
+            DragonMountsLegacy.LOG.warn("Tried to mate with non-dragon? Hello? {}", animal);
             return;
         }
 
         DragonEgg egg = DMLRegistry.DRAGON_EGG.get().create(level);
 
         // pick a breed to inherit from
-        egg.setEggBreed(getRandom().nextBoolean()? breed : ((TameableDragon) mate).breed);
+        egg.setEggBreed(getRandom().nextBoolean()? breed : mate.breed);
 
         // mix the custom names in case both parents have one
-        if (hasCustomName() && mate.hasCustomName())
+        if (hasCustomName() && animal.hasCustomName())
         {
             String p1Name = getCustomName().getString();
-            String p2Name = mate.getCustomName().getString();
+            String p2Name = animal.getCustomName().getString();
             String babyName;
 
             if (p1Name.contains(" ") || p2Name.contains(" "))
@@ -833,7 +831,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         // increase reproduction counter
         addReproCount();
-        ((TameableDragon) mate).addReproCount();
+        mate.addReproCount();
         egg.setPos(getX(), getY(), getZ());
         level.addFreshEntity(egg);
     }

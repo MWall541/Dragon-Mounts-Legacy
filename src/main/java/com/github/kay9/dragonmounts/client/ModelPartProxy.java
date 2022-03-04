@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Proxy for a model part that is used to project one model renderer on multiple
@@ -20,9 +19,9 @@ public class ModelPartProxy
     public final ModelPart part;
     private final List<ModelPartProxy> children;
     // scale multiplier
-    public float renderScaleX = 1;
-    public float renderScaleY = 1;
-    public float renderScaleZ = 1;
+    public float scaleX = 1;
+    public float scaleY = 1;
+    public float scaleZ = 1;
     // rotation points
     private float x;
     private float y;
@@ -43,9 +42,30 @@ public class ModelPartProxy
     {
         this.part = part;
 
-        children = part.getAllParts().skip(1).map(ModelPartProxy::new).collect(Collectors.toList());
+        children = part.getAllParts().skip(1).map(ModelPartProxy::new).toList();
 
         update();
+    }
+
+    public void copy(ModelPartProxy other)
+    {
+        other.x = x;
+        other.y = y;
+        other.z = z;
+
+        other.xRot = xRot;
+        other.yRot = yRot;
+        other.zRot = zRot;
+
+        other.scaleX = scaleX;
+        other.scaleY = scaleY;
+        other.scaleZ = scaleZ;
+
+        other.visible = visible;
+
+        if (children.size() != other.children.size())
+            throw new IllegalArgumentException("Proxies do not share the same children.");
+        for (int i = 0; i < children.size(); i++) children.get(i).copy(other.children.get(i));
     }
 
     /**
@@ -64,9 +84,9 @@ public class ModelPartProxy
 
         ModelPartAccess mixinPart = (ModelPartAccess)(Object) part;
 
-        renderScaleX = mixinPart.getXScale();
-        renderScaleY = mixinPart.getYScale();
-        renderScaleZ = mixinPart.getZScale();
+        scaleX = mixinPart.getXScale();
+        scaleY = mixinPart.getYScale();
+        scaleZ = mixinPart.getZScale();
 
         visible = part.visible;
 
@@ -86,7 +106,7 @@ public class ModelPartProxy
         part.yRot = yRot;
         part.zRot = zRot;
 
-        ((ModelPartAccess)(Object) part).setRenderScale(renderScaleX, renderScaleY, renderScaleZ);
+        ((ModelPartAccess)(Object) part).setRenderScale(scaleX, scaleY, scaleZ);
 
         part.visible = visible;
 

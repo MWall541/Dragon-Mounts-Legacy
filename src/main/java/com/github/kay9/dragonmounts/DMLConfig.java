@@ -72,7 +72,7 @@ public class DMLConfig
         UPDATE_HABITATS = configurator.comment("Should Dragon Eggs adapt to their environments and change breeds?")
                 .define("update_habitats", true);
         REPRO_LIMIT = configurator.comment("Number of times a dragon is able to breed.")
-                .defineInRange("breed_limit", TameableDragon.REPRO_LIMIT, 0, Integer.MAX_VALUE);
+                .defineInRange("breed_limit", TameableDragon.DEFAULT_REPRO_LIMIT, 0, Integer.MAX_VALUE);
 
         SERVER = configurator.build();
     }

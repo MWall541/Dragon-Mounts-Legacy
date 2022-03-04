@@ -13,7 +13,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
 
 /**
  * Generic model for all winged tetrapod dragons.
@@ -50,6 +49,8 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPart hindcrus;
     public final ModelPart hindfoot;
     public final ModelPart hindtoe;
+    public final ModelPartProxy thinForeThigh;
+    public final ModelPartProxy thinHindThigh;
     public final ModelPart wingArm;
     public final ModelPart wingForearm;
     public final ModelPart[] wingFinger = new ModelPart[4];
@@ -60,11 +61,10 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPartProxy[] thighProxy = new ModelPartProxy[4];
 
     public float size;
+    private boolean thinLegs;
 
     public DragonModel(ModelPart root)
     {
-        super(RenderType::entityCutoutNoCull);
-
         this.body = root.getChild("body");
         this.back = body.getChild("back");
         this.neck = root.getChild("neck");
@@ -79,14 +79,16 @@ public class DragonModel extends EntityModel<TameableDragon>
         this.tailHornLeft = tail.getChild("left_tail_spike");
         this.wingArm = root.getChild("wing_arm");
         this.wingForearm = wingArm.getChild("wing_forearm");
-        this.forethigh = root.getChild("forethigh");
-        this.forecrus = forethigh.getChild("forecrus");
-        this.forefoot = forecrus.getChild("forefoot");
-        this.foretoe = forefoot.getChild("foretoe");
-        this.hindthigh = root.getChild("hindthigh");
-        this.hindcrus = hindthigh.getChild("hindcrus");
-        this.hindfoot = hindcrus.getChild("hindfoot");
-        this.hindtoe = hindfoot.getChild("hindtoe");
+        this.forethigh = root.getChild("fore_thigh");
+        this.forecrus = forethigh.getChild("fore_crus");
+        this.forefoot = forecrus.getChild("fore_foot");
+        this.foretoe = forefoot.getChild("fore_toe");
+        this.hindthigh = root.getChild("hind_thigh");
+        this.hindcrus = hindthigh.getChild("hind_crus");
+        this.hindfoot = hindcrus.getChild("hind_foot");
+        this.hindtoe = hindfoot.getChild("hind_toe");
+        this.thinForeThigh = new ModelPartProxy(root.getChild("thin_fore_thigh"));
+        this.thinHindThigh = new ModelPartProxy(root.getChild("thin_hind_thigh"));
 
         for (int i = 1; i < 5; i++) wingFinger[i - 1] = wingForearm.getChild("wing_finger_" + i);
 
@@ -215,24 +217,24 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     private static void buildLegs(PartDefinition root)
     {
-        buildLeg(root, false);
-        buildLeg(root, true);
+        buildLeg(root, false, false);
+        buildLeg(root, true, false);
+        buildLeg(root, false, true);
+        buildLeg(root, true, true);
     }
 
-    private static void buildLeg(PartDefinition root, boolean hind)
+    private static void buildLeg(PartDefinition root, boolean hind, boolean thin)
     {
-        // thinner legs for skeletons
-//        boolean skeleton = breed == EnumDragonBreed.GHOST; todo during rendering
-
         float baseLength = 26;
-        String baseName = hind? "hind" : "fore";
+        String baseName = hind? "hind_" : "fore_";
+        if (thin) baseName = "thin_" + baseName;
 
         // thigh variables
         float thighPosX = -11;
         float thighPosY = 18;
         float thighPosZ = 4;
 
-        int thighThick = 9; /* - (skeleton? 2 : 0);*/
+        int thighThick = 9 - (thin? 2 : 0);
         int thighLength = (int) (baseLength * (hind? 0.9f : 0.77f));
 
         if (hind)
@@ -268,7 +270,7 @@ public class DragonModel extends EntityModel<TameableDragon>
         float footPosY = crusLength + (crusOfs / 2f);
         float footPosZ = 0;
 
-        int footWidth = crusThick + 2/* + (skeleton? 2 : 0)*/;
+        int footWidth = crusThick + 2 + (thin? 2 : 0);
         int footHeight = 4;
         int footLength = (int) (baseLength * (hind? 0.67f : 0.34f));
 
@@ -297,10 +299,12 @@ public class DragonModel extends EntityModel<TameableDragon>
     @Override
     public void prepareMobModel(TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pPartialTick)
     {
-        boolean middleScales = dragon.breed.showMiddleTailScales();
+        var props = dragon.getBreed().modelProperties();
+        boolean middleScales = props.middleTailScales();
         tailScaleMiddle.visible = middleScales;
         tailScaleRight.visible = tailScaleLeft.visible = !middleScales;
         size = dragon.getScale();
+        thinLegs = props.thinLegs();
 
         dragon.getAnimator().setPartialTicks(pPartialTick);
     }
@@ -353,15 +357,25 @@ public class DragonModel extends EntityModel<TameableDragon>
     protected void renderLegs(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
         ps.pushPose();
+
         for (int i = 0; i < thighProxy.length; i++)
         {
-            thighProxy[i].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+            var proxy = thighProxy[i];
+            if (thinLegs)
+            {
+                var thin = (i % 2 == 0)? thinForeThigh : thinHindThigh;
+                proxy.copy(thin);
+                proxy = thin;
+            }
+            proxy.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+
             if (i == 1)
             {
                 ps.last().pose().multiply(INVERSE_SCALE);
                 ps.last().normal().mul(INVERSE_NORMS);
             }
         }
+
         ps.popPose();
     }
 }

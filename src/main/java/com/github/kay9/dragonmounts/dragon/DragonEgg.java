@@ -20,7 +20,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 
 /**
@@ -159,30 +158,31 @@ public class DragonEgg extends Entity
 //            wiggleTime.add(wiggling? 0.1f : -0.1f);
 //            if (wiggleTime.get() == 1) wiggling = false;
 
-            addHatchingParticles(breed, 1);
+            addHatchingParticles();
         }
 
         super.tick();
     }
 
-    public void addHatchingParticles(DragonBreed forBreed, double yOffset)
+    public void addHatchingParticles()
     {
         double px = getX() + (random.nextDouble() - 0.5);
-        double py = getY() + (random.nextDouble() - 0.5);
+        double py = getY() + random.nextDouble();
         double pz = getZ() + (random.nextDouble() - 0.5);
+        double ox = 0;
+        double oy = 0;
+        double oz = 0;
 
-        if (forBreed.id().getPath().equals("end"))
+        var particle = breed.getHatchParticles(random);
+        if (particle.getType() == ParticleTypes.DUST) py = getY() + (random.nextDouble() - 0.5) + 1;
+        if (particle.getType() == ParticleTypes.PORTAL)
         {
-            double ox = (random.nextDouble() - 0.5) * 2;
-            double oy = (random.nextDouble() - 0.5) * 2;
-            double oz = (random.nextDouble() - 0.5) * 2;
-            level.addParticle(ParticleTypes.PORTAL, px, py, pz, ox, oy, oz);
+            ox = (random.nextDouble() - 0.5) * 2;
+            oy = (random.nextDouble() - 0.5) * 2;
+            oz = (random.nextDouble() - 0.5) * 2;
         }
-        else
-        {
-            Vector3f color = new Vector3f(Vec3.fromRGB24(random.nextDouble() < 0.75? forBreed.primaryColor() : forBreed.secondaryColor()));
-            level.addParticle(new DustParticleOptions(color, 1), px, py + yOffset, pz, 0, 0, 0);
-        }
+
+        level.addParticle(new DustParticleOptions(new Vector3f(1f, 1f, 1f), 1), px, py, pz, ox, oy, oz);
     }
 
     @Override
@@ -202,7 +202,7 @@ public class DragonEgg extends Entity
     {
         DragonBreed winner = null;
         int prevPoints = 0;
-        for (DragonBreed breed : BreedManager.getBreeds())
+        for (var breed : BreedManager.getBreeds())
         {
             int points = breed.getHabitatPoints(level, blockPosition());
             if (points > 2 && points > prevPoints)
@@ -283,8 +283,15 @@ public class DragonEgg extends Entity
 
                 if (level.isClientSide)
                 {
-                    for (int i = 0; i < BREED_TRANSITION_TIME - transitionTime; i++)
-                        addHatchingParticles(transitioningBreed, 0.5);
+                    for (var i = 0; i < BREED_TRANSITION_TIME - transitionTime; i++)
+                    {
+                        var px = getX() + (random.nextDouble() - 0.5);
+                        var py = getY() + (random.nextDouble() - 0.5);
+                        var pz = getZ() + (random.nextDouble() - 0.5);
+                        var particle = breed.getDustParticles(random);
+
+                        level.addParticle(particle, px, py, pz, 0, 0, 0);
+                    }
                 }
             }
         }

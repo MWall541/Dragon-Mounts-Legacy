@@ -8,10 +8,14 @@ import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
@@ -19,24 +23,26 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
-public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryColor, boolean showMiddleTailScales,
-                          boolean showTailSpikes,
-                          Map<Attribute, Double> attributes,
-                          List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities,
-                          Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime)
+public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryColor,
+                          Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties,
+                          Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats,
+                          ImmutableSet<String> immunities, Optional<SoundEvent> specialSound,
+                          ResourceLocation deathLoot, int growthTime)
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(func -> func.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(DragonBreed::id),
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
-            Codec.BOOL.optionalFieldOf("show_middle_tail_scales", true).forGetter(DragonBreed::showMiddleTailScales),
-            Codec.BOOL.optionalFieldOf("show_tail_spikes", false).forGetter(DragonBreed::showTailSpikes),
+            ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
+            ModelProperties.CODEC.optionalFieldOf("model_properties", ModelProperties.STANDARD).forGetter(DragonBreed::modelProperties),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
             Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
@@ -52,8 +58,8 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
     public static final DragonBreed FIRE = new DragonBreed(DragonMountsLegacy.id("fire"),
             0x912400,
             0xff9819,
-            false,
-            false,
+            Optional.of(ParticleTypes.FLAME),
+            new ModelProperties(false, false, false),
             ImmutableMap.of(),
             ImmutableList.of(),
             ImmutableList.of(new NearbyBlocksHabitat(BlockTags.createOptional(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
@@ -61,6 +67,16 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             Optional.empty(),
             BuiltInLootTables.EMPTY,
             TameableDragon.DEFAULT_GROWTH_TIME);
+
+    public ParticleOptions getHatchParticles(Random random)
+    {
+        return hatchParticles().orElseGet(() -> getDustParticles(random));
+    }
+
+    public DustParticleOptions getDustParticles(Random random)
+    {
+        return new DustParticleOptions(new Vector3f(Vec3.fromRGB24(random.nextDouble() < 0.75? primaryColor() : secondaryColor())), 1);
+    }
 
     @Nullable
     public SoundEvent getAmbientSound()
@@ -78,5 +94,16 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
         int points = 0;
         for (Habitat habitat : habitats()) points += habitat.getHabitatPoints(level, pos);
         return points;
+    }
+
+    public static record ModelProperties(boolean middleTailScales, boolean tailHorns, boolean thinLegs)
+    {
+        public static final ModelProperties STANDARD = new ModelProperties(true, false, false);
+
+        public static Codec<ModelProperties> CODEC = RecordCodecBuilder.create(func -> func.group(
+                Codec.BOOL.optionalFieldOf("middle_tail_scales", true).forGetter(ModelProperties::middleTailScales),
+                Codec.BOOL.optionalFieldOf("tail_horns", false).forGetter(ModelProperties::tailHorns),
+                Codec.BOOL.optionalFieldOf("thin_legs", false).forGetter(ModelProperties::thinLegs)
+        ).apply(func, ModelProperties::new));
     }
 }

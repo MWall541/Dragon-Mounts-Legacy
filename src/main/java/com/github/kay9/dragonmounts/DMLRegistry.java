@@ -68,11 +68,14 @@ public class DMLRegistry
     {
         if (FMLLoader.getDist().isClient() && Minecraft.getInstance() != null) // instance is null during datagen
         {
-            var keymap = new KeyMapping(name, defaultMapping, category);
+            var keymap = new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
             ClientRegistry.registerKeyBinding(keymap);
             return keymap::isDown;
         }
-        return null;
+        return () ->
+        {
+            throw new RuntimeException("Cannot invoke '" + name + "' key mapping on server side!");
+        };
     }
 
     @SuppressWarnings("unchecked")

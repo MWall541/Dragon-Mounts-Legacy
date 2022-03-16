@@ -14,5 +14,7 @@
 
   "block.dragonmounts.dragon_egg": "%s Egg",
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
-  "block.dragonmounts.dragon_egg.change_breeds": "Creative mode: Interacting with a dragon will change it's breed to this egg's breed."
+  "block.dragonmounts.dragon_egg.change_breeds": "Creative mode: Interacting with a dragon will change it's breed to this egg's breed.",
+
+  "key.dragonmounts.flight_descent": "Flight Descent"
 }

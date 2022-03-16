@@ -3,8 +3,6 @@ package com.github.kay9.dragonmounts.dragon;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.data.BreedManager;
-import com.mojang.math.Vector3f;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -182,7 +180,7 @@ public class DragonEgg extends Entity
             oz = (random.nextDouble() - 0.5) * 2;
         }
 
-        level.addParticle(new DustParticleOptions(new Vector3f(1f, 1f, 1f), 1), px, py, pz, ox, oy, oz);
+        level.addParticle(particle, px, py, pz, ox, oy, oz);
     }
 
     @Override
@@ -286,9 +284,9 @@ public class DragonEgg extends Entity
                     for (var i = 0; i < BREED_TRANSITION_TIME - transitionTime; i++)
                     {
                         var px = getX() + (random.nextDouble() - 0.5);
-                        var py = getY() + (random.nextDouble() - 0.5);
+                        var py = getY() + random.nextDouble();
                         var pz = getZ() + (random.nextDouble() - 0.5);
-                        var particle = breed.getDustParticles(random);
+                        var particle = transitioningBreed.getDustParticles(random);
 
                         level.addParticle(particle, px, py, pz, 0, 0, 0);
                     }

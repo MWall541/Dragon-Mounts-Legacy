@@ -5,13 +5,7 @@
       "type": "nearby_blocks"
     },
     {
-      "biomes": [
-        "minecraft:basalt_deltas",
-        "minecraft:crimson_forest",
-        "minecraft:nether_wastes",
-        "minecraft:soul_sand_valley",
-        "minecraft:warped_forest"
-      ],
+      "biome_tag": "dragonmounts:nether_dragon_biomes",
       "type": "biome"
     }
   ],

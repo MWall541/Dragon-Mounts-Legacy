@@ -19,7 +19,6 @@ import net.minecraft.data.HashCache;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 import java.io.IOException;
@@ -66,7 +65,7 @@ public class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(),
             list(GreenToesAbility.INSTANCE),
-            list(new NearbyBlocksHabitat(TagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(set(Biomes.JUNGLE, Biomes.SPARSE_JUNGLE, Biomes.BAMBOO_JUNGLE))),
+            list(new NearbyBlocksHabitat(BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(BiomeTagProvider.FOREST_DRAGON_BIOMES)),
             set(),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -92,7 +91,7 @@ public class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(),
             list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
-            list(new NearbyBlocksHabitat(TagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
+            list(new NearbyBlocksHabitat(BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -105,7 +104,7 @@ public class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(Attributes.ARMOR, 8d),
             list(),
-            list(new NearbyBlocksHabitat(TagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(set(Biomes.BASALT_DELTAS, Biomes.CRIMSON_FOREST, Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST))),
+            list(new NearbyBlocksHabitat(BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(BiomeTagProvider.NETHER_DRAGON_BIOMES)),
             set("inFire", "onFire", "lava", "hotFloor"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,

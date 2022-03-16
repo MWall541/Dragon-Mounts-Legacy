@@ -21,6 +21,6 @@ Once fostered and tamed, they'll be your faithful companion in all situations an
 [[dependencies.dragonmounts]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.1,1.19)"
+    versionRange="[1.18.1]"
     ordering="NONE"
     side="BOTH"

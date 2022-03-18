@@ -18,6 +18,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
@@ -62,22 +63,28 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     }
 
     @Override
-    public void attack(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer)
+    public void attack(BlockState state, Level level, BlockPos at, Player player)
     {
-        BlockEntity state = pLevel.getBlockEntity(pPos);
-        if (state instanceof Entity e && e.getBreed().id().getPath().equals("end"))
-            super.attack(pState, pLevel, pPos, pPlayer);
+        if (level.getBlockEntity(at) instanceof Entity e && e.getBreed().id().getPath().equals("end"))
+            super.attack(state, level, at, player);
     }
 
     @Override
     public RenderShape getRenderShape(BlockState pState)
     {
-        return RenderShape.MODEL;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     public static void startHatching(DragonBreed breed, Level level, BlockPos pos)
     {
         startHatching(breed, DragonEgg.DEFAULT_HATCH_TIME, level, pos);
+    }
+
+    @Override
+    protected void falling(FallingBlockEntity falling)
+    {
+        if (falling.level.getBlockEntity(falling.blockPosition()) instanceof Entity e)
+            falling.blockData = e.saveWithoutMetadata();
     }
 
     public static void startHatching(DragonBreed breed, int hatchTime, Level level, BlockPos pos)

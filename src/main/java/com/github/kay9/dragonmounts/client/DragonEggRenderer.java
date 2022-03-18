@@ -1,6 +1,5 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
@@ -14,10 +13,10 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.IItemRenderProperties;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +24,7 @@ import java.util.Map;
 public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implements BlockEntityRenderer<DMLEggBlock.Entity>, IItemRenderProperties
 {
     public static final DragonEggRenderer INSTANCE = new DragonEggRenderer();
-    private static final Map<ResourceLocation, ResourceLocation> MODEL_CACHE = new HashMap<>(8);
+    public static final Map<ResourceLocation, ResourceLocation> MODEL_CACHE = new HashMap<>(8);
 
     public DragonEggRenderer()
     {
@@ -57,16 +56,19 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     {
         ps.pushPose();
         if (offset) ps.translate(-0.5D, 0.0D, -0.5D);
-        BakedModel model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.computeIfAbsent(breed.id(), id -> new ResourceLocation(id.getNamespace(), "block/dragon_eggs/" + id.getPath() + "_dragon_egg")));
-        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, DMLRegistry.EGG_BLOCK.get().defaultBlockState(), model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
+        var model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.get(breed.id()));
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, null, model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
         ps.popPose();
     }
 
     /**
      * Here to provide a way to create a method reference factory to return the instance.
      * Still confused? I'm exploiting javas shitty class loading ways.
+     *
+     * Don't use this as a getter. Simply use the public field.
      */
     @SuppressWarnings("unused")
+    @NotNull
     public static DragonEggRenderer instance(Object context)
     {
         return INSTANCE;

@@ -88,8 +88,13 @@ public class DragonMountsLegacy
         var suffixLength = ".json".length();
         for (var rl : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.endsWith(".json")))
         {
-            String path = rl.getPath();
-            ForgeModelBakery.addSpecialModel(new ResourceLocation(rl.getNamespace(), path.substring(length, path.length() - suffixLength)));
+            var path = rl.getPath();
+            path = path.substring(length, path.length() - suffixLength);
+            var model = new ResourceLocation(rl.getNamespace(), path);
+            var id = path.substring("block/dragon_eggs/".length(), path.length() - "_dragon_egg".length());
+
+            ForgeModelBakery.addSpecialModel(model);
+            DragonEggRenderer.MODEL_CACHE.put(new ResourceLocation(rl.getNamespace(), id), model);
         }
     }
 

@@ -7,6 +7,8 @@ import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -18,7 +20,10 @@ import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.registries.*;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryManager;
+import net.minecraftforge.registries.RegistryObject;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -26,19 +31,22 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import static net.minecraftforge.registries.ForgeRegistries.Keys;
+
 public class DMLRegistry
 {
-    public static void init(IEventBus bus)
+    protected static void init(IEventBus bus)
     {
         REGISTRIES.values().forEach(r -> r.register(bus));
+        REGISTRIES.clear(); // Registration happens once, no need to stick around.
     }
 
-    private static final Map<IForgeRegistry<?>, DeferredRegister<?>> REGISTRIES = new HashMap<>();
+    private static final Map<ResourceKey<? extends Registry<?>>, DeferredRegister<?>> REGISTRIES = new HashMap<>();
 
-    public static final RegistryObject<Block> EGG_BLOCK = register("dragon_egg", ForgeRegistries.BLOCKS, DMLEggBlock::new);
+    public static final RegistryObject<Block> EGG_BLOCK = register("dragon_egg", Keys.BLOCKS, DMLEggBlock::new);
 
-    public static final RegistryObject<Item> EGG_BLOCK_ITEM = register(EGG_BLOCK.getId().getPath(), ForgeRegistries.ITEMS, DMLEggBlock.Item::new);
-    public static final RegistryObject<Item> SPAWN_EGG = register("spawn_egg", ForgeRegistries.ITEMS, DragonSpawnEgg::new);
+    public static final RegistryObject<Item> EGG_BLOCK_ITEM = register(EGG_BLOCK.getId().getPath(), Keys.ITEMS, DMLEggBlock.Item::new);
+    public static final RegistryObject<Item> SPAWN_EGG = register("spawn_egg", Keys.ITEMS, DragonSpawnEgg::new);
 
     public static final RegistryObject<SoundEvent> DRAGON_BREATHE_SOUND = sound("entity.dragon.breathe");
     public static final RegistryObject<SoundEvent> DRAGON_STEP_SOUND = sound("entity.dragon.step");
@@ -47,20 +55,20 @@ public class DMLRegistry
     public static final RegistryObject<EntityType<TameableDragon>> DRAGON = entity("dragon", EntityType.Builder   .of(TameableDragon::new, MobCategory.CREATURE).sized(TameableDragon.BASE_WIDTH, TameableDragon.BASE_HEIGHT).clientTrackingRange(10).updateInterval(3));
     public static final RegistryObject<EntityType<DragonEgg>> DRAGON_EGG = entity("dragon_egg", EntityType.Builder.of(DragonEgg::new, MobCategory.MISC)         .sized(DragonEgg.WIDTH, DragonEgg.HEIGHT)                    .clientTrackingRange(5) .updateInterval(8));
 
-    public static final RegistryObject<BlockEntityType<DMLEggBlock.Entity>> EGG_BLOCK_ENTITY = register("dragon_egg", ForgeRegistries.BLOCK_ENTITIES, () -> BlockEntityType.Builder.of(DMLEggBlock.Entity::new, EGG_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<DMLEggBlock.Entity>> EGG_BLOCK_ENTITY = register("dragon_egg", Keys.BLOCK_ENTITY_TYPES, () -> BlockEntityType.Builder.of(DMLEggBlock.Entity::new, EGG_BLOCK.get()).build(null));
 
-    public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", ForgeRegistries.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
+    public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
 
     public static final BooleanSupplier FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {
-        return register(name, ForgeRegistries.ENTITIES, () -> builder.build(DragonMountsLegacy.MOD_ID + ":" + name));
+        return register(name, Keys.ENTITY_TYPES, () -> builder.build(DragonMountsLegacy.MOD_ID + ":" + name));
     }
 
     private static RegistryObject<SoundEvent> sound(String name)
     {
-        return register(name, ForgeRegistries.SOUND_EVENTS, () -> new SoundEvent(DragonMountsLegacy.id(name)));
+        return register(name, Keys.SOUND_EVENTS, () -> new SoundEvent(DragonMountsLegacy.id(name)));
     }
 
     @SuppressWarnings({"ConstantConditions"})
@@ -76,9 +84,14 @@ public class DMLRegistry
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends IForgeRegistryEntry<T>, I extends T> RegistryObject<I> register(String name, IForgeRegistry<T> forType, Supplier<? extends I> sup)
+    private static <T extends IForgeRegistryEntry<T>, I extends T> RegistryObject<I> register(String name, ResourceKey<Registry<T>> forType, Supplier<? extends I> sup)
     {
-        var registry = (DeferredRegister<T>) REGISTRIES.computeIfAbsent(forType, t -> DeferredRegister.create(t, DragonMountsLegacy.MOD_ID));
+        var registry = (DeferredRegister<T>) REGISTRIES.computeIfAbsent(forType, t ->
+        {
+            var fr = RegistryManager.ACTIVE.getRegistry(forType);
+            if (fr == null) return DeferredRegister.create(forType, DragonMountsLegacy.MOD_ID);
+            return DeferredRegister.create(fr, DragonMountsLegacy.MOD_ID);
+        });
         return registry.register(name, sup);
     }
 }

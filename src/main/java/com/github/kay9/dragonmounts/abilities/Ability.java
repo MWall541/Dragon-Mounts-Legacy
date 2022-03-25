@@ -22,6 +22,10 @@ public interface Ability
         return name;
     }
 
+    default void initialize(TameableDragon dragon) {}
+
+    default void close(TameableDragon dragon) {}
+
     default void tick(TameableDragon dragon) {}
 
     default void onMove(TameableDragon dragon) {}

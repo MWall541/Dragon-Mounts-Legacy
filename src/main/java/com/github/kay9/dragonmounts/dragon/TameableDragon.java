@@ -117,7 +117,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
-        breed = BreedManager.getFallback();
+        breed = BreedManager.getFallback(); //todo: figure something out for this? Not ideal to use fallback at any point during init...
     }
 
     @Override
@@ -136,19 +136,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 .add(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
                 .add(ATTACK_DAMAGE, BASE_DAMAGE)
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
-    }
-
-    public void applyAttributes()
-    {
-        float healthPercentile = getHealth() / getMaxHealth();
-
-        getBreed().attributes().forEach((att, value) ->
-        {
-            AttributeInstance inst = getAttribute(att);
-            if (inst != null) inst.setBaseValue(value);
-        });
-
-        setHealth(getMaxHealth() * healthPercentile);
     }
 
     @Override
@@ -175,7 +162,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super.defineSynchedData();
 
-        entityData.define(DATA_BREED, BreedManager.getFallback().id().toString());
+        entityData.define(DATA_BREED,"");
         entityData.define(DATA_FLYING, false);
         entityData.define(DATA_SADDLED, false);
         entityData.define(DATA_AGE, 0); // default to adult stage
@@ -184,7 +171,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> data)
     {
-        if (DATA_BREED.equals(data)) breed = BreedManager.read(entityData.get(DATA_BREED));
+        if (DATA_BREED.equals(data)) updateBreed(BreedManager.read(entityData.get(DATA_BREED)));
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
         else super.onSyncedDataUpdated(data);
@@ -213,7 +200,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void setBreed(DragonBreed dragonBreed)
     {
         entityData.set(DATA_BREED, dragonBreed.id().toString());
-        if (isServer()) applyAttributes();
+    }
+
+    private void updateBreed(DragonBreed breed)
+    {
+        getBreed().close(this);
+        this.breed = breed;
+        getBreed().initialize(this);
     }
 
     public DragonBreed getBreed()
@@ -513,7 +506,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         double random = getRandom().nextDouble();
 
         if (random < 0.2) return SoundEvents.ENDER_DRAGON_GROWL;
-        else if (getBreed().specialSound().isPresent() && random < 0.5) return getBreed().getAmbientSound();
+        if (getBreed().specialSound().isPresent() && random < 0.5) return getBreed().getAmbientSound();
         return DMLRegistry.DRAGON_BREATHE_SOUND.get();
     }
 

@@ -21,6 +21,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
@@ -68,6 +70,18 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             BuiltInLootTables.EMPTY,
             TameableDragon.DEFAULT_GROWTH_TIME);
 
+    public void initialize(TameableDragon dragon)
+    {
+        applyAttributes(dragon);
+        for (Ability a : abilities()) a.initialize(dragon);
+    }
+
+    public void close(TameableDragon dragon)
+    {
+        dragon.getAttributes().assignValues(new AttributeMap(TameableDragon.createAttributes().build())); // restore default attributes
+        for (Ability a : abilities()) a.close(dragon);
+    }
+
     public ParticleOptions getHatchParticles(Random random)
     {
         return hatchParticles().orElseGet(() -> getDustParticles(random));
@@ -94,6 +108,19 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
         int points = 0;
         for (Habitat habitat : habitats()) points += habitat.getHabitatPoints(level, pos);
         return points;
+    }
+
+    private void applyAttributes(TameableDragon dragon)
+    {
+        float healthPercentile = dragon.getHealth() / dragon.getMaxHealth();
+
+        attributes().forEach((att, value) ->
+        {
+            AttributeInstance inst = dragon.getAttribute(att);
+            if (inst != null) inst.setBaseValue(value);
+        });
+
+        dragon.setHealth(dragon.getMaxHealth() * healthPercentile); // in case we have less than max health
     }
 
     public static record ModelProperties(boolean middleTailScales, boolean tailHorns, boolean thinLegs)

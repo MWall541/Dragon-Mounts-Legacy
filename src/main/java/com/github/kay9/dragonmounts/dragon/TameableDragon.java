@@ -625,7 +625,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean isFood(ItemStack stack)
     {
-        return ItemTags.FISHES.contains(stack.getItem());
+        return stack.is(ItemTags.FISHES);
     }
 
     public void tamedFor(Player player, boolean successful)

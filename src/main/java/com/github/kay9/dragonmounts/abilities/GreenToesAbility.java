@@ -3,6 +3,8 @@ package com.github.kay9.dragonmounts.abilities;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -36,8 +38,13 @@ public class GreenToesAbility extends FootprintAbility
             placing = (level.getRandom().nextBoolean()? Blocks.RED_MUSHROOM : Blocks.BROWN_MUSHROOM).defaultBlockState();
         else if (steppingOn.is(BlockTags.DIRT)) // different from the actual dirt block. Could be grass or moss
         {
-            do placing = BlockTags.SMALL_FLOWERS.getRandomElement(dragon.getRandom()).defaultBlockState();
-            while (placing.is(Blocks.WITHER_ROSE)); // don't place wither roses.
+            placing = Registry.BLOCK
+                    .getTag(BlockTags.SMALL_FLOWERS)
+                    .flatMap(tag -> tag.getRandomElement(dragon.getRandom()))
+                    .map(Holder::value)
+                    .filter(b -> b != Blocks.WITHER_ROSE)
+                    .orElse(Blocks.DANDELION)
+                    .defaultBlockState();
         }
 
         if (placing != null && placing.canSurvive(level, pos))

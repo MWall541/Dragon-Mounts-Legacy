@@ -3,14 +3,13 @@ package com.github.kay9.dragonmounts.habitats;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 
-public record NearbyBlocksHabitat(Tag<Block> tag) implements Habitat
+public record NearbyBlocksHabitat(TagKey<Block> tag) implements Habitat
 {
-    public static final Codec<NearbyBlocksHabitat> CODEC = Tag.codec(() -> SerializationTags.getInstance().getOrEmpty(Registry.BLOCK_REGISTRY))
+    public static final Codec<NearbyBlocksHabitat> CODEC = TagKey.codec(Registry.BLOCK_REGISTRY)
             .fieldOf("block_tag")
             .xmap(NearbyBlocksHabitat::new, NearbyBlocksHabitat::tag)
             .codec();

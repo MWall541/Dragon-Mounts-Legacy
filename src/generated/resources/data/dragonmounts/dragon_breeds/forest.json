@@ -10,11 +10,7 @@
       "type": "nearby_blocks"
     },
     {
-      "biomes": [
-        "minecraft:jungle",
-        "minecraft:sparse_jungle",
-        "minecraft:bamboo_jungle"
-      ],
+      "biome_tag": "dragonmounts:forest_dragon_biomes",
       "type": "biome"
     }
   ],

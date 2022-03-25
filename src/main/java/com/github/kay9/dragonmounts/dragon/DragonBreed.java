@@ -62,7 +62,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             new ModelProperties(false, false, false),
             ImmutableMap.of(),
             ImmutableList.of(),
-            ImmutableList.of(new NearbyBlocksHabitat(BlockTags.createOptional(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
+            ImmutableList.of(new NearbyBlocksHabitat(BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,

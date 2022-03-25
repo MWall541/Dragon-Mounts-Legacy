@@ -36,6 +36,7 @@ public class LootModifierProvider extends GlobalLootModifierProvider
 
     public void add(DragonBreed breed, ResourceLocation table, float chance)
     {
+        // todo: change path to something like: "aether_in_simple_dungeon"
         var path = breed.id().getNamespace() + "/" + breed.id().getPath() + "/" + table.getPath();
 
         var conditions = new LootItemCondition[] {

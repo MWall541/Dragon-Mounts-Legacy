@@ -1,13 +1,13 @@
 {
-  "habitats": [
-    {
-      "height": 200,
-      "type": "world_height"
-    }
-  ],
   "attributes": {
     "minecraft:generic.flying_speed": 0.76125
   },
+  "habitats": [
+    {
+      "type": "world_height",
+      "height": 200
+    }
+  ],
   "name": "dragonmounts:aether",
   "primary_color": 7441065,
   "secondary_color": 15132390

@@ -5,7 +5,6 @@ import com.github.kay9.dragonmounts.data.BreedManager;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -22,7 +21,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     @Override
     public void fillItemCategory(CreativeModeTab pCategory, NonNullList<ItemStack> pItems)
     {
-        if (allowdedIn(pCategory))
+        if (allowedIn(pCategory))
         {
             for (DragonBreed breed : BreedManager.getBreeds()) pItems.add(create(breed));
         }
@@ -56,7 +55,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         String name = BreedManager.getFallback().getTranslationKey();
         CompoundTag tag = stack.getTagElement("ItemData");
         if (tag != null) name = tag.getString("ItemName");
-        return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
+        return Component.translatable(getDescriptionId(), Component.translatable(name));
     }
 
     public static int getColor(ItemStack stack, int tintIndex)

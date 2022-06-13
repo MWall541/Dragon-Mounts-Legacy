@@ -11,8 +11,6 @@ import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -604,7 +602,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected Component getTypeName()
     {
-        return new TranslatableComponent(getBreed().getTranslationKey());
+        return Component.translatable(getBreed().getTranslationKey());
     }
 
     /**
@@ -819,7 +817,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 babyName = getRandom().nextBoolean()? p1Name + p2Name : p2Name + p1Name;
             }
 
-            egg.setCustomName(new TextComponent(babyName));
+            egg.setCustomName(Component.literal(babyName));
         }
 
         // increase reproduction counter
@@ -855,7 +853,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return !isHatchling() && super.canAttack(target);
     }
 
-    @Override
     public boolean canBeControlledByRider()
     {
         return getControllingPassenger() instanceof LivingEntity driver && isOwnedBy(driver);

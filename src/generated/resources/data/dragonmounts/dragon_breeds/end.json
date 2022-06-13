@@ -1,18 +1,18 @@
 {
+  "attributes": {
+    "minecraft:generic.max_health": 75.0
+  },
   "habitats": [
     {
       "type": "dragon_breath"
     }
   ],
-  "immunities": [
-    "dragonBreath"
-  ],
   "hatch_particles": {
     "type": "minecraft:portal"
   },
-  "attributes": {
-    "minecraft:generic.max_health": 75.0
-  },
+  "immunities": [
+    "dragonBreath"
+  ],
   "name": "dragonmounts:end",
   "primary_color": 1447446,
   "secondary_color": 16737256

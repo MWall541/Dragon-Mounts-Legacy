@@ -86,7 +86,7 @@ public class DragonMountsLegacy
         var dir = "models/block/dragon_eggs";
         var length = "models/".length();
         var suffixLength = ".json".length();
-        for (var rl : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.endsWith(".json")))
+        for (var rl : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.getPath().endsWith(".json")).keySet())
         {
             var path = rl.getPath();
             path = path.substring(length, path.length() - suffixLength);

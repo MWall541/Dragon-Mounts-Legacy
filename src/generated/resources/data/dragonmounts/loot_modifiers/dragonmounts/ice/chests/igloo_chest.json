@@ -1,14 +1,14 @@
 {
+  "type": "dragonmounts:dragon_egg_loot",
+  "breed": "dragonmounts:ice",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/igloo_chest"
     },
     {
-      "condition": "minecraft:random_chance",
-      "chance": 0.2
+      "chance": 0.2,
+      "condition": "minecraft:random_chance"
     }
-  ],
-  "breed": "dragonmounts:ice",
-  "type": "dragonmounts:dragon_egg_loot"
+  ]
 }

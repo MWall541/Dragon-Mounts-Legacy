@@ -16,12 +16,12 @@ public class DataProvider
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper fileHelper = event.getExistingFileHelper();
 
-        if (event.includeServer())
-        {
-            gen.addProvider(new BlockTagProvider(gen, fileHelper));
-            gen.addProvider(new BiomeTagProvider(gen, fileHelper));
-            gen.addProvider(new LootModifierProvider(gen));
-            gen.addProvider(new DragonBreedProvider(gen));
-        }
+        boolean server = event.includeServer();
+        boolean client = event.includeClient();
+
+        gen.addProvider(server, new BlockTagProvider(gen, fileHelper));
+        gen.addProvider(server, new BiomeTagProvider(gen, fileHelper));
+        gen.addProvider(server, new LootModifierProvider(gen));
+        gen.addProvider(server, new DragonBreedProvider(gen));
     }
 }

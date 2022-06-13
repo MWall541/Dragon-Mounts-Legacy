@@ -6,6 +6,7 @@ import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.google.gson.JsonObject;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -14,8 +15,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class DragonEggLootMod extends LootModifier
 {
@@ -27,9 +26,7 @@ public class DragonEggLootMod extends LootModifier
         this.breed = breed;
     }
 
-    @NotNull
-    @Override
-    protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
+    protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
     {
         if (DMLConfig.useLootTables()) generatedLoot.add(DMLEggBlock.Item.create(breed, DragonEgg.DEFAULT_HATCH_TIME));
         return generatedLoot;

@@ -21,7 +21,6 @@ import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.registries.RegistryObject;
 import org.lwjgl.glfw.GLFW;
@@ -87,7 +86,7 @@ public class DMLRegistry
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends IForgeRegistryEntry<T>, I extends T> RegistryObject<I> register(String name, ResourceKey<Registry<T>> forType, Supplier<? extends I> sup)
+    private static <T, I extends T> RegistryObject<I> register(String name, ResourceKey<Registry<T>> forType, Supplier<? extends I> sup)
     {
         var registry = (DeferredRegister<T>) REGISTRIES.computeIfAbsent(forType, t ->
         {

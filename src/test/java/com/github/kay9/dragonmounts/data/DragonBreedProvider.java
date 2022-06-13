@@ -13,9 +13,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -131,14 +131,13 @@ public class DragonBreedProvider implements DataProvider
     }
 
     @Override
-    public void run(HashCache cache) throws IOException
+    public void run(CachedOutput cache) throws IOException
     {
-        for (var breed : new DragonBreed[] {AETHER, END, FIRE, FOREST, GHOST, ICE, NETHER, WATER})
+        for (var breed : new DragonBreed[]{AETHER, END, FIRE, FOREST, GHOST, ICE, NETHER, WATER})
         {
             String path = breed.id().getNamespace();
             String name = breed.id().getPath();
-            DataProvider.save(GSON,
-                    cache,
+            DataProvider.saveStable(cache,
                     DragonBreed.CODEC.encodeStart(JsonOps.INSTANCE, breed).getOrThrow(false, DragonMountsLegacy.LOG::error),
                     generator.getOutputFolder().resolve("data/" + path + "/dragon_breeds/" + name + ".json"));
         }

@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -31,7 +32,6 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryColor,
                           Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties,
@@ -82,12 +82,12 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
         for (Ability a : abilities()) a.close(dragon);
     }
 
-    public ParticleOptions getHatchParticles(Random random)
+    public ParticleOptions getHatchParticles(RandomSource random)
     {
         return hatchParticles().orElseGet(() -> getDustParticles(random));
     }
 
-    public DustParticleOptions getDustParticles(Random random)
+    public DustParticleOptions getDustParticles(RandomSource random)
     {
         return new DustParticleOptions(new Vector3f(Vec3.fromRGB24(random.nextDouble() < 0.75? primaryColor() : secondaryColor())), 1);
     }

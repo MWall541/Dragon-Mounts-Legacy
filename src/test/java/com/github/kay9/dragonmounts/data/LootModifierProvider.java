@@ -1,6 +1,5 @@
 package com.github.kay9.dragonmounts.data;
 
-import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
@@ -44,6 +43,6 @@ public class LootModifierProvider extends GlobalLootModifierProvider
                 LootItemRandomChanceCondition.randomChance(chance).build()
         };
 
-        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed));
+        super.add(path, new DragonEggLootMod(conditions, breed));
     }
 }

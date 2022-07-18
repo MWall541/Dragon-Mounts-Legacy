@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[41,)"
 license="MIT"
 issueTrackerURL="https://github.com/Kay9Unit/Dragon-Mounts-Legacy/issues"
 [[mods]]
@@ -14,7 +14,7 @@ Once fostered and tamed, they'll be your faithful companion in all situations an
 [[dependencies.dragonmounts]]
     modId="forge"
     mandatory=true
-    versionRange="[40.0.22,)"
+    versionRange="[41.0.100,)"
     ordering="NONE"
     side="BOTH"
 

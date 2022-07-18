@@ -15,13 +15,13 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implements BlockEntityRenderer<DMLEggBlock.Entity>, IItemRenderProperties
+public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implements BlockEntityRenderer<DMLEggBlock.Entity>, IClientItemExtensions
 {
     public static final DragonEggRenderer INSTANCE = new DragonEggRenderer();
     public static final Map<ResourceLocation, ResourceLocation> MODEL_CACHE = new HashMap<>(8);
@@ -47,7 +47,7 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     }
 
     @Override
-    public BlockEntityWithoutLevelRenderer getItemStackRenderer()
+    public BlockEntityWithoutLevelRenderer getCustomRenderer()
     {
         return this;
     }

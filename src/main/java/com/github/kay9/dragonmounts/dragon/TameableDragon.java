@@ -4,6 +4,7 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
+import com.github.kay9.dragonmounts.client.KeyMap;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
@@ -342,7 +343,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 {
                     moveForward = moveForward > 0? moveForward : 0;
                     if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
-                    else moveY = driver.jumping? 1 : DMLRegistry.FLIGHT_DESCENT_KEY.getAsBoolean()? -1 : 0;
+                    else moveY = driver.jumping? 1 : KeyMap.FLIGHT_DESCENT.isDown()? -1 : 0;
                 }
                 else if (driver.jumping && canFly()) liftOff();
 

@@ -1,9 +1,6 @@
 package com.github.kay9.dragonmounts;
 
-import com.github.kay9.dragonmounts.client.DragonEggRenderer;
-import com.github.kay9.dragonmounts.client.DragonModel;
-import com.github.kay9.dragonmounts.client.DragonRenderer;
-import com.github.kay9.dragonmounts.client.EggEntityRenderer;
+import com.github.kay9.dragonmounts.client.*;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
@@ -14,11 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.event.ColorHandlerEvent;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ForgeModelBakery;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
@@ -34,6 +27,8 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.function.Consumer;
 
 @Mod(DragonMountsLegacy.MOD_ID)
 public class DragonMountsLegacy
@@ -55,11 +50,12 @@ public class DragonMountsLegacy
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
-            MinecraftForge.EVENT_BUS.addListener((EntityViewRenderEvent.CameraSetup e) -> cameraAngles(e.getCamera()));
+            MinecraftForge.EVENT_BUS.addListener((ViewportEvent.ComputeCameraAngles e) -> cameraAngles(e.getCamera()));
 
-            bus.addListener((ModelRegistryEvent e) -> defineBlockModels());
-            bus.addListener((ColorHandlerEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
+            bus.addListener((ModelEvent.RegisterAdditional e) -> defineBlockModels(e::register));
+            bus.addListener((RegisterColorHandlersEvent.Item e) -> e.register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
             bus.addListener(DragonMountsLegacy::rendererRegistry);
+            bus.addListener((RegisterKeyMappingsEvent e) -> KeyMap.register(e::register));
         }
         else // Server Events
         {
@@ -78,10 +74,10 @@ public class DragonMountsLegacy
 
     private static void attemptVanillaEggReplacement(PlayerInteractEvent.RightClickBlock evt)
     {
-        if (DMLEggBlock.overrideVanillaDragonEgg(evt.getWorld(), evt.getPos(), evt.getPlayer())) evt.setCanceled(true);
+        if (DMLEggBlock.overrideVanillaDragonEgg(evt.getLevel(), evt.getPos(), evt.getEntity())) evt.setCanceled(true);
     }
 
-    private static void defineBlockModels()
+    private static void defineBlockModels(Consumer<ResourceLocation> registry)
     {
         var dir = "models/block/dragon_eggs";
         var length = "models/".length();
@@ -93,7 +89,7 @@ public class DragonMountsLegacy
             var model = new ResourceLocation(rl.getNamespace(), path);
             var id = path.substring("block/dragon_eggs/".length(), path.length() - "_dragon_egg".length());
 
-            ForgeModelBakery.addSpecialModel(model);
+            registry.accept(model);
             DragonEggRenderer.MODEL_CACHE.put(new ResourceLocation(rl.getNamespace(), id), model);
         }
     }
@@ -108,6 +104,7 @@ public class DragonMountsLegacy
         e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private static void cameraAngles(Camera camera)
     {
         if (Minecraft.getInstance().player.getVehicle() instanceof TameableDragon)

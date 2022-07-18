@@ -5,8 +5,7 @@ import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
@@ -16,18 +15,13 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.client.ClientRegistry;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.registries.RegistryObject;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static net.minecraftforge.registries.ForgeRegistries.Keys;
@@ -56,9 +50,7 @@ public class DMLRegistry
 
     public static final RegistryObject<BlockEntityType<DMLEggBlock.Entity>> EGG_BLOCK_ENTITY = register("dragon_egg", Keys.BLOCK_ENTITY_TYPES, () -> BlockEntityType.Builder.of(DMLEggBlock.Entity::new, EGG_BLOCK.get()).build(null));
 
-    public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
-
-    public static final BooleanSupplier FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
+    public static final RegistryObject<Codec<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> DragonEggLootMod.CODEC);
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {
@@ -68,21 +60,6 @@ public class DMLRegistry
     private static RegistryObject<SoundEvent> sound(String name)
     {
         return register(name, Keys.SOUND_EVENTS, () -> new SoundEvent(DragonMountsLegacy.id(name)));
-    }
-
-    @SuppressWarnings({"ConstantConditions"})
-    private static BooleanSupplier keymap(String name, int defaultMapping, String category)
-    {
-        if (FMLLoader.getDist().isClient() && Minecraft.getInstance() != null) // instance is null during datagen
-        {
-            var keymap = new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
-            ClientRegistry.registerKeyBinding(keymap);
-            return keymap::isDown;
-        }
-        return () ->
-        {
-            throw new RuntimeException("Cannot invoke '" + name + "' key mapping on server side!");
-        };
     }
 
     @SuppressWarnings("unchecked")

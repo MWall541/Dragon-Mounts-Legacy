@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -169,7 +169,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         }
 
         @Override
-        public void initializeClient(Consumer<IItemRenderProperties> consumer)
+        public void initializeClient(Consumer<IClientItemExtensions> consumer)
         {
             consumer.accept(DragonEggRenderer.INSTANCE);
         }

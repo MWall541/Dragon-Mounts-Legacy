@@ -5,6 +5,7 @@ import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -25,6 +26,7 @@ public class BreedManager extends SimpleJsonResourceReloadListener
     private static DragonBreed fallback = DragonBreed.FIRE;
 
     public static final BreedManager INSTANCE = new BreedManager();
+    public static final Codec<DragonBreed> CODEC = Codec.STRING.xmap(BreedManager::read, b -> b.id().toString());
 
     protected BreedManager()
     {

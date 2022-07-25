@@ -77,7 +77,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
 
     public static void startHatching(DragonBreed breed, Level level, BlockPos pos)
     {
-        startHatching(breed, DragonEgg.DEFAULT_HATCH_TIME, level, pos);
+        startHatching(breed, breed.hatchTime(), level, pos);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         {
             if (allowdedIn(tab))
                 for (DragonBreed breed : BreedManager.getBreeds())
-                    items.add(Item.create(breed, DragonEgg.DEFAULT_HATCH_TIME));
+                    items.add(Item.create(breed, breed.hatchTime()));
         }
 
         @Override
@@ -144,10 +144,12 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         {
             super.appendHoverText(stack, level, tooltips, pFlag);
 
-            var time = DragonEgg.DEFAULT_HATCH_TIME;
+
+
             var tag = stack.getTagElement("BlockEntityTag");
-            if (tag != null) time = tag.getInt(DragonEgg.NBT_HATCH_TIME);
-            tooltips.add(new TranslatableComponent(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
+            int time;
+            if (tag != null && (time = tag.getInt(DragonEgg.NBT_HATCH_TIME)) != 0)
+                tooltips.add(new TranslatableComponent(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
 
             if (Minecraft.getInstance().player.getAbilities().instabuild)
                 tooltips.add(new TranslatableComponent(getDescriptionId() + ".change_breeds")
@@ -201,7 +203,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         {
             super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
             setBreed(BreedManager.getFallback());
-            setHatchTime(DragonEgg.DEFAULT_HATCH_TIME);
+            setHatchTime(breed.hatchTime());
         }
 
         @Override

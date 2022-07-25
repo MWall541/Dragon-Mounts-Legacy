@@ -37,7 +37,7 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
                           Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties,
                           Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats,
                           ImmutableSet<String> immunities, Optional<SoundEvent> specialSound,
-                          ResourceLocation deathLoot, int growthTime)
+                          ResourceLocation deathLoot, int growthTime, int hatchTime)
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(func -> func.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(DragonBreed::id),
@@ -51,8 +51,17 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
-            Codec.INT.optionalFieldOf("growth_time", TameableDragon.DEFAULT_GROWTH_TIME).forGetter(DragonBreed::growthTime)
+            Codec.INT.optionalFieldOf("growth_time", TameableDragon.DEFAULT_GROWTH_TIME).forGetter(DragonBreed::growthTime),
+            Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime)
     ).apply(func, DragonBreed::new));
+
+    public DragonBreed(ResourceLocation id, int primaryColor, int secondaryColor,
+                Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties,
+                Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats,
+                ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
+    {
+        this(id, primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.DEFAULT_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME);
+    }
 
     /**
      * Internal use only. For built-in fallbacks and data generation.
@@ -64,11 +73,9 @@ public record DragonBreed(ResourceLocation id, int primaryColor, int secondaryCo
             new ModelProperties(false, false, false),
             ImmutableMap.of(),
             ImmutableList.of(),
-            ImmutableList.of(new NearbyBlocksHabitat(BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(FluidTags.LAVA)),
+            ImmutableList.of(new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(3, FluidTags.LAVA)),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.empty());
 
     public void initialize(TameableDragon dragon)
     {

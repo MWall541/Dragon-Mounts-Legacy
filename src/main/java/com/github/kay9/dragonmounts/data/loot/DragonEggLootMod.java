@@ -4,7 +4,6 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
-import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -31,7 +30,7 @@ public class DragonEggLootMod extends LootModifier
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {
-        if (DMLConfig.useLootTables()) generatedLoot.add(DMLEggBlock.Item.create(breed, DragonEgg.DEFAULT_HATCH_TIME));
+        if (DMLConfig.useLootTables()) generatedLoot.add(DMLEggBlock.Item.create(breed, breed.hatchTime()));
         return generatedLoot;
     }
 

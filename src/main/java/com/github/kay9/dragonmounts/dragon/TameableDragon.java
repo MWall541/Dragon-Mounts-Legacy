@@ -51,7 +51,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -798,8 +798,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 String[] p1Names = p1Name.split(" ");
                 String[] p2Names = p2Name.split(" ");
 
-                p1Name = StringUtils.capitalise(p1Names[getRandom().nextInt(p1Names.length)]);
-                p2Name = StringUtils.capitalise(p2Names[getRandom().nextInt(p2Names.length)]);
+                p1Name = StringUtils.capitalize(p1Names[getRandom().nextInt(p1Names.length)]);
+                p2Name = StringUtils.capitalize(p2Names[getRandom().nextInt(p2Names.length)]);
 
                 babyName = getRandom().nextBoolean()? p1Name + " " + p2Name : p2Name + " " + p1Name;
             }
@@ -814,7 +814,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 if (getRandom().nextBoolean()) p2Name = p2Name.substring(0, (p2Name.length() - 1) / 2);
                 else p2Name = p2Name.substring((p2Name.length() - 1) / 2);
 
-                p2Name = StringUtils.capitalise(p2Name);
+                p2Name = StringUtils.capitalize(p2Name);
 
                 babyName = getRandom().nextBoolean()? p1Name + p2Name : p2Name + p1Name;
             }

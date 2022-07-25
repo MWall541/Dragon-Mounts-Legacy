@@ -1,7 +1,8 @@
 {
   "values": [
-    "#forge:netherrack",
     "#minecraft:soul_fire_base_blocks",
+    "minecraft:blackstone",
+    "minecraft:basalt",
     "minecraft:soul_fire",
     "minecraft:soul_campfire"
   ]

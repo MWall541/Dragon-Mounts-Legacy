@@ -17,9 +17,9 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -37,11 +37,9 @@ public class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.45),
             list(),
-            list(new HeightHabitat(false, 200)),
+            list(new HeightHabitat(3, false, 200)),
             set(),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.empty());
 
     static final DragonBreed END = new DragonBreed(DragonMountsLegacy.id("end"),
             0x161616,
@@ -52,9 +50,7 @@ public class DragonBreedProvider implements DataProvider
             list(), // teleport ability?
             list(DragonBreathHabitat.INSTANCE),
             set("dragonBreath"),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.empty());
 
     static final DragonBreed FIRE = DragonBreed.FIRE;
 
@@ -65,11 +61,9 @@ public class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(),
             list(GreenToesAbility.INSTANCE),
-            list(new NearbyBlocksHabitat(BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(BiomeTagProvider.FOREST_DRAGON_BIOMES)),
+            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(2, BiomeTags.IS_JUNGLE)),
             set(),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.empty());
 
     static final DragonBreed GHOST = new DragonBreed(DragonMountsLegacy.id("ghost"),
             0xc4c4c4,
@@ -78,11 +72,9 @@ public class DragonBreedProvider implements DataProvider
             new DragonBreed.ModelProperties(true, false, true),
             of(),
             list(),
-            list(new PickyHabitat(ImmutableList.of(new HeightHabitat(true, 0), new LightHabitat(true, 3)))),
+            list(new PickyHabitat(ImmutableList.of(new HeightHabitat(1, true, 0), new LightHabitat(2, true, 3)))),
             set("drown"),
-            Optional.of(SoundEvents.SKELETON_AMBIENT),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.of(SoundEvents.SKELETON_AMBIENT));
 
     static final DragonBreed ICE = new DragonBreed(DragonMountsLegacy.id("ice"),
             0xffffff,
@@ -91,11 +83,9 @@ public class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(),
             list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
-            list(new NearbyBlocksHabitat(BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
+            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.empty());
 
     static final DragonBreed NETHER = new DragonBreed(DragonMountsLegacy.id("nether"),
             0x912400,
@@ -104,11 +94,9 @@ public class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(Attributes.ARMOR, 8d),
             list(),
-            list(new NearbyBlocksHabitat(BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(BiomeTagProvider.NETHER_DRAGON_BIOMES)),
+            list(new NearbyBlocksHabitat(1f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(3, BiomeTags.IS_NETHER)),
             set("inFire", "onFire", "lava", "hotFloor"),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.empty());
 
     static final DragonBreed WATER = new DragonBreed(DragonMountsLegacy.id("water"),
             0x0062ff,
@@ -117,11 +105,9 @@ public class DragonBreedProvider implements DataProvider
             new DragonBreed.ModelProperties(true, true, false),
             of(),
             list(),
-            list(new FluidHabitat(FluidTags.WATER)),
+            list(new FluidHabitat(1f, FluidTags.WATER)),
             set("drown"),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME);
+            Optional.empty());
 
     private final DataGenerator generator;
 

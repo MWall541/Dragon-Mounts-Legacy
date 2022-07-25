@@ -1,23 +1,25 @@
 {
   "habitats": [
     {
-      "type": "nearby_blocks",
-      "block_tag": "dragonmounts:fire_dragon_habitat_blocks"
+      "point_multiplier": 1.0,
+      "block_tag": "dragonmounts:fire_dragon_habitat_blocks",
+      "type": "nearby_blocks"
     },
     {
-      "type": "in_fluid",
-      "fluid_tag": "minecraft:lava"
+      "point_multiplier": 3.0,
+      "fluid_tag": "minecraft:lava",
+      "type": "in_fluid"
     }
   ],
-  "hatch_particles": {
-    "type": "minecraft:flame"
-  },
   "immunities": [
     "onFire",
     "inFire",
     "lava",
     "hotFloor"
   ],
+  "hatch_particles": {
+    "type": "minecraft:flame"
+  },
   "model_properties": {
     "middle_tail_scales": false
   },

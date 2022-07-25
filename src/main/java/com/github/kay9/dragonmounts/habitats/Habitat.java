@@ -1,11 +1,13 @@
 package com.github.kay9.dragonmounts.habitats;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public interface Habitat
 {
@@ -25,6 +27,16 @@ public interface Habitat
     {
         REGISTRY.put(name, codec);
         return name;
+    }
+
+    static <T extends Habitat> RecordCodecBuilder<T, Integer> withPoints(int defaultTo, Function<T, Integer> getter)
+    {
+        return Codec.INT.optionalFieldOf("points", defaultTo).forGetter(getter);
+    }
+
+    static <T extends Habitat> RecordCodecBuilder<T, Float> withMultiplier(float defaultTo, Function<T, Float> getter)
+    {
+        return Codec.FLOAT.optionalFieldOf("point_multiplier", defaultTo).forGetter(getter);
     }
 
     int getHabitatPoints(Level level, BlockPos pos);

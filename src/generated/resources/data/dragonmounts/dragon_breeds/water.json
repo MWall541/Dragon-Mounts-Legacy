@@ -1,16 +1,17 @@
 {
   "habitats": [
     {
-      "type": "in_fluid",
-      "fluid_tag": "minecraft:water"
+      "point_multiplier": 1.0,
+      "fluid_tag": "minecraft:water",
+      "type": "in_fluid"
     }
+  ],
+  "immunities": [
+    "drown"
   ],
   "hatch_particles": {
     "type": "minecraft:dripping_water"
   },
-  "immunities": [
-    "drown"
-  ],
   "model_properties": {
     "tail_horns": true
   },

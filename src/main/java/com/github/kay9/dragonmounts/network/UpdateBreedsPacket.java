@@ -80,7 +80,8 @@ public class UpdateBreedsPacket
                 ImmutableSet.of(),
                 Optional.empty(),
                 BuiltInLootTables.EMPTY,
-                buf.readInt());
+                buf.readInt(),
+                0);
     }
 
     @SuppressWarnings({"ConstantConditions", "unchecked"})

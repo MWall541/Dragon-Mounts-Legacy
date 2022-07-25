@@ -4,22 +4,20 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
-import com.github.kay9.dragonmounts.dragon.DragonEgg;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import com.google.gson.JsonObject;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
+import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class DragonEggLootMod extends LootModifier
 {
-    public static final Codec<DragonEggLootMod> CODEC = RecordCodecBuilder.create(i ->
-            codecStart(i).and(BreedManager.CODEC.fieldOf("breed").forGetter(m -> m.breed)).apply(i, DragonEggLootMod::new));
-
     private final DragonBreed breed;
 
     public DragonEggLootMod(LootItemCondition[] conditions, DragonBreed breed)
@@ -28,15 +26,28 @@ public class DragonEggLootMod extends LootModifier
         this.breed = breed;
     }
 
-    protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
+    @NotNull
+    @Override
+    protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {
-        if (DMLConfig.useLootTables()) generatedLoot.add(DMLEggBlock.Item.create(breed, DragonEgg.DEFAULT_HATCH_TIME));
+        if (DMLConfig.useLootTables()) generatedLoot.add(DMLEggBlock.Item.create(breed, breed.hatchTime()));
         return generatedLoot;
     }
 
-    @Override
-    public Codec<? extends IGlobalLootModifier> codec()
+    public static class Serializer extends GlobalLootModifierSerializer<DragonEggLootMod>
     {
-        return CODEC;
+        @Override
+        public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
+        {
+            return new DragonEggLootMod(conditions, BreedManager.read(GsonHelper.getAsString(object, "breed")));
+        }
+
+        @Override
+        public JsonObject write(DragonEggLootMod instance)
+        {
+            var json = makeConditions(instance.conditions);
+            json.addProperty("breed", instance.breed.id().toString());
+            return json;
+        }
     }
 }

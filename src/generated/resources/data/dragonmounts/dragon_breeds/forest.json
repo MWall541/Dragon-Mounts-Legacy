@@ -6,12 +6,12 @@
   ],
   "habitats": [
     {
-      "type": "nearby_blocks",
-      "block_tag": "dragonmounts:forest_dragon_habitat_blocks"
+      "block_tag": "dragonmounts:forest_dragon_habitat_blocks",
+      "type": "nearby_blocks"
     },
     {
-      "type": "biome",
-      "biome_tag": "dragonmounts:forest_dragon_biomes"
+      "biome_tag": "minecraft:is_jungle",
+      "type": "biome"
     }
   ],
   "hatch_particles": {

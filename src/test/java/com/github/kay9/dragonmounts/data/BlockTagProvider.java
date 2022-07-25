@@ -7,7 +7,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +33,7 @@ public class BlockTagProvider extends BlockTagsProvider
 
         tag(ICE_DRAGON_HABITAT_BLOCKS).addTags(BlockTags.ICE, BlockTags.SNOW);
 
-        tag(NETHER_DRAGON_HABITAT_BLOCKS).addTags(Tags.Blocks.NETHERRACK, BlockTags.SOUL_FIRE_BASE_BLOCKS)
-                .add(Blocks.SOUL_FIRE, Blocks.SOUL_CAMPFIRE);
+        tag(NETHER_DRAGON_HABITAT_BLOCKS).addTags(BlockTags.SOUL_FIRE_BASE_BLOCKS)
+                .add(Blocks.BLACKSTONE, Blocks.BASALT, Blocks.SOUL_FIRE, Blocks.SOUL_CAMPFIRE);
     }
 }

@@ -31,7 +31,7 @@ public class DragonEgg extends Entity
     public static final int HABITAT_UPDATE_INTERVAL = 200; // every 10 seconds (give or take, this depends on lag)
     public static final int DEFAULT_HATCH_TIME = 12000;
     public static final int BREED_TRANSITION_TIME = 200;
-    public static final float EGG_WIGGLE_THRESHOLD = DEFAULT_HATCH_TIME * 0.25f;
+    public static final int MIN_HABITAT_POINTS = 2;
     public static final byte HATCH_ID = 1;
     public static final byte WIGGLE_ID = 2;
 
@@ -50,7 +50,7 @@ public class DragonEgg extends Entity
         super(type, level);
 
         breed = BreedManager.getFallback();
-        hatchTime = DEFAULT_HATCH_TIME;
+        hatchTime = breed.hatchTime();
         transitioner = new TransitionHandler();
 //        wiggleTime = LerpedFloat.unit();
     }
@@ -126,6 +126,12 @@ public class DragonEgg extends Entity
     }
 
     @Override
+    public boolean fireImmune()
+    {
+        return true;
+    }
+
+    @Override
     public void tick()
     {
         // update motion - should fall
@@ -149,7 +155,7 @@ public class DragonEgg extends Entity
                 return; // Were hatching! drop the cock and lets go!
             }
 
-            if (hatchTime < EGG_WIGGLE_THRESHOLD && random.nextInt(Math.max(10, hatchTime)) == 0) wiggle();
+            if (hatchTime < breed.hatchTime() * 0.25f && random.nextInt(Math.max(10, hatchTime)) == 0) wiggle();
         }
         else
         {
@@ -203,7 +209,7 @@ public class DragonEgg extends Entity
         for (var breed : BreedManager.getBreeds())
         {
             int points = breed.getHabitatPoints(level, blockPosition());
-            if (points > 2 && points > prevPoints)
+            if (points > MIN_HABITAT_POINTS && points > prevPoints)
             {
                 winner = breed;
                 prevPoints = points;

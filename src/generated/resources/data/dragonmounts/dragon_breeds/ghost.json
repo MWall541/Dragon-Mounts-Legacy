@@ -2,19 +2,21 @@
   "ambient_sound": "minecraft:entity.skeleton.ambient",
   "habitats": [
     {
-      "type": "picky",
       "required_habitats": [
         {
-          "type": "world_height",
+          "points": 1,
           "below": true,
-          "height": 0
+          "height": 0,
+          "type": "world_height"
         },
         {
-          "type": "light",
+          "points": 2,
           "below": true,
-          "light": 3
+          "light": 3,
+          "type": "light"
         }
-      ]
+      ],
+      "type": "picky"
     }
   ],
   "immunities": [

@@ -24,7 +24,7 @@ public record PickyHabitat(List<Habitat> habitats) implements Habitat
             if (i == 0) return 0; // ALL habitat conditions must be met. Otherwise, nope.
             points += i;
         }
-        return (int) (points * 0.75);
+        return points;
     }
 
     @Override

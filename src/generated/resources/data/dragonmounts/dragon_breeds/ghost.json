@@ -4,11 +4,13 @@
     {
       "required_habitats": [
         {
+          "points": 1,
           "below": true,
           "height": 0,
           "type": "world_height"
         },
         {
+          "points": 2,
           "below": true,
           "light": 3,
           "type": "light"

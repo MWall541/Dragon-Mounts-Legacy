@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -29,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -128,13 +127,13 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             String name = BreedManager.getFallback().getTranslationKey();
             CompoundTag tag = stack.getTag();
             if (tag != null) name = tag.getString("ItemName");
-            return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
+            return Component.translatable(getDescriptionId(), Component.translatable(name));
         }
 
         @Override
         public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items)
         {
-            if (allowdedIn(tab))
+            if (allowedIn(tab))
                 for (DragonBreed breed : BreedManager.getBreeds())
                     items.add(Item.create(breed, breed.hatchTime()));
         }
@@ -149,10 +148,10 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             var tag = stack.getTagElement("BlockEntityTag");
             int time;
             if (tag != null && (time = tag.getInt(DragonEgg.NBT_HATCH_TIME)) != 0)
-                tooltips.add(new TranslatableComponent(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
+                tooltips.add(Component.translatable(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
 
             if (Minecraft.getInstance().player.getAbilities().instabuild)
-                tooltips.add(new TranslatableComponent(getDescriptionId() + ".change_breeds")
+                tooltips.add(Component.translatable(getDescriptionId() + ".change_breeds")
                         .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC, ChatFormatting.UNDERLINE));
         }
 
@@ -172,7 +171,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         }
 
         @Override
-        public void initializeClient(Consumer<IItemRenderProperties> consumer)
+        public void initializeClient(Consumer<IClientItemExtensions> consumer)
         {
             consumer.accept(DragonEggRenderer.INSTANCE);
         }

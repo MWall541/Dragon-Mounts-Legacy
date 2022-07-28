@@ -6,6 +6,8 @@ import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -130,6 +132,12 @@ public class DragonEgg extends Entity
     public boolean fireImmune()
     {
         return true;
+    }
+
+    @Override
+    protected Component getTypeName()
+    {
+        return new TranslatableComponent(DMLRegistry.EGG_BLOCK.get().getDescriptionId(), new TranslatableComponent(breed.getTranslationKey()));
     }
 
     @Override

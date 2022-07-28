@@ -17,7 +17,6 @@
   "hatch_particles": {
     "type": "minecraft:happy_villager"
   },
-  "name": "dragonmounts:forest",
   "primary_color": 346624,
   "secondary_color": 693760
 }

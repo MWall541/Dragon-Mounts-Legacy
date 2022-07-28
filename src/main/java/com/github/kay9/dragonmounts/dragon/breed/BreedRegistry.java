@@ -6,7 +6,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -22,7 +21,7 @@ public class BreedRegistry
             .disableSaving()
             .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC)
             .setDefaultKey(DragonBreed.FIRE.getId()));
-    public static final Codec<DragonBreed> CODEC = ExtraCodecs.lazyInitializedCodec(() -> REGISTRY.get().getCodec());
+    public static final Codec<DragonBreed> CODEC = ResourceLocation.CODEC.xmap(BreedRegistry::get, DragonBreed::id); //todo log an error on unknown breeds instead...
 
     public static DragonBreed get(String byString)
     {

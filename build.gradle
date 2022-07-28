@@ -60,7 +60,6 @@ minecraft {
             mods {
                 dragonmounts {
                     sources sourceSets.main
-                    sources sourceSets.test
                 }
             }
         }

@@ -1,9 +1,9 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
-import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -34,9 +34,9 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     @Override
     public void renderByItem(ItemStack pStack, ItemTransforms.TransformType pTransformType, PoseStack pPoseStack, MultiBufferSource buffer, int pPackedLight, int pPackedOverlay)
     {
-        var breed = BreedManager.getFallback();
+        var breed = DragonBreed.FIRE.get();
         var tag = pStack.getTagElement("BlockEntityTag");
-        if (tag != null) breed = BreedManager.read(tag.getString(TameableDragon.NBT_BREED));
+        if (tag != null) breed = BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED));
         renderEgg(pPoseStack, buffer.getBuffer(Sheets.translucentItemSheet()), pPackedLight, breed, false);
     }
 
@@ -56,7 +56,7 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     {
         ps.pushPose();
         if (offset) ps.translate(-0.5D, 0.0D, -0.5D);
-        var model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.get(breed.id()));
+        var model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.get(breed.getRegistryName()));
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, null, model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
         ps.popPose();
     }

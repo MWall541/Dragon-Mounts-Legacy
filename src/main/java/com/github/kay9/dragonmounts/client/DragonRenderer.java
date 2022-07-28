@@ -1,8 +1,8 @@
 package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -72,7 +72,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
     public static ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
     {
-        return TEXTURE_CACHE.computeIfAbsent(breed.id(), DragonRenderer::cacheTextures)[layer];
+        return TEXTURE_CACHE.computeIfAbsent(breed.getRegistryName(), DragonRenderer::cacheTextures)[layer];
     }
 
     private static ResourceLocation[] cacheTextures(ResourceLocation id)

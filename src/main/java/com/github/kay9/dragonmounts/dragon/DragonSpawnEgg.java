@@ -1,7 +1,8 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.data.BreedManager;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,7 +25,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         if (allowdedIn(pCategory))
         {
-            for (DragonBreed breed : BreedManager.getBreeds()) pItems.add(create(breed));
+            for (DragonBreed breed : BreedRegistry.values()) pItems.add(create(breed));
         }
     }
 
@@ -34,7 +35,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
 
         // entity tag
         CompoundTag entityTag = new CompoundTag();
-        entityTag.putString(TameableDragon.NBT_BREED, breed.id().toString());
+        entityTag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
         root.put(EntityType.ENTITY_TAG, entityTag);
 
         // name & colors
@@ -53,7 +54,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     @Override
     public Component getName(ItemStack stack)
     {
-        String name = BreedManager.getFallback().getTranslationKey();
+        String name = DragonBreed.FIRE.get().getTranslationKey();
         CompoundTag tag = stack.getTagElement("ItemData");
         if (tag != null) name = tag.getString("ItemName");
         return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
@@ -63,6 +64,6 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         CompoundTag tag = stack.getTagElement("ItemData");
         if (tag != null) return tintIndex == 0? tag.getInt("PrimaryColor") : tag.getInt("SecondaryColor");
-        return tintIndex == 0? BreedManager.getFallback().primaryColor() : BreedManager.getFallback().secondaryColor();
+        return tintIndex == 0? DragonBreed.FIRE.get().primaryColor() : DragonBreed.FIRE.get().secondaryColor();
     }
 }

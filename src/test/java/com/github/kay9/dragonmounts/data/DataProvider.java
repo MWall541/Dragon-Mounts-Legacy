@@ -19,7 +19,7 @@ public class DataProvider
         if (event.includeServer())
         {
             gen.addProvider(new BlockTagProvider(gen, fileHelper));
-            gen.addProvider(new LootModifierProvider(gen));
+//            gen.addProvider(new LootModifierProvider(gen));
             gen.addProvider(new DragonBreedProvider(gen));
         }
     }

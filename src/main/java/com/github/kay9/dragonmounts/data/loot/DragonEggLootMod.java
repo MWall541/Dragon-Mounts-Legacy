@@ -1,10 +1,11 @@
 package com.github.kay9.dragonmounts.data.loot;
 
 import com.github.kay9.dragonmounts.DMLConfig;
-import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
-import com.github.kay9.dragonmounts.dragon.DragonBreed;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -39,14 +40,17 @@ public class DragonEggLootMod extends LootModifier
         @Override
         public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
         {
-            return new DragonEggLootMod(conditions, BreedManager.read(GsonHelper.getAsString(object, "breed")));
+            var id = GsonHelper.getAsString(object, "breed");
+            var breed = BreedRegistry.getNullable(new ResourceLocation(id));
+            if (breed == null) throw new JsonParseException("Unknown breed id: '{}'");
+            return new DragonEggLootMod(conditions, breed);
         }
 
         @Override
         public JsonObject write(DragonEggLootMod instance)
         {
             var json = makeConditions(instance.conditions);
-            json.addProperty("breed", instance.breed.id().toString());
+            json.addProperty("breed", instance.breed.getRegistryName().toString());
             return json;
         }
     }

@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.data;
+package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
@@ -12,11 +12,11 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
 import net.minecraftforge.common.data.GlobalLootModifierProvider;
 import net.minecraftforge.common.loot.LootTableIdCondition;
 
-import static com.github.kay9.dragonmounts.data.DragonBreedProvider.*;
+import static com.github.kay9.dragonmounts.data.providers.DragonBreedProvider.*;
 
-public class LootModifierProvider extends GlobalLootModifierProvider
+class LootModifierProvider extends GlobalLootModifierProvider
 {
-    public LootModifierProvider(DataGenerator gen)
+    LootModifierProvider(DataGenerator gen)
     {
         super(gen, DragonMountsLegacy.MOD_ID);
     }
@@ -34,7 +34,7 @@ public class LootModifierProvider extends GlobalLootModifierProvider
         add(WATER, BuiltInLootTables.BURIED_TREASURE, 0.175f);
     }
 
-    public void add(DragonBreed breed, ResourceLocation table, float chance)
+    private void add(DragonBreed breed, ResourceLocation table, float chance)
     {
         // todo: change path to something like: "aether_in_simple_dungeon"
         var path = breed.getRegistryName().getNamespace() + "/" + breed.getRegistryName().getPath() + "/" + table.getPath();

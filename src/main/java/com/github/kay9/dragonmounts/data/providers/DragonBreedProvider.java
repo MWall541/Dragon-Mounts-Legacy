@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.data;
+package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.FrostWalkerAbility;
@@ -29,7 +29,7 @@ import java.util.Optional;
 
 import static com.google.common.collect.ImmutableMap.of;
 
-public class DragonBreedProvider implements DataProvider
+class DragonBreedProvider implements DataProvider
 {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -112,7 +112,7 @@ public class DragonBreedProvider implements DataProvider
 
     private final DataGenerator generator;
 
-    public DragonBreedProvider(DataGenerator generator)
+    DragonBreedProvider(DataGenerator generator)
     {
         this.generator = generator;
     }

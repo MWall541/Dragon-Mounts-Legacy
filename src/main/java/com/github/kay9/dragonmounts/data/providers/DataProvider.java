@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.data;
+package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import net.minecraft.data.DataGenerator;

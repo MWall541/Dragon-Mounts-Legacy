@@ -67,7 +67,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     public void attack(BlockState state, Level level, BlockPos at, Player player)
     {
         if (level.getBlockEntity(at) instanceof Entity e && e.getBreed().getRegistryName().getPath().equals("end"))
-            super.attack(state, level, at, player);
+            super.attack(Blocks.DRAGON_EGG.defaultBlockState(), level, at, player); // hacky fix for breed resets...
     }
 
     @Override

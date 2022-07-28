@@ -10,7 +10,6 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
-import java.util.Collection;
 import java.util.function.Supplier;
 
 public class BreedRegistry
@@ -38,9 +37,9 @@ public class BreedRegistry
         return retrieveRegistry().get(byId);
     }
 
-    public static Collection<DragonBreed> values()
+    public static Iterable<DragonBreed> values()
     {
-        return retrieveRegistry().stream().toList();
+        return retrieveRegistry();
     }
 
     private static Registry<DragonBreed> retrieveRegistry()

@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.data;
+package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import net.minecraft.data.DataGenerator;
@@ -10,14 +10,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 
-public class BlockTagProvider extends BlockTagsProvider
+class BlockTagProvider extends BlockTagsProvider
 {
-    public static final TagKey<Block> FIRE_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"));
-    public static final TagKey<Block> FOREST_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("forest_dragon_habitat_blocks"));
-    public static final TagKey<Block> ICE_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("ice_dragon_habitat_blocks"));
-    public static final TagKey<Block> NETHER_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("nether_dragon_habitat_blocks"));
+    static final TagKey<Block> FIRE_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"));
+    static final TagKey<Block> FOREST_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("forest_dragon_habitat_blocks"));
+    static final TagKey<Block> ICE_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("ice_dragon_habitat_blocks"));
+    static final TagKey<Block> NETHER_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("nether_dragon_habitat_blocks"));
 
-    public BlockTagProvider(DataGenerator pGenerator, @Nullable ExistingFileHelper existingFileHelper)
+    BlockTagProvider(DataGenerator pGenerator, @Nullable ExistingFileHelper existingFileHelper)
     {
         super(pGenerator, DragonMountsLegacy.MOD_ID, existingFileHelper);
     }

@@ -1,10 +1,11 @@
 package com.github.kay9.dragonmounts.data.loot;
 
 import com.github.kay9.dragonmounts.DMLConfig;
-import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
-import com.github.kay9.dragonmounts.dragon.DragonBreed;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.mojang.serialization.Codec;
+import com.google.gson.JsonParseException;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public class DragonEggLootMod extends LootModifier
 {
     public static final Codec<DragonEggLootMod> CODEC = RecordCodecBuilder.create(i ->
-            codecStart(i).and(BreedManager.CODEC.fieldOf("breed").forGetter(m -> m.breed)).apply(i, DragonEggLootMod::new));
+            codecStart(i).and(BreedRegistry.CODEC.fieldOf("breed").forGetter(m -> m.breed)).apply(i, DragonEggLootMod::new));
 
     private final DragonBreed breed;
 

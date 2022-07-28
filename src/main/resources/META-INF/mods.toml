@@ -14,7 +14,7 @@ Once fostered and tamed, they'll be your faithful companion in all situations an
 [[dependencies.dragonmounts]]
     modId="forge"
     mandatory=true
-    versionRange="[41.0.100,)"
+    versionRange="[41.1.0,)"
     ordering="NONE"
     side="BOTH"
 

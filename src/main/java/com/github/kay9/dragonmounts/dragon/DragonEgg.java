@@ -2,9 +2,12 @@ package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.data.BreedManager;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -49,7 +52,7 @@ public class DragonEgg extends Entity
     {
         super(type, level);
 
-        breed = BreedManager.getFallback();
+        breed = DragonBreed.FIRE.get();
         hatchTime = breed.hatchTime();
         transitioner = new TransitionHandler();
 //        wiggleTime = LerpedFloat.unit();
@@ -65,7 +68,7 @@ public class DragonEgg extends Entity
     protected void addAdditionalSaveData(CompoundTag tag)
     {
         tag.putInt(NBT_HATCH_TIME, hatchTime);
-        tag.putString(TameableDragon.NBT_BREED, breed.id().toString());
+        tag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
         transitioner.save(tag);
     }
 
@@ -73,18 +76,18 @@ public class DragonEgg extends Entity
     protected void readAdditionalSaveData(CompoundTag tag)
     {
         setHatchTime(tag.getInt(NBT_HATCH_TIME));
-        setEggBreed(BreedManager.read(tag.getString(TameableDragon.NBT_BREED)));
+        setEggBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED)));
         transitioner.read(tag);
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key)
     {
-        if (key.equals(BREED)) breed = BreedManager.read(entityData.get(BREED));
+        if (key.equals(BREED)) breed = BreedRegistry.get(entityData.get(BREED));
         else if (key.equals(TransitionHandler.TRANSITION_BREED))
         {
             // the transitioner can have a null value
-            var breed = BreedManager.getNullable(ResourceLocation.tryParse(entityData.get(TransitionHandler.TRANSITION_BREED)));
+            var breed = BreedRegistry.getNullable(new ResourceLocation(entityData.get(TransitionHandler.TRANSITION_BREED)));
             if (breed != null) transitioner.begin(breed);
             else transitioner.abort();
         }
@@ -93,7 +96,7 @@ public class DragonEgg extends Entity
 
     public void setEggBreed(DragonBreed breed)
     {
-        entityData.set(BREED, breed.id().toString());
+        entityData.set(BREED, breed.getRegistryName().toString());
     }
 
     public void setHatchTime(int time)
@@ -129,6 +132,12 @@ public class DragonEgg extends Entity
     public boolean fireImmune()
     {
         return true;
+    }
+
+    @Override
+    protected Component getTypeName()
+    {
+        return new TranslatableComponent(DMLRegistry.EGG_BLOCK.get().getDescriptionId(), new TranslatableComponent(breed.getTranslationKey()));
     }
 
     @Override
@@ -206,7 +215,7 @@ public class DragonEgg extends Entity
     {
         DragonBreed winner = null;
         int prevPoints = 0;
-        for (var breed : BreedManager.getBreeds())
+        for (var breed : BreedRegistry.values())
         {
             int points = breed.getHabitatPoints(level, blockPosition());
             if (points > MIN_HABITAT_POINTS && points > prevPoints)
@@ -304,7 +313,7 @@ public class DragonEgg extends Entity
         {
             this.transitioningBreed = transitioningBreed;
             this.transitionTime = transitionTime;
-            entityData.set(TRANSITION_BREED, transitioningBreed.id().toString());
+            entityData.set(TRANSITION_BREED, transitioningBreed.getRegistryName().toString());
         }
 
         public void begin(DragonBreed transitioningBreed)
@@ -327,14 +336,14 @@ public class DragonEgg extends Entity
         {
             if (transitioningBreed != null)
             {
-                tag.putString(NBT_TRANSITION_BREED, transitioningBreed.id().toString());
+                tag.putString(NBT_TRANSITION_BREED, transitioningBreed.getRegistryName().toString());
                 tag.putInt(NBT_TRANSITION_TIME, transitionTime);
             }
         }
 
         public void read(CompoundTag tag)
         {
-            var breed = BreedManager.getNullable(ResourceLocation.tryParse(tag.getString(NBT_TRANSITION_BREED)));
+            var breed = BreedRegistry.getNullable(new ResourceLocation(tag.getString(NBT_TRANSITION_BREED)));
             if (breed != null) begin(breed, tag.getInt(NBT_TRANSITION_TIME));
         }
     }

@@ -4,11 +4,11 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
-import com.github.kay9.dragonmounts.client.KeyMap;
-import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -116,7 +116,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
-        breed = BreedManager.getFallback(); //todo: figure something out for this? Not ideal to use fallback at any point during init...
+        breed = DragonBreed.FIRE.get();
     }
 
     @Override
@@ -170,7 +170,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> data)
     {
-        if (DATA_BREED.equals(data)) updateBreed(BreedManager.read(entityData.get(DATA_BREED)));
+        if (DATA_BREED.equals(data)) updateBreed(BreedRegistry.get(entityData.get(DATA_BREED)));
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
         else super.onSyncedDataUpdated(data);
@@ -180,7 +180,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putString(NBT_BREED, breed.id().toString());
+        compound.putString(NBT_BREED, breed.getRegistryName().toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
     }
@@ -189,7 +189,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void readAdditionalSaveData(CompoundTag compound)
     {
         super.readAdditionalSaveData(compound);
-        setBreed(BreedManager.read(compound.getString(NBT_BREED)));
+        setBreed(BreedRegistry.get(compound.getString(NBT_BREED)));
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
 
@@ -198,7 +198,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setBreed(DragonBreed dragonBreed)
     {
-        entityData.set(DATA_BREED, dragonBreed.id().toString());
+        entityData.set(DATA_BREED, dragonBreed.getRegistryName().toString());
     }
 
     private void updateBreed(DragonBreed breed)

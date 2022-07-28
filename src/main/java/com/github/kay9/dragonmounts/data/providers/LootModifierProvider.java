@@ -1,8 +1,8 @@
-package com.github.kay9.dragonmounts.data;
+package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
-import com.github.kay9.dragonmounts.dragon.DragonBreed;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -11,11 +11,11 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
 import net.minecraftforge.common.data.GlobalLootModifierProvider;
 import net.minecraftforge.common.loot.LootTableIdCondition;
 
-import static com.github.kay9.dragonmounts.data.DragonBreedProvider.*;
+import static com.github.kay9.dragonmounts.data.providers.DragonBreedProvider.*;
 
-public class LootModifierProvider extends GlobalLootModifierProvider
+class LootModifierProvider extends GlobalLootModifierProvider
 {
-    public LootModifierProvider(DataGenerator gen)
+    LootModifierProvider(DataGenerator gen)
     {
         super(gen, DragonMountsLegacy.MOD_ID);
     }
@@ -24,7 +24,7 @@ public class LootModifierProvider extends GlobalLootModifierProvider
     protected void start()
     {
         add(AETHER, BuiltInLootTables.SIMPLE_DUNGEON, 0.2f);
-        add(FIRE, BuiltInLootTables.DESERT_PYRAMID, 0.085f);
+        add(DragonBreed.FIRE.get(), BuiltInLootTables.DESERT_PYRAMID, 0.085f);
         add(FOREST, BuiltInLootTables.JUNGLE_TEMPLE, 0.3f);
         add(GHOST, BuiltInLootTables.WOODLAND_MANSION, 0.2f);
         add(GHOST, BuiltInLootTables.ABANDONED_MINESHAFT, 0.075f);
@@ -33,10 +33,10 @@ public class LootModifierProvider extends GlobalLootModifierProvider
         add(WATER, BuiltInLootTables.BURIED_TREASURE, 0.175f);
     }
 
-    public void add(DragonBreed breed, ResourceLocation table, float chance)
+    private void add(DragonBreed breed, ResourceLocation table, float chance)
     {
         // todo: change path to something like: "aether_in_simple_dungeon"
-        var path = breed.id().getNamespace() + "/" + breed.id().getPath() + "/" + table.getPath();
+        var path = breed.getRegistryName().getNamespace() + "/" + breed.getRegistryName().getPath() + "/" + table.getPath();
 
         var conditions = new LootItemCondition[] {
                 LootTableIdCondition.builder(table).build(),

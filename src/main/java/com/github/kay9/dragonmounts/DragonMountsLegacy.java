@@ -1,11 +1,10 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.*;
-import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.network.UpdateBreedsPacket;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -13,8 +12,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -42,8 +39,8 @@ public class DragonMountsLegacy
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         DMLRegistry.init(bus);
+        BreedRegistry.DEFERRED_REGISTRY.register(bus);
 
-        MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent e) -> e.addListener(BreedManager.INSTANCE));
         MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
 
         bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
@@ -56,10 +53,6 @@ public class DragonMountsLegacy
             bus.addListener((RegisterColorHandlersEvent.Item e) -> e.register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
             bus.addListener(DragonMountsLegacy::rendererRegistry);
             bus.addListener((RegisterKeyMappingsEvent e) -> KeyMap.register(e::register));
-        }
-        else // Server Events
-        {
-            MinecraftForge.EVENT_BUS.addListener((OnDatapackSyncEvent e) -> UpdateBreedsPacket.send(e.getPlayer()));
         }
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
@@ -131,7 +124,5 @@ public class DragonMountsLegacy
                 .serverAcceptedVersions(PROTOCOL_VERSION::equals)
                 .networkProtocolVersion(() -> PROTOCOL_VERSION)
                 .simpleChannel();
-
-        NETWORK.registerMessage(1, UpdateBreedsPacket.class, UpdateBreedsPacket::encode, UpdateBreedsPacket::new, UpdateBreedsPacket::handle);
     }
 }

@@ -1,9 +1,8 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.data.BreedManager;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
-import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -34,9 +33,9 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     @Override
     public void renderByItem(ItemStack pStack, ItemTransforms.TransformType pTransformType, PoseStack pPoseStack, MultiBufferSource buffer, int pPackedLight, int pPackedOverlay)
     {
-        var breed = BreedManager.getFallback();
+        var breed = DragonBreed.FIRE.get().getRegistryName();
         var tag = pStack.getTagElement("BlockEntityTag");
-        if (tag != null) breed = BreedManager.read(tag.getString(TameableDragon.NBT_BREED));
+        if (tag != null) breed = new ResourceLocation(tag.getString(TameableDragon.NBT_BREED));
         renderEgg(pPoseStack, buffer.getBuffer(Sheets.translucentItemSheet()), pPackedLight, breed, false);
     }
 
@@ -52,11 +51,22 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
         return this;
     }
 
+    /**
+     * Use this if you have a breed instance readily available.
+     */
     public static void renderEgg(PoseStack ps, VertexConsumer consumer, int light, DragonBreed breed, boolean offset)
+    {
+        renderEgg(ps, consumer, light, breed.getRegistryName(), offset);
+    }
+
+    /**
+     * Use this to avoid querying the breed registry every frame, if needed, as I'd imagine it's expensive...
+     */
+    public static void renderEgg(PoseStack ps, VertexConsumer consumer, int light, ResourceLocation breed, boolean offset)
     {
         ps.pushPose();
         if (offset) ps.translate(-0.5D, 0.0D, -0.5D);
-        var model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.get(breed.id()));
+        var model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.get(breed));
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, null, model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
         ps.popPose();
     }

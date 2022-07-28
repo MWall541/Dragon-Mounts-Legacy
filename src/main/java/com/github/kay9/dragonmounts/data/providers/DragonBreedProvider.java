@@ -4,7 +4,6 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.FrostWalkerAbility;
 import com.github.kay9.dragonmounts.abilities.GreenToesAbility;
 import com.github.kay9.dragonmounts.abilities.SnowStepperAbility;
-import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.*;
 import com.google.common.collect.ImmutableList;
@@ -13,9 +12,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.data.HashCache;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
@@ -117,15 +117,19 @@ public class DragonBreedProvider implements DataProvider
     }
 
     @Override
-    public void run(CachedOutput cache) throws IOException
+    public void run(HashCache cache) throws IOException
     {
-        for (var breed : new DragonBreed[]{AETHER, END, FIRE, FOREST, GHOST, ICE, NETHER, WATER})
+        for (var breed : new DragonBreed[] {AETHER, END, DragonBreed.FIRE.get(), FOREST, GHOST, ICE, NETHER, WATER})
         {
-            String path = breed.id().getNamespace();
-            String name = breed.id().getPath();
-            DataProvider.saveStable(cache,
-                    DragonBreed.CODEC.encodeStart(JsonOps.INSTANCE, breed).getOrThrow(false, DragonMountsLegacy.LOG::error),
-                    generator.getOutputFolder().resolve("data/" + path + "/dragon_breeds/" + name + ".json"));
+            String packName = breed.getRegistryName().getNamespace();
+            String type = breed.getRegistryName().getPath();
+
+            var ops = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
+            var json = DragonBreed.CODEC.encodeStart(ops, breed).getOrThrow(false, DragonMountsLegacy.LOG::error);
+            var regKey = BreedRegistry.REGISTRY.get().getRegistryKey().location();
+            var path = String.join("/", "data", packName, regKey.getNamespace(), regKey.getPath(), type + ".json");
+
+            DataProvider.saveStable(cache, json, generator.getOutputFolder().resolve(path));
         }
     }
 

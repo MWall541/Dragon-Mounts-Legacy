@@ -4,6 +4,7 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
+import com.github.kay9.dragonmounts.client.KeyMap;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
@@ -180,7 +181,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putString(NBT_BREED, breed.getRegistryName().toString());
+        compound.putString(NBT_BREED, breed.id().toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
     }
@@ -198,7 +199,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setBreed(DragonBreed dragonBreed)
     {
-        entityData.set(DATA_BREED, dragonBreed.getRegistryName().toString());
+        entityData.set(DATA_BREED, dragonBreed.id().toString());
     }
 
     private void updateBreed(DragonBreed breed)
@@ -350,7 +351,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 vec3 = new Vec3(moveSideways, moveY, moveForward);
                 setSpeed(speed);
             }
-            else if (driver instanceof Player) // other clients recieve animations
+            else if (driver instanceof Player) // other clients receive animations
             {
                 calculateEntityAnimation(this, true);
                 setDeltaMovement(Vec3.ZERO);

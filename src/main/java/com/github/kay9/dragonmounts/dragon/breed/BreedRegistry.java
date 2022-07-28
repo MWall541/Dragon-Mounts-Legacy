@@ -1,10 +1,12 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -16,10 +18,11 @@ public class BreedRegistry
 {
     public static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
     public static final DeferredRegister<DragonBreed> DEFERRED_REGISTRY = DeferredRegister.create(REGISTRY_KEY, DragonMountsLegacy.MOD_ID);
-    public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(DragonBreed.class, () -> new RegistryBuilder<DragonBreed>()
+    public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(() -> new RegistryBuilder<DragonBreed>()
             .disableSaving()
             .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC)
             .setDefaultKey(DragonBreed.FIRE.getId()));
+    public static final Codec<DragonBreed> CODEC = ExtraCodecs.lazyInitializedCodec(() -> REGISTRY.get().getCodec());
 
     public static DragonBreed get(String byString)
     {
@@ -42,7 +45,7 @@ public class BreedRegistry
         return retrieveRegistry();
     }
 
-    private static Registry<DragonBreed> retrieveRegistry()
+    public static Registry<DragonBreed> retrieveRegistry()
     {
         var server = ServerLifecycleHooks.getCurrentServer();
         return (server == null? BuiltinRegistries.ACCESS : server.registryAccess()).registryOrThrow(REGISTRY_KEY);

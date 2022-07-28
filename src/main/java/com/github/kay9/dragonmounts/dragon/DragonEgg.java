@@ -7,7 +7,6 @@ import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -68,7 +67,7 @@ public class DragonEgg extends Entity
     protected void addAdditionalSaveData(CompoundTag tag)
     {
         tag.putInt(NBT_HATCH_TIME, hatchTime);
-        tag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+        tag.putString(TameableDragon.NBT_BREED, breed.id().toString());
         transitioner.save(tag);
     }
 
@@ -96,7 +95,7 @@ public class DragonEgg extends Entity
 
     public void setEggBreed(DragonBreed breed)
     {
-        entityData.set(BREED, breed.getRegistryName().toString());
+        entityData.set(BREED, breed.id().toString());
     }
 
     public void setHatchTime(int time)
@@ -137,7 +136,7 @@ public class DragonEgg extends Entity
     @Override
     protected Component getTypeName()
     {
-        return new TranslatableComponent(DMLRegistry.EGG_BLOCK.get().getDescriptionId(), new TranslatableComponent(breed.getTranslationKey()));
+        return Component.translatable(DMLRegistry.EGG_BLOCK.get().getDescriptionId(), Component.translatable(breed.getTranslationKey()));
     }
 
     @Override
@@ -313,7 +312,7 @@ public class DragonEgg extends Entity
         {
             this.transitioningBreed = transitioningBreed;
             this.transitionTime = transitionTime;
-            entityData.set(TRANSITION_BREED, transitioningBreed.getRegistryName().toString());
+            entityData.set(TRANSITION_BREED, transitioningBreed.id().toString());
         }
 
         public void begin(DragonBreed transitioningBreed)
@@ -336,7 +335,7 @@ public class DragonEgg extends Entity
         {
             if (transitioningBreed != null)
             {
-                tag.putString(NBT_TRANSITION_BREED, transitioningBreed.getRegistryName().toString());
+                tag.putString(NBT_TRANSITION_BREED, transitioningBreed.id().toString());
                 tag.putInt(NBT_TRANSITION_TIME, transitionTime);
             }
         }

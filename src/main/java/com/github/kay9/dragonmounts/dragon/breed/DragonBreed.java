@@ -29,7 +29,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
@@ -37,10 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<DragonBreed>
+public class DragonBreed
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("name").forGetter(DragonBreed::getRegistryName),
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
@@ -53,10 +51,9 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.DEFAULT_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime)
-    ).apply(instance, DragonBreed::named));
+    ).apply(instance, DragonBreed::new));
 
     public static final Codec<DragonBreed> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("name").forGetter(DragonBreed::getRegistryName),
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
@@ -80,6 +77,7 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
             TameableDragon.DEFAULT_GROWTH_TIME,
             DragonEgg.DEFAULT_HATCH_TIME));
 
+    private ResourceLocation id; // id is retrieved lazily from the registry
     private final int primaryColor;
     private final int secondaryColor;
     private final Optional<ParticleOptions> hatchParticles;
@@ -109,21 +107,16 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
         this.hatchTime = hatchTime;
     }
 
-    public static DragonBreed named(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
+    public static DragonBreed builtIn(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.DEFAULT_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME)
-                .setRegistryName(name);
+        var breed = new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.DEFAULT_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME);
+        breed.id = name;
+        return breed;
     }
 
-    public static DragonBreed named(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime)
+    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, deathLoot, growthTime, hatchTime)
-                .setRegistryName(name);
-    }
-
-    public static DragonBreed fromNetwork(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties)
-    {
-        return named(name, primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), Optional.empty(), BuiltInLootTables.EMPTY, 0, 0);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), Optional.empty(), BuiltInLootTables.EMPTY, 0, 0);
     }
 
     public void initialize(TameableDragon dragon)
@@ -156,7 +149,7 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
 
     public String getTranslationKey()
     {
-        return "dragon_breed." + getRegistryName().getNamespace() + "." + getRegistryName().getPath();
+        return "dragon_breed." + id().getNamespace() + "." + id().getPath();
     }
 
     public int getHabitatPoints(Level level, BlockPos pos)
@@ -243,7 +236,13 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
     @Override
     public String toString()
     {
-        return "DragonBreed{name=\"" + getRegistryName() + "\"}";
+        return "DragonBreed{name=\"" + id() + "\"}";
+    }
+
+    public ResourceLocation id()
+    {
+        if (id == null) this.id = BreedRegistry.retrieveRegistry().getKey(this);
+        return id;
     }
 
     public static record ModelProperties(boolean middleTailScales, boolean tailHorns, boolean thinLegs)

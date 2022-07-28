@@ -65,7 +65,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     @Override
     public void attack(BlockState state, Level level, BlockPos at, Player player)
     {
-        if (level.getBlockEntity(at) instanceof Entity e && e.getBreed().getRegistryName().getPath().equals("end"))
+        if (level.getBlockEntity(at) instanceof Entity e && e.getBreed().id().getPath().equals("end"))
             super.attack(Blocks.DRAGON_EGG.defaultBlockState(), level, at, player); // hacky fix for breed resets...
     }
 
@@ -181,7 +181,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             var rootTag = new CompoundTag();
 
             var bETag = new CompoundTag();
-            bETag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+            bETag.putString(TameableDragon.NBT_BREED, breed.id().toString());
             bETag.putInt(DragonEgg.NBT_HATCH_TIME, hatchTime);
 
             rootTag.put("BlockEntityTag", bETag);
@@ -209,7 +209,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         protected void saveAdditional(CompoundTag tag)
         {
             super.saveAdditional(tag);
-            tag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+            tag.putString(TameableDragon.NBT_BREED, breed.id().toString());
             tag.putInt(DragonEgg.NBT_HATCH_TIME, hatchTime);
         }
 

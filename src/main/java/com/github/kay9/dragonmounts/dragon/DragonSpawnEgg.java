@@ -34,7 +34,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
 
         // entity tag
         CompoundTag entityTag = new CompoundTag();
-        entityTag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+        entityTag.putString(TameableDragon.NBT_BREED, breed.id().toString());
         root.put(EntityType.ENTITY_TAG, entityTag);
 
         // name & colors

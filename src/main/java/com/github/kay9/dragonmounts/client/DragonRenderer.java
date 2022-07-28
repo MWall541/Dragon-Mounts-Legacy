@@ -72,7 +72,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
     public static ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
     {
-        return TEXTURE_CACHE.computeIfAbsent(breed.getRegistryName(), DragonRenderer::cacheTextures)[layer];
+        return TEXTURE_CACHE.computeIfAbsent(breed.id(), DragonRenderer::cacheTextures)[layer];
     }
 
     private static ResourceLocation[] cacheTextures(ResourceLocation id)

@@ -31,7 +31,7 @@ minecraft {
             arg "-mixin.config=dragonmounts.mixins.json"
 
             mods {
-                dragonmounts {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
@@ -44,10 +44,10 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
-            arg "-mixin.config=dragonmounts.mixins.json"
+            arg "-mixin.config=${mod_id}.mixins.json"
 
             mods {
-                dragonmounts {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
@@ -55,10 +55,10 @@ minecraft {
 
         data {
             workingDirectory project.file('run')
-            args '--mod', 'dragonmounts', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                dragonmounts {
+                "${mod_id}" {
                     sources sourceSets.main
                     sources sourceSets.test
                 }
@@ -79,9 +79,35 @@ dependencies {
     annotationProcessor "org.spongepowered:mixin:${mixin_processor_version}:processor"
 }
 
+def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta']
+def intoTargets = ["$rootDir/out/production/resources/", "$rootDir/out/production/${project.name}.main/", "$rootDir/bin/main/"]
+def replaceProperties = [mod_id: mod_id, mod_name: mod_name, mod_version: mod_version,
+                         minecraft_version_range: game_version_range, forge_version_range: forge_version_range,
+                         loader_version_range: loader_version_range]
+processResources {
+    inputs.properties replaceProperties
+    replaceProperties.put 'project', project
+
+    filesMatching(resourceTargets) {
+        expand replaceProperties
+    }
+
+    intoTargets.each { target ->
+        if (file(target).exists()) {
+            copy {
+                from(sourceSets.main.resources) {
+                    include resourceTargets
+                    expand replaceProperties
+                }
+                into target
+            }
+        }
+    }
+}
+
 mixin {
-    add sourceSets.main, 'dragonmounts.mixins.refmap.json'
-    config 'dragonmounts.mixins.json'
+    add sourceSets.main, "${mod_id}.mixins.refmap.json"
+    config "${mod_id}.mixins.json"
 
     debug.export = true
 }

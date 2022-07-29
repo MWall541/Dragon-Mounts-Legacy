@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/dragon_egg",
+  "textures": {
+    "all": "example_addon:block/example_breed_dragon_egg"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "dragonmounts:dragon_egg_loot",
+  "breed": "example_addon:example_breed",
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/simple_dungeon"
+    }
+  ]
+}

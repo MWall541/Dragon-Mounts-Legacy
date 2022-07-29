@@ -1,10 +1,12 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -44,7 +46,20 @@ public class BreedRegistry
 
     private static Registry<DragonBreed> retrieveRegistry()
     {
-        var server = ServerLifecycleHooks.getCurrentServer();
-        return (server == null? BuiltinRegistries.ACCESS : server.registryAccess()).registryOrThrow(REGISTRY_KEY);
+        return (switch(FMLLoader.getDist())
+        {
+            case CLIENT:
+            {
+                if (Minecraft.getInstance().level != null)
+                    yield Minecraft.getInstance().level.registryAccess();
+            }
+            case DEDICATED_SERVER:
+            {
+                if (ServerLifecycleHooks.getCurrentServer() != null)
+                    yield ServerLifecycleHooks.getCurrentServer().registryAccess();
+            }
+            yield BuiltinRegistries.ACCESS;
+        }
+        ).registryOrThrow(REGISTRY_KEY);
     }
 }

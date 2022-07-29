@@ -1,26 +1,26 @@
 modLoader="javafml"
-loaderVersion="[41,)"
+loaderVersion="${loader_version_range}"
 license="MIT"
 issueTrackerURL="https://github.com/Kay9Unit/Dragon-Mounts-Legacy/issues"
 [[mods]]
-modId="dragonmounts"
-version="${file.jarVersion}"
-displayName="Dragon Mounts: Legacy"
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
 #logoFile="examplemod.png"
 credits="ata4/barracuda for the original project and idea."
 authors="Kay9"
 description='''This is a mod that allows you to hatch previously useless dragon eggs.
 Once fostered and tamed, they'll be your faithful companion in all situations and, of course, can be used for a ride!'''
-[[dependencies.dragonmounts]]
+[[dependencies.${mod_id}]]
     modId="forge"
     mandatory=true
-    versionRange="[41.1.0,)"
+    versionRange="${forge_version_range}"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.dragonmounts]]
+[[dependencies.${mod_id}]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19,1.20)"
+    versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"

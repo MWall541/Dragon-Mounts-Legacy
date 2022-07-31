@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +25,7 @@ class LootModifierProvider extends GlobalLootModifierProvider
     protected void start()
     {
         add(AETHER, BuiltInLootTables.SIMPLE_DUNGEON, 0.2f);
-        add(DragonBreed.FIRE.get(), BuiltInLootTables.DESERT_PYRAMID, 0.085f);
+        add(BreedRegistry.FIRE_BUILTIN.get(), BuiltInLootTables.DESERT_PYRAMID, 0.085f);
         add(FOREST, BuiltInLootTables.JUNGLE_TEMPLE, 0.3f);
         add(GHOST, BuiltInLootTables.WOODLAND_MANSION, 0.2f);
         add(GHOST, BuiltInLootTables.ABANDONED_MINESHAFT, 0.075f);

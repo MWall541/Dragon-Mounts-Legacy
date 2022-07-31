@@ -51,7 +51,7 @@ public class DragonEgg extends Entity
     {
         super(type, level);
 
-        breed = DragonBreed.FIRE.get();
+        breed = BreedRegistry.FIRE.get();
         hatchTime = breed.hatchTime();
         transitioner = new TransitionHandler();
 //        wiggleTime = LerpedFloat.unit();
@@ -85,10 +85,9 @@ public class DragonEgg extends Entity
         if (key.equals(BREED)) breed = BreedRegistry.get(entityData.get(BREED));
         else if (key.equals(TransitionHandler.TRANSITION_BREED))
         {
-            // the transitioner can have a null value
-            var breed = BreedRegistry.getNullable(new ResourceLocation(entityData.get(TransitionHandler.TRANSITION_BREED)));
-            if (breed != null) transitioner.begin(breed);
-            else transitioner.abort();
+            BreedRegistry.registry()
+                    .getOptional(new ResourceLocation(entityData.get(TransitionHandler.TRANSITION_BREED)))
+                    .ifPresentOrElse(transitioner::begin, transitioner::abort);
         }
         super.onSyncedDataUpdated(key);
     }
@@ -214,7 +213,7 @@ public class DragonEgg extends Entity
     {
         DragonBreed winner = null;
         int prevPoints = 0;
-        for (var breed : BreedRegistry.values())
+        for (var breed : BreedRegistry.registry())
         {
             int points = breed.getHabitatPoints(level, blockPosition());
             if (points > MIN_HABITAT_POINTS && points > prevPoints)
@@ -342,8 +341,9 @@ public class DragonEgg extends Entity
 
         public void read(CompoundTag tag)
         {
-            var breed = BreedRegistry.getNullable(new ResourceLocation(tag.getString(NBT_TRANSITION_BREED)));
-            if (breed != null) begin(breed, tag.getInt(NBT_TRANSITION_TIME));
+            BreedRegistry.registry()
+                    .getOptional(new ResourceLocation(tag.getString(NBT_TRANSITION_BREED)))
+                    .ifPresent(breed -> begin(breed, tag.getInt(NBT_TRANSITION_TIME)));
         }
     }
 }

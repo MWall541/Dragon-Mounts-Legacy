@@ -33,6 +33,7 @@ import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class DMLEggBlock extends DragonEggBlock implements EntityBlock
@@ -103,12 +104,12 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     {
         if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
-            DragonBreed end = BreedRegistry.getNullable(DragonMountsLegacy.id("end"));
-            if (end != null)
+            Optional<DragonBreed> end = BreedRegistry.registry().getOptional(DragonMountsLegacy.id("end"));
+            if (end.isPresent())
             {
                 level.removeBlock(pos, false);
                 if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
-                startHatching(end, level, pos);
+                startHatching(end.get(), level, pos);
                 return true;
             }
         }
@@ -125,7 +126,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         @Override
         public Component getName(ItemStack stack)
         {
-            String name = DragonBreed.FIRE.get().getTranslationKey();
+            String name = BreedRegistry.FIRE.get().getTranslationKey();
             CompoundTag tag = stack.getTag();
             if (tag != null) name = tag.getString("ItemName");
             return Component.translatable(getDescriptionId(), Component.translatable(name));
@@ -135,7 +136,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items)
         {
             if (allowedIn(tab))
-                for (DragonBreed breed : BreedRegistry.values())
+                for (DragonBreed breed : BreedRegistry.registry())
                     items.add(Item.create(breed, breed.hatchTime()));
         }
 
@@ -201,7 +202,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public Entity(BlockPos pWorldPosition, BlockState pBlockState)
         {
             super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
-            setBreed(DragonBreed.FIRE.get());
+            setBreed(BreedRegistry.FIRE.get());
             setHatchTime(breed.hatchTime());
         }
 

@@ -1,12 +1,9 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.Habitat;
-import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -20,8 +17,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -29,7 +24,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -59,23 +53,6 @@ public class DragonBreed
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             ModelProperties.CODEC.optionalFieldOf("model_properties", ModelProperties.STANDARD).forGetter(DragonBreed::modelProperties)
     ).apply(instance, DragonBreed::fromNetwork));
-
-    /**
-     * Internal use only. For built-in fallbacks and data generation.
-     */
-    public static final RegistryObject<DragonBreed> FIRE = BreedRegistry.DEFERRED_REGISTRY.register("fire", () -> new DragonBreed(
-            0x912400,
-            0xff9819,
-            Optional.of(ParticleTypes.FLAME),
-            new ModelProperties(false, false, false),
-            ImmutableMap.of(),
-            ImmutableList.of(),
-            ImmutableList.of(new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(3, FluidTags.LAVA)),
-            ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME,
-            DragonEgg.DEFAULT_HATCH_TIME));
 
     private ResourceLocation id; // id is retrieved lazily from the registry
     private final int primaryColor;
@@ -241,7 +218,7 @@ public class DragonBreed
 
     public ResourceLocation id()
     {
-        if (id == null) this.id = BreedRegistry.retrieveRegistry().getKey(this);
+        if (id == null) this.id = BreedRegistry.registry().getKey(this);
         return id;
     }
 

@@ -120,7 +120,7 @@ class DragonBreedProvider implements DataProvider
     @Override
     public void run(HashCache cache) throws IOException
     {
-        for (var breed : new DragonBreed[] {AETHER, END, DragonBreed.FIRE.get(), FOREST, GHOST, ICE, NETHER, WATER})
+        for (var breed : new DragonBreed[] {AETHER, END, BreedRegistry.FIRE_BUILTIN.get(), FOREST, GHOST, ICE, NETHER, WATER})
         {
             String packName = breed.getRegistryName().getNamespace();
             String type = breed.getRegistryName().getPath();

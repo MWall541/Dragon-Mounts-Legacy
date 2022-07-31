@@ -25,7 +25,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         if (allowdedIn(pCategory))
         {
-            for (DragonBreed breed : BreedRegistry.values()) pItems.add(create(breed));
+            for (DragonBreed breed : BreedRegistry.registry()) pItems.add(create(breed));
         }
     }
 
@@ -54,7 +54,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     @Override
     public Component getName(ItemStack stack)
     {
-        String name = DragonBreed.FIRE.get().getTranslationKey();
+        String name = BreedRegistry.FIRE.get().getTranslationKey();
         CompoundTag tag = stack.getTagElement("ItemData");
         if (tag != null) name = tag.getString("ItemName");
         return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
@@ -64,6 +64,6 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         CompoundTag tag = stack.getTagElement("ItemData");
         if (tag != null) return tintIndex == 0? tag.getInt("PrimaryColor") : tag.getInt("SecondaryColor");
-        return tintIndex == 0? DragonBreed.FIRE.get().primaryColor() : DragonBreed.FIRE.get().secondaryColor();
+        return tintIndex == 0? BreedRegistry.FIRE.get().primaryColor() : BreedRegistry.FIRE.get().secondaryColor();
     }
 }

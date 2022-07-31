@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -33,7 +34,7 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     @Override
     public void renderByItem(ItemStack pStack, ItemTransforms.TransformType pTransformType, PoseStack pPoseStack, MultiBufferSource buffer, int pPackedLight, int pPackedOverlay)
     {
-        var breed = DragonBreed.FIRE.get().getRegistryName();
+        var breed = BreedRegistry.FIRE.get().getRegistryName();
         var tag = pStack.getTagElement("BlockEntityTag");
         if (tag != null) breed = new ResourceLocation(tag.getString(TameableDragon.NBT_BREED));
         renderEgg(pPoseStack, buffer.getBuffer(Sheets.translucentItemSheet()), pPackedLight, breed, false);

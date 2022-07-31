@@ -1,0 +1,57 @@
+{
+  "name": "example_addon:example_breed",
+  "primary_color": 2389822,
+  "secondary_color": 4185307,
+  "hatch_particles": {
+    "type": "minecraft:heart"
+  },
+  "model_properties": {
+    "middle_tail_scales": false,
+    "tail_horns": true,
+    "thin_legs": false
+  },
+  "attributes": {
+    "minecraft:generic.armor": 10.0
+  },
+  "abilities": [
+    {
+      "type": "snow_stepper"
+    },
+    {
+      "type": "green_toes"
+    }
+  ],
+  "habitats": [
+    {
+      "type": "light",
+      "points": 2,
+      "light": 10,
+      "below": false
+    },
+    {
+      "type": "world_height",
+      "points": 1,
+      "height": 60,
+      "below": false
+    },
+    {
+      "type": "picky",
+      "required_habitats": [
+        {
+          "type": "biome",
+          "points": 1,
+          "biome_tag": "minecraft:is_beach"
+        },
+        {
+          "type": "nearby_blocks",
+          "point_multiplier": 0.5,
+          "block_tag": "minecraft:sand"
+        }
+      ]
+    }
+  ],
+  "ambient_sound": "minecraft:entity.cat.ambient",
+  "death_loot": "minecraft:chests/bastion_treasure",
+  "growth_time": 120,
+  "hatch_time": 180
+}

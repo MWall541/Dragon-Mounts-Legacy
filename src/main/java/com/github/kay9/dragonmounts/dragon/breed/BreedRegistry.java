@@ -1,8 +1,6 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.dragon.DragonEgg;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
 import com.google.common.collect.ImmutableList;
@@ -17,7 +15,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -32,7 +29,7 @@ public class BreedRegistry
 {
     private static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
     public static final DeferredRegister<DragonBreed> DEFERRED_REGISTRY = DeferredRegister.create(REGISTRY_KEY, DragonMountsLegacy.MOD_ID);
-    public static final RegistryObject<DragonBreed> FIRE_BUILTIN = BreedRegistry.DEFERRED_REGISTRY.register("fire", () -> new DragonBreed(
+    public static final RegistryObject<DragonBreed> FIRE_BUILTIN = BreedRegistry.DEFERRED_REGISTRY.register("fire", () -> DragonBreed.builtIn(DragonMountsLegacy.id("fire"),
             0x912400,
             0xff9819,
             Optional.of(ParticleTypes.FLAME),
@@ -43,10 +40,7 @@ public class BreedRegistry
                     new NearbyBlocksHabitat(1, Registry.BLOCK.getOrCreateTag(BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks")))),
                     new FluidHabitat(3, Registry.FLUID.getOrCreateTag(FluidTags.LAVA))),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
-            Optional.empty(),
-            BuiltInLootTables.EMPTY,
-            TameableDragon.DEFAULT_GROWTH_TIME,
-            DragonEgg.DEFAULT_HATCH_TIME));
+            Optional.empty()));
     public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(DragonBreed.class, () -> new RegistryBuilder<DragonBreed>()
             .disableSaving()
             .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC)

@@ -22,7 +22,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -384,6 +383,19 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         final InteractionResult SUCCESS = InteractionResult.sidedSuccess(level.isClientSide);
 
+        // tame
+        if (!isTame())
+        {
+            if (isServer() && stack.is(getBreed().tamingItems()))
+            {
+                stack.shrink(1);
+                tamedFor(player, getRandom().nextInt(5) == 0);
+                return InteractionResult.SUCCESS;
+            }
+
+            return InteractionResult.PASS;
+        }
+
         // heal
         if (getHealthRelative() < 1 && isFoodItem(stack))
         {
@@ -398,14 +410,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             stack.shrink(1);
             equipSaddle(getSoundSource());
-            return SUCCESS;
-        }
-
-        // tame
-        if (isFood(stack) && !isTame())
-        {
-            stack.shrink(1);
-            if (isServer()) tamedFor(player, getRandom().nextInt(5) == 0);
             return SUCCESS;
         }
 
@@ -616,10 +620,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return stack.getItem().isEdible() && stack.getItem().getFoodProperties().isMeat();
     }
 
+    // the "food" that enables breeding mode
     @Override
     public boolean isFood(ItemStack stack)
     {
-        return stack.is(ItemTags.FISHES);
+        return stack.is(getBreed().breedingItems());
     }
 
     public void tamedFor(Player player, boolean successful)

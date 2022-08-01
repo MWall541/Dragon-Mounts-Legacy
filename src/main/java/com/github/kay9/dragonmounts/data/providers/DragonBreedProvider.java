@@ -38,7 +38,7 @@ class DragonBreedProvider implements DataProvider
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final RegistryOps<JsonElement> OPS = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
 
-    static final DragonBreed AETHER = DragonBreed.named(DragonMountsLegacy.id("aether"),
+    static final DragonBreed AETHER = DragonBreed.builtIn(DragonMountsLegacy.id("aether"),
             0x718AA9,
             0xE6E6E6,
             Optional.empty(),
@@ -49,7 +49,7 @@ class DragonBreedProvider implements DataProvider
             set(),
             Optional.empty());
 
-    static final DragonBreed END = DragonBreed.named(DragonMountsLegacy.id("end"),
+    static final DragonBreed END = DragonBreed.builtIn(DragonMountsLegacy.id("end"),
             0x161616,
             0xff63e8,
             Optional.of(ParticleTypes.PORTAL),
@@ -60,7 +60,7 @@ class DragonBreedProvider implements DataProvider
             set("dragonBreath"),
             Optional.empty());
 
-    static final DragonBreed FOREST = DragonBreed.named(DragonMountsLegacy.id("forest"),
+    static final DragonBreed FOREST = DragonBreed.builtIn(DragonMountsLegacy.id("forest"),
             0x054a00,
             0x0a9600,
             Optional.of(ParticleTypes.HAPPY_VILLAGER),
@@ -71,7 +71,7 @@ class DragonBreedProvider implements DataProvider
             set(),
             Optional.empty());
 
-    static final DragonBreed GHOST = DragonBreed.named(DragonMountsLegacy.id("ghost"),
+    static final DragonBreed GHOST = DragonBreed.builtIn(DragonMountsLegacy.id("ghost"),
             0xc4c4c4,
             0xc2f8ff,
             Optional.empty(),
@@ -82,7 +82,7 @@ class DragonBreedProvider implements DataProvider
             set("drown"),
             Optional.of(SoundEvents.SKELETON_AMBIENT));
 
-    static final DragonBreed ICE = DragonBreed.named(DragonMountsLegacy.id("ice"),
+    static final DragonBreed ICE = DragonBreed.builtIn(DragonMountsLegacy.id("ice"),
             0xffffff,
             0x00E1FF,
             Optional.of(ParticleTypes.SNOWFLAKE),
@@ -93,7 +93,7 @@ class DragonBreedProvider implements DataProvider
             set("drown", "freeze"),
             Optional.empty());
 
-    static final DragonBreed NETHER = DragonBreed.named(DragonMountsLegacy.id("nether"),
+    static final DragonBreed NETHER = DragonBreed.builtIn(DragonMountsLegacy.id("nether"),
             0x912400,
             0x2e0b00,
             Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
@@ -104,7 +104,7 @@ class DragonBreedProvider implements DataProvider
             set("inFire", "onFire", "lava", "hotFloor"),
             Optional.empty());
 
-    static final DragonBreed WATER = DragonBreed.named(DragonMountsLegacy.id("water"),
+    static final DragonBreed WATER = DragonBreed.builtIn(DragonMountsLegacy.id("water"),
             0x0062ff,
             0x5999ff,
             Optional.of(ParticleTypes.DRIPPING_WATER),

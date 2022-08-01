@@ -118,7 +118,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
-        breed = BreedRegistry.FIRE.get();
+        breed = BreedRegistry.getFallback();
     }
 
     @Override

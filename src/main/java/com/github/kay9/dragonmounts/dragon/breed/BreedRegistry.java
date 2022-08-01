@@ -30,18 +30,8 @@ import java.util.function.Supplier;
 
 public class BreedRegistry
 {
-    public static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
+    private static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
     public static final DeferredRegister<DragonBreed> DEFERRED_REGISTRY = DeferredRegister.create(REGISTRY_KEY, DragonMountsLegacy.MOD_ID);
-    public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(DragonBreed.class, () -> new RegistryBuilder<DragonBreed>()
-            .disableSaving()
-            .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC)
-            .setDefaultKey(DragonMountsLegacy.id("fire")));
-    public static final Codec<DragonBreed> CODEC = ResourceLocation.CODEC.xmap(BreedRegistry::get, DragonBreed::id)
-            .promotePartial(err -> DragonMountsLegacy.LOG.error("Unknown Dragon Breed Type: {}", err));
-
-    /**
-     * Internal use only. For built-in fallbacks and data generation.
-     */
     public static final RegistryObject<DragonBreed> FIRE_BUILTIN = BreedRegistry.DEFERRED_REGISTRY.register("fire", () -> new DragonBreed(
             0x912400,
             0xff9819,
@@ -55,7 +45,12 @@ public class BreedRegistry
             BuiltInLootTables.EMPTY,
             TameableDragon.DEFAULT_GROWTH_TIME,
             DragonEgg.DEFAULT_HATCH_TIME));
-    public static final Supplier<DragonBreed> FIRE = () -> get(FIRE_BUILTIN.getId());
+    public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(DragonBreed.class, () -> new RegistryBuilder<DragonBreed>()
+            .disableSaving()
+            .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC)
+            .setDefaultKey(FIRE_BUILTIN.getId()));
+    public static final Codec<DragonBreed> CODEC = ResourceLocation.CODEC.xmap(BreedRegistry::get, DragonBreed::getRegistryName)
+            .promotePartial(err -> DragonMountsLegacy.LOG.error("Unknown Dragon Breed Type: {}", err));
 
     public static DragonBreed get(String byString)
     {
@@ -65,8 +60,13 @@ public class BreedRegistry
     public static DragonBreed get(ResourceLocation byId)
     {
         var breed = registry().get(byId);
-        if (breed == null) breed = FIRE.get(); // guard for if/when the registry is not defaulted...
+        if (breed == null) breed = getFallback(); // guard for if/when the registry is not defaulted...
         return breed;
+    }
+
+    public static DragonBreed getFallback()
+    {
+        return get(FIRE_BUILTIN.getId());
     }
 
     public static Registry<DragonBreed> registry()

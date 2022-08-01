@@ -127,9 +127,10 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         @Override
         public Component getName(ItemStack stack)
         {
-            String name = BreedRegistry.FIRE.get().getTranslationKey();
-            CompoundTag tag = stack.getTag();
-            if (tag != null) name = tag.getString("ItemName");
+            String name;
+            var tag = stack.getTag();
+            if (tag == null || (name = tag.getString("ItemName")).isEmpty())
+                name = BreedRegistry.getFallback().getTranslationKey();
             return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
         }
 
@@ -203,7 +204,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public Entity(BlockPos pWorldPosition, BlockState pBlockState)
         {
             super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
-            setBreed(BreedRegistry.FIRE.get());
+            setBreed(BreedRegistry.getFallback());
             setHatchTime(breed.hatchTime());
         }
 

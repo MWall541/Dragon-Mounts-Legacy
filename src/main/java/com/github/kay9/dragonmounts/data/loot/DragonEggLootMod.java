@@ -41,8 +41,9 @@ public class DragonEggLootMod extends LootModifier
         public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
         {
             var id = GsonHelper.getAsString(object, "breed");
-            var breed = BreedRegistry.getNullable(new ResourceLocation(id));
-            if (breed == null) throw new JsonParseException("Unknown breed id: '{}'");
+            var breed = BreedRegistry.registry()
+                    .getOptional(new ResourceLocation(id))
+                    .orElseThrow(() -> new JsonParseException("Unknown breed id: " + id));
             return new DragonEggLootMod(conditions, breed);
         }
 

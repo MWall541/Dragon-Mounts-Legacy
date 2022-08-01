@@ -60,7 +60,6 @@ minecraft {
             mods {
                 "${mod_id}" {
                     sources sourceSets.main
-                    sources sourceSets.test
                 }
             }
         }

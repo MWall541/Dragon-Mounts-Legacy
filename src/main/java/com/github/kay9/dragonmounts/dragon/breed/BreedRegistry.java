@@ -39,7 +39,9 @@ public class BreedRegistry
             new DragonBreed.ModelProperties(false, false, false),
             ImmutableMap.of(),
             ImmutableList.of(),
-            ImmutableList.of(new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))), new FluidHabitat(3, FluidTags.LAVA)),
+            ImmutableList.of(
+                    new NearbyBlocksHabitat(1, Registry.BLOCK.getOrCreateTag(BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks")))),
+                    new FluidHabitat(3, Registry.FLUID.getOrCreateTag(FluidTags.LAVA))),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
             Optional.empty(),
             BuiltInLootTables.EMPTY,
@@ -69,13 +71,14 @@ public class BreedRegistry
         return get(FIRE_BUILTIN.getId());
     }
 
+    @SuppressWarnings("ConstantConditions") // the game instance isn't available in datagen
     public static Registry<DragonBreed> registry()
     {
         return (switch(FMLLoader.getDist())
         {
             case CLIENT:
             {
-                if (Minecraft.getInstance().level != null)
+                if (Minecraft.getInstance() != null && Minecraft.getInstance().level != null)
                     yield Minecraft.getInstance().level.registryAccess();
             }
             case DEDICATED_SERVER:

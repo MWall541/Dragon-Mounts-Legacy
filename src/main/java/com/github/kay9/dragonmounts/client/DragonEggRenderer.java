@@ -34,9 +34,10 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     @Override
     public void renderByItem(ItemStack pStack, ItemTransforms.TransformType pTransformType, PoseStack pPoseStack, MultiBufferSource buffer, int pPackedLight, int pPackedOverlay)
     {
-        var breed = BreedRegistry.FIRE.get().id();
+        ResourceLocation breed;
         var tag = pStack.getTagElement("BlockEntityTag");
-        if (tag != null) breed = new ResourceLocation(tag.getString(TameableDragon.NBT_BREED));
+        if (tag == null || (breed = ResourceLocation.tryParse(tag.getString(TameableDragon.NBT_BREED))) == null)
+            breed = BreedRegistry.FIRE_BUILTIN.getId();
         renderEgg(pPoseStack, buffer.getBuffer(Sheets.translucentItemSheet()), pPackedLight, breed, false);
     }
 

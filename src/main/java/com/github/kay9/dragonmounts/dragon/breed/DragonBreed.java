@@ -17,13 +17,17 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.RandomSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -44,7 +48,9 @@ public class DragonBreed
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.DEFAULT_GROWTH_TIME).forGetter(DragonBreed::growthTime),
-            Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime)
+            Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime),
+            TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("taming_items", ItemTags.FISHES).forGetter(DragonBreed::tamingItems),
+            TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("breeding_items", ItemTags.FISHES).forGetter(DragonBreed::breedingItems)
     ).apply(instance, DragonBreed::new));
 
     public static final Codec<DragonBreed> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -67,8 +73,10 @@ public class DragonBreed
     private final ResourceLocation deathLoot;
     private final int growthTime;
     private final int hatchTime;
+    private final TagKey<Item> tamingItems;
+    private final TagKey<Item> breedingItems;
 
-    public DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime)
+    public DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime, TagKey<Item> tamingItems, TagKey<Item> breedingItems)
     {
         this.primaryColor = primaryColor;
         this.secondaryColor = secondaryColor;
@@ -82,11 +90,13 @@ public class DragonBreed
         this.deathLoot = deathLoot;
         this.growthTime = growthTime;
         this.hatchTime = hatchTime;
+        this.tamingItems = tamingItems;
+        this.breedingItems = breedingItems;
     }
 
-    public static DragonBreed builtIn(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
+    public static DragonBreed builtIn(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime, TagKey<Item> tamingFood, TagKey<Item> breedingItems)
     {
-        var breed = new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.DEFAULT_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME);
+        var breed = new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, deathLoot, growthTime, hatchTime, tamingFood, breedingItems);
         breed.id = name;
         return breed;
     }
@@ -208,6 +218,16 @@ public class DragonBreed
     public int hatchTime()
     {
         return hatchTime;
+    }
+
+    public TagKey<Item> tamingItems()
+    {
+        return tamingItems;
+    }
+
+    public TagKey<Item> breedingItems()
+    {
+        return breedingItems;
     }
 
     @Override

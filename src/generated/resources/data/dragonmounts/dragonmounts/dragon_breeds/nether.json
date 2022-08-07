@@ -5,12 +5,12 @@
   "habitats": [
     {
       "type": "nearby_blocks",
-      "block_tag": "dragonmounts:nether_dragon_habitat_blocks",
+      "blocks": "#dragonmounts:nether_dragon_habitat_blocks",
       "point_multiplier": 1.0
     },
     {
       "type": "biome",
-      "biome_tag": "minecraft:is_nether",
+      "biomes": "#minecraft:is_nether",
       "points": 3
     }
   ],

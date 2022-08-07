@@ -51,6 +51,8 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -1061,5 +1063,26 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super.onChangedBlock(pos);
         for (var ability : getBreed().abilities()) ability.onMove(this);
+    }
+
+    @Override
+    public boolean isInWall()
+    {
+        if (noPhysics) return false;
+        else
+        {
+            var collider = getBoundingBox().deflate(getBbWidth() * 0.2f);
+            return BlockPos.betweenClosedStream(collider).anyMatch((pos) ->
+            {
+                BlockState state = level.getBlockState(pos);
+                return !state.isAir() && state.isSuffocating(level, pos) && Shapes.joinIsNotEmpty(state.getCollisionShape(level, pos).move(pos.getX(), pos.getY(), pos.getZ()), Shapes.create(collider), BooleanOp.AND);
+            });
+        }
+    }
+
+    @Override
+    public Vec3 getLightProbePosition(float p_20309_)
+    {
+        return new Vec3(getX(), getY() + getBbHeight(), getZ());
     }
 }

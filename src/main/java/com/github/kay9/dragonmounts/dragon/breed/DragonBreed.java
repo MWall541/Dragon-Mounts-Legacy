@@ -58,6 +58,7 @@ public class DragonBreed
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             ModelProperties.CODEC.fieldOf("model_properties").forGetter(DragonBreed::modelProperties),
+            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
             Codec.INT.fieldOf("hatch_time").forGetter(DragonBreed::hatchTime)
     ).apply(instance, DragonBreed::fromNetwork));
@@ -110,9 +111,9 @@ public class DragonBreed
         return breed;
     }
 
-    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, int growthTime, int hatchTime)
+    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Optional<SoundEvent> specialSound, int growthTime, int hatchTime)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), Optional.empty(), BuiltInLootTables.EMPTY, growthTime, hatchTime, EMPTY_TAG, EMPTY_TAG);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), specialSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, EMPTY_TAG, EMPTY_TAG);
     }
 
     public void initialize(TameableDragon dragon)

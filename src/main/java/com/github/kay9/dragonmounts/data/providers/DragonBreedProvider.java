@@ -10,8 +10,6 @@ import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.habitats.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.HolderSet;
@@ -26,7 +24,6 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.level.block.Blocks;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -35,7 +32,6 @@ import static com.google.common.collect.ImmutableMap.of;
 
 class DragonBreedProvider implements DataProvider
 {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final RegistryOps<JsonElement> OPS = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
 
     static final DragonBreed AETHER = DragonBreed.builtIn(DragonMountsLegacy.id("aether"),
@@ -116,7 +112,7 @@ class DragonBreedProvider implements DataProvider
             Optional.empty());
 
     private final DataGenerator generator;
-    private HashCache cache;
+    private CachedOutput cache;
 
     DragonBreedProvider(DataGenerator generator)
     {
@@ -127,7 +123,6 @@ class DragonBreedProvider implements DataProvider
     public void run(CachedOutput cache) throws IOException
     {
         this.cache = cache;
-        var bs = Blocks.DIRT;
 
         for (DragonBreed dragonBreed : new DragonBreed[]{AETHER, END, BreedRegistry.FIRE_BUILTIN.get(), FOREST, GHOST, ICE, NETHER, WATER})
             encode(dragonBreed);

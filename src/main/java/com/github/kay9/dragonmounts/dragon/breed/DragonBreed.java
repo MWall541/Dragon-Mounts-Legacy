@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
@@ -59,8 +60,12 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
-            ModelProperties.CODEC.optionalFieldOf("model_properties", ModelProperties.STANDARD).forGetter(DragonBreed::modelProperties)
+            ModelProperties.CODEC.fieldOf("model_properties").forGetter(DragonBreed::modelProperties),
+            Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
+            Codec.INT.fieldOf("hatch_time").forGetter(DragonBreed::hatchTime)
     ).apply(instance, DragonBreed::fromNetwork));
+
+    private static final TagKey<Item> EMPTY_TAG = ItemTags.create(DragonMountsLegacy.id("empty")); // dummy for client instances
 
     private final int primaryColor;
     private final int secondaryColor;
@@ -112,9 +117,10 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
                 .setRegistryName(name);
     }
 
-    public static DragonBreed fromNetwork(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties)
+    public static DragonBreed fromNetwork(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, int growthTime, int hatchTime)
     {
-        return builtIn(name, primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), Optional.empty());
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), Optional.empty(), BuiltInLootTables.EMPTY, growthTime, hatchTime, EMPTY_TAG, EMPTY_TAG)
+                .setRegistryName(name);
     }
 
     public void initialize(TameableDragon dragon)

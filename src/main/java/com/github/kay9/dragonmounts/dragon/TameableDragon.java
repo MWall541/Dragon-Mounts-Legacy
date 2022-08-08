@@ -415,7 +415,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // sit!
-        if (isTamedFor(player) && player.isShiftKeyDown())
+        if (isTamedFor(player) && (player.isShiftKeyDown() || stack.is(Items.BONE))) // "bone sitting" for legacy reasons
         {
             if (isServer())
             {

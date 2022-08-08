@@ -57,7 +57,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         var tag = stack.getTagElement("ItemData");
         if (tag == null || (name = tag.getString("ItemName")).isEmpty())
             name = BreedRegistry.getFallback().getTranslationKey();
-        return Component.translatable(getDescriptionId(), new TranslatableComponent(name));
+        return Component.translatable(getDescriptionId(), Component.translatable(name));
     }
 
     public static int getColor(ItemStack stack, int tintIndex)

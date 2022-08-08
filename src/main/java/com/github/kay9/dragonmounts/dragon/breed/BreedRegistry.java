@@ -1,12 +1,20 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.habitats.FluidHabitat;
+import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.mojang.serialization.Codec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -37,7 +45,7 @@ public class BreedRegistry
             .disableSaving()
             .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC)
             .setDefaultKey(FIRE_BUILTIN.getId()));
-    public static final Codec<DragonBreed> CODEC = ResourceLocation.CODEC.xmap(BreedRegistry::get, DragonBreed::getRegistryName)
+    public static final Codec<DragonBreed> CODEC = ResourceLocation.CODEC.xmap(BreedRegistry::get, DragonBreed::id)
             .promotePartial(err -> DragonMountsLegacy.LOG.error("Unknown Dragon Breed Type: {}", err));
 
     public static DragonBreed get(String byString)

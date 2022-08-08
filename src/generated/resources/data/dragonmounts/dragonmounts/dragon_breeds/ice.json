@@ -9,8 +9,8 @@
   ],
   "habitats": [
     {
-      "blocks": "#dragonmounts:ice_dragon_habitat_blocks",
-      "type": "nearby_blocks"
+      "type": "nearby_blocks",
+      "blocks": "#dragonmounts:ice_dragon_habitat_blocks"
     }
   ],
   "hatch_particles": {

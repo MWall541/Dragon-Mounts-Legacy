@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
@@ -17,8 +18,9 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -26,8 +28,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -45,7 +45,7 @@ public class DragonBreed
             Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
-            SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
+            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.DEFAULT_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime),
@@ -57,8 +57,12 @@ public class DragonBreed
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
-            ModelProperties.CODEC.optionalFieldOf("model_properties", ModelProperties.STANDARD).forGetter(DragonBreed::modelProperties)
+            ModelProperties.CODEC.fieldOf("model_properties").forGetter(DragonBreed::modelProperties),
+            Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
+            Codec.INT.fieldOf("hatch_time").forGetter(DragonBreed::hatchTime)
     ).apply(instance, DragonBreed::fromNetwork));
+
+    private static final TagKey<Item> EMPTY_TAG = ItemTags.create(DragonMountsLegacy.id("empty")); // dummy for client instances
 
     private ResourceLocation id; // id is retrieved lazily from the registry
     private final int primaryColor;
@@ -94,16 +98,21 @@ public class DragonBreed
         this.breedingItems = breedingItems;
     }
 
-    public static DragonBreed builtIn(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime, TagKey<Item> tamingFood, TagKey<Item> breedingItems)
+    public static DragonBreed builtInUnnamed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
     {
-        var breed = new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, deathLoot, growthTime, hatchTime, tamingFood, breedingItems);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.DEFAULT_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, ItemTags.FISHES, ItemTags.FISHES);
+    }
+
+    public static DragonBreed builtIn(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
+    {
+        var breed = builtInUnnamed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound);
         breed.id = name;
         return breed;
     }
 
-    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties)
+    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, int growthTime, int hatchTime)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), Optional.empty(), BuiltInLootTables.EMPTY, 0, 0);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), Optional.empty(), BuiltInLootTables.EMPTY, growthTime, hatchTime, EMPTY_TAG, EMPTY_TAG);
     }
 
     public void initialize(TameableDragon dragon)

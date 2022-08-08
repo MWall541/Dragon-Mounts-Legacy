@@ -130,7 +130,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             var tag = stack.getTag();
             if (tag == null || (name = tag.getString("ItemName")).isEmpty())
                 name = BreedRegistry.getFallback().getTranslationKey();
-            return Component.translatable(getDescriptionId(), new TranslatableComponent(name));
+            return Component.translatable(getDescriptionId(), Component.translatable(name));
         }
 
         @Override

@@ -2,7 +2,7 @@
   "habitats": [
     {
       "point_multiplier": 1.0,
-      "fluids": "#minecraft:water",
+      "fluid_tag": "minecraft:water",
       "type": "in_fluid"
     }
   ],

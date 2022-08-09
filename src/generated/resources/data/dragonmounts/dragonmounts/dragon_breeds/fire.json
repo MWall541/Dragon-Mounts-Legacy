@@ -2,12 +2,12 @@
   "habitats": [
     {
       "point_multiplier": 1.0,
-      "blocks": "#dragonmounts:fire_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:fire_dragon_habitat_blocks",
       "type": "nearby_blocks"
     },
     {
       "point_multiplier": 3.0,
-      "fluids": "#minecraft:lava",
+      "fluid_tag": "minecraft:lava",
       "type": "in_fluid"
     }
   ],

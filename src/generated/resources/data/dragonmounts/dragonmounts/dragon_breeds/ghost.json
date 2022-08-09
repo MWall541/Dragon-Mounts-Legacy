@@ -1,5 +1,4 @@
 {
-  "ambient_sound": "minecraft:entity.skeleton.ambient",
   "habitats": [
     {
       "required_habitats": [
@@ -22,6 +21,7 @@
   "immunities": [
     "drown"
   ],
+  "ambient_sound": "minecraft:entity.skeleton.ambient",
   "model_properties": {
     "thin_legs": true
   },

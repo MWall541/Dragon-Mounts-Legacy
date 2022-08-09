@@ -1,15 +1,7 @@
 {
-  "abilities": [
-    {
-      "type": "frost_walker"
-    },
-    {
-      "type": "snow_stepper"
-    }
-  ],
   "habitats": [
     {
-      "blocks": "#dragonmounts:ice_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:ice_dragon_habitat_blocks",
       "type": "nearby_blocks"
     }
   ],
@@ -20,6 +12,14 @@
   "hatch_particles": {
     "type": "minecraft:snowflake"
   },
+  "abilities": [
+    {
+      "type": "frost_walker"
+    },
+    {
+      "type": "snow_stepper"
+    }
+  ],
   "name": "dragonmounts:ice",
   "primary_color": 16777215,
   "secondary_color": 57855

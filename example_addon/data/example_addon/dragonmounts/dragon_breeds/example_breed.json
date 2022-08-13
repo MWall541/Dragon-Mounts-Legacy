@@ -55,5 +55,5 @@
   "growth_time": 120,
   "hatch_time": 180,
   "taming_items": "forge:eggs",
-  "breeding_items": "forge_ender_pearls"
+  "breeding_items": "forge:ender_pearls"
 }

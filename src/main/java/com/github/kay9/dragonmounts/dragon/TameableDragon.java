@@ -278,6 +278,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.set(DATA_FLYING, flying);
     }
 
+    public void setNavigation(boolean flying) {
+            navigation = flying ?
+                    new FlyingPathNavigation(this, level) :
+                    new GroundPathNavigation(this, level);
+    }
+
     @Override
     public void tick()
     {
@@ -299,8 +305,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 getAttribute(FOLLOW_RANGE).setBaseValue(flying? BASE_FOLLOW_RANGE_FLYING : BASE_FOLLOW_RANGE);
 
                 // update pathfinding method
-                if (flying) navigation = new FlyingPathNavigation(this, level);
-                else navigation = new GroundPathNavigation(this, level);
+                setNavigation(flying);
             }
         }
         else

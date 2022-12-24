@@ -80,8 +80,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final double BASE_SPEED_FLYING = 0.525;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
-    public static final double BASE_FOLLOW_RANGE = 16;
-    public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
     public static final int BASE_KB_RESISTANCE = 1;
     public static final float BASE_WIDTH = 2.75f; // adult sizes
     public static final float BASE_HEIGHT = 2.75f;
@@ -135,7 +133,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return Mob.createMobAttributes()
                 .add(MOVEMENT_SPEED, BASE_SPEED_GROUND)
                 .add(MAX_HEALTH, BASE_HEALTH)
-                .add(ATTACK_DAMAGE, BASE_FOLLOW_RANGE)
                 .add(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
                 .add(ATTACK_DAMAGE, BASE_DAMAGE)
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
@@ -299,10 +296,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             {
                 // notify client
                 setFlying(flying);
-
-                // update AI follow range (needs to be updated before creating
-                // new PathNavigate!)
-                getAttribute(FOLLOW_RANGE).setBaseValue(flying? BASE_FOLLOW_RANGE_FLYING : BASE_FOLLOW_RANGE);
 
                 // update pathfinding method
                 setNavigation(flying);

@@ -108,6 +108,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private int reproCount;
     private float ageProgress;
 
+    private final GroundPathNavigation groundNavigation;
+    private final FlyingPathNavigation flyingNavigation;
+
     public TameableDragon(EntityType<? extends TameableDragon> type, Level level)
     {
         super(type, level);
@@ -119,6 +122,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
         breed = BreedRegistry.getFallback();
+
+        flyingNavigation = new FlyingPathNavigation(this, level);
+        groundNavigation = new GroundPathNavigation(this, level);
+
+        navigation = groundNavigation;
     }
 
     @Override
@@ -277,8 +285,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setNavigation(boolean flying) {
             navigation = flying ?
-                    new FlyingPathNavigation(this, level) :
-                    new GroundPathNavigation(this, level);
+                    flyingNavigation :
+                    groundNavigation;
     }
 
     @Override

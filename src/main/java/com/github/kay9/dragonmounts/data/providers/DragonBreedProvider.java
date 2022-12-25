@@ -63,7 +63,7 @@ class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(),
             list(GreenToesAbility.INSTANCE),
-            list(new NearbyBlocksHabitat(0.5f, tagSet(BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS)), new BiomeHabitat(2, tagSet(BiomeTags.IS_JUNGLE))),
+            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(2, BiomeTags.IS_JUNGLE)),
             set(),
             Optional.empty());
 
@@ -85,7 +85,7 @@ class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(),
             list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
-            list(new NearbyBlocksHabitat(0.5f, tagSet(BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS))),
+            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
             Optional.empty());
 
@@ -96,7 +96,7 @@ class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(Attributes.ARMOR, 8d),
             list(),
-            list(new NearbyBlocksHabitat(1f, tagSet(BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS)), new BiomeHabitat(3, tagSet(BiomeTags.IS_NETHER))),
+            list(new NearbyBlocksHabitat(1f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(3, BiomeTags.IS_NETHER)),
             set("inFire", "onFire", "lava", "hotFloor"),
             Optional.empty());
 
@@ -107,7 +107,7 @@ class DragonBreedProvider implements DataProvider
             new DragonBreed.ModelProperties(true, true, false),
             of(),
             list(),
-            list(new FluidHabitat(1f, tagSet(FluidTags.WATER))),
+            list(new FluidHabitat(1f, FluidTags.WATER)),
             set("drown"),
             Optional.empty());
 

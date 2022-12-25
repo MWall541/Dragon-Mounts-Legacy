@@ -37,8 +37,8 @@ public class BreedRegistry
             ImmutableMap.of(),
             ImmutableList.of(),
             ImmutableList.of(
-                    new NearbyBlocksHabitat(1, Registry.BLOCK.getOrCreateTag(BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks")))),
-                    new FluidHabitat(3, Registry.FLUID.getOrCreateTag(FluidTags.LAVA))),
+                    new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
+                    new FluidHabitat(3, FluidTags.LAVA)),
             ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
             Optional.empty()));
     public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(() -> new RegistryBuilder<DragonBreed>()

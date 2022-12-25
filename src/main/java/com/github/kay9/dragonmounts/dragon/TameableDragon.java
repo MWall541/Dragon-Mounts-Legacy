@@ -7,6 +7,7 @@ import com.github.kay9.dragonmounts.client.DragonAnimator;
 import com.github.kay9.dragonmounts.client.KeyMap;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
+import com.github.kay9.dragonmounts.dragon.ai.DragonFollowOwnerGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
@@ -78,8 +79,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final double BASE_SPEED_FLYING = 0.525;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
-    public static final double BASE_FOLLOW_RANGE = 16;
-    public static final double BASE_FOLLOW_RANGE_FLYING = BASE_FOLLOW_RANGE * 2;
     public static final int BASE_KB_RESISTANCE = 1;
     public static final float BASE_WIDTH = 2.75f; // adult sizes
     public static final float BASE_HEIGHT = 2.75f;
@@ -108,6 +107,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private int reproCount;
     private float ageProgress;
 
+    private final GroundPathNavigation groundNavigation;
+    private final FlyingPathNavigation flyingNavigation;
+
     public TameableDragon(EntityType<? extends TameableDragon> type, Level level)
     {
         super(type, level);
@@ -119,6 +121,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
         breed = BreedRegistry.getFallback();
+
+        flyingNavigation = new FlyingPathNavigation(this, level);
+        groundNavigation = new GroundPathNavigation(this, level);
+
+        navigation = groundNavigation;
     }
 
     @Override
@@ -133,7 +140,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return Mob.createMobAttributes()
                 .add(MOVEMENT_SPEED, BASE_SPEED_GROUND)
                 .add(MAX_HEALTH, BASE_HEALTH)
-                .add(ATTACK_DAMAGE, BASE_FOLLOW_RANGE)
                 .add(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
                 .add(ATTACK_DAMAGE, BASE_DAMAGE)
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
@@ -146,7 +152,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
 //        goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
-        goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.1, 10f, 3.5f, true));
+        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1.1, 10f, 3.5f, 32f));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
@@ -276,6 +282,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.set(DATA_FLYING, flying);
     }
 
+    public void setNavigation(boolean flying) {
+            navigation = flying ?
+                    flyingNavigation :
+                    groundNavigation;
+    }
+
     @Override
     public void tick()
     {
@@ -292,13 +304,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 // notify client
                 setFlying(flying);
 
-                // update AI follow range (needs to be updated before creating
-                // new PathNavigate!)
-                getAttribute(FOLLOW_RANGE).setBaseValue(flying? BASE_FOLLOW_RANGE_FLYING : BASE_FOLLOW_RANGE);
-
                 // update pathfinding method
-                if (flying) navigation = new FlyingPathNavigation(this, level);
-                else navigation = new GroundPathNavigation(this, level);
+                setNavigation(flying);
             }
         }
         else

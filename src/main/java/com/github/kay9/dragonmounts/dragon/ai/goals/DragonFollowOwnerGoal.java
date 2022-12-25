@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.dragon.ai;
+package com.github.kay9.dragonmounts.dragon.ai.goals;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;

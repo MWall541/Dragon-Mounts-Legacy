@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.data.CachedOutput;
@@ -22,7 +21,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import java.io.IOException;
@@ -32,7 +30,7 @@ import static com.google.common.collect.ImmutableMap.of;
 
 class DragonBreedProvider implements DataProvider
 {
-    private static final RegistryOps<JsonElement> OPS = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     static final DragonBreed AETHER = DragonBreed.builtIn(DragonMountsLegacy.id("aether"),
             0x718AA9,
@@ -123,17 +121,18 @@ class DragonBreedProvider implements DataProvider
     public void run(CachedOutput cache) throws IOException
     {
         this.cache = cache;
+        var ops = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
 
         for (DragonBreed dragonBreed : new DragonBreed[]{AETHER, END, BreedRegistry.FIRE_BUILTIN.get(), FOREST, GHOST, ICE, NETHER, WATER})
-            encode(dragonBreed);
+            encode(dragonBreed, ops);
     }
 
-    protected void encode(DragonBreed breed) throws IOException
+    protected void encode(DragonBreed breed, RegistryOps<JsonElement> ops) throws IOException
     {
         String packName = breed.id().getNamespace();
         String type = breed.id().getPath();
 
-        var json = DragonBreed.CODEC.encodeStart(OPS, breed).getOrThrow(false, DragonMountsLegacy.LOG::error);
+        var json = DragonBreed.CODEC.encodeStart(ops, breed).getOrThrow(false, DragonMountsLegacy.LOG::error);
         var regKey = BreedRegistry.REGISTRY.get().getRegistryKey().location();
         var path = String.join("/", "data", packName, regKey.getNamespace(), regKey.getPath(), type + ".json");
 
@@ -154,10 +153,5 @@ class DragonBreedProvider implements DataProvider
     protected static <T> ImmutableSet<T> set(T... objs)
     {
         return ImmutableSet.copyOf(objs);
-    }
-
-    protected static <T> HolderSet<T> tagSet(TagKey<T> key)
-    {
-        return OPS.registry(key.registry()).orElseThrow().getOrCreateTag(key);
     }
 }

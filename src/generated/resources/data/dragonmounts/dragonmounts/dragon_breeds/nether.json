@@ -4,14 +4,14 @@
   },
   "habitats": [
     {
-      "type": "nearby_blocks",
-      "blocks": "#dragonmounts:nether_dragon_habitat_blocks",
-      "point_multiplier": 1.0
+      "point_multiplier": 1.0,
+      "block_tag": "dragonmounts:nether_dragon_habitat_blocks",
+      "type": "nearby_blocks"
     },
     {
-      "type": "biome",
-      "biomes": "#minecraft:is_nether",
-      "points": 3
+      "points": 3,
+      "biome_tag": "minecraft:is_nether",
+      "type": "biome"
     }
   ],
   "hatch_particles": {

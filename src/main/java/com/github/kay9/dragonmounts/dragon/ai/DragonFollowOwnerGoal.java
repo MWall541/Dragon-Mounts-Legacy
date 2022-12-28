@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.phys.AABB;
 
 import java.util.EnumSet;
 
@@ -95,10 +96,9 @@ public class DragonFollowOwnerGoal extends Goal {
             if (!this.dragon.isLeashed() && !this.dragon.isPassenger()) {
                 if (this.dragon.distanceToSqr(owner) >= (this.teleportDistance * this.teleportDistance)) {
                     this.teleportToOwner();
-                } else if (
-                        !this.dragon.isFlying()
-                                && this.dragon.canFly()
-                                && (owner.blockPosition().getY() - this.dragon.blockPosition().getY()) >= this.startDistance) {
+                } else if (!this.dragon.isFlying()
+                        && this.dragon.canFly()
+                        && (owner.blockPosition().getY() - this.dragon.blockPosition().getY()) >= this.startDistance) {
                     this.dragon.liftOff();
                 } else {
                     this.dragon.getNavigation().moveTo(owner, this.speedModifier);
@@ -153,8 +153,10 @@ public class DragonFollowOwnerGoal extends Goal {
             }
         }
 
-        BlockPos blockpos = pos.subtract(this.dragon.blockPosition());
-        return this.level.noCollision(this.dragon, this.dragon.getBoundingBox().move(blockpos));
+        BlockPos blockPos = pos.subtract(this.dragon.blockPosition());
+        AABB targetBoundingBox = this.dragon.getBoundingBox().move(blockPos);
+        return this.level.noCollision(this.dragon, targetBoundingBox)
+                && !this.level.containsAnyLiquid(targetBoundingBox);
     }
 
     private int randomIntInclusive(int min, int max) {

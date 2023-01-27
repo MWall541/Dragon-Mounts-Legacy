@@ -13,14 +13,15 @@ public class DataProvider
     @SubscribeEvent
     public static void gather(GatherDataEvent event)
     {
-        DataGenerator gen = event.getGenerator();
-        ExistingFileHelper fileHelper = event.getExistingFileHelper();
+        var gen = event.getGenerator();
+        var fileHelper = event.getExistingFileHelper();
 
         if (event.includeServer())
         {
-            gen.addProvider(new BlockTagProvider(gen, fileHelper));
-            gen.addProvider(new LootModifierProvider(gen));
+            gen.addProvider(new BlockTagProvider(gen, DragonMountsLegacy.MOD_ID, fileHelper));
+            gen.addProvider(new LootModifierProvider(gen, DragonMountsLegacy.MOD_ID));
             gen.addProvider(new DragonBreedProvider(gen));
         }
+
     }
 }

@@ -125,8 +125,12 @@ class DragonBreedProvider implements DataProvider
         this.cache = cache;
         var ops = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
 
-        for (DragonBreed dragonBreed : new DragonBreed[]{AETHER, END, BreedRegistry.FIRE_BUILTIN.get(), FOREST, GHOST, ICE, NETHER, WATER})
-            encode(dragonBreed, ops);
+        for (var breed : breeds()) encode(breed, ops);
+    }
+
+    protected DragonBreed[] breeds()
+    {
+        return new DragonBreed[]{AETHER, END, BreedRegistry.FIRE_BUILTIN.get(), FOREST, GHOST, ICE, NETHER, WATER};
     }
 
     protected void encode(DragonBreed breed, RegistryOps<JsonElement> ops) throws IOException

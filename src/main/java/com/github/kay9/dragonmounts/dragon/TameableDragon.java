@@ -388,7 +388,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // tame
         if (!isTame())
         {
-            if (isServer() && stack.is(getBreed().tamingItems()))
+            if (isServer() && getBreed().tamingItems().contains(stack.getItem().builtInRegistryHolder()))
             {
                 stack.shrink(1);
                 tamedFor(player, getRandom().nextInt(5) == 0);
@@ -626,7 +626,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean isFood(ItemStack stack)
     {
-        return stack.is(getBreed().breedingItems());
+        return getBreed().tamingItems().contains(stack.getItem().builtInRegistryHolder());
     }
 
     public void tamedFor(Player player, boolean successful)

@@ -17,9 +17,9 @@ class BlockTagProvider extends BlockTagsProvider
     static final TagKey<Block> ICE_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("ice_dragon_habitat_blocks"));
     static final TagKey<Block> NETHER_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("nether_dragon_habitat_blocks"));
 
-    BlockTagProvider(DataGenerator pGenerator, @Nullable ExistingFileHelper existingFileHelper)
+    BlockTagProvider(DataGenerator pGenerator, String modid, ExistingFileHelper existingFileHelper)
     {
-        super(pGenerator, DragonMountsLegacy.MOD_ID, existingFileHelper);
+        super(pGenerator, modid, existingFileHelper);
     }
 
     @Override

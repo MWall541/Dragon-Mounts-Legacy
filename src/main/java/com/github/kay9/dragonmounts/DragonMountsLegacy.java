@@ -112,10 +112,10 @@ public class DragonMountsLegacy
                 case THIRD_PERSON_FRONT -> distance = 6;
                 case THIRD_PERSON_BACK -> {
                     distance = 6;
-                    vertical = 3;
+                    vertical = 4;
                 }
             }
-            camera.move(-distance, vertical, 0);
+            camera.move(-camera.getMaxZoom(distance), vertical, 0);
         }
     }
 

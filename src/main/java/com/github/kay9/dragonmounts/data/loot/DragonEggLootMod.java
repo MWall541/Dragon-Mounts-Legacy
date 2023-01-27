@@ -3,7 +3,6 @@ package com.github.kay9.dragonmounts.data.loot;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.minecraft.resources.ResourceLocation;
@@ -19,19 +18,30 @@ import java.util.List;
 
 public class DragonEggLootMod extends LootModifier
 {
-    private final DragonBreed breed;
+    private final ResourceLocation id;
 
-    public DragonEggLootMod(LootItemCondition[] conditions, DragonBreed breed)
+    public DragonEggLootMod(LootItemCondition[] conditions, ResourceLocation breed)
     {
         super(conditions);
-        this.breed = breed;
+        this.id = breed;
     }
 
     @NotNull
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {
-        if (DMLConfig.useLootTables()) generatedLoot.add(DMLEggBlock.Item.create(breed, breed.hatchTime()));
+        if (DMLConfig.useLootTables())
+        {
+            context.getLevel()
+                    .registryAccess()
+                    .registryOrThrow(BreedRegistry.REGISTRY_KEY)
+                    .getOptional(id)
+                    .ifPresentOrElse(breed -> generatedLoot.add(DMLEggBlock.Item.create(breed, breed.hatchTime())),
+                            () ->
+                            {
+                                throw new JsonParseException("Unable to produce Dragon Egg Loot with unknown breed id: \"" + id + "\"");
+                            });
+        }
         return generatedLoot;
     }
 
@@ -40,18 +50,17 @@ public class DragonEggLootMod extends LootModifier
         @Override
         public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
         {
-            var id = GsonHelper.getAsString(object, "breed");
-            var breed = BreedRegistry.registry()
-                    .getOptional(new ResourceLocation(id))
-                    .orElseThrow(() -> new JsonParseException("Unknown breed id: " + id));
-            return new DragonEggLootMod(conditions, breed);
+            var in = GsonHelper.getAsString(object, "breed");
+            if (!ResourceLocation.isValidResourceLocation(in))
+                throw new JsonParseException("Not a valid ResourceLocation: \"" + in + "\"");
+            return new DragonEggLootMod(conditions, new ResourceLocation(in));
         }
 
         @Override
         public JsonObject write(DragonEggLootMod instance)
         {
             var json = makeConditions(instance.conditions);
-            json.addProperty("breed", instance.breed.getRegistryName().toString());
+            json.addProperty("breed", instance.id.toString());
             return json;
         }
     }

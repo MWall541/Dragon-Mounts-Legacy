@@ -12,14 +12,15 @@ import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -47,12 +48,12 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
             Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
-            SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
+            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.DEFAULT_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime),
-            TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("taming_items", ItemTags.FISHES).forGetter(DragonBreed::tamingItems),
-            TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("breeding_items", ItemTags.FISHES).forGetter(DragonBreed::breedingItems)
+            RegistryCodecs.homogeneousList(Registry.ITEM_REGISTRY).optionalFieldOf("taming_items", Registry.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::tamingItems),
+            RegistryCodecs.homogeneousList(Registry.ITEM_REGISTRY).optionalFieldOf("breeding_items", Registry.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::breedingItems)
     ).apply(instance, DragonBreed::named));
 
     public static final Codec<DragonBreed> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -66,7 +67,7 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
             Codec.INT.fieldOf("hatch_time").forGetter(DragonBreed::hatchTime)
     ).apply(instance, DragonBreed::fromNetwork));
 
-    private static final TagKey<Item> EMPTY_TAG = ItemTags.create(DragonMountsLegacy.id("empty")); // dummy for client instances
+    private static final HolderSet<Item> EMPTY_SET = new HolderSet.Named<>(Registry.ITEM, ItemTags.create(DragonMountsLegacy.id("empty"))); // dummy for client instances
 
     private final int primaryColor;
     private final int secondaryColor;
@@ -80,10 +81,10 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
     private final ResourceLocation deathLoot;
     private final int growthTime;
     private final int hatchTime;
-    private final TagKey<Item> tamingItems;
-    private final TagKey<Item> breedingItems;
+    private final HolderSet<Item> tamingItems;
+    private final HolderSet<Item> breedingItems;
 
-    public DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime, TagKey<Item> tamingItems, TagKey<Item> breedingItems)
+    public DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime, HolderSet<Item> tamingItems, HolderSet<Item> breedingItems)
     {
         this.primaryColor = primaryColor;
         this.secondaryColor = secondaryColor;
@@ -101,7 +102,7 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
         this.breedingItems = breedingItems;
     }
 
-    public static DragonBreed named(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime, TagKey<Item> tamingFood, TagKey<Item> breedingItems)
+    public static DragonBreed named(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound, ResourceLocation deathLoot, int growthTime, int hatchTime, HolderSet<Item> tamingFood, HolderSet<Item> breedingItems)
     {
         return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, deathLoot, growthTime, hatchTime, tamingFood, breedingItems)
                 .setRegistryName(name);
@@ -109,7 +110,7 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
 
     public static DragonBreed builtInUnnamed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.DEFAULT_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, ItemTags.FISHES, ItemTags.FISHES);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.DEFAULT_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES));
     }
 
     public static DragonBreed builtIn(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
@@ -120,7 +121,7 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
 
     public static DragonBreed fromNetwork(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Optional<SoundEvent> specialSound, int growthTime, int hatchTime)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), specialSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, EMPTY_TAG, EMPTY_TAG)
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), specialSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, EMPTY_SET, EMPTY_SET)
                 .setRegistryName(name);
     }
 
@@ -238,12 +239,12 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
         return hatchTime;
     }
 
-    public TagKey<Item> tamingItems()
+    public HolderSet<Item> tamingItems()
     {
         return tamingItems;
     }
 
-    public TagKey<Item> breedingItems()
+    public HolderSet<Item> breedingItems()
     {
         return breedingItems;
     }

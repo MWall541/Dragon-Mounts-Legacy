@@ -17,9 +17,9 @@ import static com.github.kay9.dragonmounts.data.providers.DragonBreedProvider.*;
 
 class LootModifierProvider extends GlobalLootModifierProvider
 {
-    LootModifierProvider(DataGenerator gen)
+    LootModifierProvider(DataGenerator gen, String modid)
     {
-        super(gen, DragonMountsLegacy.MOD_ID);
+        super(gen, modid);
     }
 
     @Override
@@ -35,16 +35,16 @@ class LootModifierProvider extends GlobalLootModifierProvider
         add(WATER, BuiltInLootTables.BURIED_TREASURE, 0.175f);
     }
 
-    private void add(DragonBreed breed, ResourceLocation table, float chance)
+    protected void add(DragonBreed breed, ResourceLocation table, float chance)
     {
         // todo: change path to something like: "aether_in_simple_dungeon"
         var path = breed.getRegistryName().getNamespace() + "/" + breed.getRegistryName().getPath() + "/" + table.getPath();
 
-        var conditions = new LootItemCondition[] {
+        var conditions = new LootItemCondition[]{
                 LootTableIdCondition.builder(table).build(),
                 LootItemRandomChanceCondition.randomChance(chance).build()
         };
 
-        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed));
+        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed.getRegistryName()));
     }
 }

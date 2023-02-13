@@ -84,6 +84,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final int BASE_KB_RESISTANCE = 1;
     public static final float BASE_WIDTH = 2.75f; // adult sizes
     public static final float BASE_HEIGHT = 2.75f;
+    public static final int BASE_REPRO_LIMIT = 2;
+    public static final int BASE_GROWTH_TIME = 72000;
+    public static final float BASE_SIZE_MODIFIER = 1.0f;
 
     // data value IDs
     private static final EntityDataAccessor<String> DATA_BREED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.STRING);
@@ -100,8 +103,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final int AGE_UPDATE_INTERVAL = 100;
     public static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"); // just a random uuid I took online
     public static final int ALTITUDE_FLYING_THRESHOLD = 3;
-    public static final int DEFAULT_REPRO_LIMIT = 2;
-    public static final int DEFAULT_GROWTH_TIME = 72000;
 
     // server/client delegates
     private final DragonAnimator animator;
@@ -416,7 +417,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // sit!
-        if (isTamedFor(player) && (player.isShiftKeyDown() || stack.is(Items.BONE))) // "bone sitting" for legacy reasons
+        if (isTamedFor(player) && (player.isSecondaryUseActive() || stack.is(Items.BONE))) // "bone sitting" for legacy reasons
         {
             if (isServer())
             {
@@ -614,19 +615,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return new TranslatableComponent(getBreed().getTranslationKey());
     }
 
-    /**
-     * Called when a player interacts with a mob. e.g. gets milk from a cow, gets into the saddle on a pig.
-     */
     public boolean isFoodItem(ItemStack stack)
     {
-        return stack.getItem().isEdible() && stack.getItem().getFoodProperties().isMeat();
+        var food = stack.getItem().getFoodProperties(stack, this);
+        return food != null && food.isMeat();
     }
 
     // the "food" that enables breeding mode
     @Override
     public boolean isFood(ItemStack stack)
     {
-        return getBreed().tamingItems().contains(stack.getItem().builtInRegistryHolder());
+        return getBreed().breedingItems().contains(stack.getItem().builtInRegistryHolder());
     }
 
     public void tamedFor(Player player, boolean successful)
@@ -670,11 +669,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     /**
      * Returns render size modifier
+     * <p>
+     * 0.33 is the value representing the size for baby dragons.
+     * 1.0 is the value representing the size for adult dragons.
+     * We are essentially rough lerping from baby size to adult size, using ageProgress
+     * as an input.
+     * This value can be manipulated using the breed's size modifier
      */
     @Override
     public float getScale()
     {
-        return 0.33f + (0.67f * getAgeProgress());
+        return (0.33f + (0.67f * getAgeProgress())) * getBreed().sizeModifier();
     }
 
     /**

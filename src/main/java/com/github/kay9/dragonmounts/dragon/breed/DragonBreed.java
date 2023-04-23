@@ -63,6 +63,7 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             ModelProperties.CODEC.fieldOf("model_properties").forGetter(DragonBreed::modelProperties),
+            Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
             Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
             Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
             Codec.INT.fieldOf("hatch_time").forGetter(DragonBreed::hatchTime),
@@ -123,9 +124,9 @@ public class DragonBreed extends ForgeRegistryEntry.UncheckedRegistryEntry<Drago
                 .setRegistryName(name);
     }
 
-    public static DragonBreed fromNetwork(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Optional<SoundEvent> specialSound, int growthTime, int hatchTime, float sizeModifier)
+    public static DragonBreed fromNetwork(ResourceLocation name, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, List<Ability> abilities, Optional<SoundEvent> specialSound, int growthTime, int hatchTime, float sizeModifier)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), specialSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, EMPTY_SET, EMPTY_SET)
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), abilities, List.of(), ImmutableSet.of(), specialSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, EMPTY_SET, EMPTY_SET)
                 .setRegistryName(name);
     }
 

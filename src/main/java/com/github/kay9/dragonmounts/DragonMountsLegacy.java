@@ -8,6 +8,7 @@ import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.network.WeaponAbilityPacket;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -127,5 +128,8 @@ public class DragonMountsLegacy
                 .serverAcceptedVersions(PROTOCOL_VERSION::equals)
                 .networkProtocolVersion(() -> PROTOCOL_VERSION)
                 .simpleChannel();
+
+        var index = -1;
+        NETWORK.registerMessage(++index, WeaponAbilityPacket.class, WeaponAbilityPacket::encode, WeaponAbilityPacket::new, WeaponAbilityPacket::prepare);
     }
 }

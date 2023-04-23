@@ -59,7 +59,8 @@ public class DMLRegistry
 
     public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
 
-    public static final BooleanSupplier FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
+    public static final BooleanSupplier FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, KeyMapping.CATEGORY_MOVEMENT);
+    public static final BooleanSupplier WEAPON_KEY = keymap("weapon", GLFW.GLFW_KEY_R, KeyMapping.CATEGORY_GAMEPLAY);
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {

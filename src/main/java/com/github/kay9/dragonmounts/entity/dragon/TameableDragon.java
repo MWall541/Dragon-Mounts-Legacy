@@ -1,14 +1,15 @@
-package com.github.kay9.dragonmounts.dragon;
+package com.github.kay9.dragonmounts.entity.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
-import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
-import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
-import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.entity.dragon.ai.DragonBodyController;
+import com.github.kay9.dragonmounts.entity.dragon.ai.DragonBreedGoal;
+import com.github.kay9.dragonmounts.entity.dragon.ai.DragonMoveController;
+import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -57,9 +58,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
@@ -105,6 +104,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final int ALTITUDE_FLYING_THRESHOLD = 3;
 
     // server/client delegates
+    private final Map<Ability, Ability.Data> abilityData = new HashMap<>();
     private final DragonAnimator animator;
     private DragonBreed breed;
     private int reproCount;
@@ -187,6 +187,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         compound.putString(NBT_BREED, breed.getRegistryName().toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
+
+        for (Ability.Data data : abilityData.values()) data.serialize(compound);
     }
 
     @Override
@@ -198,6 +200,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
 
         entityData.set(DATA_AGE, getAge());
+
+        for (Ability.Data data : abilityData.values()) data.deserialize(compound);
     }
 
     public void setBreed(DragonBreed dragonBreed)
@@ -1089,5 +1093,23 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public Vec3 getLightProbePosition(float p_20309_)
     {
         return new Vec3(getX(), getY() + getBbHeight(), getZ());
+    }
+
+    public void registerAbilityData(Ability ability, Ability.Data data)
+    {
+        abilityData.put(ability, data);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Ability.Data> T getAbilityData(Ability ability)
+    {
+        return (T) abilityData.get(ability);
+    }
+
+    public Vec3 getMouthPos()
+    {
+        var pos = getEyePosition();
+        var distFromCenter = 2 * getAgeProgress(); // TODO: fine tune
+        return pos.add(calculateViewVector(getXRot(), getYRot()).scale(distFromCenter));
     }
 }

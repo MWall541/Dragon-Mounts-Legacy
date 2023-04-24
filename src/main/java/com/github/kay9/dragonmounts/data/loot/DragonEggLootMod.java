@@ -1,8 +1,8 @@
 package com.github.kay9.dragonmounts.data.loot;
 
 import com.github.kay9.dragonmounts.DMLConfig;
-import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.entity.dragon.DMLEggBlock;
+import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import net.minecraft.resources.ResourceLocation;

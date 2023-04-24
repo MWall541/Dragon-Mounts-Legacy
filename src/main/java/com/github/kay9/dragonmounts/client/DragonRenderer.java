@@ -1,8 +1,8 @@
 package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;

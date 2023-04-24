@@ -1,8 +1,8 @@
-package com.github.kay9.dragonmounts.dragon;
+package com.github.kay9.dragonmounts.entity.dragon;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;

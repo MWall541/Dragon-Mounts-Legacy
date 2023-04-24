@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.abilities;
 
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;

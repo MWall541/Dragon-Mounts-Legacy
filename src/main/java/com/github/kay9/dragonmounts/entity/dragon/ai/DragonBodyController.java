@@ -1,6 +1,6 @@
-package com.github.kay9.dragonmounts.dragon.ai;
+package com.github.kay9.dragonmounts.entity.dragon.ai;
 
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 

@@ -1,9 +1,9 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.entity.dragon.DMLEggBlock;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;

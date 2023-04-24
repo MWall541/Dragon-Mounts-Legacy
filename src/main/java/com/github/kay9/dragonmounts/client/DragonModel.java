@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.accessors.ModelPartAccess;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;

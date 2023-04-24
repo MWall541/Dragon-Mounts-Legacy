@@ -1,11 +1,11 @@
-package com.github.kay9.dragonmounts.dragon;
+package com.github.kay9.dragonmounts.entity.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonEggRenderer;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

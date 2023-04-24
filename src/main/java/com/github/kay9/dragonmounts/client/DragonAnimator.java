@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.accessors.ModelPartAccess;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.util.CircularBuffer;
 import com.github.kay9.dragonmounts.util.LerpedFloat;
 import net.minecraft.client.model.geom.ModelPart;
@@ -57,7 +57,6 @@ public class DragonAnimator
 
     // model flags
     private boolean onGround;
-    private boolean openJaw;
     private boolean wingsDown;
 
     // animation parameters
@@ -317,7 +316,8 @@ public class DragonAnimator
             model.neck.z -= Mth.cos(model.neck.yRot) * Mth.cos(model.neck.xRot) * neckSize;
         }
 
-        model.head.xRot = (float) Math.toRadians(lookPitch) + (1 - speed);
+        final float HEAD_TILT_DURING_BREATH = -0.1F;
+        model.head.xRot = (float) Math.toRadians(lookPitch) + (1 - speed) + (jaw * HEAD_TILT_DURING_BREATH);
         model.head.yRot = model.neck.yRot;
         model.head.zRot = model.neck.zRot * 0.2f;
 
@@ -602,9 +602,9 @@ public class DragonAnimator
         this.onGround = onGround;
     }
 
-    public void setOpenJaw(boolean openJaw)
+    public LerpedFloat getJawTimer()
     {
-        this.openJaw = openJaw;
+        return jawTimer;
     }
 
     private static void slerpArrays(float[] a, float[] b, float[] c, float x)

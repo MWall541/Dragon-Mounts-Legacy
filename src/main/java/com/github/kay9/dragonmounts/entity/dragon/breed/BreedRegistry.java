@@ -1,6 +1,7 @@
-package com.github.kay9.dragonmounts.dragon.breed;
+package com.github.kay9.dragonmounts.entity.dragon.breed;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.BreathWeaponAbility;
 import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
 import com.google.common.collect.ImmutableList;
@@ -35,7 +36,9 @@ public class BreedRegistry
             Optional.of(ParticleTypes.FLAME),
             new DragonBreed.ModelProperties(false, false, false),
             ImmutableMap.of(),
-            ImmutableList.of(),
+            ImmutableList.of(
+                    new BreathWeaponAbility(BreathWeaponAbility.FIRE)
+            ),
             ImmutableList.of(
                     new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
                     new FluidHabitat(3, FluidTags.LAVA)),

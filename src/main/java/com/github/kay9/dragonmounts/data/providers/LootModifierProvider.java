@@ -1,10 +1,9 @@
 package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;

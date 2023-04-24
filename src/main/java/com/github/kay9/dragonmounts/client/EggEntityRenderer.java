@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.dragon.DragonEgg;
+import com.github.kay9.dragonmounts.entity.dragon.DragonEgg;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;

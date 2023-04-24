@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.network.WeaponAbilityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,55 +18,34 @@ public abstract class WeaponAbility implements Ability
         // unfortunately, there is no elegant way to remove data accessors, if/when the breed closes. should be fine.
         if (!dragon.getEntityData().itemsById.containsKey(ATTACKING.getId()))
             dragon.getEntityData().define(ATTACKING, false);
+
+        dragon.registerAbilityData(this, new Data());
     }
 
     @Override
     public void tick(TameableDragon dragon)
     {
         var attacking = isAttacking(dragon);
+        var timer = dragon.<Data>getAbilityData(this);
         if (dragon.isControlledByLocalInstance())
         {
             var keyDown = DMLRegistry.WEAPON_KEY.getAsBoolean();
             if (keyDown != attacking)
             {
                 setAttacking(dragon, keyDown);
+                if (keyDown) attack(dragon);
                 WeaponAbilityPacket.send(dragon, this, keyDown);
             }
         }
+
+        if (attacking) timer.incrTime();
     }
 
     /**
-     * Perform a one-time or continous attack
-     * @param dragon
+     * Perform a one-shot attack.
      */
-    public void attack(TameableDragon dragon) {}
-
-    /**
-     * Is only called if this weapon is continuous
-     * @param dragon
-     */
-    public void endAttack(TameableDragon dragon) {}
-
-    /**
-     * Determines whether the attack is continuous or not.
-     * For example, a continuous attack would be a constant stream of fire.
-     * A non-continuous would be a single-shot fireball.
-     * @return if the weapon is continuous.
-     */
-    public boolean isContinuous()
+    public void attack(TameableDragon dragon)
     {
-        return false;
-    }
-
-    public void receiveCommand(TameableDragon dragon, boolean attacking)
-    {
-        setAttacking(dragon, attacking);
-
-        if (isContinuous())
-        {
-            if (!attacking) endAttack(dragon);
-        }
-        else if (attacking) attack(dragon);
     }
 
     public boolean isAttacking(TameableDragon dragon)
@@ -77,5 +56,26 @@ public abstract class WeaponAbility implements Ability
     public void setAttacking(TameableDragon dragon, boolean attacking)
     {
         dragon.getEntityData().set(ATTACKING, attacking);
+        dragon.<Data>getAbilityData(this).setAttackTime(0);
+    }
+
+    public static class Data implements Ability.Data
+    {
+        private int attackTime = 0;
+
+        public void setAttackTime(int time)
+        {
+            this.attackTime = time;
+        }
+
+        public int getAttackTime()
+        {
+            return attackTime;
+        }
+
+        public void incrTime()
+        {
+            attackTime++;
+        }
     }
 }

@@ -1,9 +1,9 @@
-package com.github.kay9.dragonmounts.dragon.breed;
+package com.github.kay9.dragonmounts.entity.dragon.breed;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
-import com.github.kay9.dragonmounts.dragon.DragonEgg;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.DragonEgg;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.Habitat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

@@ -1,7 +1,8 @@
 package com.github.kay9.dragonmounts.abilities;
 
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ public interface Ability
     String FROST_WALKER = register("frost_walker", FrostWalkerAbility.CODEC);
     String GREEN_TOES = register("green_toes", GreenToesAbility.CODEC);
     String SNOW_STEPPER = register("snow_stepper", SnowStepperAbility.CODEC);
+    String BREATH_WEAPON = register("breath_weapon", BreathWeaponAbility.CODEC);
 
     static String register(String name, Codec<? extends Ability> codec)
     {
@@ -31,4 +33,10 @@ public interface Ability
     default void onMove(TameableDragon dragon) {}
 
     String type();
+
+    interface Data
+    {
+        default void serialize(CompoundTag tag) {}
+        default void deserialize(CompoundTag tag) {}
+    }
 }

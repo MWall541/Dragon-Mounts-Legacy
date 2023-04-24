@@ -3,7 +3,7 @@ package com.github.kay9.dragonmounts.network;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.abilities.WeaponAbility;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -46,7 +46,9 @@ public class WeaponAbilityPacket
     public void handle(NetworkEvent.Context ctx)
     {
         var dragon = (TameableDragon) ctx.getSender().getLevel().getEntity(dragonId);
-        ((WeaponAbility) dragon.getBreed().abilities().get(abilityId)).receiveCommand(dragon, attacking);
+        var ability = ((WeaponAbility) dragon.getBreed().abilities().get(abilityId));
+        ability.setAttacking(dragon, attacking);
+        if (attacking) ability.attack(dragon);
     }
 
     public static void send(TameableDragon dragon, Ability ability, boolean breathing)

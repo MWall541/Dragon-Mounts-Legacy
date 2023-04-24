@@ -1,6 +1,6 @@
-package com.github.kay9.dragonmounts.dragon.ai;
+package com.github.kay9.dragonmounts.entity.dragon.ai;
 
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.ai.goal.BreedGoal;

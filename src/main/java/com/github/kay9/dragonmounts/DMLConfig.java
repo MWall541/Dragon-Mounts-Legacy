@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts;
 
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class DMLConfig

@@ -568,16 +568,19 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         if (isInWater()) return;
 
+        if (isHatchling())
+        {
+            super.playStepSound(entityPos, state);
+            return;
+        }
+
         // override sound type if the top block is snowy
-        SoundType soundType = state.getSoundType();
+        var soundType = state.getSoundType();
         if (level.getBlockState(entityPos.above()).getBlock() == Blocks.SNOW)
             soundType = Blocks.SNOW.getSoundType(state, level, entityPos, this);
 
         // play stomping for bigger dragons
-        SoundEvent stepSound = getStepSound();
-        if (isHatchling()) stepSound = soundType.getStepSound();
-
-        playSound(stepSound, soundType.getVolume(), getVoicePitch());
+        playSound(getStepSound(), soundType.getVolume(), soundType.getPitch() * getVoicePitch());
     }
 
     /**

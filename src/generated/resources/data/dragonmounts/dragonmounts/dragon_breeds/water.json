@@ -10,9 +10,12 @@
       "point_multiplier": 1.0,
       "fluid_tag": "minecraft:water",
       "type": "in_fluid"
+    },
+    {
+      "block_tag": "dragonmounts:water_dragon_habitat_blocks",
+      "type": "nearby_blocks"
     }
   ],
-  "name": "dragonmounts:water",
   "primary_color": 25343,
   "secondary_color": 5872127,
   "hatch_particles": {

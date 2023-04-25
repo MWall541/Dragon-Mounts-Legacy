@@ -44,7 +44,7 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     @Override
     public void render(DMLEggBlock.Entity pBlockEntity, float pPartialTick, PoseStack pPoseStack, MultiBufferSource buffer, int pPackedLight, int pPackedOverlay)
     {
-        renderEgg(pPoseStack, buffer.getBuffer(Sheets.translucentCullBlockSheet()), pPackedLight, pBlockEntity.getBreed(), false);
+        renderEgg(pPoseStack, buffer.getBuffer(Sheets.translucentCullBlockSheet()), pPackedLight, pBlockEntity.getBreedId(), false);
     }
 
     @Override
@@ -53,17 +53,6 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
         return this;
     }
 
-    /**
-     * Use this if you have a breed instance readily available.
-     */
-    public static void renderEgg(PoseStack ps, VertexConsumer consumer, int light, DragonBreed breed, boolean offset)
-    {
-        renderEgg(ps, consumer, light, breed.getRegistryName(), offset);
-    }
-
-    /**
-     * Use this to avoid querying the breed registry every frame, if needed, as I'd imagine it's expensive...
-     */
     public static void renderEgg(PoseStack ps, VertexConsumer consumer, int light, ResourceLocation breed, boolean offset)
     {
         ps.pushPose();

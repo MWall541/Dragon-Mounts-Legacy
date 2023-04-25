@@ -10,7 +10,6 @@
   },
   "habitats": [
     {
-      "point_multiplier": 1.0,
       "block_tag": "dragonmounts:nether_dragon_habitat_blocks",
       "type": "nearby_blocks"
     },
@@ -20,7 +19,6 @@
       "type": "biome"
     }
   ],
-  "name": "dragonmounts:nether",
   "primary_color": 9511936,
   "secondary_color": 3017472,
   "hatch_particles": {

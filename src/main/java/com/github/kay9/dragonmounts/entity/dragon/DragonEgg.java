@@ -52,7 +52,7 @@ public class DragonEgg extends Entity
     {
         super(type, level);
 
-        breed = BreedRegistry.getFallback();
+        breed = BreedRegistry.getFallback(level.registryAccess());
         hatchTime = breed.hatchTime();
         transitioner = new TransitionHandler();
 //        wiggleTime = LerpedFloat.unit();
@@ -68,7 +68,7 @@ public class DragonEgg extends Entity
     protected void addAdditionalSaveData(CompoundTag tag)
     {
         tag.putInt(NBT_HATCH_TIME, hatchTime);
-        tag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+        tag.putString(TameableDragon.NBT_BREED, entityData.get(BREED));
         transitioner.save(tag);
     }
 
@@ -76,17 +76,17 @@ public class DragonEgg extends Entity
     protected void readAdditionalSaveData(CompoundTag tag)
     {
         setHatchTime(tag.getInt(NBT_HATCH_TIME));
-        setEggBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED)));
+        setEggBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), level.registryAccess()));
         transitioner.read(tag);
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key)
     {
-        if (key.equals(BREED)) breed = BreedRegistry.get(entityData.get(BREED));
+        if (key.equals(BREED)) breed = BreedRegistry.get(getBreedId(), level.registryAccess());
         else if (key.equals(TransitionHandler.TRANSITION_BREED))
         {
-            BreedRegistry.registry()
+            BreedRegistry.registry(level.registryAccess())
                     .getOptional(new ResourceLocation(entityData.get(TransitionHandler.TRANSITION_BREED)))
                     .ifPresentOrElse(transitioner::begin, transitioner::abort);
         }
@@ -95,7 +95,12 @@ public class DragonEgg extends Entity
 
     public void setEggBreed(DragonBreed breed)
     {
-        entityData.set(BREED, breed.getRegistryName().toString());
+        entityData.set(BREED, breed.id(getLevel().registryAccess()).toString());
+    }
+
+    public ResourceLocation getBreedId()
+    {
+        return new ResourceLocation(entityData.get(BREED));
     }
 
     public void setHatchTime(int time)
@@ -136,7 +141,8 @@ public class DragonEgg extends Entity
     @Override
     protected Component getTypeName()
     {
-        return new TranslatableComponent(DMLRegistry.EGG_BLOCK.get().getDescriptionId(), new TranslatableComponent(breed.getTranslationKey()));
+        return new TranslatableComponent(DMLRegistry.EGG_BLOCK.get().getDescriptionId(),
+                new TranslatableComponent(breed.getTranslationKey(getLevel().registryAccess())));
     }
 
     @Override
@@ -202,7 +208,7 @@ public class DragonEgg extends Entity
     {
         if (source.getEntity() instanceof Player)
         {
-            spawnAtLocation(DMLEggBlock.Item.create(breed, hatchTime));
+            spawnAtLocation(DMLEggBlock.Item.create(breed, getLevel().registryAccess(), hatchTime));
             discard();
         }
         else if (amount > 4f) discard();
@@ -214,7 +220,7 @@ public class DragonEgg extends Entity
     {
         DragonBreed winner = null;
         int prevPoints = 0;
-        for (var breed : BreedRegistry.registry())
+        for (var breed : BreedRegistry.registry(getLevel().registryAccess()))
         {
             int points = breed.getHabitatPoints(level, blockPosition());
             if (points > MIN_HABITAT_POINTS && points > prevPoints)
@@ -312,7 +318,7 @@ public class DragonEgg extends Entity
         {
             this.transitioningBreed = transitioningBreed;
             this.transitionTime = transitionTime;
-            entityData.set(TRANSITION_BREED, transitioningBreed.getRegistryName().toString());
+            entityData.set(TRANSITION_BREED, transitioningBreed.id(getLevel().registryAccess()).toString());
         }
 
         public void begin(DragonBreed transitioningBreed)
@@ -335,14 +341,14 @@ public class DragonEgg extends Entity
         {
             if (transitioningBreed != null)
             {
-                tag.putString(NBT_TRANSITION_BREED, transitioningBreed.getRegistryName().toString());
+                tag.putString(NBT_TRANSITION_BREED, transitioningBreed.id(getLevel().registryAccess()).toString());
                 tag.putInt(NBT_TRANSITION_TIME, transitionTime);
             }
         }
 
         public void read(CompoundTag tag)
         {
-            BreedRegistry.registry()
+            BreedRegistry.registry(getLevel().registryAccess())
                     .getOptional(new ResourceLocation(tag.getString(NBT_TRANSITION_BREED)))
                     .ifPresent(breed -> begin(breed, tag.getInt(NBT_TRANSITION_TIME)));
         }

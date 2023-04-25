@@ -8,11 +8,6 @@
   "model_properties": {
     "middle_tail_scales": false
   },
-  "abilities": [
-    {
-      "type": "fire_breath"
-    }
-  ],
   "habitats": [
     {
       "point_multiplier": 1.0,
@@ -25,7 +20,6 @@
       "type": "in_fluid"
     }
   ],
-  "name": "dragonmounts:fire",
   "primary_color": 9511936,
   "secondary_color": 16750617,
   "hatch_particles": {

@@ -4,6 +4,7 @@ import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 public class DragonSpawnEgg extends ForgeSpawnEggItem
 {
@@ -23,25 +25,28 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     @Override
     public void fillItemCategory(CreativeModeTab pCategory, NonNullList<ItemStack> pItems)
     {
-        if (allowdedIn(pCategory))
+        if (FMLLoader.getDist().isClient() && allowdedIn(pCategory) && Minecraft.getInstance().level != null)
         {
-            for (DragonBreed breed : BreedRegistry.registry()) pItems.add(create(breed));
+            var reg = Minecraft.getInstance().level.registryAccess();
+            for (DragonBreed breed : BreedRegistry.registry(reg))
+                pItems.add(create(breed, reg));
         }
+
     }
 
-    public static ItemStack create(DragonBreed breed)
+    public static ItemStack create(DragonBreed breed, RegistryAccess reg)
     {
         CompoundTag root = new CompoundTag();
 
         // entity tag
         CompoundTag entityTag = new CompoundTag();
-        entityTag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+        entityTag.putString(TameableDragon.NBT_BREED, breed.id(reg).toString());
         root.put(EntityType.ENTITY_TAG, entityTag);
 
         // name & colors
         // storing these in the stack nbt is more performant than getting the breed everytime
         CompoundTag itemDataTag = new CompoundTag();
-        itemDataTag.putString("ItemName", breed.getTranslationKey());
+        itemDataTag.putString("ItemName", breed.getTranslationKey(reg));
         itemDataTag.putInt("PrimaryColor", breed.primaryColor());
         itemDataTag.putInt("SecondaryColor", breed.secondaryColor());
         root.put("ItemData", itemDataTag);
@@ -57,7 +62,8 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         String name;
         var tag = stack.getTagElement("ItemData");
         if (tag == null || (name = tag.getString("ItemName")).isEmpty())
-            name = BreedRegistry.getFallback().getTranslationKey();
+            name = BreedRegistry.getFallback(Minecraft.getInstance().level.registryAccess())
+                    .getTranslationKey(Minecraft.getInstance().level.registryAccess());
         return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
     }
 
@@ -73,7 +79,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         }
         else
         {
-            var fire = BreedRegistry.getFallback();
+            var fire = BreedRegistry.getFallback(Minecraft.getInstance().level.registryAccess());
             prim = fire.primaryColor();
             sec = fire.secondaryColor();
         }

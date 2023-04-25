@@ -96,7 +96,7 @@ class DragonBreedProvider implements DataProvider
             DragonBreed.ModelProperties.STANDARD,
             of(Attributes.ARMOR, 8d),
             list(),
-            list(new NearbyBlocksHabitat(1f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(3, BiomeTags.IS_NETHER)),
+            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(3, BiomeTags.IS_NETHER)),
             set("inFire", "onFire", "lava", "hotFloor"),
             Optional.empty());
 
@@ -107,7 +107,7 @@ class DragonBreedProvider implements DataProvider
             new DragonBreed.ModelProperties(true, true, false),
             of(),
             list(),
-            list(new FluidHabitat(1f, FluidTags.WATER)),
+            list(new FluidHabitat(1f, FluidTags.WATER), new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)),
             set("drown"),
             Optional.empty());
 

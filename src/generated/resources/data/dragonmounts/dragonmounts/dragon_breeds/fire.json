@@ -1,4 +1,13 @@
 {
+  "immunities": [
+    "onFire",
+    "inFire",
+    "lava",
+    "hotFloor"
+  ],
+  "model_properties": {
+    "middle_tail_scales": false
+  },
   "habitats": [
     {
       "point_multiplier": 1.0,
@@ -11,19 +20,10 @@
       "type": "in_fluid"
     }
   ],
-  "immunities": [
-    "onFire",
-    "inFire",
-    "lava",
-    "hotFloor"
-  ],
-  "hatch_particles": {
-    "type": "minecraft:flame"
-  },
-  "model_properties": {
-    "middle_tail_scales": false
-  },
   "name": "dragonmounts:fire",
   "primary_color": 9511936,
-  "secondary_color": 16750617
+  "secondary_color": 16750617,
+  "hatch_particles": {
+    "type": "minecraft:flame"
+  }
 }

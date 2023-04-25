@@ -45,6 +45,7 @@ minecraft {
         server {
             workingDirectory project.file('run')
             arg "-mixin.config=${mod_id}.mixins.json"
+            arg "nogui"
 
             mods {
                 "${mod_id}" {

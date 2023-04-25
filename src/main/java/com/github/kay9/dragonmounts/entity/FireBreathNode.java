@@ -2,6 +2,9 @@ package com.github.kay9.dragonmounts.entity;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -24,11 +27,37 @@ public class FireBreathNode extends BreathNode
         super(type, xPos, yPos, zPos, xMove, yMove, zMove, level);
     }
 
-    public static FireBreathNode create(TameableDragon shooter)
+    public static FireBreathNode shoot(TameableDragon shooter)
     {
         var mouthPos = shooter.getMouthPos();
         var direction = Vec3.directionFromRotation(shooter.getXRot(), shooter.getYRot());
         return new FireBreathNode(DMLRegistry.FIRE_BREATH.get(), mouthPos.x(), mouthPos.y(), mouthPos.z(), direction.x(), direction.y(), direction.z(), shooter.getLevel());
+    }
+
+    @Override
+    public void tick()
+    {
+        if (isInWater())
+        {
+            extinguish();
+            return;
+        }
+
+        super.tick();
+
+        if (getLevel().isClientSide())
+        {
+            // AbstractHurtingProjectile already features a trailing particle of smoke,
+            // so we don't have to do that here.
+            var motion = getDeltaMovement();
+            for (int i = 0; i < 5; i++)
+            {
+                var x = getRandomX(0.2) + motion.x();
+                var y = getRandomY() + motion.y();
+                var z = getRandomZ(0.2) + motion.z();
+                level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0, 0);
+            }
+        }
     }
 
     @Override
@@ -58,6 +87,14 @@ public class FireBreathNode extends BreathNode
     public boolean isOnFire()
     {
         return true;
+    }
+
+    private void extinguish()
+    {
+        discard();
+        if (random.nextDouble() <= 0.25d) playSound(SoundEvents.FIRE_EXTINGUISH, 1, 1);
+        for (int i = 0; i < 15; i++)
+            level.addParticle(ParticleTypes.SMOKE, getRandomX(1), getRandomY(), getRandomZ(1), 0, random.nextDouble() * 0.08f, 0);
     }
 
     private DamageSource getDamageSource()

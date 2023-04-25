@@ -10,7 +10,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 public abstract class WeaponAbility implements Ability
 {
     // needed for syncing
-    public static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<Boolean> ATTACKING = TameableDragon.createDataKey(EntityDataSerializers.BOOLEAN);
 
     @Override
     public void initialize(TameableDragon dragon)
@@ -26,25 +26,24 @@ public abstract class WeaponAbility implements Ability
     public void tick(TameableDragon dragon)
     {
         var attacking = isAttacking(dragon);
-        var timer = dragon.<Data>getAbilityData(this);
         if (dragon.isControlledByLocalInstance())
         {
             var keyDown = DMLRegistry.WEAPON_KEY.getAsBoolean();
             if (keyDown != attacking)
             {
                 setAttacking(dragon, keyDown);
-                if (keyDown) attack(dragon);
                 WeaponAbilityPacket.send(dragon, this, keyDown);
             }
         }
 
-        if (attacking) timer.incrTime();
+        var data = dragon.<Data>getAbilityData(this);
+        if (attacking) data.incrTime();
+
+        tickWeapon(dragon, attacking, data.getAttackTime());
     }
 
-    /**
-     * Perform a one-shot attack.
-     */
-    public void attack(TameableDragon dragon)
+    // intention is for overrides without needing to re-retrieve anything more than once every tick.
+    public void tickWeapon(TameableDragon dragon, boolean attacking, int attackTime)
     {
     }
 

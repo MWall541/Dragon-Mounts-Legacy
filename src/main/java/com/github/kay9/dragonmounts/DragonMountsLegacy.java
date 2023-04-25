@@ -11,6 +11,7 @@ import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.network.WeaponAbilityPacket;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -98,6 +99,7 @@ public class DragonMountsLegacy
         ForgeHooksClient.registerLayerDefinition(DragonRenderer.LAYER_LOCATION, DragonModel::createBodyLayer);
 
         e.registerEntityRenderer(DMLRegistry.DRAGON_EGG.get(), EggEntityRenderer::new);
+        e.registerEntityRenderer(DMLRegistry.FIRE_BREATH.get(), NoopRenderer::new); // fixme
 
         e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }

@@ -39,16 +39,12 @@ public class WeaponAbilityPacket
 
     public void prepare(Supplier<NetworkEvent.Context> ctx)
     {
-        ctx.get().enqueueWork(() -> handle(ctx.get()));
+        ctx.get().enqueueWork(() ->
+        {
+            var dragon = (TameableDragon) ctx.get().getSender().getLevel().getEntity(dragonId);
+            ((WeaponAbility) dragon.getBreed().abilities().get(abilityId)).setAttacking(dragon, attacking);
+        });
         ctx.get().setPacketHandled(true);
-    }
-
-    public void handle(NetworkEvent.Context ctx)
-    {
-        var dragon = (TameableDragon) ctx.getSender().getLevel().getEntity(dragonId);
-        var ability = ((WeaponAbility) dragon.getBreed().abilities().get(abilityId));
-        ability.setAttacking(dragon, attacking);
-        if (attacking) ability.attack(dragon);
     }
 
     public static void send(TameableDragon dragon, Ability ability, boolean breathing)

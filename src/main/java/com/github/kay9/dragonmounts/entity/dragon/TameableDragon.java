@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
@@ -1108,8 +1109,18 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public Vec3 getMouthPos()
     {
-        var pos = getEyePosition();
-        var distFromCenter = 2 * getAgeProgress(); // TODO: fine tune
-        return pos.add(calculateViewVector(getXRot(), getYRot()).scale(distFromCenter));
+        var rotVector = calculateViewVector(getXRot(), getYRot());
+        var position = getEyePosition();
+        return position.add(rotVector.scale(getBbWidth()));
+    }
+
+    /**
+     * Use this when creating new EntityDataAccessor keys.
+     * This bootstraps the class to load the class-owned keys first and attempts to prevent duplicates.
+     * Seems unsafe as it's not threadsafe, but seems to be working so far.
+     */
+    public static <T> EntityDataAccessor<T> createDataKey(EntityDataSerializer<T> serializer)
+    {
+        return SynchedEntityData.defineId(TameableDragon.class, serializer);
     }
 }

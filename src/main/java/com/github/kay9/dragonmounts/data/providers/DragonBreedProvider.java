@@ -20,10 +20,12 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -34,7 +36,7 @@ class DragonBreedProvider implements DataProvider
 {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    static final DragonBreed AETHER = DragonBreed.builtIn(DragonMountsLegacy.id("aether"),
+    static final Pair<ResourceLocation, DragonBreed> AETHER = Pair.of(DragonMountsLegacy.id("aether"), DragonBreed.builtIn(
             0x718AA9,
             0xE6E6E6,
             Optional.empty(),
@@ -43,9 +45,9 @@ class DragonBreedProvider implements DataProvider
             list(),
             list(new HeightHabitat(3, false, 200)),
             set(),
-            Optional.empty());
+            Optional.empty()));
 
-    static final DragonBreed END = DragonBreed.builtIn(DragonMountsLegacy.id("end"),
+    static final Pair<ResourceLocation, DragonBreed> END = Pair.of(DragonMountsLegacy.id("end"), DragonBreed.builtIn(
             0x161616,
             0xff63e8,
             Optional.of(ParticleTypes.PORTAL),
@@ -54,9 +56,9 @@ class DragonBreedProvider implements DataProvider
             list(), // teleport ability?
             list(DragonBreathHabitat.INSTANCE),
             set("dragonBreath"),
-            Optional.empty());
+            Optional.empty()));
 
-    static final DragonBreed FOREST = DragonBreed.builtIn(DragonMountsLegacy.id("forest"),
+    static final Pair<ResourceLocation, DragonBreed> FOREST = Pair.of(DragonMountsLegacy.id("forest"), DragonBreed.builtIn(
             0x054a00,
             0x0a9600,
             Optional.of(ParticleTypes.HAPPY_VILLAGER),
@@ -65,9 +67,9 @@ class DragonBreedProvider implements DataProvider
             list(GreenToesAbility.INSTANCE),
             list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(2, BiomeTags.IS_JUNGLE)),
             set(),
-            Optional.empty());
+            Optional.empty()));
 
-    static final DragonBreed GHOST = DragonBreed.builtIn(DragonMountsLegacy.id("ghost"),
+    static final Pair<ResourceLocation, DragonBreed> GHOST = Pair.of(DragonMountsLegacy.id("ghost"), DragonBreed.builtIn(
             0xc4c4c4,
             0xc2f8ff,
             Optional.empty(),
@@ -76,9 +78,9 @@ class DragonBreedProvider implements DataProvider
             list(),
             list(new PickyHabitat(list(new HeightHabitat(1, true, 0), new LightHabitat(2, true, 3)))),
             set("drown"),
-            Optional.of(SoundEvents.SKELETON_AMBIENT));
+            Optional.of(SoundEvents.SKELETON_AMBIENT)));
 
-    static final DragonBreed ICE = DragonBreed.builtIn(DragonMountsLegacy.id("ice"),
+    static final Pair<ResourceLocation, DragonBreed> ICE = Pair.of(DragonMountsLegacy.id("ice"), DragonBreed.builtIn(
             0xffffff,
             0x00E1FF,
             Optional.of(ParticleTypes.SNOWFLAKE),
@@ -87,9 +89,9 @@ class DragonBreedProvider implements DataProvider
             list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
             list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
-            Optional.empty());
+            Optional.empty()));
 
-    static final DragonBreed NETHER = DragonBreed.builtIn(DragonMountsLegacy.id("nether"),
+    static final Pair<ResourceLocation, DragonBreed> NETHER = Pair.of(DragonMountsLegacy.id("nether"), DragonBreed.builtIn(
             0x912400,
             0x2e0b00,
             Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
@@ -98,9 +100,9 @@ class DragonBreedProvider implements DataProvider
             list(),
             list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(3, BiomeTags.IS_NETHER)),
             set("inFire", "onFire", "lava", "hotFloor"),
-            Optional.empty());
+            Optional.empty()));
 
-    static final DragonBreed WATER = DragonBreed.builtIn(DragonMountsLegacy.id("water"),
+    static final Pair<ResourceLocation, DragonBreed> WATER = Pair.of(DragonMountsLegacy.id("water"), DragonBreed.builtIn(
             0x0062ff,
             0x5999ff,
             Optional.of(ParticleTypes.DRIPPING_WATER),
@@ -109,7 +111,7 @@ class DragonBreedProvider implements DataProvider
             list(),
             list(new FluidHabitat(1f, FluidTags.WATER), new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)),
             set("drown"),
-            Optional.empty());
+            Optional.empty()));
 
     private final DataGenerator generator;
     private HashCache cache;
@@ -125,22 +127,20 @@ class DragonBreedProvider implements DataProvider
         this.cache = cache;
         var ops = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
 
-        for (var breed : breeds()) encode(breed, ops);
+        for (var breed : breeds()) encode(breed.getKey(), breed.getValue(), ops);
     }
 
-    protected DragonBreed[] breeds()
+    protected Pair<ResourceLocation, DragonBreed>[] breeds()
     {
-        return new DragonBreed[]{AETHER, END, BreedRegistry.FIRE_BUILTIN.get(), FOREST, GHOST, ICE, NETHER, WATER};
+        var fire = Pair.of(BreedRegistry.FIRE_BUILTIN.getId(), BreedRegistry.FIRE_BUILTIN.get());
+        return new Pair[]{AETHER, END, fire, FOREST, GHOST, ICE, NETHER, WATER};
     }
 
-    protected void encode(DragonBreed breed, RegistryOps<JsonElement> ops) throws IOException
+    protected void encode(ResourceLocation id, DragonBreed breed, RegistryOps<JsonElement> ops) throws IOException
     {
-        String packName = breed.getRegistryName().getNamespace();
-        String type = breed.getRegistryName().getPath();
-
         var json = DragonBreed.CODEC.encodeStart(ops, breed).getOrThrow(false, DragonMountsLegacy.LOG::error);
         var regKey = BreedRegistry.REGISTRY.get().getRegistryKey().location();
-        var path = String.join("/", "data", packName, regKey.getNamespace(), regKey.getPath(), type + ".json");
+        var path = String.join("/", "data", id.getNamespace(), regKey.getNamespace(), regKey.getPath(), id.getPath() + ".json");
 
         DataProvider.save(GSON, cache, json, generator.getOutputFolder().resolve(path));
     }

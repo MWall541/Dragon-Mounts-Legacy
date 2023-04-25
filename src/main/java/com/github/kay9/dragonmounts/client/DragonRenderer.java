@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Vector3f;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -72,7 +73,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
     public static ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
     {
-        return TEXTURE_CACHE.computeIfAbsent(breed.getRegistryName(), DragonRenderer::cacheTextures)[layer];
+        return TEXTURE_CACHE.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::cacheTextures)[layer];
     }
 
     private static ResourceLocation[] cacheTextures(ResourceLocation id)

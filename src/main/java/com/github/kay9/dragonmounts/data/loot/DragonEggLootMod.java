@@ -32,11 +32,10 @@ public class DragonEggLootMod extends LootModifier
     {
         if (DMLConfig.useLootTables())
         {
-            context.getLevel()
-                    .registryAccess()
-                    .registryOrThrow(BreedRegistry.REGISTRY_KEY)
+            var reg = context.getLevel().registryAccess();
+            BreedRegistry.registry(reg)
                     .getOptional(id)
-                    .ifPresentOrElse(breed -> generatedLoot.add(DMLEggBlock.Item.create(breed, breed.hatchTime())),
+                    .ifPresentOrElse(breed -> generatedLoot.add(DMLEggBlock.Item.create(breed, reg, breed.hatchTime())),
                             () ->
                             {
                                 throw new JsonParseException("Unable to produce Dragon Egg Loot with unknown breed id: \"" + id + "\"");

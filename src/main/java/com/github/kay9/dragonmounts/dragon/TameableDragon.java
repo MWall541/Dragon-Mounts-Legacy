@@ -47,7 +47,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SaddleItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -120,7 +119,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
-        breed = BreedRegistry.getFallback();
+        breed = BreedRegistry.getFallback(level.registryAccess());
     }
 
     @Override
@@ -135,7 +134,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return Mob.createMobAttributes()
                 .add(MOVEMENT_SPEED, BASE_SPEED_GROUND)
                 .add(MAX_HEALTH, BASE_HEALTH)
-                .add(ATTACK_DAMAGE, BASE_FOLLOW_RANGE)
+                .add(FOLLOW_RANGE, BASE_FOLLOW_RANGE)
                 .add(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
                 .add(ATTACK_DAMAGE, BASE_DAMAGE)
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
@@ -174,7 +173,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> data)
     {
-        if (DATA_BREED.equals(data)) updateBreed(BreedRegistry.get(entityData.get(DATA_BREED)));
+        if (DATA_BREED.equals(data)) updateBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().registryAccess()));
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
         else super.onSyncedDataUpdated(data);
@@ -184,7 +183,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putString(NBT_BREED, breed.getRegistryName().toString());
+        compound.putString(NBT_BREED, breed.id(getLevel().registryAccess()).toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
     }
@@ -193,7 +192,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void readAdditionalSaveData(CompoundTag compound)
     {
         super.readAdditionalSaveData(compound);
-        setBreed(BreedRegistry.get(compound.getString(NBT_BREED)));
+        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().registryAccess()));
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
 
@@ -202,7 +201,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setBreed(DragonBreed dragonBreed)
     {
-        entityData.set(DATA_BREED, dragonBreed.getRegistryName().toString());
+        entityData.set(DATA_BREED, dragonBreed.id(getLevel().registryAccess()).toString());
     }
 
     private void updateBreed(DragonBreed breed)
@@ -609,13 +608,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public ItemStack getPickedResult(HitResult target)
     {
-        return DragonSpawnEgg.create(getBreed());
+        return DragonSpawnEgg.create(getBreed(), getLevel().registryAccess());
     }
 
     @Override
     protected Component getTypeName()
     {
-        return new TranslatableComponent(getBreed().getTranslationKey());
+        return new TranslatableComponent(getBreed().getTranslationKey(getLevel().registryAccess()));
     }
 
     public boolean isFoodItem(ItemStack stack)
@@ -1000,7 +999,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         refreshDimensions();
 
         var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", getScale(), AttributeModifier.Operation.ADDITION);
-        for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE}) // avoid duped code
+        for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code
         {
             AttributeInstance instance = getAttribute(attribute);
             instance.removeModifier(mod);

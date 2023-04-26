@@ -285,7 +285,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.set(DATA_FLYING, flying);
     }
 
-    public void setNavigation(boolean flying) {
+    public void setNavigation(boolean flying)
+    {
             navigation = flying ?
                     flyingNavigation :
                     groundNavigation;

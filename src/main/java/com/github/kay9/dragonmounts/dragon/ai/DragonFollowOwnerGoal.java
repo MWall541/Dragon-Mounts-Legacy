@@ -18,13 +18,14 @@ import java.util.EnumSet;
  * Goal for dragon to follow its owner.
  * <p></p>
  * Mostly copied from <code>FollowOwnerGoal</code>, but with some modifications to fix an issue.
- * Also allows dragon to tp to owner in the air so they don't get stuck until the owner lands.
+ * Also allows dragon to tp to owner in the air, so they don't get stuck until the owner lands.
  *
  * @author AnimalsWritingCode
  *
  * @see net.minecraft.world.entity.ai.goal.FollowOwnerGoal
  */
-public class DragonFollowOwnerGoal extends Goal {
+public class DragonFollowOwnerGoal extends Goal
+{
     private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
     private static final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
     private static final int MIN_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 0;
@@ -38,7 +39,8 @@ public class DragonFollowOwnerGoal extends Goal {
     private final float teleportDistance;
     private float oldWaterCost;
 
-    public DragonFollowOwnerGoal(TameableDragon dragon, double speedModifier, float startDistance, float stopDistance, float teleportDistance) {
+    public DragonFollowOwnerGoal(TameableDragon dragon, double speedModifier, float startDistance, float stopDistance, float teleportDistance)
+    {
         this.dragon = dragon;
         this.level = dragon.level;
         this.speedModifier = speedModifier;
@@ -46,61 +48,73 @@ public class DragonFollowOwnerGoal extends Goal {
         this.stopDistance = stopDistance;
         this.teleportDistance = teleportDistance;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
-        if (!(dragon.getNavigation() instanceof GroundPathNavigation) && !(dragon.getNavigation() instanceof FlyingPathNavigation)) {
-            throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
-        }
     }
 
-    public boolean canUse() {
+    public boolean canUse()
+    {
         LivingEntity livingentity = this.dragon.getOwner();
         if (livingentity == null) {
             return false;
-        } else if (livingentity.isSpectator()) {
-            return false;
-        } else if (this.dragon.isOrderedToSit()) {
-            return false;
-        } else if (this.dragon.distanceToSqr(livingentity) < (double)(this.startDistance * this.startDistance)) {
-            return false;
-        } else {
-            return true;
         }
+        if (livingentity.isSpectator())
+        {
+            return false;
+        }
+        if (this.dragon.isOrderedToSit())
+        {
+            return false;
+        }
+        return this.dragon.distanceToSqr(livingentity) >= (double)(this.startDistance * this.startDistance);
     }
 
-    public boolean canContinueToUse() {
-        if (this.dragon.getNavigation().isDone()) {
+    public boolean canContinueToUse()
+    {
+        if (this.dragon.getNavigation().isDone())
+        {
             return false;
-        } else if (this.dragon.isOrderedToSit()) {
-            return false;
-        } else {
-            return !(this.dragon.distanceToSqr(this.dragon.getOwner()) <= (double)(this.stopDistance * this.stopDistance));
         }
+        if (this.dragon.isOrderedToSit())
+        {
+            return false;
+        }
+        return this.dragon.distanceToSqr(this.dragon.getOwner()) >= (double)(this.stopDistance * this.stopDistance);
     }
 
-    public void start() {
+    public void start()
+    {
         this.timeToRecalcPath = 0;
         this.oldWaterCost = this.dragon.getPathfindingMalus(BlockPathTypes.WATER);
         this.dragon.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
     }
 
-    public void stop() {
+    public void stop()
+    {
         this.dragon.getNavigation().stop();
         this.dragon.setPathfindingMalus(BlockPathTypes.WATER, this.oldWaterCost);
     }
 
-    public void tick() {
+    public void tick()
+    {
         LivingEntity owner = this.dragon.getOwner();
         this.dragon.getLookControl().setLookAt(owner, 10.0F, (float)this.dragon.getMaxHeadXRot());
-        if (--this.timeToRecalcPath <= 0) {
+        if (--this.timeToRecalcPath <= 0)
+        {
             this.timeToRecalcPath = this.adjustedTickDelay(10);
-            if (!this.dragon.isLeashed() && !this.dragon.isPassenger()) {
-                if (this.dragon.distanceToSqr(owner) >= (this.teleportDistance * this.teleportDistance)) {
+            if (!this.dragon.isLeashed() && !this.dragon.isPassenger())
+            {
+                if (this.dragon.distanceToSqr(owner) >= (this.teleportDistance * this.teleportDistance))
+                {
                     this.teleportToOwner();
-                } else if (
+                }
+                else if (
                         !this.dragon.isFlying()
                                 && this.dragon.canFly()
-                                && (owner.blockPosition().getY() - this.dragon.blockPosition().getY()) >= this.startDistance) {
+                                && (owner.blockPosition().getY() - this.dragon.blockPosition().getY()) >= this.startDistance)
+                {
                     this.dragon.liftOff();
-                } else {
+                }
+                else
+                {
                     this.dragon.getNavigation().moveTo(owner, this.speedModifier);
                 }
 
@@ -108,10 +122,12 @@ public class DragonFollowOwnerGoal extends Goal {
         }
     }
 
-    private void teleportToOwner() {
+    private void teleportToOwner()
+    {
         BlockPos ownerPos = this.dragon.getOwner().blockPosition();
 
-        for(int i = 0; i < 10; ++i) {
+        for(int i = 0; i < 10; ++i)
+        {
             BlockPos target = this.randomBlockPosNearPos(
                     ownerPos,
                     MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING,
@@ -120,35 +136,43 @@ public class DragonFollowOwnerGoal extends Goal {
                     MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING
             );
             boolean flag = this.maybeTeleportTo(target);
-            if (flag) {
+            if (flag)
+            {
                 return;
             }
         }
 
     }
 
-    private boolean maybeTeleportTo(BlockPos pos) {
+    private boolean maybeTeleportTo(BlockPos pos)
+    {
         LivingEntity owner = this.dragon.getOwner();
-        if (owner.blockPosition().closerThan(pos, 2.0D)) {
+        if (owner.blockPosition().closerThan(pos, 2.0D))
+        {
             return false;
-        } else if (!this.canTeleportTo(pos)) {
-            return false;
-        } else {
-            this.dragon.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ(), this.dragon.getYRot(), this.dragon.getXRot());
-            this.dragon.getNavigation().stop();
-            return true;
         }
+        if (!this.canTeleportTo(pos))
+        {
+            return false;
+        }
+        this.dragon.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ(), this.dragon.getYRot(), this.dragon.getXRot());
+        this.dragon.getNavigation().stop();
+        return true;
     }
 
-    private boolean canTeleportTo(BlockPos pos) {
-        if (!this.dragon.canFly()) {
+    private boolean canTeleportTo(BlockPos pos)
+    {
+        if (!this.dragon.canFly())
+        {
             BlockPathTypes blockpathtypes = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, pos.mutable());
-            if (blockpathtypes != BlockPathTypes.WALKABLE) {
+            if (blockpathtypes != BlockPathTypes.WALKABLE)
+            {
                 return false;
             }
 
             BlockState blockstate = this.level.getBlockState(pos.below());
-            if (blockstate.getBlock() instanceof LeavesBlock) {
+            if (blockstate.getBlock() instanceof LeavesBlock)
+            {
                 return false;
             }
         }
@@ -157,20 +181,25 @@ public class DragonFollowOwnerGoal extends Goal {
         return this.level.noCollision(this.dragon, this.dragon.getBoundingBox().move(blockpos));
     }
 
-    private int randomIntInclusive(int min, int max) {
+    private int randomIntInclusive(int min, int max)
+    {
         return this.dragon.getRandom().nextInt(max - min + 1) + min;
     }
 
-    private int randomIntInclusive(int farLow, int nearLow, int nearHigh, int farHigh) {
+    private int randomIntInclusive(int farLow, int nearLow, int nearHigh, int farHigh)
+    {
         if (nearLow == nearHigh)
+        {
             return this.randomIntInclusive(farLow, farHigh);
+        }
 
         return this.dragon.getRandom().nextBoolean() ?
                 this.randomIntInclusive(farLow, nearLow) :
                 this.randomIntInclusive(nearHigh, farHigh);
     }
 
-    private BlockPos randomBlockPosNearPos(BlockPos origin, int minDist, int maxDist, int minYDist, int maxYDist) {
+    private BlockPos randomBlockPosNearPos(BlockPos origin, int minDist, int maxDist, int minYDist, int maxYDist)
+    {
         int x = this.randomIntInclusive(-maxDist, -minDist, minDist, maxDist);
         int y = this.randomIntInclusive(-maxYDist, -minYDist, minYDist, maxYDist);
         int z = this.randomIntInclusive(-maxDist, -minDist, minDist, maxDist);

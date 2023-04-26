@@ -1,4 +1,9 @@
 {
+  "abilities": [
+    {
+      "type": "green_toes"
+    }
+  ],
   "habitats": [
     {
       "block_tag": "dragonmounts:forest_dragon_habitat_blocks",
@@ -9,15 +14,9 @@
       "type": "biome"
     }
   ],
+  "primary_color": 346624,
+  "secondary_color": 693760,
   "hatch_particles": {
     "type": "minecraft:happy_villager"
-  },
-  "abilities": [
-    {
-      "type": "green_toes"
-    }
-  ],
-  "name": "dragonmounts:forest",
-  "primary_color": 346624,
-  "secondary_color": 693760
+  }
 }

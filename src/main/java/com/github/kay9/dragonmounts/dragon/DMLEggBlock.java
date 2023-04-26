@@ -10,12 +10,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,10 +33,10 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class DMLEggBlock extends DragonEggBlock implements EntityBlock
@@ -57,7 +59,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         BlockEntity entity = level.getBlockEntity(pos);
         if (entity instanceof Entity e)
         {
-            startHatching(e.getBreed(), e.getHatchTime(), level, pos);
+            startHatching(e.getBreed(level.registryAccess()), e.getHatchTime(), level, pos);
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -67,7 +69,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     @Override
     public void attack(BlockState state, Level level, BlockPos at, Player player)
     {
-        if (level.getBlockEntity(at) instanceof Entity e && e.getBreed().getRegistryName().getPath().equals("end"))
+        if (level.getBlockEntity(at) instanceof Entity e && e.getBreedId().getPath().equals("end"))
             super.attack(Blocks.DRAGON_EGG.defaultBlockState(), level, at, player); // hacky fix for breed resets...
     }
 
@@ -105,7 +107,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     {
         if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
-            Optional<DragonBreed> end = BreedRegistry.registry().getOptional(DragonMountsLegacy.id("end"));
+            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonMountsLegacy.id("end"));
             if (end.isPresent())
             {
                 level.removeBlock(pos, false);
@@ -130,16 +132,20 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             String name;
             var tag = stack.getTag();
             if (tag == null || (name = tag.getString("ItemName")).isEmpty())
-                name = BreedRegistry.getFallback().getTranslationKey();
+                name = BreedRegistry.getFallback(Minecraft.getInstance().level.registryAccess())
+                        .getTranslationKey(Minecraft.getInstance().level.registryAccess());
             return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
         }
 
         @Override
         public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items)
         {
-            if (allowdedIn(tab))
-                for (DragonBreed breed : BreedRegistry.registry())
-                    items.add(Item.create(breed, breed.hatchTime()));
+            if (FMLLoader.getDist().isClient() && allowdedIn(tab) && Minecraft.getInstance().level != null)
+            {
+                var reg = Minecraft.getInstance().level.registryAccess();
+                for (DragonBreed breed : BreedRegistry.registry(reg))
+                    items.add(Item.create(breed, reg, breed.hatchTime()));
+            }
         }
 
         @Override
@@ -166,7 +172,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
                 var tag = stack.getTagElement("BlockEntityTag");
                 if (tag != null)
                 {
-                    dragon.setBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED)));
+                    dragon.setBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.getLevel().registryAccess()));
                     return InteractionResult.sidedSuccess(player.level.isClientSide);
                 }
             }
@@ -179,16 +185,16 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             consumer.accept(DragonEggRenderer.INSTANCE);
         }
 
-        public static ItemStack create(DragonBreed breed, int hatchTime)
+        public static ItemStack create(DragonBreed breed, RegistryAccess reg, int hatchTime)
         {
             var rootTag = new CompoundTag();
 
             var bETag = new CompoundTag();
-            bETag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+            bETag.putString(TameableDragon.NBT_BREED, breed.id(reg).toString());
             bETag.putInt(DragonEgg.NBT_HATCH_TIME, hatchTime);
 
             rootTag.put("BlockEntityTag", bETag);
-            rootTag.putString("ItemName", breed.getTranslationKey());
+            rootTag.putString("ItemName", breed.getTranslationKey(reg));
 
             var stack = new ItemStack(DMLRegistry.EGG_BLOCK_ITEM.get());
             stack.setTag(rootTag);
@@ -198,21 +204,21 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
 
     public static class Entity extends BlockEntity
     {
-        private DragonBreed breed;
+        private ResourceLocation breedId;
         private int hatchTime;
 
         public Entity(BlockPos pWorldPosition, BlockState pBlockState)
         {
             super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
-            setBreed(BreedRegistry.getFallback());
-            setHatchTime(breed.hatchTime());
+            setBreedId(BreedRegistry.FIRE_BUILTIN.getId());
+            setHatchTime(DragonEgg.DEFAULT_HATCH_TIME);
         }
 
         @Override
         protected void saveAdditional(CompoundTag tag)
         {
             super.saveAdditional(tag);
-            tag.putString(TameableDragon.NBT_BREED, breed.getRegistryName().toString());
+            tag.putString(TameableDragon.NBT_BREED, breedId.toString());
             tag.putInt(DragonEgg.NBT_HATCH_TIME, hatchTime);
         }
 
@@ -220,7 +226,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public void load(CompoundTag tag)
         {
             super.load(tag);
-            setBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED)));
+            setBreedId(new ResourceLocation(tag.getString(TameableDragon.NBT_BREED)));
             setHatchTime(tag.getInt(DragonEgg.NBT_HATCH_TIME));
         }
 
@@ -237,14 +243,19 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             return saveWithoutMetadata();
         }
 
-        public void setBreed(DragonBreed breed)
+        public DragonBreed getBreed(RegistryAccess reg)
         {
-            this.breed = breed;
+            return BreedRegistry.get(getBreedId(), reg);
         }
 
-        public DragonBreed getBreed()
+        public void setBreedId(ResourceLocation id)
         {
-            return breed;
+            this.breedId = id;
+        }
+
+        public ResourceLocation getBreedId()
+        {
+            return breedId;
         }
 
         public void setHatchTime(int time)

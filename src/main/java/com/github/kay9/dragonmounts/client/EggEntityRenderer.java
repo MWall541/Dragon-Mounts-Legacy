@@ -26,7 +26,7 @@ public class EggEntityRenderer extends EntityRenderer<DragonEgg>
 
         if (state != entity.level.getBlockState(blockpos))
         {
-            DragonEggRenderer.renderEgg(ps, buffer.getBuffer(Sheets.translucentCullBlockSheet()), light, entity.breed, true);
+            DragonEggRenderer.renderEgg(ps, buffer.getBuffer(Sheets.translucentCullBlockSheet()), light, entity.getBreedId(), true);
             super.render(entity, yaw, partialTicks, ps, buffer, light);
         }
     }

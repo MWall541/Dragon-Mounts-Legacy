@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:corals",
+    "#minecraft:wall_corals",
+    "#minecraft:coral_blocks",
+    "minecraft:seagrass",
+    "minecraft:tall_seagrass",
+    "minecraft:kelp",
+    "minecraft:kelp_plant",
+    "minecraft:prismarine",
+    "minecraft:sea_lantern",
+    "minecraft:sea_pickle"
+  ]
+}

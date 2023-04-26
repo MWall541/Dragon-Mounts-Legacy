@@ -79,6 +79,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final double BASE_SPEED_FLYING = 0.525;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
+    public static final double BASE_FOLLOW_RANGE = 16;
     public static final int BASE_KB_RESISTANCE = 1;
     public static final float BASE_WIDTH = 2.75f; // adult sizes
     public static final float BASE_HEIGHT = 2.75f;
@@ -288,7 +289,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.set(DATA_FLYING, flying);
     }
 
-    public void setNavigation(boolean flying) {
+    public void setNavigation(boolean flying)
+    {
             navigation = flying ?
                     flyingNavigation :
                     groundNavigation;

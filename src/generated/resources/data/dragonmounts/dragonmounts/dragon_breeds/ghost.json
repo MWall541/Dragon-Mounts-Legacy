@@ -1,4 +1,11 @@
 {
+  "immunities": [
+    "drown"
+  ],
+  "ambient_sound": "minecraft:entity.skeleton.ambient",
+  "model_properties": {
+    "thin_legs": true
+  },
   "habitats": [
     {
       "required_habitats": [
@@ -18,14 +25,6 @@
       "type": "picky"
     }
   ],
-  "immunities": [
-    "drown"
-  ],
-  "ambient_sound": "minecraft:entity.skeleton.ambient",
-  "model_properties": {
-    "thin_legs": true
-  },
-  "name": "dragonmounts:ghost",
   "primary_color": 12895428,
   "secondary_color": 12777727
 }

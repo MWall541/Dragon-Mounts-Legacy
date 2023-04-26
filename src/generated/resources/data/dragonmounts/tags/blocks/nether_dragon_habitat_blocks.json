@@ -2,9 +2,20 @@
   "replace": false,
   "values": [
     "#minecraft:soul_fire_base_blocks",
-    "minecraft:blackstone",
-    "minecraft:basalt",
+    "#minecraft:base_stone_nether",
+    "#minecraft:warped_stems",
+    "#minecraft:crimson_stems",
+    "minecraft:glowstone",
     "minecraft:soul_fire",
-    "minecraft:soul_campfire"
+    "minecraft:soul_campfire",
+    "minecraft:soul_torch",
+    "minecraft:nether_gold_ore",
+    "minecraft:nether_quartz_ore",
+    "minecraft:ancient_debris",
+    "minecraft:twisting_vines_plant",
+    "minecraft:weeping_vines_plant",
+    "minecraft:shroomlight",
+    "minecraft:nether_wart",
+    "minecraft:nether_wart_block"
   ]
 }

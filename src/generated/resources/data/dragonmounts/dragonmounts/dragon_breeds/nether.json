@@ -1,7 +1,15 @@
 {
+  "immunities": [
+    "inFire",
+    "onFire",
+    "lava",
+    "hotFloor"
+  ],
+  "attributes": {
+    "minecraft:generic.armor": 8.0
+  },
   "habitats": [
     {
-      "point_multiplier": 1.0,
       "block_tag": "dragonmounts:nether_dragon_habitat_blocks",
       "type": "nearby_blocks"
     },
@@ -11,19 +19,9 @@
       "type": "biome"
     }
   ],
-  "immunities": [
-    "inFire",
-    "onFire",
-    "lava",
-    "hotFloor"
-  ],
+  "primary_color": 9511936,
+  "secondary_color": 3017472,
   "hatch_particles": {
     "type": "minecraft:soul_fire_flame"
-  },
-  "attributes": {
-    "minecraft:generic.armor": 8.0
-  },
-  "name": "dragonmounts:nether",
-  "primary_color": 9511936,
-  "secondary_color": 3017472
+  }
 }

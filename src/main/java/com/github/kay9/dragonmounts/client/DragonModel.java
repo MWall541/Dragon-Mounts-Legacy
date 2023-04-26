@@ -303,7 +303,7 @@ public class DragonModel extends EntityModel<TameableDragon>
         boolean middleScales = props.middleTailScales();
         tailScaleMiddle.visible = middleScales;
         tailScaleRight.visible = tailScaleLeft.visible = !middleScales;
-        size = dragon.getScale();
+        size = Math.min(dragon.getScale(), 1);
         thinLegs = props.thinLegs();
 
         dragon.getAnimator().setPartialTicks(pPartialTick);

@@ -106,9 +106,11 @@ public class DragonFollowOwnerGoal extends Goal
                 if (this.dragon.distanceToSqr(owner) >= (this.teleportDistance * this.teleportDistance))
                 {
                     this.teleportToOwner();
-                } else if (!this.dragon.isFlying()
-                        && this.dragon.canFly()
-                        && (owner.blockPosition().getY() - this.dragon.blockPosition().getY()) >= this.startDistance)
+                }
+                else if (
+                        !this.dragon.isFlying()
+                                && this.dragon.canFly()
+                                && (owner.blockPosition().getY() - this.dragon.blockPosition().getY()) >= this.startDistance)
                 {
                     this.dragon.liftOff();
                 }

@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.phys.AABB;
 
 import java.util.EnumSet;
 
@@ -177,8 +178,10 @@ public class DragonFollowOwnerGoal extends Goal
             }
         }
 
-        BlockPos blockpos = pos.subtract(this.dragon.blockPosition());
-        return this.level.noCollision(this.dragon, this.dragon.getBoundingBox().move(blockpos));
+        BlockPos blockPos = pos.subtract(this.dragon.blockPosition());
+        AABB targetBoundingBox = this.dragon.getBoundingBox().move(blockPos);
+        return this.level.noCollision(this.dragon, targetBoundingBox)
+                && !this.level.containsAnyLiquid(targetBoundingBox);
     }
 
     private int randomIntInclusive(int min, int max)

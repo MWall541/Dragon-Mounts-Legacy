@@ -7,6 +7,7 @@ import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
 import com.github.kay9.dragonmounts.entity.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.entity.dragon.ai.DragonBreedGoal;
+import com.github.kay9.dragonmounts.entity.dragon.ai.DragonFollowOwnerGoal;
 import com.github.kay9.dragonmounts.entity.dragon.ai.DragonMoveController;
 import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;

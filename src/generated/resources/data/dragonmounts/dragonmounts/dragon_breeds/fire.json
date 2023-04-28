@@ -8,6 +8,11 @@
   "model_properties": {
     "middle_tail_scales": false
   },
+  "abilities": [
+    {
+      "type": "fire_breath"
+    }
+  ],
   "habitats": [
     {
       "point_multiplier": 1.0,

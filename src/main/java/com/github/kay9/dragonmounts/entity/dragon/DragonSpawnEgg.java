@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.entity.dragon;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.breed.DragonBreed;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;

@@ -5,7 +5,6 @@ import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.network.WeaponAbilityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 
 public abstract class WeaponAbility implements Ability
 {
@@ -39,10 +38,9 @@ public abstract class WeaponAbility implements Ability
         var data = dragon.<Data>getAbilityData(this);
         if (attacking) data.incrTime();
 
-        tickWeapon(dragon, attacking, data.getAttackTime());
+        tickWeapon(dragon, attacking, data.getAttackTime()); // intention is for overrides without needing to re-retrieve anything more than once every tick.
     }
 
-    // intention is for overrides without needing to re-retrieve anything more than once every tick.
     public void tickWeapon(TameableDragon dragon, boolean attacking, int attackTime)
     {
     }

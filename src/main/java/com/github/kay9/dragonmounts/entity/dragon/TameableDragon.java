@@ -1002,7 +1002,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         // no reason to recalculate this value several times per tick/frame...
         float growth = -breed.growthTime();
-        float min = Math.min(getAge(), 0);
+        float min = Mth.clamp(getAge(), growth, 0);
         ageProgress = 1 - (min / growth);
     }
 
@@ -1125,9 +1125,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public Vec3 getMouthPos()
     {
-        var rotVector = calculateViewVector(getXRot(), getYRot());
-        var position = getEyePosition();
-        return position.add(rotVector.scale(getBbWidth()));
+        var rotVector = calculateViewVector(getXRot() * 0.2f, getYRot());
+        var position = getEyePosition().add(0, 1.1, 0);
+        return position.add(rotVector.scale(getBbWidth() * 5.25f));
     }
 
     /**

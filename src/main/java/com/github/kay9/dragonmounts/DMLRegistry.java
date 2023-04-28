@@ -1,8 +1,12 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
+import com.github.kay9.dragonmounts.entity.BreathNode;
 import com.github.kay9.dragonmounts.entity.FireBreathNode;
-import com.github.kay9.dragonmounts.entity.dragon.*;
+import com.github.kay9.dragonmounts.entity.dragon.DMLEggBlock;
+import com.github.kay9.dragonmounts.entity.dragon.DragonEgg;
+import com.github.kay9.dragonmounts.entity.dragon.DragonSpawnEgg;
+import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
@@ -52,7 +56,7 @@ public class DMLRegistry
 
     public static final RegistryObject<EntityType<TameableDragon>> DRAGON = entity("dragon", EntityType.Builder   .of(TameableDragon::new, MobCategory.CREATURE).sized(TameableDragon.BASE_WIDTH, TameableDragon.BASE_HEIGHT).clientTrackingRange(10).updateInterval(3));
     public static final RegistryObject<EntityType<DragonEgg>> DRAGON_EGG = entity("dragon_egg", EntityType.Builder.of(DragonEgg::new, MobCategory.MISC)         .sized(DragonEgg.WIDTH, DragonEgg.HEIGHT)                    .clientTrackingRange(5) .updateInterval(8));
-    public static final RegistryObject<EntityType<FireBreathNode>> FIRE_BREATH = entity("fire_breath", EntityType.Builder.of(FireBreathNode::new, MobCategory.MISC).sized(0.2f, 0.2f).clientTrackingRange(4).updateInterval(10));
+    public static final RegistryObject<EntityType<FireBreathNode>> FIRE_BREATH = entity("fire_breath", EntityType.Builder.of(FireBreathNode::new, MobCategory.MISC).sized(BreathNode.DEFAULT_MAX_SIZE, BreathNode.DEFAULT_MAX_SIZE).clientTrackingRange(4).updateInterval(10));
     public static final RegistryObject<BlockEntityType<DMLEggBlock.Entity>> EGG_BLOCK_ENTITY = register("dragon_egg", Keys.BLOCK_ENTITY_TYPES, () -> BlockEntityType.Builder.of(DMLEggBlock.Entity::new, EGG_BLOCK.get()).build(null));
 
     public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);

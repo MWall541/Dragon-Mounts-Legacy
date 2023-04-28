@@ -13,7 +13,7 @@ public class FireBreathAbility extends MouthWeaponAbility
     public void tickWeapon(TameableDragon dragon, boolean attacking, int attackTime)
     {
         super.tickWeapon(dragon, attacking, attackTime);
-        if (attackTime >= MouthWeaponAbility.OPEN_JAW_DELAY)
+        if (dragon.isServer() && attackTime >= MouthWeaponAbility.OPEN_JAW_DELAY)
             dragon.getLevel().addFreshEntity(FireBreathNode.shoot(dragon));
     }
 

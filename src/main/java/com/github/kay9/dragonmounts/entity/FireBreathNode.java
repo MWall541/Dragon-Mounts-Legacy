@@ -4,11 +4,9 @@ import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
@@ -30,7 +28,9 @@ public class FireBreathNode extends BreathNode
     public static FireBreathNode shoot(TameableDragon shooter)
     {
         var mouthPos = shooter.getMouthPos();
-        var direction = Vec3.directionFromRotation(shooter.getXRot(), shooter.getYRot());
+        var innacX = 0.2f * shooter.getRandom().nextFloat() - 0.1f;
+        var innacY = 0.2f * shooter.getRandom().nextFloat() - 0.1f;
+        var direction = Vec3.directionFromRotation((shooter.getXRot() * 0.2f) + innacX, shooter.getYRot() + innacY);
         return new FireBreathNode(DMLRegistry.FIRE_BREATH.get(), mouthPos.x(), mouthPos.y(), mouthPos.z(), direction.x(), direction.y(), direction.z(), shooter.getLevel());
     }
 
@@ -50,13 +50,10 @@ public class FireBreathNode extends BreathNode
             // AbstractHurtingProjectile already features a trailing particle of smoke,
             // so we don't have to do that here.
             var motion = getDeltaMovement();
-            for (int i = 0; i < 5; i++)
-            {
-                var x = getRandomX(0.2) + motion.x();
-                var y = getRandomY() + motion.y();
-                var z = getRandomZ(0.2) + motion.z();
-                level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0, 0);
-            }
+            var x = getRandomX(0.2) + motion.x();
+            var y = getRandomY() + motion.y();
+            var z = getRandomZ(0.2) + motion.z();
+            level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0, 0);
         }
     }
 
@@ -68,19 +65,19 @@ public class FireBreathNode extends BreathNode
         if (!getLevel().isClientSide()) return;
 
         var damage = (float) TameableDragon.BASE_DAMAGE;
-        LivingEntity living = null;
-        if (getOwner() instanceof LivingEntity shooter)
+        TameableDragon dragon = null;
+        if (getOwner() instanceof TameableDragon shooter)
         {
             damage = (float) shooter.getAttributeValue(Attributes.ATTACK_DAMAGE);
-            living = shooter;
+            dragon = shooter;
         }
 
         var entity = result.getEntity();
         if (entity.fireImmune()) damage *= 0.25;
-        else entity.setSecondsOnFire(7);
+        else entity.setSecondsOnFire((int) (7 * getIntensityScale()));
 
-        if (entity.hurt(getDamageSource(), damage) && living != null)
-            doEnchantDamageEffects(living, entity);
+        if (entity.hurt(getDamageSource(), damage) && dragon != null)
+            doEnchantDamageEffects(dragon, entity);
     }
 
     @Override

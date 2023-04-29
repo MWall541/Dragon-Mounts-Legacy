@@ -1107,9 +1107,28 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
+    public int getMaxHeadYRot()
+    {
+        return 120;
+    }
+
+    @Override
+    public int getMaxHeadXRot()
+    {
+        return 90;
+    }
+
+    @Override
     public Vec3 getLightProbePosition(float p_20309_)
     {
         return new Vec3(getX(), getY() + getBbHeight(), getZ());
+    }
+
+    public Vec3 getMouthPos()
+    {
+        var rotVector = Vec3.directionFromRotation(getXRot() * 0.2f, getYRot());
+        var position = getEyePosition().add(0, -1.1, 0);
+        return position.add(rotVector.scale(getBbWidth() * 1.75));
     }
 
     public void registerAbilityData(Ability ability, Ability.Data data)
@@ -1121,13 +1140,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public <T extends Ability.Data> T getAbilityData(Ability ability)
     {
         return (T) abilityData.get(ability);
-    }
-
-    public Vec3 getMouthPos()
-    {
-        var rotVector = calculateViewVector(getXRot() * 0.2f, getYRot());
-        var position = getEyePosition().add(0, 1.1, 0);
-        return position.add(rotVector.scale(getBbWidth() * 5.25f));
     }
 
     /**

@@ -1,8 +1,9 @@
-package com.github.kay9.dragonmounts.entity;
+package com.github.kay9.dragonmounts.entity.breath;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -25,7 +26,8 @@ import java.util.Map;
 
 public class FireBreathNode extends BreathNode
 {
-    private static final Map<BlockState, ScorchResult> SCORCH_RESULTS = new HashMap<>(); //todo: eventually make this data-driven?
+    private static final Map<Block, ScorchResult> SCORCH_RESULTS = new HashMap<>(); //todo: eventually make this data-driven?
+    private static final byte BURNOUT_EVENT = 8;
 
     public FireBreathNode(EntityType<? extends FireBreathNode> type, Level level)
     {
@@ -55,22 +57,22 @@ public class FireBreathNode extends BreathNode
             return;
         }
 
+        super.tick();
+
         // rain puts out fire quicker
         if (getLevel().isRainingAt(blockPosition())) age += 1;
 
-        super.tick();
+        ageBySpeed();
 
         if (getLevel().isClientSide())
         {
             var motion = getDeltaMovement();
-            var particle = ParticleTypes.FLAME;
-            for (int i = 0; i < 2; i++)
+            for (var particle : new ParticleOptions[] {ParticleTypes.FLAME, ParticleTypes.SMOKE})
             {
                 var x = getRandomX(0.2) + motion.x();
                 var y = getRandomY() + motion.y();
                 var z = getRandomZ(0.2) + motion.z();
                 level.addParticle(particle, x, y, z, 0, 0, 0);
-                particle = ParticleTypes.SMOKE;
             }
         }
     }
@@ -103,43 +105,45 @@ public class FireBreathNode extends BreathNode
     {
         super.onHitBlock(result);
 
-        var entityDir = getDirection();
-        var directContact = result.getDirection() == entityDir.getOpposite();
+        if (getLevel().isClientSide()) return;
+
+        var dir = result.getDirection();
+        var pos = result.getBlockPos();
+        var directContact = pick(getBbWidth() + 0.2, 1, true) instanceof BlockHitResult b && b.getDirection() == dir;
         if (directContact) age += 1;
 
         if (!(getOwner() instanceof TameableDragon dragon) || !DMLConfig.canGrief(dragon)) return;
 
-        var pos = result.getBlockPos();
-        var dir = result.getDirection();
         var state = getLevel().getBlockState(pos);
         var relative = pos.relative(dir);
         var raining = getLevel().isRainingAt(pos);
 
-        if (BaseFireBlock.canBePlacedAt(getLevel(), relative, entityDir))
+        if (BaseFireBlock.canBePlacedAt(getLevel(), relative, dir))
         {
-            int fireChance = state.getFireSpreadSpeed(getLevel(), pos, dir);
+            int fireChance = 5 + state.getFireSpreadSpeed(getLevel(), pos, dir);
             if (directContact) fireChance *= 1.35;
             if (raining) fireChance *= 0.5;
             fireChance *= getIntensityScale();
             fireChance *= DMLConfig.getFireSpreadMultiplier();
 
             if (random.nextInt(100) < fireChance)
-                getLevel().setBlock(relative, BaseFireBlock.getState(getLevel(), relative), Block.UPDATE_ALL_IMMEDIATE);
+                getLevel().setBlockAndUpdate(relative, BaseFireBlock.getState(getLevel(), relative));
         }
 
-        if (!directContact) return;
-
         var burn = state.getFlammability(getLevel(), pos, dir);
-        if (raining) burn *= 0.5;
-        burn *= getIntensityScale();
-        burn *= DMLConfig.getBreathBurnMultiplier();
-
-        if (burn > 0 && random.nextInt(60) < burn)
-            getLevel().removeBlock(pos, false); // Fire gets hot enough and incinerates its path.
+        if (directContact && burn > 0)
+        {
+            if (raining) burn *= 0.5;
+            burn *= getIntensityScale();
+            burn *= DMLConfig.getBreathBurnMultiplier();
+            if (random.nextInt(100) < burn)
+                getLevel().removeBlock(pos, false); // Fire gets hot enough and incinerates its path.
+        }
         else
         {
-            var scorched = getScorchedResult(state);
-            if (scorched != null) getLevel().setBlock(pos, scorched, Block.UPDATE_ALL); // unburnable blocks get scorched instead.
+            var scorched = getScorchedResult(state, directContact);
+            if (scorched != null)
+                getLevel().setBlockAndUpdate(pos, scorched); // unburnable blocks get scorched instead.
         }
     }
 
@@ -161,23 +165,32 @@ public class FireBreathNode extends BreathNode
         return 1f;
     }
 
-    @Nullable
-    private BlockState getScorchedResult(BlockState previous)
+    @Override
+    public void expire()
     {
-        var result = SCORCH_RESULTS.get(previous);
-        if (result != null)
-        {
-            var chance = result.chance() * DMLConfig.getBreathBurnMultiplier();
-            if (random.nextDouble() < chance) return result.result();
-        }
-        return null;
+        getLevel().broadcastEntityEvent(this, BURNOUT_EVENT);
+        super.expire();
+    }
+
+    @Override
+    public void handleEntityEvent(byte event)
+    {
+        super.handleEntityEvent(event);
+        if (event == BURNOUT_EVENT) burnOutParticles();
     }
 
     private void extinguish()
     {
-        discard();
-        if (random.nextDouble() <= 0.25d) playSound(SoundEvents.FIRE_EXTINGUISH, 1, 1);
-        for (int i = 0; i < 15; i++)
+        if (!getLevel().isClientSide()) discard();
+        if (random.nextDouble() <= 0.25) playSound(SoundEvents.FIRE_EXTINGUISH, 1, 1);
+        burnOutParticles();
+    }
+
+    private void burnOutParticles()
+    {
+        level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, getRandomX(0.75), getY() + getBbHeight(), getRandomZ(0.75), 0, 0.05, 0);
+        level.addParticle(ParticleTypes.LAVA, getRandomX(0.75), getY() + getBbHeight(), getRandomZ(0.75), 0, 0, 0);
+        for (int i = 0; i < 10; i++)
             level.addParticle(ParticleTypes.SMOKE, getRandomX(1), getRandomY(), getRandomZ(1), 0, random.nextDouble() * 0.08f, 0);
     }
 
@@ -189,25 +202,41 @@ public class FireBreathNode extends BreathNode
         if (!owned) shooter = this;
         return new IndirectEntityDamageSource(name, this, shooter).setIsFire().setProjectile();
     }
+
+    @Nullable
+    private BlockState getScorchedResult(BlockState previous, boolean directContact)
+    {
+        var result = SCORCH_RESULTS.get(previous.getBlock());
+        if (result != null)
+        {
+            var chance = result.chance() * DMLConfig.getBreathBurnMultiplier();
+            if (!directContact) chance *= 0.25f;
+            if (random.nextDouble() < chance) return result.result();
+        }
+        return null;
+    }
+
     private record ScorchResult(double chance, BlockState result) {}
 
-    public static void registerScorchResult(BlockState from, double chance, BlockState result)
+    public static void registerScorchResult(Block from, double chance, BlockState result)
     {
         SCORCH_RESULTS.put(from, new ScorchResult(chance, result));
     }
 
     static
     {
-        registerScorchResult(Blocks.SNOW_BLOCK.defaultBlockState(), 0.175, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 2));
-        registerScorchResult(Blocks.SNOW.defaultBlockState(), 0.3, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 8));
-        registerScorchResult(Blocks.ICE.defaultBlockState(), 0.15, Blocks.WATER.defaultBlockState());
-        registerScorchResult(Blocks.PACKED_ICE.defaultBlockState(), 0.075, Blocks.WATER.defaultBlockState());
-        registerScorchResult(Blocks.BLUE_ICE.defaultBlockState(), 0.01, Blocks.WATER.defaultBlockState());
-        registerScorchResult(Blocks.WATER.defaultBlockState(), 0.05, Blocks.AIR.defaultBlockState());
-        registerScorchResult(Blocks.GRASS.defaultBlockState(), 0.25, Blocks.DIRT.defaultBlockState());
-        registerScorchResult(Blocks.STONE.defaultBlockState(), 0.05, Blocks.BLACKSTONE.defaultBlockState());
-        registerScorchResult(Blocks.COBBLESTONE.defaultBlockState(), 0.05, Blocks.BLACKSTONE.defaultBlockState());
-        registerScorchResult(Blocks.BLACKSTONE.defaultBlockState(), 0.015, Blocks.MAGMA_BLOCK.defaultBlockState());
-        registerScorchResult(Blocks.MAGMA_BLOCK.defaultBlockState(), 0.001, Blocks.LAVA.defaultBlockState());
+        registerScorchResult(Blocks.SAND, 0.005, Blocks.GLASS.defaultBlockState());
+        registerScorchResult(Blocks.RED_SAND, 0.005, Blocks.GLASS.defaultBlockState());
+        registerScorchResult(Blocks.SNOW_BLOCK, 0.05, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 14));
+        registerScorchResult(Blocks.SNOW, 0.1, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 2));
+        registerScorchResult(Blocks.ICE, 0.15, Blocks.WATER.defaultBlockState());
+        registerScorchResult(Blocks.PACKED_ICE, 0.075, Blocks.WATER.defaultBlockState());
+        registerScorchResult(Blocks.BLUE_ICE, 0.01, Blocks.WATER.defaultBlockState());
+        registerScorchResult(Blocks.WATER, 0.01, Blocks.AIR.defaultBlockState());
+        registerScorchResult(Blocks.GRASS_BLOCK, 0.1, Blocks.DIRT.defaultBlockState());
+        registerScorchResult(Blocks.STONE, 0.01, Blocks.BLACKSTONE.defaultBlockState());
+        registerScorchResult(Blocks.COBBLESTONE, 0.01, Blocks.BLACKSTONE.defaultBlockState());
+        registerScorchResult(Blocks.BLACKSTONE, 0.001, Blocks.MAGMA_BLOCK.defaultBlockState());
+        registerScorchResult(Blocks.MAGMA_BLOCK, 0.0005, Blocks.LAVA.defaultBlockState());
     }
 }

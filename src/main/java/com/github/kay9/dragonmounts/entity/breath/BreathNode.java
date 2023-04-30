@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.entity;
+package com.github.kay9.dragonmounts.entity.breath;
 
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;
@@ -26,7 +26,7 @@ public class BreathNode extends Projectile
 {
     public static final float DEFAULT_MAX_SIZE = 2f;
     public static final int DEFAULT_MAX_AGE = 40;
-    public static final float DEFAULT_SPEED = 1.2f;
+    public static final float DEFAULT_SPEED = 0.95f;
 
     private final float maxSize = variedMaxSize();
     private final float maxAge = variedMaxAge();
@@ -83,48 +83,6 @@ public class BreathNode extends Projectile
         contactMethod();
     }
 
-    /**
-     * Describes the method of contact on objects in the environment. Called every tick.
-     */
-    public void contactMethod()
-    {
-        rayTrace();
-    }
-
-    /**
-     * A method of contact that uses raytracing, pointing in the direction of the movement.
-     * Useful for less needy results.
-     */
-    public void rayTrace()
-    {
-        var hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
-        if (hitResult.getType() != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hitResult))
-            onHit(hitResult);
-    }
-
-    /**
-     * A method of contact that uses the bounding box to interact with objects in the environment.
-     * Anything within the box, from blocks to entities, is hit.
-     * This is useful when the projectile is rather large
-     * or when the projectile may "brush" by any objects as it flies by them. (e.g. fire passes by leaves, and sets them on fire)
-     */
-    public void touch()
-    {
-        var box = getBoundingBox().inflate(0.1);
-        for (var pos : BlockPos.betweenClosed((int) box.minX, (int) box.minY, (int) box.minZ, (int) box.maxX, (int) box.maxY, (int) box.maxZ))
-        {
-            if (!level.getBlockState(pos).isAir())
-            {
-                var normal = Vec3.upFromBottomCenterOf(pos, 0.5).subtract(position()).normalize();
-                var dir = Direction.getNearest(normal.x(), normal.y(), normal.z());
-                onHit(new BlockHitResult(Vec3.atLowerCornerOf(pos), dir, pos, false));
-
-            }
-        }
-        for (var entity : getLevel().getEntities(null, box))
-            onHit(new EntityHitResult(entity));
-    }
-
     @Override
     public void addAdditionalSaveData(CompoundTag tag)
     {
@@ -175,6 +133,12 @@ public class BreathNode extends Projectile
     }
 
     @Override
+    protected MovementEmission getMovementEmission()
+    {
+        return MovementEmission.NONE;
+    }
+
+    @Override
     public EntityDimensions getDimensions(Pose pose)
     {
         var size = calculateCurrentSize();
@@ -196,9 +160,60 @@ public class BreathNode extends Projectile
         direction = new Vec3(packet.getXa(), packet.getYa(), packet.getZa());
     }
 
+    /**
+     * Describes the method of contact on objects in the environment. Called every tick.
+     */
+    public void contactMethod()
+    {
+        rayTrace();
+    }
+
+    /**
+     * A method of contact that uses raytracing, pointing in the direction of the movement.
+     * Useful for less needy results.
+     */
+    public void rayTrace()
+    {
+        var hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
+        if (hitResult.getType() != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hitResult))
+            onHit(hitResult);
+    }
+
+    /**
+     * A method of contact that uses the bounding box to interact with objects in the environment.
+     * Anything within the box, from blocks to entities, is hit.
+     * This is useful when the projectile is rather large
+     * or when the projectile may "brush" by any objects as it flies by them. (e.g. fire passes by leaves, and sets them on fire)
+     */
+    public void touch()
+    {
+        var box = getBoundingBox().inflate(0.1);
+        for (var pos : BlockPos.betweenClosed((int) box.minX, (int) box.minY, (int) box.minZ, (int) box.maxX, (int) box.maxY, (int) box.maxZ))
+        {
+            if (!level.getBlockState(pos).isAir())
+            {
+                var normal = position().subtract(Vec3.atBottomCenterOf(pos)).normalize();
+                var dir = Direction.getNearest(normal.x(), normal.y(), normal.z());
+                onHit(new BlockHitResult(Vec3.atLowerCornerOf(pos), dir, pos, false));
+            }
+        }
+        for (var entity : getLevel().getEntities(null, box))
+            onHit(new EntityHitResult(entity));
+    }
+
+    /**
+     * Slow moving or stuck nodes shouldn't stick around long.
+     */
+    public void ageBySpeed()
+    {
+        var currentSpeed = getDeltaMovement().length();
+        var dif = getSpeed() - currentSpeed;
+        if (dif > 0.1) age += 5 * dif;
+    }
+
     public void expire()
     {
-        discard();
+        if (!getLevel().isClientSide()) discard();
     }
 
     public float variedMaxSize()
@@ -213,7 +228,7 @@ public class BreathNode extends Projectile
 
     public float variedSpeed()
     {
-        return 0.95f;
+        return DEFAULT_SPEED + (0.3f * random.nextFloat() - 0.15f);
     }
 
     @SuppressWarnings("ConstantConditions")

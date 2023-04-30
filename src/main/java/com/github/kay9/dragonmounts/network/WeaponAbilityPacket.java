@@ -42,7 +42,7 @@ public class WeaponAbilityPacket
         ctx.get().enqueueWork(() ->
         {
             var dragon = (TameableDragon) ctx.get().getSender().getLevel().getEntity(dragonId);
-            ((WeaponAbility) dragon.getBreed().abilities().get(abilityId)).setAttacking(dragon, attacking);
+            ((WeaponAbility<?>) dragon.getBreed().abilities().get(abilityId)).setAttacking(dragon, attacking);
         });
         ctx.get().setPacketHandled(true);
     }

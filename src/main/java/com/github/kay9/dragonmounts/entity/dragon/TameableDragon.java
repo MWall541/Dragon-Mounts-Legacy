@@ -5,6 +5,7 @@ import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
+import com.github.kay9.dragonmounts.client.SoundRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.entity.dragon.ai.DragonBreedGoal;
 import com.github.kay9.dragonmounts.entity.dragon.ai.DragonFollowOwnerGoal;
@@ -533,7 +534,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         if (random < 0.2) return SoundEvents.ENDER_DRAGON_GROWL;
         if (getBreed().specialSound().isPresent() && random < 0.5) return getBreed().getAmbientSound();
-        return DMLRegistry.DRAGON_BREATHE_SOUND.get();
+        return SoundRegistry.DRAGON_BREATHE_SOUND.get();
     }
 
     @Nullable
@@ -545,7 +546,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public SoundEvent getStepSound()
     {
-        return DMLRegistry.DRAGON_STEP_SOUND.get();
+        return SoundRegistry.DRAGON_STEP_SOUND.get();
     }
 
     /**
@@ -554,7 +555,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected SoundEvent getDeathSound()
     {
-        return DMLRegistry.DRAGON_DEATH_SOUND.get();
+        return SoundRegistry.DRAGON_DEATH_SOUND.get();
     }
 
     @Override
@@ -606,9 +607,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected float getSoundVolume()
+    public float getSoundVolume()
     {
-        return getScale();
+        return 3 * getScale();
     }
 
     @Override
@@ -1109,13 +1110,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public int getMaxHeadYRot()
     {
-        return 120;
+        return 90;
     }
 
     @Override
     public int getMaxHeadXRot()
     {
-        return 90;
+        return 75;
     }
 
     @Override

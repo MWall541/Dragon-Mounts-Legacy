@@ -6,7 +6,7 @@ import com.github.kay9.dragonmounts.network.WeaponAbilityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 
-public abstract class WeaponAbility implements Ability
+public abstract class WeaponAbility<T extends WeaponAbility.Data> implements Ability
 {
     // needed for syncing
     public static final EntityDataAccessor<Boolean> ATTACKING = TameableDragon.createDataKey(EntityDataSerializers.BOOLEAN);
@@ -18,12 +18,14 @@ public abstract class WeaponAbility implements Ability
         if (!dragon.getEntityData().itemsById.containsKey(ATTACKING.getId()))
             dragon.getEntityData().define(ATTACKING, false);
 
-        dragon.registerAbilityData(this, new Data());
+        dragon.registerAbilityData(this, createWeaponData(dragon));
     }
 
     @Override
     public void tick(TameableDragon dragon)
     {
+        if (!canAttack(dragon)) return;
+
         var attacking = isAttacking(dragon);
         if (dragon.isControlledByLocalInstance())
         {
@@ -35,14 +37,19 @@ public abstract class WeaponAbility implements Ability
             }
         }
 
-        var data = dragon.<Data>getAbilityData(this);
+        var data = dragon.<T>getAbilityData(this);
         if (attacking) data.incrTime();
 
-        tickWeapon(dragon, attacking, data.getAttackTime()); // intention is for overrides without needing to re-retrieve anything more than once every tick.
+        tickWeapon(dragon, attacking, data); // intention is for overrides without needing to re-retrieve anything more than once every tick.
     }
 
-    public void tickWeapon(TameableDragon dragon, boolean attacking, int attackTime)
+    public void tickWeapon(TameableDragon dragon, boolean attacking, T attackData)
     {
+    }
+
+    public boolean canAttack(TameableDragon dragon)
+    {
+        return !dragon.isHatchling();
     }
 
     public boolean isAttacking(TameableDragon dragon)
@@ -53,7 +60,12 @@ public abstract class WeaponAbility implements Ability
     public void setAttacking(TameableDragon dragon, boolean attacking)
     {
         dragon.getEntityData().set(ATTACKING, attacking);
-        dragon.<Data>getAbilityData(this).setAttackTime(0);
+        dragon.<T>getAbilityData(this).setAttackTime(0);
+    }
+
+    protected Data createWeaponData(TameableDragon dragon)
+    {
+        return new Data();
     }
 
     public static class Data implements Ability.Data

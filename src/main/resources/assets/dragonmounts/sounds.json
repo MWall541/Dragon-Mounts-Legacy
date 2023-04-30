@@ -35,5 +35,47 @@
         "name": "dragonmounts:entity/dragon/death"
       }
     ]
+  },
+  "entity.dragon.weapon.breath.fire.adult.start": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/adult/start"
+      }
+    ]
+  },
+  "entity.dragon.weapon.breath.fire.adult.loop": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/adult/loop"
+      }
+    ]
+  },
+  "entity.dragon.weapon.breath.fire.adult.stop": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/adult/stop"
+      }
+    ]
+  },
+  "entity.dragon.weapon.breath.fire.juvenile.start": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/juvenile/start"
+      }
+    ]
+  },
+  "entity.dragon.weapon.breath.fire.juvenile.loop": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/juvenile/loop"
+      }
+    ]
+  },
+  "entity.dragon.weapon.breath.fire.juvenile.stop": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/juvenile/stop"
+      }
+    ]
   }
 }

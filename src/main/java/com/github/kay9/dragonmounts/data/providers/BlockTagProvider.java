@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.tags.BlockTags;
@@ -8,7 +9,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 
 class BlockTagProvider extends BlockTagsProvider
 {
@@ -47,5 +47,8 @@ class BlockTagProvider extends BlockTagsProvider
                 .addTags(BlockTags.CORALS, BlockTags.WALL_CORALS, BlockTags.CORAL_BLOCKS)
                 .add(Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.KELP, Blocks.KELP_PLANT, Blocks.PRISMARINE,
                         Blocks.SEA_LANTERN, Blocks.SEA_PICKLE);
+
+        tag(HotFeetAbility.BURNABLES_TAG)
+                .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.REPLACEABLE_PLANTS);
     }
 }

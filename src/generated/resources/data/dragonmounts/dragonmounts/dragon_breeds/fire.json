@@ -8,6 +8,11 @@
   "model_properties": {
     "middle_tail_scales": false
   },
+  "abilities": [
+    {
+      "type": "hot_feet"
+    }
+  ],
   "habitats": [
     {
       "point_multiplier": 1.0,

@@ -24,8 +24,12 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkHooks;
 
 /**
- * todo: Entity may not be needed. All this logic could possibly be implemented in a BlockEntity...?
+ * @deprecated for removal in 1.19.4
+ * <p>
+ * Using an entity is entirely uneeded.
+ * All this logic can easily be done in a block entity.
  */
+@Deprecated(forRemoval = true, since = "1.19.4")
 public class DragonEgg extends Entity
 {
     // constants

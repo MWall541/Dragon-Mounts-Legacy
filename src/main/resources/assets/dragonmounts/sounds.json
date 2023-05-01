@@ -36,45 +36,45 @@
       }
     ]
   },
-  "entity.dragon.weapon.breath.fire.adult.start": {
+  "entity.dragon.weapon.breath.fire.start": {
     "sounds": [
       {
-        "name": "dragonmounts:entity/dragon/weapon/breath/fire/adult/start"
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/start"
       }
     ]
   },
-  "entity.dragon.weapon.breath.fire.adult.loop": {
+  "entity.dragon.weapon.breath.fire.loop": {
     "sounds": [
       {
-        "name": "dragonmounts:entity/dragon/weapon/breath/fire/adult/loop"
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/loop"
       }
     ]
   },
-  "entity.dragon.weapon.breath.fire.adult.stop": {
+  "entity.dragon.weapon.breath.fire.stop": {
     "sounds": [
       {
-        "name": "dragonmounts:entity/dragon/weapon/breath/fire/adult/stop"
+        "name": "dragonmounts:entity/dragon/weapon/breath/fire/stop"
       }
     ]
   },
-  "entity.dragon.weapon.breath.fire.juvenile.start": {
+  "entity.dragon.weapon.breath.ice.start": {
     "sounds": [
       {
-        "name": "dragonmounts:entity/dragon/weapon/breath/fire/juvenile/start"
+        "name": "dragonmounts:entity/dragon/weapon/breath/ice/start"
       }
     ]
   },
-  "entity.dragon.weapon.breath.fire.juvenile.loop": {
+  "entity.dragon.weapon.breath.ice.loop": {
     "sounds": [
       {
-        "name": "dragonmounts:entity/dragon/weapon/breath/fire/juvenile/loop"
+        "name": "dragonmounts:entity/dragon/weapon/breath/ice/loop"
       }
     ]
   },
-  "entity.dragon.weapon.breath.fire.juvenile.stop": {
+  "entity.dragon.weapon.breath.ice.stop": {
     "sounds": [
       {
-        "name": "dragonmounts:entity/dragon/weapon/breath/fire/juvenile/stop"
+        "name": "dragonmounts:entity/dragon/weapon/breath/ice/stop"
       }
     ]
   }

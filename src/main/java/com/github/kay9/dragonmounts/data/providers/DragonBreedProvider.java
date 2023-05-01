@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.data.providers;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.FrostWalkerAbility;
 import com.github.kay9.dragonmounts.abilities.GreenToesAbility;
+import com.github.kay9.dragonmounts.abilities.IceBreathAbility;
 import com.github.kay9.dragonmounts.abilities.SnowStepperAbility;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
@@ -86,7 +87,7 @@ class DragonBreedProvider implements DataProvider
             Optional.of(ParticleTypes.SNOWFLAKE),
             DragonBreed.ModelProperties.STANDARD,
             of(),
-            list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
+            list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE, IceBreathAbility.INSTANCE),
             list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
             Optional.empty()));

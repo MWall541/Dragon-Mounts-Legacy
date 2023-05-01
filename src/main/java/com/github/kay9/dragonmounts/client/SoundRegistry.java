@@ -13,9 +13,13 @@ public class SoundRegistry extends SoundEvent
     public static final RegistryObject<SoundEvent> DRAGON_STEP_SOUND = sound("entity.dragon.step");
     public static final RegistryObject<SoundEvent> DRAGON_DEATH_SOUND = sound("entity.dragon.death");
 
-    public static final RegistryObject<SoundRegistry> ADULT_FIRE_BREATH_START = breath("fire.adult.start", 2);
-    public static final RegistryObject<SoundRegistry> ADULT_FIRE_BREATH_LOOP = breath("fire.adult.loop", 5.336);
-    public static final RegistryObject<SoundRegistry> ADULT_FIRE_BREATH_STOP = breath("fire.adult.stop", 1);
+    public static final RegistryObject<SoundRegistry> FIRE_BREATH_START = breath("fire.start", 2);
+    public static final RegistryObject<SoundRegistry> FIRE_BREATH_LOOP = breath("fire.loop", 5.336);
+    public static final RegistryObject<SoundRegistry> FIRE_BREATH_STOP = breath("fire.stop", 1);
+
+    public static final RegistryObject<SoundRegistry> ICE_BREATH_START = breath("ice.start", 2);
+    public static final RegistryObject<SoundRegistry> ICE_BREATH_LOOP = breath("ice.loop", 5.336);
+    public static final RegistryObject<SoundRegistry> ICE_BREATH_STOP = breath("ice.stop", 1);
 
     private static RegistryObject<SoundEvent> sound(String name)
     {

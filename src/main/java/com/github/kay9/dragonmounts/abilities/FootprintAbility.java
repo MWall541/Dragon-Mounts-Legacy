@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.abilities;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;
 
@@ -8,7 +9,8 @@ public abstract class FootprintAbility implements Ability
     @Override
     public void onMove(TameableDragon dragon)
     {
-        if (dragon.level.isClientSide || !dragon.isAdult() || !dragon.isOnGround()) return;
+        if (dragon.level.isClientSide || !dragon.isAdult() || !dragon.isOnGround() || !DMLConfig.canGrief(dragon))
+            return;
 
         var chance = getFootprintChance(dragon);
         if (chance == 0) return;

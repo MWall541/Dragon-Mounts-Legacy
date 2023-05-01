@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.entity.breath;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
@@ -27,7 +28,6 @@ import java.util.Map;
 public class FireBreathNode extends BreathNode
 {
     private static final Map<Block, ScorchResult> SCORCH_RESULTS = new HashMap<>(); //todo: eventually make this data-driven?
-    private static final byte BURNOUT_EVENT = 8;
 
     public FireBreathNode(EntityType<? extends FireBreathNode> type, Level level)
     {
@@ -41,11 +41,8 @@ public class FireBreathNode extends BreathNode
 
     public static FireBreathNode shoot(TameableDragon shooter)
     {
-        var mouthPos = shooter.getMouthPos();
-        var innacX = 2 * shooter.getRandom().nextFloat() - 1;
-        var innacY = 2 * shooter.getRandom().nextFloat() - 1;
-        var direction = Vec3.directionFromRotation(shooter.getXRot() + innacX, shooter.getYHeadRot() + innacY);
-        return new FireBreathNode(shooter, mouthPos, direction);
+        var direction = getShootDirection(shooter.getRandom(), shooter.getXRot(), shooter.getYHeadRot(), 1);
+        return new FireBreathNode(shooter, shooter.getMouthPos(), direction);
     }
 
     @Override
@@ -108,12 +105,13 @@ public class FireBreathNode extends BreathNode
         if (getLevel().isClientSide()) return;
 
         var dir = result.getDirection();
-        var pos = result.getBlockPos();
-        var directContact = pick(getBbWidth() + 0.2, 1, true) instanceof BlockHitResult b && b.getDirection() == dir;
+        var entityDir = Direction.getNearest(getMoveDirection().x(), getMoveDirection().y(), getMoveDirection().z());
+        var directContact = entityDir.getOpposite() == dir;
         if (directContact) age += 1;
 
         if (!(getOwner() instanceof TameableDragon dragon) || !DMLConfig.canGrief(dragon)) return;
 
+        var pos = result.getBlockPos();
         var state = getLevel().getBlockState(pos);
         var relative = pos.relative(dir);
         var raining = getLevel().isRainingAt(pos);
@@ -168,15 +166,8 @@ public class FireBreathNode extends BreathNode
     @Override
     public void expire()
     {
-        getLevel().broadcastEntityEvent(this, BURNOUT_EVENT);
+        if (getLevel().isClientSide()) burnOutParticles();
         super.expire();
-    }
-
-    @Override
-    public void handleEntityEvent(byte event)
-    {
-        super.handleEntityEvent(event);
-        if (event == BURNOUT_EVENT) burnOutParticles();
     }
 
     private void extinguish()

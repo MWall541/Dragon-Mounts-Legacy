@@ -9,6 +9,9 @@
     },
     {
       "type": "snow_stepper"
+    },
+    {
+      "type": "ice_breath"
     }
   ],
   "habitats": [

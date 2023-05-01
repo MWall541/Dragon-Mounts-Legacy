@@ -19,17 +19,21 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Random;
+
 // quick notes: Weapon nodes should be heavily affected by the dragons scale.
 // Dragons have dynamic growth, as well as possible custom scales.
 // Damage, grief, and other effects should reflect this.
 public class BreathNode extends Projectile
 {
+    private static final byte EXPIRE_EVENT = 8;
+
     public static final float DEFAULT_MAX_SIZE = 2f;
     public static final int DEFAULT_MAX_AGE = 40;
     public static final float DEFAULT_SPEED = 0.95f;
 
     private final float maxSize = variedMaxSize();
-    private final float maxAge = variedMaxAge();
+    private final int maxAge = variedMaxAge();
     private final float variedSpeed = variedSpeed();
 
     private float intensityScale = 1f;
@@ -52,23 +56,37 @@ public class BreathNode extends Projectile
         reapplyPosition();
     }
 
+    protected static Vec3 getShootDirection(Random random, float dirX, float dirY, float inaccuracy)
+    {
+        var offset = inaccuracy * 2;
+        var innacX = offset * random.nextFloat() - inaccuracy;
+        var innacY = offset * random.nextFloat() - inaccuracy;
+        return Vec3.directionFromRotation(dirX + innacX, dirY + innacY);
+    }
+
     @Override
     protected void defineSynchedData() {}
 
     @Override
     public void tick()
     {
-        if (!getLevel().hasChunkAt(blockPosition()))
+        age++;
+
+        if (!getLevel().isClientSide())
         {
-            discard();
-            return;
+            if (!getLevel().hasChunkAt(blockPosition()))
+            {
+                discard();
+                return;
+            }
+
+            if (age > getMaxAge())
+            {
+                expire();
+                return;
+            }
         }
 
-        if (age++ > getMaxAge())
-        {
-            expire();
-            return;
-        }
 
         super.tick();
 
@@ -141,7 +159,7 @@ public class BreathNode extends Projectile
     @Override
     public EntityDimensions getDimensions(Pose pose)
     {
-        var size = calculateCurrentSize();
+        var size = getCurrentSize();
         return EntityDimensions.scalable(size, size);
     }
 
@@ -213,7 +231,18 @@ public class BreathNode extends Projectile
 
     public void expire()
     {
-        if (!getLevel().isClientSide()) discard();
+        if (!getLevel().isClientSide())
+        {
+            getLevel().broadcastEntityEvent(this, EXPIRE_EVENT);
+            discard();
+        }
+    }
+
+    @Override
+    public void handleEntityEvent(byte id)
+    {
+        if (id == EXPIRE_EVENT) expire();
+        else super.handleEntityEvent(id);
     }
 
     public float variedMaxSize()
@@ -221,9 +250,9 @@ public class BreathNode extends Projectile
         return DEFAULT_MAX_SIZE + (0.5f * random.nextFloat() - 0.25f);
     }
 
-    public float variedMaxAge()
+    public int variedMaxAge()
     {
-        return DEFAULT_MAX_AGE + (0.5f * random.nextFloat() - 0.25f);
+        return DEFAULT_MAX_AGE + (random.nextInt(10) - 5);
     }
 
     public float variedSpeed()
@@ -244,7 +273,7 @@ public class BreathNode extends Projectile
         return maxSize;
     }
 
-    public float getMaxAge()
+    public int getMaxAge()
     {
         return maxAge;
     }
@@ -269,12 +298,25 @@ public class BreathNode extends Projectile
         return direction;
     }
 
-    protected float calculateCurrentSize()
+    protected float getCurrentSize()
+    {
+        return calculateRapidExpansion();
+    }
+
+    protected float calculateRapidExpansion()
     {
         var speed = getMaxAge() * 0.25f; // grows to full size in about 1/4 time of its max age.
         var ageFraction = Mth.clamp(age / speed, 0, 1f);
         var maxNodeSize = getMaxSize() * getIntensityScale();
         var startSize = 0.2f * maxNodeSize;
         return Mth.lerp(ageFraction, startSize, maxNodeSize);
+    }
+
+    protected float calculateLinearExpansion()
+    {
+        var ageFraction = getAgeFraction();
+        var maxSize = getMaxSize() * getIntensityScale();
+        var startSize = 0.2f * maxSize;
+        return Mth.lerp(ageFraction, startSize, maxSize);
     }
 }

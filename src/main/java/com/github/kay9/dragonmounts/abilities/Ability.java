@@ -17,6 +17,7 @@ public interface Ability
     String FROST_WALKER = register("frost_walker", FrostWalkerAbility.CODEC);
     String GREEN_TOES = register("green_toes", GreenToesAbility.CODEC);
     String SNOW_STEPPER = register("snow_stepper", SnowStepperAbility.CODEC);
+    String HOT_FEET = register("hot_feet", HotFeetAbility.CODEC);
     String FIRE_BREATH = register("fire_breath", FireBreathAbility.CODEC);
     String ICE_BREATH = register("ice_breath", IceBreathAbility.CODEC);
 

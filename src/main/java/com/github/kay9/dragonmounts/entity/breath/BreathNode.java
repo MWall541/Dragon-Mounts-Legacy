@@ -4,8 +4,8 @@ import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -16,15 +16,14 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
-// quick notes: Weapon nodes should be heavily affected by the dragons scale.
-// Dragons have dynamic growth, as well as possible custom scales.
-// Damage, grief, and other effects should reflect this.
-public class BreathNode extends Projectile
+public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
 {
     private static final byte EXPIRE_EVENT = 8;
 
@@ -32,12 +31,11 @@ public class BreathNode extends Projectile
     public static final int DEFAULT_MAX_AGE = 40;
     public static final float DEFAULT_SPEED = 0.95f;
 
-    private final float maxSize = variedMaxSize();
-    private final int maxAge = variedMaxAge();
-    private final float variedSpeed = variedSpeed();
-
-    private float intensityScale = 1f;
     private Vec3 direction = Vec3.ZERO;
+    private float movementSpeed = DEFAULT_SPEED;
+    private float maxSize = DEFAULT_MAX_SIZE;
+    private int maxAge = DEFAULT_MAX_AGE;
+    private float intensityScale = 1f;
     protected int age = 0;
 
     public BreathNode(EntityType<? extends BreathNode> type, Level level)
@@ -49,6 +47,9 @@ public class BreathNode extends Projectile
     {
         super(type, shooter.getLevel());
 
+        this.movementSpeed = variedSpeed();
+        this.maxSize = variedMaxSize();
+        this.maxAge = variedMaxAge();
         this.direction = direction;
 
         setOwner(shooter);
@@ -94,9 +95,15 @@ public class BreathNode extends Projectile
         refreshDimensions();
         setPos(prevPos);
 
-        setDeltaMovement(getMoveDirection().scale(getSpeed()));
+        setDeltaMovement(getMoveDirection().scale(getMovementSpeed()));
         move(MoverType.SELF, getDeltaMovement());
-        ProjectileUtil.rotateTowardsMovement(this, 1f);
+        Vec3 vec3 = getDeltaMovement();
+        if (vec3.lengthSqr() != 0)
+        {
+            double d0 = vec3.horizontalDistance();
+            setYRot((float) (Mth.atan2(vec3.z, vec3.x) * (180 / Math.PI)) + 90f);
+            setXRot((float) (Mth.atan2(d0, vec3.y) * (180 / Math.PI)) - 90f);
+        }
 
         contactMethod();
     }
@@ -166,16 +173,28 @@ public class BreathNode extends Projectile
     @Override
     public Packet<?> getAddEntityPacket()
     {
-        var owner = getOwner();
-        var ownerId = owner == null? 0 : owner.getId();
-        return new ClientboundAddEntityPacket(getId(), getUUID(), getX(), getY(), getZ(), getXRot(), getYRot(), getType(), ownerId, direction);
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     @Override
-    public void recreateFromPacket(ClientboundAddEntityPacket packet)
+    public void writeSpawnData(FriendlyByteBuf buffer)
     {
-        super.recreateFromPacket(packet);
-        direction = new Vec3(packet.getXa(), packet.getYa(), packet.getZa());
+        var owner = getOwner();
+        var ownerId = owner == null? 0 : owner.getId();
+        buffer.writeInt(ownerId);
+        buffer.writeFloat(movementSpeed);
+        buffer.writeFloat(maxSize);
+        buffer.writeInt(maxAge);
+    }
+
+    @Override
+    public void readSpawnData(FriendlyByteBuf buffer)
+    {
+        var ownerId = buffer.readInt();
+        if (ownerId != 0) setOwner(getLevel().getEntity(ownerId));
+        movementSpeed = buffer.readFloat();
+        maxSize = buffer.readFloat();
+        maxAge = buffer.readInt();
     }
 
     /**
@@ -225,7 +244,7 @@ public class BreathNode extends Projectile
     public void ageBySpeed()
     {
         var currentSpeed = getDeltaMovement().length();
-        var dif = getSpeed() - currentSpeed;
+        var dif = getMovementSpeed() - currentSpeed;
         if (dif > 0.1) age += 5 * dif;
     }
 
@@ -278,14 +297,14 @@ public class BreathNode extends Projectile
         return maxAge;
     }
 
-    public float getSpeed()
+    public float getMovementSpeed()
     {
-        return variedSpeed;
+        return movementSpeed;
     }
 
     public float getAgeFraction()
     {
-        return Mth.clamp(age / getMaxAge(), 0, 1);
+        return Mth.clamp((float) age / (float) getMaxAge(), 0f, 1f);
     }
 
     public float getIntensityScale()

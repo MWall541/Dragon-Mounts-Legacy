@@ -1,9 +1,6 @@
 package com.github.kay9.dragonmounts;
 
-import com.github.kay9.dragonmounts.client.DragonEggRenderer;
-import com.github.kay9.dragonmounts.client.DragonModel;
-import com.github.kay9.dragonmounts.client.DragonRenderer;
-import com.github.kay9.dragonmounts.client.EggEntityRenderer;
+import com.github.kay9.dragonmounts.client.*;
 import com.github.kay9.dragonmounts.entity.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.entity.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
@@ -11,7 +8,6 @@ import com.github.kay9.dragonmounts.entity.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.network.WeaponAbilityPacket;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -99,7 +95,8 @@ public class DragonMountsLegacy
         ForgeHooksClient.registerLayerDefinition(DragonRenderer.LAYER_LOCATION, DragonModel::createBodyLayer);
 
         e.registerEntityRenderer(DMLRegistry.DRAGON_EGG.get(), EggEntityRenderer::new);
-        e.registerEntityRenderer(DMLRegistry.FIRE_BREATH.get(), NoopRenderer::new); // fixme
+        e.registerEntityRenderer(DMLRegistry.FIRE_BREATH.get(), ctx -> new BreathNodeRenderer(ctx, id("textures/entity/weapon/breath/fire_breath.png"), false, true));
+        e.registerEntityRenderer(DMLRegistry.ICE_BREATH.get(), ctx -> new BreathNodeRenderer(ctx, id("textures/entity/weapon/breath/ice_breath.png"), true, false));
 
         e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }

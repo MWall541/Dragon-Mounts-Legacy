@@ -3,6 +3,8 @@ package com.github.kay9.dragonmounts.client;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.client.sounds.WeighedSoundEvents;
 
 public class WeaponSound
 {
@@ -82,6 +84,12 @@ public class WeaponSound
 
             volume = dragon.getSoundVolume();
             pitch = dragon.getVoicePitch();
+        }
+
+        @Override
+        public WeighedSoundEvents resolve(SoundManager pHandler)
+        {
+            return super.resolve(pHandler);
         }
 
         public boolean finishing()

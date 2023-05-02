@@ -41,7 +41,7 @@ public class FireBreathNode extends BreathNode
 
     public static FireBreathNode shoot(TameableDragon shooter)
     {
-        var direction = getShootDirection(shooter.getRandom(), shooter.getXRot(), shooter.getYHeadRot(), 1);
+        var direction = getShootDirection(shooter.getRandom(), shooter.getXRot(), shooter.getYHeadRot(), 8);
         return new FireBreathNode(shooter, shooter.getMouthPos(), direction);
     }
 
@@ -155,6 +155,12 @@ public class FireBreathNode extends BreathNode
     public boolean isOnFire()
     {
         return true;
+    }
+
+    @Override
+    public boolean displayFireAnimation()
+    {
+        return false;
     }
 
     @Override

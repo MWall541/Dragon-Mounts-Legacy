@@ -72,12 +72,12 @@ public class IceBreathNode extends BreathNode
         if (getLevel().isClientSide())
         {
             var motion = getDeltaMovement();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
                 var x = getRandomX(0.2) + motion.x();
                 var y = getRandomY() + motion.y();
                 var z = getRandomZ(0.2) + motion.z();
-                getLevel().addParticle(ParticleTypes.SNOWFLAKE, x, y, z, (2 * random.nextDouble() - 1) * 0.8, 0.05, (2 * random.nextDouble() - 1) * 0.8);
+                getLevel().addParticle(ParticleTypes.SNOWFLAKE, x, y, z, (2 * random.nextDouble() - 1) * 0.1, 0.05, (2 * random.nextDouble() - 1) * 0.1);
             }
         }
     }
@@ -98,7 +98,7 @@ public class IceBreathNode extends BreathNode
         if (getLevel().isClientSide())
         {
             getLevel().addDestroyBlockEffect(blockPosition(), Blocks.ICE.defaultBlockState());
-            playSound(SoundEvents.GLASS_BREAK, 0.75f, 1);
+            playSound(SoundEvents.GLASS_BREAK, 1f, 1);
         }
         super.expire();
     }

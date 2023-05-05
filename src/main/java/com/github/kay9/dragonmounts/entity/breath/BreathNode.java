@@ -92,7 +92,7 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
         super.tick();
 
         var prevPos = position();
-        refreshDimensions();
+        refreshDimensions(); //todo too expensive!
         setPos(prevPos);
 
         setDeltaMovement(getMoveDirection().scale(getMovementSpeed()));
@@ -133,8 +133,9 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
     @Override
     protected boolean canHitEntity(Entity entity)
     {
-        if (entity == this) return false;
-        if (getOwner() != null && getOwner().isAlliedTo(entity)) return false; // todo: do we want this?
+        if (getType() == entity.getType()) return false;
+        if (entity == getOwner()) return false;
+//        if (getOwner() != null && getOwner().isAlliedTo(entity)) return false; // todo: do we want this?
         return super.canHitEntity(entity);
     }
 
@@ -182,6 +183,9 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
         var owner = getOwner();
         var ownerId = owner == null? 0 : owner.getId();
         buffer.writeInt(ownerId);
+        buffer.writeDouble(direction.x);
+        buffer.writeDouble(direction.y);
+        buffer.writeDouble(direction.z);
         buffer.writeFloat(movementSpeed);
         buffer.writeFloat(maxSize);
         buffer.writeInt(maxAge);
@@ -192,6 +196,7 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
     {
         var ownerId = buffer.readInt();
         if (ownerId != 0) setOwner(getLevel().getEntity(ownerId));
+        direction = new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
         movementSpeed = buffer.readFloat();
         maxSize = buffer.readFloat();
         maxAge = buffer.readInt();

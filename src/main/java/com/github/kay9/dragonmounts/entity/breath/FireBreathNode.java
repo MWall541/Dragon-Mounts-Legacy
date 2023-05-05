@@ -29,6 +29,8 @@ public class FireBreathNode extends BreathNode
 {
     private static final Map<Block, ScorchResult> SCORCH_RESULTS = new HashMap<>(); //todo: eventually make this data-driven?
 
+    private static final int FIRE_SECONDS = 7;
+
     public FireBreathNode(EntityType<? extends FireBreathNode> type, Level level)
     {
         super(type, level);
@@ -88,10 +90,11 @@ public class FireBreathNode extends BreathNode
             damage = (float) shooter.getAttributeValue(Attributes.ATTACK_DAMAGE);
             dragon = shooter;
         }
+        damage *= getIntensityScale();
 
         var entity = result.getEntity();
         if (entity.fireImmune()) damage *= 0.25;
-        else entity.setSecondsOnFire((int) (7 * getIntensityScale()));
+        else entity.setSecondsOnFire((int) (FIRE_SECONDS * getIntensityScale()));
 
         if (entity.hurt(getDamageSource(), damage) && dragon != null)
             doEnchantDamageEffects(dragon, entity);

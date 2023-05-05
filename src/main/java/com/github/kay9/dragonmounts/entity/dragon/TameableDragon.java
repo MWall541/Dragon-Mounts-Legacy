@@ -109,7 +109,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private final DragonAnimator animator;
     private DragonBreed breed;
     private int reproCount;
-    private float ageProgress;
+    private float ageProgress = 1.0f;
 
     private final GroundPathNavigation groundNavigation;
     private final FlyingPathNavigation flyingNavigation;

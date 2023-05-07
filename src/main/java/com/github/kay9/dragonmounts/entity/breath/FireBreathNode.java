@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class FireBreathNode extends BreathNode
 {
-    private static final Map<Block, ScorchResult> SCORCH_RESULTS = new HashMap<>(); //todo: eventually make this data-driven?
+    private static final BreathEnvironmentEffects EFFECTS = new BreathEnvironmentEffects();
 
     private static final int BASE_FIRE_SPREAD = 10;
     private static final int FIRE_SECONDS = 7;
@@ -133,9 +133,9 @@ public class FireBreathNode extends BreathNode
         }
         else
         {
-            var scorched = getScorchedResult(state, directContact);
-            if (scorched != null)
-                getLevel().setBlockAndUpdate(pos, scorched); // unburnable blocks get scorched instead.
+            var chance = random.nextDouble();
+            if (directContact) chance *= 0.5;
+            EFFECTS.affectEnvironment(getLevel(), pos, state, chance);
         }
     }
 
@@ -194,40 +194,20 @@ public class FireBreathNode extends BreathNode
         return new IndirectEntityDamageSource(name, this, shooter).setIsFire().setProjectile();
     }
 
-    @Nullable
-    private BlockState getScorchedResult(BlockState previous, boolean directContact)
-    {
-        var result = SCORCH_RESULTS.get(previous.getBlock());
-        if (result != null)
-        {
-            var chance = result.chance() * DMLConfig.getBreathBurnMultiplier();
-            if (!directContact) chance *= 0.25f;
-            if (random.nextDouble() < chance) return result.result();
-        }
-        return null;
-    }
-
-    private record ScorchResult(double chance, BlockState result) {}
-
-    public static void registerScorchResult(Block from, double chance, BlockState result)
-    {
-        SCORCH_RESULTS.put(from, new ScorchResult(chance, result));
-    }
-
     static
     {
-        registerScorchResult(Blocks.SAND, 0.005, Blocks.GLASS.defaultBlockState());
-        registerScorchResult(Blocks.RED_SAND, 0.005, Blocks.GLASS.defaultBlockState());
-        registerScorchResult(Blocks.SNOW_BLOCK, 0.05, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 14));
-        registerScorchResult(Blocks.SNOW, 0.1, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 2));
-        registerScorchResult(Blocks.ICE, 0.15, Blocks.WATER.defaultBlockState());
-        registerScorchResult(Blocks.PACKED_ICE, 0.075, Blocks.WATER.defaultBlockState());
-        registerScorchResult(Blocks.BLUE_ICE, 0.01, Blocks.WATER.defaultBlockState());
-        registerScorchResult(Blocks.WATER, 0.01, Blocks.AIR.defaultBlockState());
-        registerScorchResult(Blocks.GRASS_BLOCK, 0.1, Blocks.DIRT.defaultBlockState());
-        registerScorchResult(Blocks.STONE, 0.01, Blocks.BLACKSTONE.defaultBlockState());
-        registerScorchResult(Blocks.COBBLESTONE, 0.01, Blocks.BLACKSTONE.defaultBlockState());
-        registerScorchResult(Blocks.BLACKSTONE, 0.001, Blocks.MAGMA_BLOCK.defaultBlockState());
-        registerScorchResult(Blocks.MAGMA_BLOCK, 0.0005, Blocks.LAVA.defaultBlockState());
+        EFFECTS.registerBasicReplacer(Blocks.SAND, Blocks.GLASS.defaultBlockState(), 0.005);
+        EFFECTS.registerBasicReplacer(Blocks.RED_SAND, Blocks.GLASS.defaultBlockState(), 0.005);
+        EFFECTS.registerBasicReplacer(Blocks.SNOW_BLOCK, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 14), 0.05);
+        EFFECTS.registerBasicReplacer(Blocks.SNOW, Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, 2), 0.1);
+        EFFECTS.registerBasicReplacer(Blocks.ICE, Blocks.WATER.defaultBlockState(), 0.15);
+        EFFECTS.registerBasicReplacer(Blocks.PACKED_ICE, Blocks.WATER.defaultBlockState(), 0.075);
+        EFFECTS.registerBasicReplacer(Blocks.BLUE_ICE, Blocks.WATER.defaultBlockState(), 0.01);
+        EFFECTS.registerBasicReplacer(Blocks.WATER, Blocks.AIR.defaultBlockState(), 0.01);
+        EFFECTS.registerBasicReplacer(Blocks.GRASS_BLOCK, Blocks.DIRT.defaultBlockState(), 0.1);
+        EFFECTS.registerBasicReplacer(Blocks.STONE, Blocks.BLACKSTONE.defaultBlockState(), 0.01);
+        EFFECTS.registerBasicReplacer(Blocks.COBBLESTONE, Blocks.BLACKSTONE.defaultBlockState(), 0.01);
+        EFFECTS.registerBasicReplacer(Blocks.BLACKSTONE, Blocks.MAGMA_BLOCK.defaultBlockState(), 0.001);
+        EFFECTS.registerBasicReplacer(Blocks.MAGMA_BLOCK, Blocks.LAVA.defaultBlockState(), 0.0005);
     }
 }

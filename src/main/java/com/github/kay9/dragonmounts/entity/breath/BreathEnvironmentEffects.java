@@ -29,11 +29,11 @@ public class BreathEnvironmentEffects
         behaviors.put(affected, behavior);
     }
 
-    public void registerBasicReplacer(Block affecting, Block replacer, double chance)
+    public void registerBasicReplacer(Block affecting, BlockState replacer, double chance)
     {
         register(affecting, (level, pos, state, c) ->
         {
-            if (c < chance) level.setBlockAndUpdate(pos, replacer.defaultBlockState());
+            if (c < chance) level.setBlockAndUpdate(pos, replacer);
         });
     }
 

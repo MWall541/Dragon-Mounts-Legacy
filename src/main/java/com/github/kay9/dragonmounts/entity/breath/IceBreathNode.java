@@ -241,11 +241,11 @@ public class IceBreathNode extends BreathNode
     static
     {
         EFFECTS.register(Blocks.WATER, frostedIceBehavior());
-        EFFECTS.registerBasicReplacer(Blocks.FROSTED_ICE, Blocks.ICE, 0.05);
-        EFFECTS.registerBasicReplacer(Blocks.ICE, Blocks.PACKED_ICE, 0.005);
-        EFFECTS.registerBasicReplacer(Blocks.PACKED_ICE, Blocks.BLUE_ICE, 0.0001);
+        EFFECTS.registerBasicReplacer(Blocks.FROSTED_ICE, Blocks.ICE.defaultBlockState(), 0.05);
+        EFFECTS.registerBasicReplacer(Blocks.ICE, Blocks.PACKED_ICE.defaultBlockState(), 0.005);
+        EFFECTS.registerBasicReplacer(Blocks.PACKED_ICE, Blocks.BLUE_ICE.defaultBlockState(), 0.0001);
         EFFECTS.register(Blocks.SNOW, snowLayerBehavior());
-        EFFECTS.registerBasicReplacer(Blocks.LAVA, Blocks.OBSIDIAN, 0.005); // Direct contact melts into water and makes obsidian anyway, so let's cover close-by contact.
+        EFFECTS.registerBasicReplacer(Blocks.LAVA, Blocks.OBSIDIAN.defaultBlockState(), 0.005); // Direct contact melts into water and makes obsidian anyway, so let's cover close-by contact.
     }
 
     private static BreathEnvironmentEffects.BreathBehavior snowLayerBehavior()

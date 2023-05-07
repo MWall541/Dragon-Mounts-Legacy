@@ -20,7 +20,6 @@ public class BreathNodeRenderer extends EntityRenderer<BreathNode>
     private static final Random QUAD_RANDOM = new Random();
 
     private final ResourceLocation texture;
-    private final RenderType renderType;
     private final boolean quadTexture;
     private final boolean fullBright;
 
@@ -28,7 +27,6 @@ public class BreathNodeRenderer extends EntityRenderer<BreathNode>
     {
         super(ctx);
         this.texture = texture;
-        this.renderType = RenderType.entityCutoutNoCull(texture);
         this.quadTexture = quadTexture;
         this.fullBright = fullBright;
     }
@@ -57,7 +55,15 @@ public class BreathNodeRenderer extends EntityRenderer<BreathNode>
         var last = pPoseStack.last();
         var pos = last.pose();
         var normal = last.normal();
-        var consumer = pBuffer.getBuffer(renderType);
+        var consumer = pBuffer.getBuffer(RenderType.entityTranslucent(texture));
+
+        var alpha = 255;
+        var ageFrac = pEntity.getAgeFraction();
+        if (ageFrac >= 0.9f)
+        {
+            ageFrac -= 0.9f;
+            alpha *= (10 * -ageFrac) + 1;
+        }
 
         var minU = 0f;
         var minV = 0f;
@@ -84,17 +90,17 @@ public class BreathNodeRenderer extends EntityRenderer<BreathNode>
             maxV *= 0.5f;
         }
 
-        vertex(consumer, pos, normal, 0.5f, 1, maxU, minV, pPackedLight);
-        vertex(consumer, pos, normal, 0.5f, 0, maxU, maxV, pPackedLight);
-        vertex(consumer, pos, normal, -0.5f, 0, minU, maxV, pPackedLight);
-        vertex(consumer, pos, normal, -0.5f, 1, minU, minV, pPackedLight);
+        vertex(consumer, pos, normal, 0.5f, 1, alpha, maxU, minV, pPackedLight);
+        vertex(consumer, pos, normal, 0.5f, 0, alpha, maxU, maxV, pPackedLight);
+        vertex(consumer, pos, normal, -0.5f, 0, alpha, minU, maxV, pPackedLight);
+        vertex(consumer, pos, normal, -0.5f, 1, alpha, minU, minV, pPackedLight);
         pPoseStack.popPose();
     }
 
-    private static void vertex(VertexConsumer vertex, Matrix4f pos, Matrix3f normal, float x, float y, float u, float v, int lightCords)
+    private static void vertex(VertexConsumer vertex, Matrix4f pos, Matrix3f normal, float x, float y, int alpha,  float u, float v, int lightCords)
     {
         vertex.vertex(pos, x, y, 0)
-                .color(255, 255, 255, 255)
+                .color(255, 255, 255, alpha)
                 .uv(u, v)
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(lightCords)

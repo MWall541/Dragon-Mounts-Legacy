@@ -52,7 +52,7 @@ public class DMLConfig
     private static final ForgeConfigSpec.DoubleValue FIRE_BREATH_SPREAD;
     public static double getFireSpreadMultiplier()
     {
-        return FIRE_BREATH_SPREAD.get();
+        return FIRE_BREATH_SPREAD.get(); // 1
     }
 
     private static final ForgeConfigSpec.DoubleValue FIRE_BREATH_BURN;

@@ -10,7 +10,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
@@ -29,6 +28,7 @@ public class FireBreathNode extends BreathNode
 {
     private static final Map<Block, ScorchResult> SCORCH_RESULTS = new HashMap<>(); //todo: eventually make this data-driven?
 
+    private static final int BASE_FIRE_SPREAD = 10;
     private static final int FIRE_SECONDS = 7;
 
     public FireBreathNode(EntityType<? extends FireBreathNode> type, Level level)
@@ -43,7 +43,7 @@ public class FireBreathNode extends BreathNode
 
     public static FireBreathNode shoot(TameableDragon shooter)
     {
-        var direction = getShootDirection(shooter.getRandom(), shooter.getXRot(), shooter.getYHeadRot(), 8);
+        var direction = getShootDirection(shooter.getRandom(), shooter.getXRot(), shooter.getYHeadRot(), 6);
         return new FireBreathNode(shooter, shooter.getMouthPos(), direction);
     }
 
@@ -83,21 +83,13 @@ public class FireBreathNode extends BreathNode
 
         if (getLevel().isClientSide()) return;
 
-        var damage = (float) TameableDragon.BASE_DAMAGE;
-        TameableDragon dragon = null;
-        if (getOwner() instanceof TameableDragon shooter)
-        {
-            damage = (float) shooter.getAttributeValue(Attributes.ATTACK_DAMAGE);
-            dragon = shooter;
-        }
-        damage *= getIntensityScale();
-
+        var damage = getBaseDamage() * getIntensityScale();
         var entity = result.getEntity();
+
         if (entity.fireImmune()) damage *= 0.25;
         else entity.setSecondsOnFire((int) (FIRE_SECONDS * getIntensityScale()));
 
-        if (entity.hurt(getDamageSource(), damage) && dragon != null)
-            doEnchantDamageEffects(dragon, entity);
+        hurtEntity(entity, getDamageSource(), damage);
     }
 
     @Override
@@ -105,13 +97,12 @@ public class FireBreathNode extends BreathNode
     {
         super.onHitBlock(result);
 
-        if (getLevel().isClientSide()) return;
-
         var dir = result.getDirection();
         var entityDir = Direction.getNearest(getMoveDirection().x(), getMoveDirection().y(), getMoveDirection().z());
         var directContact = entityDir.getOpposite() == dir;
         if (directContact) age += 1;
 
+        if (getLevel().isClientSide()) return;
         if (!(getOwner() instanceof TameableDragon dragon) || !DMLConfig.canGrief(dragon)) return;
 
         var pos = result.getBlockPos();
@@ -121,8 +112,8 @@ public class FireBreathNode extends BreathNode
 
         if (BaseFireBlock.canBePlacedAt(getLevel(), relative, dir))
         {
-            int fireChance = 5 + state.getFireSpreadSpeed(getLevel(), pos, dir);
-            if (directContact) fireChance *= 1.35;
+            int fireChance = 2 + state.getFireSpreadSpeed(getLevel(), pos, dir);
+            if (directContact) fireChance *= 1.25;
             if (raining) fireChance *= 0.5;
             fireChance *= getIntensityScale();
             fireChance *= DMLConfig.getFireSpreadMultiplier();

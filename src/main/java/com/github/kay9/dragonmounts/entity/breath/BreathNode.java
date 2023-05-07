@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.entity.breath;
 
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.entity.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -91,9 +92,7 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
 
         super.tick();
 
-        var prevPos = position();
-        refreshDimensions(); //todo too expensive!
-        setPos(prevPos);
+        refreshDimensions();
 
         setDeltaMovement(getMoveDirection().scale(getMovementSpeed()));
         move(MoverType.SELF, getDeltaMovement());
@@ -172,6 +171,12 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
     }
 
     @Override
+    protected float getEyeHeight(Pose pPose, EntityDimensions dimensions)
+    {
+        return dimensions.height * 0.5f;
+    }
+
+    @Override
     public Packet<?> getAddEntityPacket()
     {
         return NetworkHooks.getEntitySpawningPacket(this);
@@ -202,6 +207,17 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
         maxAge = buffer.readInt();
     }
 
+    @Override
+    public void refreshDimensions() // vanilla impl does inefficient calculations
+    {
+        var prevPos = position();
+        var pose = getPose();
+        dimensions = getDimensions(pose);
+        eyeHeight = getEyeHeight(pose, dimensions);
+
+        setPos(prevPos.x(), prevPos.y(), prevPos.z());
+    }
+
     /**
      * Describes the method of contact on objects in the environment. Called every tick.
      */
@@ -229,7 +245,7 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
      */
     public void touch()
     {
-        var box = getBoundingBox().inflate(0.1);
+        var box = getBoundingBox().inflate(1);
         for (var pos : BlockPos.betweenClosed((int) box.minX, (int) box.minY, (int) box.minZ, (int) box.maxX, (int) box.maxY, (int) box.maxZ))
         {
             if (!level.getBlockState(pos).isAir())
@@ -239,7 +255,7 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
                 onHit(new BlockHitResult(Vec3.atLowerCornerOf(pos), dir, pos, false));
             }
         }
-        for (var entity : getLevel().getEntities(null, box))
+        for (var entity : getLevel().getEntities((Entity) null, box, this::canHitEntity))
             onHit(new EntityHitResult(entity));
     }
 
@@ -342,5 +358,18 @@ public class BreathNode extends Projectile implements IEntityAdditionalSpawnData
         var maxSize = getMaxSize() * getIntensityScale();
         var startSize = 0.2f * maxSize;
         return Mth.lerp(ageFraction, startSize, maxSize);
+    }
+
+    protected float getBaseDamage()
+    {
+        if (getOwner() instanceof LivingEntity l)
+            return (float) l.getAttributeValue(DMLRegistry.PROJECTILE_DAMAGE_ATTRIBUTE.get());
+        return (float) TameableDragon.BASE_PROJECTILE_DAMAGE;
+    }
+
+    protected void hurtEntity(Entity entity, DamageSource source, float damage)
+    {
+        if (entity.invulnerableTime <= 10 && entity.hurt(source, damage) && getOwner() instanceof LivingEntity l)
+            doEnchantDamageEffects(l, entity);
     }
 }

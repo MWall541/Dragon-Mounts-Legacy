@@ -16,6 +16,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -60,8 +62,9 @@ public class DMLRegistry
     public static final RegistryObject<EntityType<FireBreathNode>> FIRE_BREATH = entity("fire_breath", EntityType.Builder.of(FireBreathNode::new, MobCategory.MISC).sized(BreathNode.DEFAULT_MAX_SIZE, BreathNode.DEFAULT_MAX_SIZE).clientTrackingRange(4).updateInterval(10));
     public static final RegistryObject<EntityType<IceBreathNode>> ICE_BREATH = entity("ice_breath", EntityType.Builder.of(IceBreathNode::new, MobCategory.MISC).sized(BreathNode.DEFAULT_MAX_SIZE, BreathNode.DEFAULT_MAX_SIZE).clientTrackingRange(4).updateInterval(10));
 
-
     public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
+
+    public static final RegistryObject<Attribute> PROJECTILE_DAMAGE_ATTRIBUTE = register("dragon.projectile_damage", Keys.ATTRIBUTES, () -> new RangedAttribute("attribute.name.dragon.projectile_damage", 2, 0, 2048));
 
     public static final BooleanSupplier FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, KeyMapping.CATEGORY_MOVEMENT);
     public static final BooleanSupplier WEAPON_KEY = keymap("weapon", GLFW.GLFW_KEY_R, KeyMapping.CATEGORY_GAMEPLAY);

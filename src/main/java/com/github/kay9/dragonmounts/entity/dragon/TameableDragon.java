@@ -79,6 +79,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final double BASE_SPEED_GROUND = 0.3;
     public static final double BASE_SPEED_FLYING = 0.525;
     public static final double BASE_DAMAGE = 8;
+    public static final double BASE_PROJECTILE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
     public static final double BASE_FOLLOW_RANGE = 16;
     public static final int BASE_KB_RESISTANCE = 1;
@@ -150,6 +151,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 .add(FOLLOW_RANGE, BASE_FOLLOW_RANGE)
                 .add(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
                 .add(ATTACK_DAMAGE, BASE_DAMAGE)
+                .add(DMLRegistry.PROJECTILE_DAMAGE_ATTRIBUTE.get(), BASE_PROJECTILE_DAMAGE)
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
     }
 
@@ -1128,7 +1130,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public Vec3 getMouthPos()
     {
         var rotVector = Vec3.directionFromRotation(getXRot() * 0.2f, getYRot());
-        var position = getEyePosition().add(0, -1.1, 0);
+        var position = getEyePosition().add(0, -0.9, 0);
         return position.add(rotVector.scale(getBbWidth() * 1.75));
     }
 

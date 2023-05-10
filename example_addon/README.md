@@ -14,3 +14,13 @@ A "lowcode" mod is basically what it says on the tin. lowcode. Or no code at all
 files need to be archived as a jar, which is pretty trivial if you've made it this far anyway. **Just package your files
 inside a zip and rename the file extension to `.jar`**. Yes, it's safe and it does work, and yes, I realize its not
 ideal, but it's better than before.
+
+Once your lowcode mod is finished, it should be packaged as shown:
+```
+-- example_addon.jar
+    | -- META-INF/
+    | -- assets/
+    | -- data/
+    | -- pack.mcmeta
+```
+> The README.MD is not necessary to be in your packaged jar.

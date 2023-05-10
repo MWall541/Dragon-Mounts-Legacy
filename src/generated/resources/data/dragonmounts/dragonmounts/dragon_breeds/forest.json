@@ -14,8 +14,8 @@
       "type": "biome"
     }
   ],
-  "primary_color": 346624,
-  "secondary_color": 693760,
+  "primary_color": "54a00",
+  "secondary_color": "a9600",
   "hatch_particles": {
     "type": "minecraft:happy_villager"
   }

@@ -5,6 +5,7 @@ import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.Habitat;
+import com.github.kay9.dragonmounts.util.HexCodec;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,8 +42,8 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     implements IForgeRegistryEntry<DragonBreed>
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
-            Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
+            HexCodec.CODEC.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
+            HexCodec.CODEC.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             ModelProperties.CODEC.optionalFieldOf("model_properties", ModelProperties.STANDARD).forGetter(DragonBreed::modelProperties),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
@@ -59,8 +60,8 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     ).apply(instance, DragonBreed::new));
 
     public static final Codec<DragonBreed> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
-            Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
+            HexCodec.CODEC.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
+            HexCodec.CODEC.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             ModelProperties.CODEC.fieldOf("model_properties").forGetter(DragonBreed::modelProperties),
             Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),

@@ -19,8 +19,8 @@
       "type": "biome"
     }
   ],
-  "primary_color": 9511936,
-  "secondary_color": 3017472,
+  "primary_color": "912400",
+  "secondary_color": "2e0b00",
   "hatch_particles": {
     "type": "minecraft:soul_fire_flame"
   }

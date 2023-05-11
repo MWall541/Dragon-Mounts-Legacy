@@ -4,12 +4,11 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
-import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
-import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
-import com.github.kay9.dragonmounts.dragon.ai.DragonFollowOwnerGoal;
-import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
+import com.github.kay9.dragonmounts.dragon.ai.*;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -28,6 +27,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -38,10 +38,16 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
+import net.minecraft.world.entity.animal.goat.GoatAi;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.hoglin.HoglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -111,6 +117,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     private final GroundPathNavigation groundNavigation;
     private final FlyingPathNavigation flyingNavigation;
+    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super TameableDragon>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS);
+    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT);
 
     public TameableDragon(EntityType<? extends TameableDragon> type, Level level)
     {
@@ -151,24 +159,54 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
     }
 
-    @Override
-    protected void registerGoals() // TODO: Much Smarter AI and features
-    {
-//        goalSelector.addGoal(1, new DragonLandGoal(this));
-        goalSelector.addGoal(1, new FloatGoal(this));
-        goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
-//        goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
-        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1.1, 10f, 3.5f, 32f));
-        goalSelector.addGoal(5, new DragonBreedGoal(this));
-        goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1));
-        goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
-        goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+//    @Override
+//    protected void registerGoals() // TODO: Much Smarter AI and features
+//    {
+////        goalSelector.addGoal(1, new DragonLandGoal(this));
+//        goalSelector.addGoal(1, new FloatGoal(this));
+//        goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
+//        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
+////        goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
+//        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1.1, 10f, 3.5f, 32f));
+//        goalSelector.addGoal(5, new DragonBreedGoal(this));
+//        goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1));
+//        goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
+//        goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+//
+//        targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
+//        targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
+//        targetSelector.addGoal(2, new HurtByTargetGoal(this));
+//        targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Animal.class, false, e -> !(e instanceof TameableDragon)));
+//    }
 
-        targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
-        targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-        targetSelector.addGoal(2, new HurtByTargetGoal(this));
-        targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Animal.class, false, e -> !(e instanceof TameableDragon)));
+    @Override
+    protected Brain.Provider<TameableDragon> brainProvider()
+    {
+        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+    }
+
+    @Override
+    protected Brain<?> makeBrain(Dynamic<?> pDynamic)
+    {
+        return DragonAi.makeBrain(this.brainProvider().makeBrain(pDynamic));
+    }
+
+    @Override
+    public Brain<TameableDragon> getBrain()
+    {
+        return (Brain<TameableDragon>)super.getBrain();
+    }
+
+    @Override
+    protected void customServerAiStep()
+    {
+        this.level.getProfiler().push("dragonBrain");
+        this.getBrain().tick((ServerLevel)this.level, this);
+        this.level.getProfiler().pop();
+        this.level.getProfiler().push("dragonActivityUpdate");
+        DragonAi.updateActivity(this);
+        this.level.getProfiler().pop();
+        super.customServerAiStep();
     }
 
     @Override

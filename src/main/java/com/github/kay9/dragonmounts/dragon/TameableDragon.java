@@ -33,11 +33,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
@@ -45,9 +40,6 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
-import net.minecraft.world.entity.animal.goat.GoatAi;
-import net.minecraft.world.entity.monster.hoglin.Hoglin;
-import net.minecraft.world.entity.monster.hoglin.HoglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -118,7 +110,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private final GroundPathNavigation groundNavigation;
     private final FlyingPathNavigation flyingNavigation;
     protected static final ImmutableList<? extends SensorType<? extends Sensor<? super TameableDragon>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS);
-    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT);
+    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.AVOID_TARGET);
 
     public TameableDragon(EntityType<? extends TameableDragon> type, Level level)
     {
@@ -804,36 +796,32 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * Called when the entity is attacked.
      */
     @Override
-    public boolean hurt(DamageSource src, float par2)
+    public boolean hurt(DamageSource src, float amount)
     {
         if (isInvulnerableTo(src)) return false;
 
         // don't just sit there!
         setOrderedToSit(false);
 
-        return super.hurt(src, par2);
+        boolean flag = super.hurt(src, amount);
+
+        if (this.level.isClientSide)
+        {
+            return false;
+        }
+
+        if (flag && src.getEntity() instanceof LivingEntity)
+        {
+            DragonAi.wasHurtBy(this, (LivingEntity) src.getEntity());
+        }
+
+        return flag;
     }
 
-    /**
-     * Returns true if the mob is currently able to mate with the specified mob.
-     */
     @Override
-    public boolean canMate(Animal mate)
+    public boolean canFallInLove()
     {
-        if (mate == this) return false; // No. Just... no.
-        else if (!(mate instanceof TameableDragon)) return false;
-        else if (!canReproduce()) return false;
-
-        TameableDragon dragonMate = (TameableDragon) mate;
-
-        if (!dragonMate.isTame()) return false;
-        else if (!dragonMate.canReproduce()) return false;
-        else return isInLove() && dragonMate.isInLove();
-    }
-
-    public boolean canReproduce()
-    {
-        return isTame() && reproCount < DMLConfig.reproLimit();
+        return isTame() && reproCount < DMLConfig.reproLimit() && super.canFallInLove();
     }
 
     @Override
@@ -894,6 +882,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         mate.addReproCount();
         egg.setPos(getX(), getY(), getZ());
         level.addFreshEntity(egg);
+
+        // Reset love state
+        this.resetLove();
+        mate.resetLove();
     }
 
     @Override

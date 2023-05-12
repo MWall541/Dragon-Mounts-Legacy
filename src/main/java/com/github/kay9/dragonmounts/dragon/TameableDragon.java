@@ -821,7 +821,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean canFallInLove()
     {
-        return isTame() && reproCount < DMLConfig.reproLimit() && super.canFallInLove();
+        return isTame() && isAdult() && reproCount < DMLConfig.reproLimit() && super.canFallInLove();
     }
 
     @Override

@@ -44,6 +44,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SaddleItem;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -51,6 +52,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -833,6 +836,18 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             return;
         }
 
+        // Respect Mod compatibility
+        if (MinecraftForge.EVENT_BUS.post(new BabyEntitySpawnEvent(animal, mate, null)))
+        {
+            // Reset the "inLove" state for the animals
+            animal.setAge(6000);
+            mate.setAge(6000);
+            return;
+        }
+
+        animal.resetLove();
+        mate.resetLove();
+
         DragonEgg egg = DMLRegistry.DRAGON_EGG.get().create(level);
 
         // pick a breed to inherit from
@@ -883,9 +898,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         egg.setPos(getX(), getY(), getZ());
         level.addFreshEntity(egg);
 
-        // Reset love state
-        this.resetLove();
-        mate.resetLove();
+        level.broadcastEntityEvent(animal, (byte) 18);
+        if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))
+            level.addFreshEntity(new ExperienceOrb(level, animal.getX(), animal.getY(), animal.getZ(), animal.getRandom().nextInt(7) + 1));
     }
 
     @Override

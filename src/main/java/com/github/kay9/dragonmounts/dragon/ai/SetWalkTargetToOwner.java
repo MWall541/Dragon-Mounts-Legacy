@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
@@ -25,7 +26,7 @@ public class SetWalkTargetToOwner extends Behavior<TamableAnimal>
 
     public SetWalkTargetToOwner(float speedModifier, int stopDistance, int startDistance)
     {
-        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
+        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED));
         this.speedModifier = speedModifier;
         this.stopDistance = stopDistance;
         this.startDistanceSqr = startDistance * startDistance;
@@ -44,5 +45,6 @@ public class SetWalkTargetToOwner extends Behavior<TamableAnimal>
         LivingEntity owner = animal.getOwner();
         if (owner == null) return;
         animal.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(owner, this.speedModifier, this.stopDistance));
+        animal.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(owner, true));
     }
 }

@@ -49,8 +49,9 @@ public class DragonAi
     private static void initIdleActivity(Brain<TameableDragon> brain)
     {
         brain.addActivity(Activity.IDLE, 10, ImmutableList.of(
-                new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0F),
-                new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0F), UniformInt.of(30, 60)),
+                new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0f),
+                new SetWalkTargetToOwner(1.0f),
+                new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0f), UniformInt.of(30, 60)),
                 new StartAttacking<>(DragonAi::canAttackRandomly, DragonAi::findNearestValidAttackTarget),
                 getIdleMovementBehaviors()));
     }

@@ -324,9 +324,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setNavigation(boolean flying)
     {
-            navigation = flying ?
-                    flyingNavigation :
-                    groundNavigation;
+        flyingNavigation.stop();
+        groundNavigation.stop();
+        navigation = flying ?
+                flyingNavigation :
+                groundNavigation;
     }
 
     @Override
@@ -337,6 +339,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (isServer())
         {
             if (age < 0 && tickCount % AGE_UPDATE_INTERVAL == 0) entityData.set(DATA_AGE, age);
+
+            if (!isFlying() && canLiftOff() && navigation.getPath() != null && !navigation.getPath().canReach())
+            {
+                liftOff();
+            }
 
             // update flying state based on the distance to the ground
             boolean flying = shouldFly();
@@ -523,6 +530,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void liftOff()
     {
         if (canFly()) jumpFromGround();
+    }
+
+    public boolean canLiftOff()
+    {
+        return level.noCollision(this, this.getBoundingBox().move(0, getJumpPower(), 0));
     }
 
     @Override

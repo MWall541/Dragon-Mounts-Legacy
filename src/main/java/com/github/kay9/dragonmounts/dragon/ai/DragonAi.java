@@ -32,6 +32,7 @@ public class DragonAi
         initIdleActivity(brain);
         initFightActivity(brain);
         initAvoidActivity(brain);
+        initSitActivity(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.useDefaultActivity();
@@ -42,6 +43,7 @@ public class DragonAi
     {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
                 new Swim(0.8f),
+                new SitWhenOrderedTo(),
                 new LookAtTargetSink(45, 90),
                 new LiftOffIfTargetIsHighEnough(),
                 new MoveToTargetSink()));
@@ -79,6 +81,14 @@ public class DragonAi
         ), MemoryModuleType.AVOID_TARGET);
     }
 
+    private static void initSitActivity(Brain<TameableDragon> brain)
+    {
+        brain.addActivityAndRemoveMemoryWhenStopped(DMLRegistry.SIT.get(), 10, ImmutableList.of(
+                new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0f),
+                new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0F), UniformInt.of(30, 60))
+        ), DMLRegistry.SITTING.get());
+    }
+
     private static RunOne<TameableDragon> getIdleMovementBehaviors()
     {
         return new RunOne<>(ImmutableList.of(
@@ -92,6 +102,7 @@ public class DragonAi
         dragon.getBrain().setActiveActivityToFirstValid(ImmutableList.of(
                 Activity.FIGHT,
                 Activity.AVOID,
+                DMLRegistry.SIT.get(),
                 Activity.IDLE));
     }
 

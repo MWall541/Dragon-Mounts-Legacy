@@ -13,6 +13,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -28,6 +30,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -59,6 +62,9 @@ public class DMLRegistry
 
     public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
 
+    public static final RegistryObject<MemoryModuleType<Boolean>> SITTING = memory("is_sitting");
+    public static final RegistryObject<Activity> SIT = activity("sit");
+
     public static final BooleanSupplier FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
@@ -69,6 +75,16 @@ public class DMLRegistry
     private static RegistryObject<SoundEvent> sound(String name)
     {
         return register(name, Keys.SOUND_EVENTS, () -> new SoundEvent(DragonMountsLegacy.id(name)));
+    }
+
+    private static <T> RegistryObject<MemoryModuleType<T>> memory(String name)
+    {
+        return register(name, Keys.MEMORY_MODULE_TYPES, () -> new MemoryModuleType<>(Optional.empty()));
+    }
+
+    private static RegistryObject<Activity> activity(String name)
+    {
+        return register(name, Keys.ACTIVITIES, () -> new Activity(name));
     }
 
     @SuppressWarnings({"ConstantConditions"})

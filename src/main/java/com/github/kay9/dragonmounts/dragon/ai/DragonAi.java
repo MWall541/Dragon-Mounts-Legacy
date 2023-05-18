@@ -84,7 +84,6 @@ public class DragonAi
     private static void initSitActivity(Brain<TameableDragon> brain)
     {
         brain.addActivityAndRemoveMemoryWhenStopped(DMLRegistry.SIT.get(), 10, ImmutableList.of(
-                new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0f),
                 new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0F), UniformInt.of(30, 60))
         ), DMLRegistry.SITTING.get());
     }

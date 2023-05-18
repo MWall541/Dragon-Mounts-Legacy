@@ -25,6 +25,7 @@ public class SitWhenOrderedTo extends Behavior<TamableAnimal> {
     @Override
     protected void start(ServerLevel level, TamableAnimal animal, long gameTime) {
         super.start(level, animal, gameTime);
+        animal.getBrain().eraseMemory(MemoryModuleType.BREED_TARGET);
         animal.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         animal.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
         animal.getBrain().setMemory(DMLRegistry.SITTING.get(), true);

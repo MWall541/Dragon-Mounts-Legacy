@@ -33,14 +33,12 @@ public class LiftOffIfTargetIsHighEnough extends Behavior<TameableDragon>
         Optional<WalkTarget> walkTarget = dragon.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
         double verticalDistance = walkTarget.get().getTarget().currentPosition().y - dragon.getY();
         return dragon.canLiftOff()
-                && verticalDistance >= this.heightNeeded
-                && super.checkExtraStartConditions(level, dragon);
+                && verticalDistance >= this.heightNeeded;
     }
 
     @Override
     protected void start(ServerLevel level, TameableDragon dragon, long gameTime)
     {
-        super.start(level, dragon, gameTime);
         dragon.liftOff();
     }
 }

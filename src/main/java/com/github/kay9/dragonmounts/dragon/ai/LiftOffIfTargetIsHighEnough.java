@@ -10,6 +10,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 import java.util.Optional;
 
+// Is this temporary until writing a custom move behavior?
 public class LiftOffIfTargetIsHighEnough extends Behavior<TameableDragon>
 {
     private static final int HEIGHT_NEEDED = 3;
@@ -31,7 +32,9 @@ public class LiftOffIfTargetIsHighEnough extends Behavior<TameableDragon>
     {
         Optional<WalkTarget> walkTarget = dragon.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
         double verticalDistance = walkTarget.get().getTarget().currentPosition().y - dragon.getY();
-        return !dragon.isFlying() && dragon.canFly() && dragon.canLiftOff() && verticalDistance >= this.heightNeeded && super.checkExtraStartConditions(level, dragon);
+        return dragon.canLiftOff()
+                && verticalDistance >= this.heightNeeded
+                && super.checkExtraStartConditions(level, dragon);
     }
 
     @Override

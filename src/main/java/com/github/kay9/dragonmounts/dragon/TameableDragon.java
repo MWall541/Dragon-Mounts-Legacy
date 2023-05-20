@@ -340,11 +340,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             if (age < 0 && tickCount % AGE_UPDATE_INTERVAL == 0) entityData.set(DATA_AGE, age);
 
-            if (!isFlying() && canLiftOff() && navigation.getPath() != null && !navigation.getPath().canReach())
-            {
-                liftOff();
-            }
-
             // update flying state based on the distance to the ground
             boolean flying = shouldFly();
             if (flying != isFlying())
@@ -534,8 +529,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public boolean canLiftOff()
     {
-        // Should this also check flying status so liftoff can only happen on the ground?
-        return level.noCollision(this, this.getBoundingBox().move(0, getJumpPower(), 0));
+        // Should liftOff call this instead of canFly so all checks are consistent?
+        return !this.isFlying()
+                && this.canFly()
+                && level.noCollision(this, this.getBoundingBox().move(0, getJumpPower(), 0));
     }
 
     @Override

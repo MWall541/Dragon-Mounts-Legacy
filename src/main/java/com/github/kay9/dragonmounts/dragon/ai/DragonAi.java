@@ -46,6 +46,7 @@ public class DragonAi
                 new SitWhenOrderedTo(),
                 new LookAtTargetSink(45, 90),
                 new LiftOffIfTargetIsHighEnough(),
+                new LiftOffIfStuck(),
                 new MoveToTargetSink()));
     }
 
@@ -67,7 +68,7 @@ public class DragonAi
                 new RunIf<>(TameableDragon::isAdult, new MeleeAttack(40)),
                 new RunIf<>(TameableDragon::isBaby, new MeleeAttack(15)),
                 new StopAttackingIfTargetInvalid<>(),
-                new EraseMemoryIf<>(DragonAi::isBreeding, MemoryModuleType.ATTACK_TARGET)
+                new EraseMemoryIf<>(DragonAi::wantsToStopFighting, MemoryModuleType.ATTACK_TARGET)
         ), MemoryModuleType.ATTACK_TARGET);
     }
 
@@ -105,7 +106,7 @@ public class DragonAi
                 Activity.IDLE));
     }
 
-    private static boolean isBreeding(TameableDragon dragon)
+    private static boolean wantsToStopFighting(TameableDragon dragon)
     {
         return dragon.getBrain().hasMemoryValue(MemoryModuleType.BREED_TARGET);
     }
@@ -114,7 +115,7 @@ public class DragonAi
     {
         Brain<TameableDragon> brain = dragon.getBrain();
         brain.eraseMemory(MemoryModuleType.BREED_TARGET);
-        if (dragon.isBaby())
+        if (dragon.isBaby()) // Should juveniles have their own behavior?
         {
             retreatFromNearestTarget(dragon, attacker);
         }

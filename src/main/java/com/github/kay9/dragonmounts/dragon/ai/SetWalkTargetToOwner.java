@@ -43,7 +43,7 @@ public class SetWalkTargetToOwner extends Behavior<TamableAnimal>
     protected void start(ServerLevel level, TamableAnimal animal, long gameTime)
     {
         LivingEntity owner = animal.getOwner();
-        if (owner == null) return;
+        if (owner == null) return; // In theory, this should never be null because of checkExtraStartConditions
         animal.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(owner, this.speedModifier, this.stopDistance));
         animal.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(owner, true));
     }

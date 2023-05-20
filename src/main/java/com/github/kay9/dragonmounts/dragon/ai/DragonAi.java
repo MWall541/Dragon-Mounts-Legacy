@@ -25,6 +25,7 @@ import java.util.Optional;
 public class DragonAi
 {
     private static final UniformInt RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
+    private static final long RETALIATE_DURATION = 200L;
 
     public static Brain<?> makeBrain(Brain<TameableDragon> brain)
     {
@@ -44,6 +45,7 @@ public class DragonAi
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
                 new Swim(0.8f),
                 new SitWhenOrderedTo(),
+                new FightWithOwner(),
                 new LookAtTargetSink(45, 90),
                 new LiftOffIfTargetIsHighEnough(),
                 new LiftOffIfStuck(),
@@ -108,7 +110,9 @@ public class DragonAi
 
     private static boolean wantsToStopFighting(TameableDragon dragon)
     {
-        return dragon.getBrain().hasMemoryValue(MemoryModuleType.BREED_TARGET);
+        // If we trigger breeding or the target becomes an ally, stop attacking.
+        return dragon.getBrain().hasMemoryValue(MemoryModuleType.BREED_TARGET)
+                || dragon.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(target -> dragon.wantsToAttack(target, dragon.getOwner())).isEmpty();
     }
 
     public static void wasHurtBy(TameableDragon dragon, LivingEntity attacker)
@@ -129,7 +133,8 @@ public class DragonAi
     {
         if (!dragon.getBrain().isActive(Activity.AVOID)
                 && !BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(dragon, attacker, 4.0D)
-                && Sensor.isEntityAttackable(dragon, attacker))
+                && Sensor.isEntityAttackable(dragon, attacker)
+                && dragon.wantsToAttack(attacker, dragon.getOwner()))
         {
             setAttackTarget(dragon, attacker);
         }
@@ -140,7 +145,7 @@ public class DragonAi
         Brain<TameableDragon> brain = dragon.getBrain();
         brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
         brain.eraseMemory(MemoryModuleType.BREED_TARGET);
-        brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, 200L);
+        brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, RETALIATE_DURATION);
     }
 
     private static void retreatFromNearestTarget(TameableDragon dragon, LivingEntity target)
@@ -148,6 +153,7 @@ public class DragonAi
         Brain<TameableDragon> brain = dragon.getBrain();
         LivingEntity avoidTarget = BehaviorUtils.getNearestTarget(dragon, brain.getMemory(MemoryModuleType.AVOID_TARGET), target);
         avoidTarget = BehaviorUtils.getNearestTarget(dragon, brain.getMemory(MemoryModuleType.ATTACK_TARGET), avoidTarget);
+        // At this point avoidTarget is the closest of target, AVOID_TARGET, and ATTACK_TARGET
         setAvoidTarget(dragon, avoidTarget);
     }
 
@@ -168,7 +174,7 @@ public class DragonAi
     {
         return dragon.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
                 .orElse(NearestVisibleLivingEntities.empty())
-                .findClosest(e -> e instanceof Animal && Sensor.isEntityAttackable(dragon, e));
+                .findClosest(e -> e instanceof Animal && !(e instanceof TameableDragon) && Sensor.isEntityAttackable(dragon, e));
     }
 
     private static boolean canAttackRandomly(TameableDragon dragon)

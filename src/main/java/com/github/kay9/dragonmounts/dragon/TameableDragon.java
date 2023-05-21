@@ -240,6 +240,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     /**
      * Returns true if the dragon is saddled.
      */
+    @Override
     public boolean isSaddled()
     {
         return entityData.get(DATA_SADDLED);
@@ -285,6 +286,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     /**
      * Returns true if the entity is flying.
      */
+    @Override
     public boolean isFlying()
     {
         return entityData.get(DATA_FLYING);

@@ -152,9 +152,13 @@ public class DragonAi
     private static void setAttackTarget(TameableDragon dragon, LivingEntity target)
     {
         Brain<TameableDragon> brain = dragon.getBrain();
-        brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-        brain.eraseMemory(MemoryModuleType.BREED_TARGET);
-        brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, RETALIATE_DURATION);
+        net.minecraftforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.minecraftforge.common.ForgeHooks.onLivingChangeTarget(dragon, target, net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
+        if(!changeTargetEvent.isCanceled()) {
+            brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+            brain.eraseMemory(MemoryModuleType.BREED_TARGET);
+            brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, RETALIATE_DURATION);
+            net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(dragon, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
+        }
     }
 
     private static void retreatFromNearestTarget(TameableDragon dragon, LivingEntity target)

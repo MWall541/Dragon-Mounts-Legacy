@@ -50,6 +50,11 @@ public class FightWithOwner extends Behavior<TamableAnimal>
 
     @Override
     protected void start(ServerLevel level, TamableAnimal animal, long gameTime) {
-        animal.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, this.attackTarget, this.attackDuration);
+        net.minecraftforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.minecraftforge.common.ForgeHooks.onLivingChangeTarget(animal, this.attackTarget, net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
+        if(!changeTargetEvent.isCanceled()) {
+            animal.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, changeTargetEvent.getNewTarget(), this.attackDuration);
+            animal.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+            net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(animal, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
+        }
     }
 }

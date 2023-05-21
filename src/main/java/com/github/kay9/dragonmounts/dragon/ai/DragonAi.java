@@ -69,7 +69,7 @@ public class DragonAi
                 new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0F),
                 new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
                 new RunIf<>(TameableDragon::isAdult, new MeleeAttack(40)),
-                new RunIf<>(TameableDragon::isBaby, new MeleeAttack(15)),
+                new RunIf<>(TameableDragon::isJuvenile, new MeleeAttack(15)),
                 new StopAttackingIfTargetInvalid<>(),
                 new EraseMemoryIf<>(DragonAi::wantsToStopFighting, MemoryModuleType.ATTACK_TARGET)
         ), MemoryModuleType.ATTACK_TARGET);

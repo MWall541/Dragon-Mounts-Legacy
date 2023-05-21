@@ -512,6 +512,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // Should liftOff call this instead of canFly so all checks are consistent?
         return !this.isFlying()
                 && this.canFly()
+                && !this.isLeashed()
                 && level.noCollision(this, this.getBoundingBox().move(0, getJumpPower(), 0));
     }
 

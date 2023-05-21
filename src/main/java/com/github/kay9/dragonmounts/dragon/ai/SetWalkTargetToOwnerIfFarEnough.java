@@ -11,7 +11,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 
-public class SetWalkTargetToOwner extends Behavior<TamableAnimal>
+public class SetWalkTargetToOwnerIfFarEnough extends Behavior<TamableAnimal>
 {
     private static final int STOP_DISTANCE = 4;
     private static final int START_DISTANCE = 10;
@@ -19,12 +19,12 @@ public class SetWalkTargetToOwner extends Behavior<TamableAnimal>
     private final int stopDistance;
     private final int startDistanceSqr;
 
-    public SetWalkTargetToOwner(float speedModifier)
+    public SetWalkTargetToOwnerIfFarEnough(float speedModifier)
     {
         this(speedModifier, STOP_DISTANCE, START_DISTANCE);
     }
 
-    public SetWalkTargetToOwner(float speedModifier, int stopDistance, int startDistance)
+    public SetWalkTargetToOwnerIfFarEnough(float speedModifier, int stopDistance, int startDistance)
     {
         super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED));
         this.speedModifier = speedModifier;
@@ -36,7 +36,8 @@ public class SetWalkTargetToOwner extends Behavior<TamableAnimal>
     protected boolean checkExtraStartConditions(ServerLevel level, TamableAnimal animal)
     {
         LivingEntity owner = animal.getOwner();
-        return owner != null && animal.distanceToSqr(owner) >= this.startDistanceSqr;
+        return owner != null
+                && animal.distanceToSqr(owner) >= this.startDistanceSqr;
     }
 
     @Override

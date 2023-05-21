@@ -56,7 +56,8 @@ public class DragonAi
     {
         brain.addActivity(Activity.IDLE, 10, ImmutableList.of(
                 new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0f),
-                new SetWalkTargetToOwner(1.0f),
+                new TeleportToOwnerIfFarEnough(),
+                new SetWalkTargetToOwnerIfFarEnough(1.0f),
                 new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0f), UniformInt.of(30, 60)),
                 new StartAttacking<>(DragonAi::canAttackRandomly, DragonAi::findNearestValidAttackTarget),
                 getIdleMovementBehaviors()));

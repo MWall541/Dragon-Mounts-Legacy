@@ -154,26 +154,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
     }
 
-//    @Override
-//    protected void registerGoals() // TODO: Much Smarter AI and features
-//    {
-////        goalSelector.addGoal(1, new DragonLandGoal(this));
-//        goalSelector.addGoal(1, new FloatGoal(this));
-//        goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-//        goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
-////        goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
-//        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1.1, 10f, 3.5f, 32f));
-//        goalSelector.addGoal(5, new DragonBreedGoal(this));
-//        goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1));
-//        goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
-//        goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-//
-//        targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
-//        targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-//        targetSelector.addGoal(2, new HurtByTargetGoal(this));
-//        targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Animal.class, false, e -> !(e instanceof TameableDragon)));
-//    }
-
     @Override
     protected Brain.Provider<TameableDragon> brainProvider()
     {

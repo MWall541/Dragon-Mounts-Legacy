@@ -447,7 +447,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             {
                 navigation.stop();
                 setOrderedToSit(!isOrderedToSit());
-                if (isOrderedToSit()) setTarget(null);
             }
             return SUCCESS;
         }
@@ -459,7 +458,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             {
                 setRidingPlayer(player);
                 navigation.stop();
-                setTarget(null);
             }
             setOrderedToSit(false);
             setInSittingPose(false);
@@ -670,7 +668,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             setTame(true);
             navigation.stop();
-            setTarget(null);
             setOwnerUUID(player.getUUID());
             level.broadcastEntityEvent(this, (byte) 7);
         }

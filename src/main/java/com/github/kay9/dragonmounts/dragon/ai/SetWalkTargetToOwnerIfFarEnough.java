@@ -26,7 +26,7 @@ public class SetWalkTargetToOwnerIfFarEnough extends Behavior<TamableAnimal>
 
     public SetWalkTargetToOwnerIfFarEnough(float speedModifier, int stopDistance, int startDistance)
     {
-        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED));
+        super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.BREED_TARGET, MemoryStatus.VALUE_ABSENT));
         this.speedModifier = speedModifier;
         this.stopDistance = stopDistance;
         this.startDistanceSqr = startDistance * startDistance;

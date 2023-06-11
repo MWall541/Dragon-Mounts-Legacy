@@ -1,3 +1,5 @@
 {
-  "dragon_breed.example_addon.example_breed": "Example Dragon"
+  "dragon_breed.example_addon.example_breed": "Example Dragon",
+
+  "subtitles.entity.dragon.ambient.ghost": "Dragon speaks"
 }

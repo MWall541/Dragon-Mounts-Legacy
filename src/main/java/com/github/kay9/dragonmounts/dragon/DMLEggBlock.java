@@ -91,6 +91,12 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             falling.blockData = e.saveWithoutMetadata();
     }
 
+    @Override
+    protected void spawnDestroyParticles(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState)
+    {
+        super.spawnDestroyParticles(pLevel, pPlayer, pPos, pState);
+    }
+
     public static void startHatching(DragonBreed breed, int hatchTime, Level level, BlockPos pos)
     {
         if (!level.isClientSide)

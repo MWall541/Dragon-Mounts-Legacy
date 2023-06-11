@@ -78,7 +78,7 @@ class DragonBreedProvider implements DataProvider
             list(),
             list(new PickyHabitat(list(new HeightHabitat(1, true, 0), new LightHabitat(2, true, 3)))),
             set("drown"),
-            Optional.of(DMLRegistry.SKELETON_DRAGON_AMBIENT.get())));
+            Optional.of(DMLRegistry.GHOST_DRAGON_AMBIENT.get())));
 
     static final Pair<ResourceLocation, DragonBreed> ICE = Pair.of(DragonMountsLegacy.id("ice"), DragonBreed.builtIn(
             0xffffff,

@@ -50,7 +50,7 @@
       ]
     }
   ],
-  "ambient_sound": "minecraft:entity.cat.ambient",
+  "ambient_sound": "example_addon:entity.dragon.ambient.example",
   "death_loot": "minecraft:chests/bastion_treasure",
   "growth_time": 120,
   "hatch_time": 180,

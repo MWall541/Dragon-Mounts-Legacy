@@ -17,7 +17,8 @@
         "name": "minecraft:entity.ender_dragon.growl",
         "type": "event"
       }
-    ]
+    ],
+    "subtitle": "subtitles.entity.dragon.ambient"
   },
   "entity.dragon.step": {
     "sounds": [
@@ -33,16 +34,18 @@
       {
         "name": "dragonmounts:entity/dragon/step4"
       }
-    ]
+    ],
+    "subtitle": "subtitles.entity.dragon.step"
   },
   "entity.dragon.death": {
     "sounds": [
       {
         "name": "dragonmounts:entity/dragon/death"
       }
-    ]
+    ],
+    "subtitle": "subtitles.entity.dragon.death"
   },
-  "entity.dragon.ambient.skeleton": {
+  "entity.dragon.ambient.ghost": {
     "sounds": [
       {
         "name": "dragonmounts:entity.dragon.ambient",
@@ -54,6 +57,7 @@
         "pitch": 0.5,
         "type": "event"
       }
-    ]
+    ],
+    "subtitle": "subtitles.entity.dragon.ambient.ghost"
   }
 }

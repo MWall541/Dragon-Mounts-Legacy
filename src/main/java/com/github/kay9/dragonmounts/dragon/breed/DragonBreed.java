@@ -8,11 +8,12 @@ import com.github.kay9.dragonmounts.habitats.Habitat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.*;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -22,15 +23,12 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
                           ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities,
@@ -92,29 +90,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         for (Ability a : abilities()) a.close(dragon);
     }
 
-    public ParticleOptions getHatchParticles(Random random)
-    {
-        return hatchParticles().orElseGet(() -> getDustParticles(random));
-    }
-
-    public DustParticleOptions getDustParticles(Random random)
-    {
-        return new DustParticleOptions(new Vector3f(Vec3.fromRGB24(random.nextDouble() < 0.75? primaryColor() : secondaryColor())), 1);
-    }
-
-    public String getTranslationKey(RegistryAccess reg)
-    {
-        var name = id(reg);
-        return "dragon_breed." + name.getNamespace() + "." + name.getPath();
-    }
-
-    public int getHabitatPoints(Level level, BlockPos pos)
-    {
-        int points = 0;
-        for (Habitat habitat : habitats()) points += habitat.getHabitatPoints(level, pos);
-        return points;
-    }
-
     private void applyAttributes(TameableDragon dragon)
     {
         float healthPercentile = dragon.getHealth() / dragon.getMaxHealth();
@@ -127,6 +102,12 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         });
 
         dragon.setHealth(dragon.getMaxHealth() * healthPercentile); // in case we have less than max health
+    }
+
+    public String getTranslationKey(RegistryAccess reg)
+    {
+        var name = id(reg);
+        return "dragon_breed." + name.getNamespace() + "." + name.getPath();
     }
 
     @Override

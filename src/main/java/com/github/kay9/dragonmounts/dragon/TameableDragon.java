@@ -862,15 +862,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean canAttackType(EntityType<?> typeIn)
-    {
-        return !isHatchling() && super.canAttackType(typeIn);
-    }
-
-    @Override
     public boolean canAttack(LivingEntity target)
     {
-        return !isHatchling() && super.canAttack(target);
+        return !isHatchling() && !canBeControlledByRider() && super.canAttack(target);
     }
 
     @Override

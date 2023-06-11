@@ -4,6 +4,9 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.habitats.Habitat;
+import com.mojang.math.Vector3f;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -21,7 +24,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
+
+import java.util.Random;
 
 /**
  * @deprecated for removal in 1.19.4
@@ -29,7 +35,7 @@ import net.minecraftforge.network.NetworkHooks;
  * Using an entity is entirely uneeded.
  * All this logic can easily be done in a block entity.
  */
-@Deprecated(forRemoval = true, since = "1.19.4")
+@Deprecated(forRemoval = true, since = "1.20")
 public class DragonEgg extends Entity
 {
     // constants
@@ -195,7 +201,7 @@ public class DragonEgg extends Entity
         double oy = 0;
         double oz = 0;
 
-        var particle = breed.getHatchParticles(random);
+        var particle = breed.hatchParticles().orElse(makeDustParticle(breed, random));
         if (particle.getType() == ParticleTypes.DUST) py = getY() + (random.nextDouble() - 0.5) + 1;
         if (particle.getType() == ParticleTypes.PORTAL)
         {
@@ -205,6 +211,11 @@ public class DragonEgg extends Entity
         }
 
         level.addParticle(particle, px, py, pz, ox, oy, oz);
+    }
+
+    private static DustParticleOptions makeDustParticle(DragonBreed breed, Random random)
+    {
+        return new DustParticleOptions(new Vector3f(Vec3.fromRGB24(random.nextDouble() < 0.75? breed.primaryColor() : breed.secondaryColor())), 1);
     }
 
     @Override
@@ -226,7 +237,8 @@ public class DragonEgg extends Entity
         int prevPoints = 0;
         for (var breed : BreedRegistry.registry(getLevel().registryAccess()))
         {
-            int points = breed.getHabitatPoints(level, blockPosition());
+            int points = 0;
+            for (Habitat habitat : breed.habitats()) points += habitat.getHabitatPoints(level, blockPosition());
             if (points > MIN_HABITAT_POINTS && points > prevPoints)
             {
                 winner = breed;
@@ -310,7 +322,7 @@ public class DragonEgg extends Entity
                         var px = getX() + (random.nextDouble() - 0.5);
                         var py = getY() + random.nextDouble();
                         var pz = getZ() + (random.nextDouble() - 0.5);
-                        var particle = transitioningBreed.getDustParticles(random);
+                        var particle = makeDustParticle(transitioningBreed, random);
 
                         level.addParticle(particle, px, py, pz, 0, 0, 0);
                     }

@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.data.providers;
 
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.FrostWalkerAbility;
 import com.github.kay9.dragonmounts.abilities.GreenToesAbility;
@@ -21,7 +22,6 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -78,7 +78,7 @@ class DragonBreedProvider implements DataProvider
             list(),
             list(new PickyHabitat(list(new HeightHabitat(1, true, 0), new LightHabitat(2, true, 3)))),
             set("drown"),
-            Optional.of(SoundEvents.SKELETON_AMBIENT)));
+            Optional.of(DMLRegistry.SKELETON_DRAGON_AMBIENT.get())));
 
     static final Pair<ResourceLocation, DragonBreed> ICE = Pair.of(DragonMountsLegacy.id("ice"), DragonBreed.builtIn(
             0xffffff,

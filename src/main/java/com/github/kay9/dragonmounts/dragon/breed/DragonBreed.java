@@ -27,7 +27,6 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +34,7 @@ import java.util.Random;
 
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
                           ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities,
-                          List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound,
+                          List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound,
                           ResourceLocation deathLoot, int growthTime, int hatchTime, float sizeModifier,
                           HolderSet<Item> tamingItems, HolderSet<Item> breedingItems)
     implements IForgeRegistryEntry<DragonBreed>
@@ -49,7 +48,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
-            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
+            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.BASE_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime),
@@ -63,7 +62,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             ModelProperties.CODEC.fieldOf("model_properties").forGetter(DragonBreed::modelProperties),
-            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
+            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
             Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
             Codec.INT.fieldOf("hatch_time").forGetter(DragonBreed::hatchTime),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier)
@@ -71,14 +70,14 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 
     private static final HolderSet<Item> EMPTY_SET = new HolderSet.Named<>(Registry.ITEM, ItemTags.create(DragonMountsLegacy.id("empty"))); // dummy for client instances
 
-    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
+    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES));
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES));
     }
 
-    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Optional<SoundEvent> specialSound, int growthTime, int hatchTime, float sizeModifier)
+    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Optional<SoundEvent> ambientSound, int growthTime, int hatchTime, float sizeModifier)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), specialSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, EMPTY_SET, EMPTY_SET);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), ambientSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, EMPTY_SET, EMPTY_SET);
     }
 
     public void initialize(TameableDragon dragon)
@@ -101,12 +100,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public DustParticleOptions getDustParticles(Random random)
     {
         return new DustParticleOptions(new Vector3f(Vec3.fromRGB24(random.nextDouble() < 0.75? primaryColor() : secondaryColor())), 1);
-    }
-
-    @Nullable
-    public SoundEvent getAmbientSound()
-    {
-        return specialSound().orElse(null);
     }
 
     public String getTranslationKey(RegistryAccess reg)

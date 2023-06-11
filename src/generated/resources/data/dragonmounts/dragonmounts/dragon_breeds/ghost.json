@@ -2,7 +2,7 @@
   "immunities": [
     "drown"
   ],
-  "ambient_sound": "minecraft:entity.skeleton.ambient",
+  "ambient_sound": "dragonmounts:entity.dragon.ambient.skeleton",
   "model_properties": {
     "thin_legs": true
   },

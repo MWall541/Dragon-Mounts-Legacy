@@ -1,15 +1,21 @@
 {
-  "entity.dragon.breathe": {
+  "entity.dragon.ambient": {
     "sounds": [
       {
-        "name": "minecraft:mob/cow/say2",
+        "name": "dragonmounts:entity/dragon/breathe1",
         "volume": 0.5,
-        "pitch": 0.5
+        "pitch": 0.5,
+        "weight": 3
       },
       {
-        "name": "minecraft:mob/cow/say4",
+        "name": "dragonmounts:entity/dragon/breathe2",
         "volume": 0.5,
-        "pitch": 0.5
+        "pitch": 0.5,
+        "weight": 3
+      },
+      {
+        "name": "minecraft:entity.ender_dragon.growl",
+        "type": "event"
       }
     ]
   },
@@ -33,6 +39,20 @@
     "sounds": [
       {
         "name": "dragonmounts:entity/dragon/death"
+      }
+    ]
+  },
+  "entity.dragon.ambient.skeleton": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity.dragon.ambient",
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.skeleton.ambient",
+        "volume": 0.35,
+        "pitch": 0.5,
+        "type": "event"
       }
     ]
   }

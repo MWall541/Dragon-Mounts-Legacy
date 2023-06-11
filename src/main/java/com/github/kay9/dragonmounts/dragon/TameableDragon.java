@@ -524,11 +524,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected SoundEvent getAmbientSound()
     {
-        double random = getRandom().nextDouble();
-
-        if (random < 0.2) return SoundEvents.ENDER_DRAGON_GROWL;
-        if (getBreed().specialSound().isPresent() && random < 0.5) return getBreed().getAmbientSound();
-        return DMLRegistry.DRAGON_BREATHE_SOUND.get();
+        return getBreed().ambientSound().orElse(DMLRegistry.DRAGON_AMBIENT_SOUND.get());
     }
 
     @Nullable
@@ -610,13 +606,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public float getVoicePitch()
     {
         return 2 - getScale();
-    }
-
-    @Override
-    public void playSound(SoundEvent pSound, float pVolume, float pPitch)
-    {
-        if (pSound == breed.getAmbientSound()) pPitch /= 2;
-        super.playSound(pSound, pVolume, pPitch);
     }
 
     @Override

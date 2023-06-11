@@ -62,6 +62,8 @@ public class BreedRegistry
 
     public static Registry<DragonBreed> registry(RegistryAccess reg)
     {
-        return reg.registryOrThrow(REGISTRY_KEY);
+        var opt = reg.registry(REGISTRY_KEY);
+        if (opt.isPresent()) return opt.get();
+        return RegistryAccess.BUILTIN.get().registryOrThrow(REGISTRY_KEY); // last resort.
     }
 }

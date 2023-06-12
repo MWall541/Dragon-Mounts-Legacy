@@ -16,7 +16,12 @@
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.change_breeds": "Creative mode: Interacting with a dragon will change it's breed to this egg's breed.",
 
-  "key.dragonmounts.flight_descent": "Flight Descent",
+  "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
+  "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",
+
+  "mount.dragon.vertical_controls": "Press %s to Ascend and %s to Descend",
+  "mount.dragon.camera_controls.enabled": "%s will now Ascend Toward Your Direction",
+  "mount.dragon.camera_controls.disabled": "%s will now only Ascend on your Command",
 
   "subtitles.entity.dragon.ambient": "Dragon speaks",
   "subtitles.entity.dragon.step": "Dragon stomps",

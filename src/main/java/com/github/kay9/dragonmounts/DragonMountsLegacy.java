@@ -1,9 +1,6 @@
 package com.github.kay9.dragonmounts;
 
-import com.github.kay9.dragonmounts.client.DragonEggRenderer;
-import com.github.kay9.dragonmounts.client.DragonModel;
-import com.github.kay9.dragonmounts.client.DragonRenderer;
-import com.github.kay9.dragonmounts.client.EggEntityRenderer;
+import com.github.kay9.dragonmounts.client.*;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
@@ -53,6 +50,8 @@ public class DragonMountsLegacy
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
             MinecraftForge.EVENT_BUS.addListener((EntityViewRenderEvent.CameraSetup e) -> cameraAngles(e.getCamera()));
+            MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
+            MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
 
             bus.addListener((ModelRegistryEvent e) -> defineBlockModels());
             bus.addListener((ColorHandlerEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));

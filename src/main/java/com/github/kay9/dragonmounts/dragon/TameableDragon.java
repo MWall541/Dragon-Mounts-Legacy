@@ -4,6 +4,8 @@ import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
+import com.github.kay9.dragonmounts.client.Keybinds;
+import com.github.kay9.dragonmounts.client.MountControlsMessenger;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonFollowOwnerGoal;
@@ -359,8 +361,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 if (isFlying)
                 {
                     moveForward = moveForward > 0? moveForward : 0;
-                    if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
-                    else moveY = driver.jumping? 1 : DMLRegistry.FLIGHT_DESCENT_KEY.getAsBoolean()? -1 : 0;
+                    moveY = 0;
+                    if (driver.jumping) moveY = 1;
+                    else if (Keybinds.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
+                    else if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
                 }
                 else if (driver.jumping && canFly()) liftOff();
 
@@ -890,6 +894,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         player.setYRot(getYRot());
         player.setXRot(getXRot());
         player.startRiding(this);
+    }
+
+    @Override
+    protected void addPassenger(Entity pPassenger)
+    {
+        super.addPassenger(pPassenger);
+        if (!isServer() && isControlledByLocalInstance()) MountControlsMessenger.sendControlsMessage();
     }
 
     @Override

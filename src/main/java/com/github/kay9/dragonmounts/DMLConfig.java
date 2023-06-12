@@ -41,7 +41,7 @@ public class DMLConfig
 
     static final ForgeConfigSpec CLIENT;
 
-    private static final ForgeConfigSpec.BooleanValue CAMERA_FLIGHT;
+    public static final ForgeConfigSpec.BooleanValue CAMERA_FLIGHT;
     public static boolean cameraFlight()
     {
         return CAMERA_FLIGHT.get();

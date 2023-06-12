@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
+@SuppressWarnings({"unused", "DataFlowIssue"})
 public class DragonAnimator
 {
     // constants
@@ -412,6 +413,7 @@ public class DragonAnimator
         }
     }
 
+    @SuppressWarnings("UnusedAssignment")
     protected void animTail(DragonModel model)
     {
         model.tail.x = 0;
@@ -582,6 +584,7 @@ public class DragonAnimator
         return terpSmoothStep(pitchHover, pitchMoving, speed);
     }
 
+    @SuppressWarnings("SameReturnValue")
     public float getModelOffsetX()
     {
         return 0;

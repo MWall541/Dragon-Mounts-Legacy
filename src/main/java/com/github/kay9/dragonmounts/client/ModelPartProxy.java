@@ -13,6 +13,7 @@ import java.util.List;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
+@SuppressWarnings("DataFlowIssue")
 public class ModelPartProxy
 {
     // projected parts and part childs

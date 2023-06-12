@@ -71,7 +71,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  * @author Kay9
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"deprecation", "SameReturnValue"})
 public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable
 {
     // base attributes
@@ -415,7 +415,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // heal
         if (getHealthRelative() < 1 && isFoodItem(stack))
         {
-            heal(stack.getItem().getFoodProperties().getNutrition());
+            heal(stack.getItem().getFoodProperties(stack, this).getNutrition());
             playSound(getEatingSound(stack), 0.7f, 1);
             stack.shrink(1);
             return SUCCESS;
@@ -782,6 +782,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         else return isInLove() && dragonMate.isInLove();
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canReproduce()
     {
         return isTame() && reproCount < DMLConfig.reproLimit();

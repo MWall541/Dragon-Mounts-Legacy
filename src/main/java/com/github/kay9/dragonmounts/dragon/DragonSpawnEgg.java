@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fml.loading.FMLLoader;
 
+@SuppressWarnings("DataFlowIssue")
 public class DragonSpawnEgg extends ForgeSpawnEggItem
 {
     public DragonSpawnEgg()
@@ -57,6 +58,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         return stack;
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Override
     public Component getName(ItemStack stack)
     {

@@ -182,12 +182,7 @@ public class DragonEgg extends Entity
             if (hatchTime < breed.hatchTime() * 0.25f && random.nextInt(Math.max(10, hatchTime)) == 0) wiggle();
         }
         else
-        {
-//            wiggleTime.add(wiggling? 0.1f : -0.1f);
-//            if (wiggleTime.get() == 1) wiggling = false;
-
             addHatchingParticles();
-        }
 
         super.tick();
     }

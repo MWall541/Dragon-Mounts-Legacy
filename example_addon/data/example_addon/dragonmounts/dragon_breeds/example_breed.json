@@ -1,7 +1,7 @@
 {
   "name": "example_addon:example_breed",
-  "primary_color": 2389822,
-  "secondary_color": 4185307,
+  "primary_color": "24773E",
+  "secondary_color": "3FDCDB",
   "hatch_particles": {
     "type": "minecraft:heart"
   },

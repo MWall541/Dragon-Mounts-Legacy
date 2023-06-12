@@ -73,6 +73,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
     public static ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
     {
+        //noinspection DataFlowIssue
         return TEXTURE_CACHE.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::cacheTextures)[layer];
     }
 
@@ -136,7 +137,6 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
             return GLOW_FUNC.apply(texture);
         }
 
-        @SuppressWarnings("ConstantConditions")
         private CustomRenderTypes()
         {
             // dummy

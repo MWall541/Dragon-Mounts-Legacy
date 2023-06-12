@@ -73,6 +73,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             super.attack(Blocks.DRAGON_EGG.defaultBlockState(), level, at, player); // hacky fix for breed resets...
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public RenderShape getRenderShape(BlockState pState)
     {
@@ -89,12 +90,6 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     {
         if (falling.level.getBlockEntity(falling.blockPosition()) instanceof Entity e)
             falling.blockData = e.saveWithoutMetadata();
-    }
-
-    @Override
-    protected void spawnDestroyParticles(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState)
-    {
-        super.spawnDestroyParticles(pLevel, pPlayer, pPos, pState);
     }
 
     public static void startHatching(DragonBreed breed, int hatchTime, Level level, BlockPos pos)

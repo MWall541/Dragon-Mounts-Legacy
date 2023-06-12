@@ -133,6 +133,7 @@ class DragonBreedProvider implements DataProvider
     protected Pair<ResourceLocation, DragonBreed>[] breeds()
     {
         var fire = Pair.of(BreedRegistry.FIRE_BUILTIN.getId(), BreedRegistry.FIRE_BUILTIN.get());
+        //noinspection unchecked
         return new Pair[]{AETHER, END, fire, FOREST, GHOST, ICE, NETHER, WATER};
     }
 
@@ -151,11 +152,13 @@ class DragonBreedProvider implements DataProvider
         return "Dragon Breeds";
     }
 
+    @SafeVarargs
     protected static <T> ImmutableList<T> list(T... objs)
     {
         return ImmutableList.copyOf(objs);
     }
 
+    @SafeVarargs
     protected static <T> ImmutableSet<T> set(T... objs)
     {
         return ImmutableSet.copyOf(objs);

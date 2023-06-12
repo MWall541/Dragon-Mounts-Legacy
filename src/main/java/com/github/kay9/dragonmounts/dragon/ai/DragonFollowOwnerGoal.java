@@ -4,8 +4,6 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,6 +23,7 @@ import java.util.EnumSet;
  *
  * @see net.minecraft.world.entity.ai.goal.FollowOwnerGoal
  */
+@SuppressWarnings("DataFlowIssue")
 public class DragonFollowOwnerGoal extends Goal
 {
     private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;

@@ -19,6 +19,7 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
+@SuppressWarnings("UnnecessaryLocalVariable")
 public class DragonModel extends EntityModel<TameableDragon>
 {
     // model constants
@@ -334,6 +335,7 @@ public class DragonModel extends EntityModel<TameableDragon>
     protected void renderHead(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
         float headScale = 1.4f / (size + 0.5f);
+        //noinspection DataFlowIssue
         ((ModelPartAccess) (Object) head).setRenderScale(headScale, headScale, headScale);
         head.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
     }

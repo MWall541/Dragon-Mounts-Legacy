@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
                           ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities,
                           List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound,
@@ -139,7 +140,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     {
         public static final ModelProperties STANDARD = new ModelProperties(true, false, false);
 
-        public static Codec<ModelProperties> CODEC = RecordCodecBuilder.create(func -> func.group(
+        public static final Codec<ModelProperties> CODEC = RecordCodecBuilder.create(func -> func.group(
                 Codec.BOOL.optionalFieldOf("middle_tail_scales", true).forGetter(ModelProperties::middleTailScales),
                 Codec.BOOL.optionalFieldOf("tail_horns", false).forGetter(ModelProperties::tailHorns),
                 Codec.BOOL.optionalFieldOf("thin_legs", false).forGetter(ModelProperties::thinLegs)

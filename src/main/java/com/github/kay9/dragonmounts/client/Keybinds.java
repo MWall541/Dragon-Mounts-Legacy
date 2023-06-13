@@ -18,8 +18,6 @@ public class Keybinds
     @SuppressWarnings({"ConstantConditions"})
     private static KeyMapping keymap(String name, int defaultMapping, String category)
     {
-        DMLConfig.CAMERA_FLIGHT.set(true);
-
         var keymap = new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
         ClientRegistry.registerKeyBinding(keymap);
         return keymap;
@@ -31,7 +29,7 @@ public class Keybinds
                 && evt.getAction() == GLFW.GLFW_PRESS
                 && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon d)
         {
-            DMLConfig.CAMERA_FLIGHT.set(!DMLConfig.cameraFlight());
+            DMLConfig.cameraFlight = !DMLConfig.cameraFlight();
             Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mount.dragon.camera_controls." + (DMLConfig.cameraFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
         }
     }

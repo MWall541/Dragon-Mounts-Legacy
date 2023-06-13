@@ -6,22 +6,22 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.event.TickEvent;
 
 /**
- * A heavily hardcoded class to display a couple messages after a player mounts a dragon.
+ * A heavily hardcoded class to display a message after the dismount controls display when a player mounts a dragon.
  * {@link MountControlsMessenger#sendControlsMessage()} is called from a dragon when the LocalPlayer mounts.
- * Messages include information about flight controls, such as ascending and the camera controls.
+ * Messages include information about flight controls, such as how to ascend/descend.
  * A hardcoded design was decided as an expanded functionality doesn't really make any sense for the
  * direction of the mod, and would instead be wasted resources.
  */
 public class MountControlsMessenger
 {
-    // taken from Gui#setOverlayMessage
-    private static final int MESSAGE_LENGTH_INTERVAL = 60;
-
     private static int delay = 0;
 
     public static void sendControlsMessage()
     {
-        delay = MESSAGE_LENGTH_INTERVAL;
+        // the length the initial "dismount" message is displayed for, in ticks.
+        // Our message displays after 60 ticks (after the dismount message.)
+        // taken from Gui#setOverlayMessage.
+        delay = 60;
     }
 
     public static void tick(TickEvent.ClientTickEvent evt)

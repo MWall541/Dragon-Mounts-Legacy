@@ -118,8 +118,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super(type, level);
 
-        // enables walking over blocks
-        maxUpStep = 1;
         noCulling = true;
 
         moveControl = new DragonMoveController(this);
@@ -270,6 +268,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return !isHatchling();
     }
 
+    // todo: shouldFly should be determined by downwards collisions rather than altitude
     public boolean shouldFly()
     {
         return canFly() && !isInWater() && isHighEnough(ALTITUDE_FLYING_THRESHOLD);
@@ -1006,6 +1005,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         setAge(entityData.get(DATA_AGE));
         updateAgeProgress();
         refreshDimensions();
+
+        maxUpStep = Math.max(2 * getAgeProgress(), 1);
 
         var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", getScale(), AttributeModifier.Operation.ADDITION);
         for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code

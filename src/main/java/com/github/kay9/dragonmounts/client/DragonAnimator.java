@@ -6,7 +6,6 @@ import com.github.kay9.dragonmounts.util.CircularBuffer;
 import com.github.kay9.dragonmounts.util.LerpedFloat;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * Animation control class to put useless reptiles in motion.
@@ -206,8 +205,10 @@ public class DragonAnimator
         }
 
         float speedMax = 0.05f;
-        Vec3 motion = dragon.getDeltaMovement();
-        float speedEnt = (float) (motion.x * motion.x + motion.z * motion.z);
+        float xD = (float) dragon.getX() - (float) dragon.xo;
+        float yD = (float) dragon.getY() - (float) dragon.yo;
+        float zD = (float) dragon.getZ() - (float) dragon.zo;
+        float speedEnt = (xD * xD + zD * zD);
         float speedMulti = Mth.clamp(speedEnt / speedMax, 0, 1);
 
         // update main animation timer
@@ -235,7 +236,7 @@ public class DragonAnimator
         groundTimer.set(groundVal);
 
         // update flutter transition
-        boolean flutterFlag = !onGround && (dragon.verticalCollision || motion.y > -0.1 || speedEnt < speedMax);
+        boolean flutterFlag = !onGround && (dragon.verticalCollision || yD > -0.1 || speedEnt < speedMax);
         flutterTimer.add(flutterFlag? 0.1f : -0.1f);
 
         // update walking transition

@@ -5,7 +5,6 @@ import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,7 +17,6 @@ import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -38,29 +36,16 @@ public class DragonMountsLegacy
 
     public DragonMountsLegacy()
     {
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        var bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         DMLRegistry.init(bus);
         BreedRegistry.DEFERRED_REGISTRY.register(bus);
 
-        MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
-
-        bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
-
-        if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
-        {
-            MinecraftForge.EVENT_BUS.addListener((EntityViewRenderEvent.CameraSetup e) -> cameraAngles(e.getCamera()));
-            MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
-            MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
-
-            bus.addListener((ModelRegistryEvent e) -> defineBlockModels());
-            bus.addListener((ColorHandlerEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
-            bus.addListener(DragonMountsLegacy::rendererRegistry);
-        }
-
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
+//        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
+
+        setupEvents();
     }
 
     public static ResourceLocation id(String path)
@@ -68,12 +53,42 @@ public class DragonMountsLegacy
         return new ResourceLocation(MOD_ID, path);
     }
 
+    static
+    {
+        var PROTOCOL_VERSION = "1.O";
+        NETWORK = NetworkRegistry.ChannelBuilder.named(id("network"))
+                .clientAcceptedVersions(PROTOCOL_VERSION::equals)
+                .serverAcceptedVersions(PROTOCOL_VERSION::equals)
+                .networkProtocolVersion(() -> PROTOCOL_VERSION)
+                .simpleChannel();
+    }
+
+    private static void setupEvents()
+    {
+        var bus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
+
+        bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
+
+        if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
+        {
+            MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::cameraAngles);
+            MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
+            MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
+
+            bus.addListener(DragonMountsLegacy::defineBlockModels);
+            bus.addListener((ColorHandlerEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
+            bus.addListener(DragonMountsLegacy::rendererRegistry);
+        }
+    }
+
     private static void attemptVanillaEggReplacement(PlayerInteractEvent.RightClickBlock evt)
     {
         if (DMLEggBlock.overrideVanillaDragonEgg(evt.getWorld(), evt.getPos(), evt.getPlayer())) evt.setCanceled(true);
     }
 
-    private static void defineBlockModels()
+    private static void defineBlockModels(ModelRegistryEvent evt)
     {
         var dir = "models/block/dragon_eggs";
         var length = "models/".length();
@@ -100,10 +115,11 @@ public class DragonMountsLegacy
         e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }
 
-    private static void cameraAngles(Camera camera)
+    private static void cameraAngles(EntityViewRenderEvent.CameraSetup evt)
     {
         if (Minecraft.getInstance().player.getVehicle() instanceof TameableDragon)
         {
+            var camera = evt.getCamera();
             var distance = 0;
             var vertical = 0;
             switch (Minecraft.getInstance().options.getCameraType())
@@ -116,15 +132,5 @@ public class DragonMountsLegacy
             }
             camera.move(-camera.getMaxZoom(distance), vertical, 0);
         }
-    }
-
-    static
-    {
-        var PROTOCOL_VERSION = "1.O";
-        NETWORK = NetworkRegistry.ChannelBuilder.named(id("network"))
-                .clientAcceptedVersions(PROTOCOL_VERSION::equals)
-                .serverAcceptedVersions(PROTOCOL_VERSION::equals)
-                .networkProtocolVersion(() -> PROTOCOL_VERSION)
-                .simpleChannel();
     }
 }

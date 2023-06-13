@@ -39,12 +39,12 @@ public class DMLConfig
         return REPRO_LIMIT.get();
     }
 
-    static final ForgeConfigSpec CLIENT;
+//    static final ForgeConfigSpec CLIENT;
 
-    public static final ForgeConfigSpec.BooleanValue CAMERA_FLIGHT;
+    public static boolean cameraFlight;
     public static boolean cameraFlight()
     {
-        return CAMERA_FLIGHT.get();
+        return cameraFlight;
     }
 
     static // common
@@ -75,15 +75,5 @@ public class DMLConfig
                 .defineInRange("breed_limit", TameableDragon.BASE_REPRO_LIMIT, 0, Integer.MAX_VALUE);
 
         SERVER = configurator.build();
-    }
-
-    static // client
-    {
-        var configurator = new ForgeConfigSpec.Builder();
-
-        CAMERA_FLIGHT = configurator.comment("Should flight controls use the game camera (true) or vertical keybinds? (false)")
-                .define("camera_flight_controls", true);
-
-        CLIENT = configurator.build();
     }
 }

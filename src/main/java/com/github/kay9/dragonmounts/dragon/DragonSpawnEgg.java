@@ -33,7 +33,6 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
             for (DragonBreed breed : BreedRegistry.registry(reg))
                 pItems.add(create(breed, reg));
         }
-
     }
 
     public static ItemStack create(DragonBreed breed, RegistryAccess reg)

@@ -6,7 +6,11 @@ import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.searchtree.SearchRegistry;
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -15,6 +19,7 @@ import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -76,6 +81,7 @@ public class DragonMountsLegacy
             MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::cameraAngles);
             MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
             MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
+            MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::populateSearchTrees);
 
             bus.addListener(DragonMountsLegacy::defineBlockModels);
             bus.addListener((ColorHandlerEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
@@ -132,5 +138,22 @@ public class DragonMountsLegacy
             }
             camera.move(-camera.getMaxZoom(distance), vertical, 0);
         }
+    }
+
+    private static void populateSearchTrees(TagsUpdatedEvent evt)
+    {
+        var tree = Minecraft.getInstance().getSearchTree(SearchRegistry.CREATIVE_NAMES);
+        var oldContents = tree.search(DragonMountsLegacy.MOD_ID + ":");
+        NonNullList<ItemStack> newContents = NonNullList.create();
+        DMLRegistry.EGG_BLOCK_ITEM.get().fillItemCategory(CreativeModeTab.TAB_SEARCH, newContents);
+        DMLRegistry.SPAWN_EGG.get().fillItemCategory(CreativeModeTab.TAB_SEARCH, newContents);
+        newItems: // this is a sanity check if resources are reloaded
+        for (var newItem : newContents)
+        {
+            for (var oldItem : oldContents)
+                if (ItemStack.matches(newItem, oldItem)) continue newItems;
+            tree.add(newItem);
+        }
+        tree.refresh();
     }
 }

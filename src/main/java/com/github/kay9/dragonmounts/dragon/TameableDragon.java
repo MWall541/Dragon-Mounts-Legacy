@@ -269,7 +269,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return !isHatchling();
     }
 
-    // todo: shouldFly should be determined by downwards collisions rather than altitude
     public boolean shouldFly()
     {
         if (isFlying()) return !onGround; // more natural landings
@@ -324,7 +323,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             else if (age > 0) setAge(--age);
         }
 
-        // update nearGround state for flight and animation logic
+        // update nearGround state when moving for flight and animation logic
         nearGround = onGround || !getLevel().noCollision(this, new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getZ()));
 
         // update flying state based on the distance to the ground
@@ -352,6 +351,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             LivingEntity driver = (LivingEntity) getControllingPassenger();
             double moveSideways = vec3.x;
             double moveY = vec3.y;
+            //noinspection ConstantConditions
             double moveForward = Math.min(Math.abs(driver.zza) + Math.abs(driver.xxa), 1);
 
             // rotate head to match driver.
@@ -404,12 +404,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand)
     {
-        ItemStack stack = player.getItemInHand(hand);
+        var stack = player.getItemInHand(hand);
 
-        InteractionResult stackResult = stack.interactLivingEntity(player, this, hand);
+        var stackResult = stack.interactLivingEntity(player, this, hand);
         if (stackResult.consumesAction()) return stackResult;
-
-        final InteractionResult SUCCESS = InteractionResult.sidedSuccess(level.isClientSide);
 
         // tame
         if (!isTame())
@@ -421,16 +419,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 return InteractionResult.SUCCESS;
             }
 
-            return InteractionResult.PASS;
+            return InteractionResult.PASS; // pass regardless. We don't want to perform breeding, age ups, etc. on untamed.
         }
 
         // heal
         if (getHealthRelative() < 1 && isFoodItem(stack))
         {
+            //noinspection ConstantConditions
             heal(stack.getItem().getFoodProperties(stack, this).getNutrition());
             playSound(getEatingSound(stack), 0.7f, 1);
             stack.shrink(1);
-            return SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
 
         // saddle up!
@@ -438,7 +437,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             stack.shrink(1);
             equipSaddle(getSoundSource());
-            return SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
 
         // sit!
@@ -450,7 +449,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 setOrderedToSit(!isOrderedToSit());
                 if (isOrderedToSit()) setTarget(null);
             }
-            return SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
 
         // ride on
@@ -464,7 +463,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             }
             setOrderedToSit(false);
             setInSittingPose(false);
-            return SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
 
         return super.mobInteract(player, hand);
@@ -704,6 +703,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     public boolean doHurtTarget(Entity entityIn)
     {
         boolean attacked = entityIn.hurt(DamageSource.mobAttack(this), (float) getAttribute(ATTACK_DAMAGE).getValue());
@@ -832,6 +832,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions")
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob)
     {
         var offspring = DMLRegistry.DRAGON.get().create(level);
@@ -980,6 +981,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return ageProgress;
     }
 
+    /**
+     * Updates properties/attributes/traits of dragons based on the current age scale.
+     * Also syncs the current age to the client.
+     * Called at an interval (of ticks) described by {@link TameableDragon#AGE_UPDATE_INTERVAL}
+     */
+    @SuppressWarnings("ConstantConditions")
     private void updateAgeProperties()
     {
         setAge(entityData.get(DATA_AGE));
@@ -1068,6 +1075,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (noPhysics) return false;
         else
         {
+            // Reduce suffocation risks. They're fat and clusmy.
             var collider = getBoundingBox().deflate(getBbWidth() * 0.2f);
             return BlockPos.betweenClosedStream(collider).anyMatch((pos) ->
             {

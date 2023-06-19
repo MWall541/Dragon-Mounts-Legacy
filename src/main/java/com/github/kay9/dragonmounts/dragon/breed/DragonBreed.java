@@ -93,7 +93,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     {
         float healthPercentile = dragon.getHealth() / dragon.getMaxHealth();
 
-        //todo: use attributes().replaceFrom instead
         attributes().forEach((att, value) ->
         {
             AttributeInstance inst = dragon.getAttribute(att);

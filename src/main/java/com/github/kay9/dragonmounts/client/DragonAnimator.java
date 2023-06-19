@@ -236,7 +236,7 @@ public class DragonAnimator
         groundTimer.set(groundVal);
 
         // update flutter transition
-        boolean flutterFlag = !onGround && (dragon.verticalCollision || yD > -0.1 || speedEnt < speedMax);
+        boolean flutterFlag = !onGround && (dragon.horizontalCollision || yD > -0.1 || speedEnt < speedMax);
         flutterTimer.add(flutterFlag? 0.1f : -0.1f);
 
         // update walking transition
@@ -257,8 +257,7 @@ public class DragonAnimator
 //        jawTimer.add(jawFlag? 0.2f : -0.2f);
 
         // update speed transition
-        boolean nearGround = onGround || !dragon.isHighEnough((int) (4 * dragon.getScale()));
-        boolean speedFlag = speedEnt > speedMax || nearGround;
+        boolean speedFlag = speedEnt > speedMax || dragon.isNearGround();
         float speedValue = 0.05f;
         speedTimer.add(speedFlag? speedValue : -speedValue);
 

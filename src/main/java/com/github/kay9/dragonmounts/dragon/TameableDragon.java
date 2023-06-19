@@ -51,6 +51,7 @@ import net.minecraft.world.item.SaddleItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -91,7 +92,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     // data value IDs
     private static final EntityDataAccessor<String> DATA_BREED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.STRING);
-    private static final EntityDataAccessor<Boolean> DATA_FLYING = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_SADDLED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_AGE = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.INT);
 
@@ -103,13 +103,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // other constants
     public static final int AGE_UPDATE_INTERVAL = 100;
     public static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"); // just a random uuid I took online
-    public static final int ALTITUDE_FLYING_THRESHOLD = 3;
+    public static final int GROUND_CLEARENCE_THRESHOLD = 3;
 
     // server/client delegates
     private final DragonAnimator animator;
     private DragonBreed breed;
     private int reproCount;
     private float ageProgress;
+    private boolean flying;
+    private boolean nearGround;
 
     private final GroundPathNavigation groundNavigation;
     private final FlyingPathNavigation flyingNavigation;
@@ -177,7 +179,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         super.defineSynchedData();
 
         entityData.define(DATA_BREED,"");
-        entityData.define(DATA_FLYING, false);
         entityData.define(DATA_SADDLED, false);
         entityData.define(DATA_AGE, 0); // default to adult stage
     }
@@ -271,7 +272,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // todo: shouldFly should be determined by downwards collisions rather than altitude
     public boolean shouldFly()
     {
-        return canFly() && !isInWater() && isHighEnough(ALTITUDE_FLYING_THRESHOLD);
+        if (isFlying()) return !onGround; // more natural landings
+        return canFly() && !isInWater() && !isNearGround();
     }
 
     /**
@@ -279,7 +281,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      */
     public boolean isFlying()
     {
-        return entityData.get(DATA_FLYING);
+        return flying;
     }
 
     /**
@@ -287,7 +289,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      */
     public void setFlying(boolean flying)
     {
-        entityData.set(DATA_FLYING, flying);
+        this.flying = flying;
+    }
+
+    public boolean isNearGround()
+    {
+        return nearGround;
     }
 
     public void setNavigation(boolean flying)
@@ -305,17 +312,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (isServer())
         {
             if (age < 0 && tickCount % AGE_UPDATE_INTERVAL == 0) entityData.set(DATA_AGE, age);
-
-            // update flying state based on the distance to the ground
-            boolean flying = shouldFly();
-            if (flying != isFlying())
-            {
-                // notify client
-                setFlying(flying);
-
-                // update pathfinding method
-                setNavigation(flying);
-            }
         }
         else
         {
@@ -326,6 +322,19 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             int age = getAge();
             if (age < 0) setAge(++age);
             else if (age > 0) setAge(--age);
+        }
+
+        // update nearGround state for flight and animation logic
+        nearGround = onGround || !getLevel().noCollision(this, new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getZ()));
+
+        // update flying state based on the distance to the ground
+        boolean flying = shouldFly();
+        if (flying != isFlying())
+        {
+            setFlying(flying);
+
+            // update pathfinding method
+            if (isServer()) setNavigation(flying);
         }
 
         updateAgeProgress();
@@ -459,35 +468,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         return super.mobInteract(player, hand);
-    }
-
-    /**
-     * Returns the int-precision distance to solid ground.
-     * Describe an inclusive limit to reduce iterations.
-     */
-    public double getAltitude(int limit)
-    {
-        var pointer = blockPosition().mutable().move(0, -1, 0);
-        var min = level.dimensionType().minY();
-        var i = 0;
-
-        while(i <= limit && pointer.getY() > min && !level.getBlockState(pointer).getMaterial().isSolid())
-            pointer.setY(getBlockY() - ++i);
-
-        return i;
-    }
-
-    /**
-     * Returns the distance to the ground while the entity is flying.
-     */
-    public double getAltitude()
-    {
-        return getAltitude(level.getMaxBuildHeight());
-    }
-
-    public boolean isHighEnough(int height)
-    {
-        return getAltitude(height) >= height;
     }
 
     public void liftOff()

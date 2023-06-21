@@ -1,23 +1,26 @@
 package com.github.kay9.dragonmounts.data.loot;
 
 import com.github.kay9.dragonmounts.DMLConfig;
-import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
+import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.common.loot.LootModifier;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class DragonEggLootMod extends LootModifier
 {
+    public static final Codec<DragonEggLootMod> CODEC = RecordCodecBuilder.create(i -> codecStart(i)
+            .and(ResourceLocation.CODEC.fieldOf("breed").forGetter(m -> m.id))
+            .apply(i, DragonEggLootMod::new));
+
     private final ResourceLocation id;
 
     public DragonEggLootMod(LootItemCondition[] conditions, ResourceLocation breed)
@@ -26,41 +29,23 @@ public class DragonEggLootMod extends LootModifier
         this.id = breed;
     }
 
-    @NotNull
     @Override
-    protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
+    protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
     {
         if (DMLConfig.useLootTables())
         {
-            var reg = context.getLevel().registryAccess();
+            var reg = context.getLevel().getServer().registryAccess();
             BreedRegistry.registry(reg)
                     .getOptional(id)
-                    .ifPresentOrElse(breed -> generatedLoot.add(DMLEggBlock.Item.create(breed, reg, breed.hatchTime())),
-                            () ->
-                            {
-                                throw new JsonParseException("Unable to produce Dragon Egg Loot with unknown breed id: \"" + id + "\"");
-                            });
+                    .ifPresentOrElse(breed -> generatedLoot.add(HatchableEggBlock.Item.create(breed, reg)),
+                            () -> DragonMountsLegacy.LOG.error("Unable to produce Dragon Egg Loot with unknown breed id: \"" + id + "\""));
         }
         return generatedLoot;
     }
 
-    public static class Serializer extends GlobalLootModifierSerializer<DragonEggLootMod>
+    @Override
+    public Codec<? extends IGlobalLootModifier> codec()
     {
-        @Override
-        public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
-        {
-            var in = GsonHelper.getAsString(object, "breed");
-            if (!ResourceLocation.isValidResourceLocation(in))
-                throw new JsonParseException("Not a valid ResourceLocation: \"" + in + "\"");
-            return new DragonEggLootMod(conditions, new ResourceLocation(in));
-        }
-
-        @Override
-        public JsonObject write(DragonEggLootMod instance)
-        {
-            var json = makeConditions(instance.conditions);
-            json.addProperty("breed", instance.id.toString());
-            return json;
-        }
+        return CODEC;
     }
 }

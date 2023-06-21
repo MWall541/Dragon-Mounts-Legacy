@@ -4,7 +4,7 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 
@@ -18,11 +18,11 @@ public class DMLUtil
         }
         catch (NumberFormatException e)
         {
-            return DataResult.error(String.format("[%s] Hexadecimal Codec error: '%s' is not a valid hex value.", DragonMountsLegacy.MOD_ID, s));
+            return DataResult.error(() -> String.format("[%s] Hexadecimal Codec error: '%s' is not a valid hex value.", DragonMountsLegacy.MOD_ID, s));
         }
     }, Integer::toHexString);
 
     // dummy for client instances to avoid syncing unnecessary information
     @SuppressWarnings("deprecation")
-    public static final HolderSet<Item> EMPTY_ITEM_HOLDER_SET = new HolderSet.Named<>(Registry.ITEM, ItemTags.create(DragonMountsLegacy.id("empty")));
+    public static final HolderSet<Item> EMPTY_ITEM_HOLDER_SET = HolderSet.emptyNamed(BuiltInRegistries.ITEM.holderOwner(), ItemTags.create(DragonMountsLegacy.id("empty")));
 }

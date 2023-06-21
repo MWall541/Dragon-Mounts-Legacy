@@ -52,7 +52,7 @@ public class DragonFollowOwnerGoal extends Goal
 
     public boolean canUse()
     {
-        LivingEntity livingentity = this.dragon.getOwner();
+        LivingEntity livingentity = this.dragon.m_269323_();
         if (livingentity == null) {
             return false;
         }
@@ -77,7 +77,7 @@ public class DragonFollowOwnerGoal extends Goal
         {
             return false;
         }
-        return this.dragon.distanceToSqr(this.dragon.getOwner()) >= (double)(this.stopDistance * this.stopDistance);
+        return this.dragon.distanceToSqr(this.dragon.m_269323_()) >= (double)(this.stopDistance * this.stopDistance);
     }
 
     public void start()
@@ -95,7 +95,7 @@ public class DragonFollowOwnerGoal extends Goal
 
     public void tick()
     {
-        LivingEntity owner = this.dragon.getOwner();
+        LivingEntity owner = this.dragon.m_269323_();
         this.dragon.getLookControl().setLookAt(owner, 10.0F, (float)this.dragon.getMaxHeadXRot());
         if (--this.timeToRecalcPath <= 0)
         {
@@ -124,7 +124,7 @@ public class DragonFollowOwnerGoal extends Goal
 
     private void teleportToOwner()
     {
-        BlockPos ownerPos = this.dragon.getOwner().blockPosition();
+        BlockPos ownerPos = this.dragon.m_269323_().blockPosition();
 
         for(int i = 0; i < 10; ++i)
         {
@@ -146,7 +146,7 @@ public class DragonFollowOwnerGoal extends Goal
 
     private boolean maybeTeleportTo(BlockPos pos)
     {
-        LivingEntity owner = this.dragon.getOwner();
+        LivingEntity owner = this.dragon.m_269323_();
         if (owner.blockPosition().closerThan(pos, 2.0D))
         {
             return false;

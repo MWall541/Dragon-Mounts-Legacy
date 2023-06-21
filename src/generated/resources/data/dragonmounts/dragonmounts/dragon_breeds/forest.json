@@ -6,17 +6,17 @@
   ],
   "habitats": [
     {
-      "block_tag": "dragonmounts:forest_dragon_habitat_blocks",
-      "type": "nearby_blocks"
+      "type": "nearby_blocks",
+      "block_tag": "dragonmounts:forest_dragon_habitat_blocks"
     },
     {
-      "biome_tag": "minecraft:is_jungle",
-      "type": "biome"
+      "type": "biome",
+      "biome_tag": "minecraft:is_jungle"
     }
   ],
-  "primary_color": "54a00",
-  "secondary_color": "a9600",
   "hatch_particles": {
     "type": "minecraft:happy_villager"
-  }
+  },
+  "primary_color": "54a00",
+  "secondary_color": "a9600"
 }

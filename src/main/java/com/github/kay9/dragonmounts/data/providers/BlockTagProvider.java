@@ -2,13 +2,16 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
+
+import java.util.concurrent.CompletableFuture;
 
 class BlockTagProvider extends BlockTagsProvider
 {
@@ -18,14 +21,14 @@ class BlockTagProvider extends BlockTagsProvider
     static final TagKey<Block> NETHER_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("nether_dragon_habitat_blocks"));
     static final TagKey<Block> WATER_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("water_dragon_habitat_blocks"));
 
-    BlockTagProvider(DataGenerator pGenerator, String modid, ExistingFileHelper existingFileHelper)
+    BlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, String modid, ExistingFileHelper existingFileHelper)
     {
-        super(pGenerator, modid, existingFileHelper);
+        super(output, lookup, modid, existingFileHelper);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void addTags()
+    protected void addTags(HolderLookup.Provider pProvider)
     {
         tag(FIRE_DRAGON_HABITAT_BLOCKS)
                 .add(Blocks.FIRE, Blocks.LAVA, Blocks.MAGMA_BLOCK, Blocks.CAMPFIRE);

@@ -4,8 +4,8 @@
   },
   "habitats": [
     {
-      "height": 200,
-      "type": "world_height"
+      "type": "world_height",
+      "height": 200
     }
   ],
   "primary_color": "718aa9",

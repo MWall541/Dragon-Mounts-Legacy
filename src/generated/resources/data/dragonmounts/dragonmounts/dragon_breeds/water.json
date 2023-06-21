@@ -1,24 +1,24 @@
 {
+  "habitats": [
+    {
+      "type": "in_fluid",
+      "fluid_tag": "minecraft:water",
+      "point_multiplier": 1.0
+    },
+    {
+      "type": "nearby_blocks",
+      "block_tag": "dragonmounts:water_dragon_habitat_blocks"
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:dripping_water"
+  },
   "immunities": [
     "drown"
   ],
   "model_properties": {
     "tail_horns": true
   },
-  "habitats": [
-    {
-      "point_multiplier": 1.0,
-      "fluid_tag": "minecraft:water",
-      "type": "in_fluid"
-    },
-    {
-      "block_tag": "dragonmounts:water_dragon_habitat_blocks",
-      "type": "nearby_blocks"
-    }
-  ],
   "primary_color": "62ff",
-  "secondary_color": "5999ff",
-  "hatch_particles": {
-    "type": "minecraft:dripping_water"
-  }
+  "secondary_color": "5999ff"
 }

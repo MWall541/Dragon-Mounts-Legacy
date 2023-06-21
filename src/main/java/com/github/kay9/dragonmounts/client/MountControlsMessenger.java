@@ -2,7 +2,7 @@ package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.TickEvent;
 
 /**
@@ -38,7 +38,7 @@ public class MountControlsMessenger
             --delay;
 
             if (delay == 0)
-                player.displayClientMessage(new TranslatableComponent("mount.dragon.vertical_controls",
+                player.displayClientMessage(Component.translatable("mount.dragon.vertical_controls",
                         Minecraft.getInstance().options.keyJump.getTranslatedKeyMessage(),
                         Keybinds.FLIGHT_DESCENT_KEY.getTranslatedKeyMessage()), true);
         }

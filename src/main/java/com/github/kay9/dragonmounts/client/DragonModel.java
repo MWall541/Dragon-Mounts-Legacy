@@ -4,8 +4,6 @@ import com.github.kay9.dragonmounts.accessors.ModelPartAccess;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -13,6 +11,9 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.RenderType;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 /**
  * Generic model for all winged tetrapod dragons.
@@ -66,6 +67,8 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     public DragonModel(ModelPart root)
     {
+        super(RenderType::entityTranslucentCull);
+
         this.body = root.getChild("body");
         this.back = body.getChild("back");
         this.neck = root.getChild("neck");
@@ -340,7 +343,7 @@ public class DragonModel extends EntityModel<TameableDragon>
         head.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
     }
 
-    private static final Matrix4f INVERSE_SCALE = Matrix4f.createScaleMatrix(-1, 1, 1);
+    private static final Matrix4f INVERSE_SCALE = new Matrix4f().m00(-1);
     private static final Matrix3f INVERSE_NORMS = new Matrix3f(INVERSE_SCALE);
 
     public void renderWings(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
@@ -349,7 +352,7 @@ public class DragonModel extends EntityModel<TameableDragon>
         ps.scale(1.1f, 1.1f, 1.1f);
 
         wingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-        ps.last().pose().multiply(INVERSE_SCALE);
+        ps.last().pose().mul(INVERSE_SCALE);
         ps.last().normal().mul(INVERSE_NORMS);
         wingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
 
@@ -373,7 +376,7 @@ public class DragonModel extends EntityModel<TameableDragon>
 
             if (i == 1)
             {
-                ps.last().pose().multiply(INVERSE_SCALE);
+                ps.last().pose().mul(INVERSE_SCALE);
                 ps.last().normal().mul(INVERSE_NORMS);
             }
         }

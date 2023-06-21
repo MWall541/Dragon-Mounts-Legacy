@@ -5,9 +5,9 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.ClientRegistry;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import org.lwjgl.glfw.GLFW;
 
 public class Keybinds
@@ -18,19 +18,23 @@ public class Keybinds
     @SuppressWarnings({"ConstantConditions"})
     private static KeyMapping keymap(String name, int defaultMapping, String category)
     {
-        var keymap = new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
-        ClientRegistry.registerKeyBinding(keymap);
-        return keymap;
+        return new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
     }
 
-    public static void handleKeyPress(InputEvent.KeyInputEvent evt)
+    public static void registerKeybinds(RegisterKeyMappingsEvent evt)
+    {
+        evt.register(FLIGHT_DESCENT_KEY);
+        evt.register(CAMERA_CONTROLS);
+    }
+
+    public static void handleKeyPress(InputEvent.Key evt)
     {
         if (evt.getKey() == CAMERA_CONTROLS.getKey().getValue()
                 && evt.getAction() == GLFW.GLFW_PRESS
                 && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon d)
         {
             DMLConfig.cameraFlight = !DMLConfig.cameraFlight();
-            Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mount.dragon.camera_controls." + (DMLConfig.cameraFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("mount.dragon.camera_controls." + (DMLConfig.cameraFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
         }
     }
 }

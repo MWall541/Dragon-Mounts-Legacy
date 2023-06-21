@@ -1,25 +1,21 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.*;
-import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.searchtree.SearchRegistry;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ForgeModelBakery;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TagsUpdatedEvent;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -44,7 +40,7 @@ public class DragonMountsLegacy
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         DMLRegistry.init(bus);
-        BreedRegistry.DEFERRED_REGISTRY.register(bus);
+//        BreedRegistry.DEFERRED_REGISTRY.register(bus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
@@ -75,38 +71,48 @@ public class DragonMountsLegacy
         MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
 
         bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
+        bus.addListener(BreedRegistry::hookRegistry);
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
             MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::cameraAngles);
             MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
             MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
-            MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::populateSearchTrees);
+//            MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::populateSearchTrees);
 
             bus.addListener(DragonMountsLegacy::defineBlockModels);
-            bus.addListener((ColorHandlerEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
+            bus.addListener(DragonMountsLegacy::addToCreativeTab);
+            bus.addListener((RegisterColorHandlersEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
             bus.addListener(DragonMountsLegacy::rendererRegistry);
+            bus.addListener(Keybinds::registerKeybinds);
         }
     }
 
     private static void attemptVanillaEggReplacement(PlayerInteractEvent.RightClickBlock evt)
     {
-        if (DMLEggBlock.overrideVanillaDragonEgg(evt.getWorld(), evt.getPos(), evt.getPlayer())) evt.setCanceled(true);
+        if (HatchableEggBlock.overrideVanillaDragonEgg(evt.getLevel(), evt.getPos(), evt.getEntity())) evt.setCanceled(true);
     }
 
-    private static void defineBlockModels(ModelRegistryEvent evt)
+    private static void addToCreativeTab(CreativeModeTabEvent.BuildContents evt)
+    {
+        if (evt.getTab() == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(evt);
+        if (evt.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(evt);
+    }
+
+    private static void defineBlockModels(ModelEvent.RegisterAdditional evt)
     {
         var dir = "models/block/dragon_eggs";
         var length = "models/".length();
         var suffixLength = ".json".length();
-        for (var rl : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.endsWith(".json")))
+        for (var entry : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.getPath().endsWith(".json")).entrySet())
         {
+            var rl = entry.getKey();
             var path = rl.getPath();
             path = path.substring(length, path.length() - suffixLength);
             var model = new ResourceLocation(rl.getNamespace(), path);
             var id = path.substring("block/dragon_eggs/".length(), path.length() - "_dragon_egg".length());
 
-            ForgeModelBakery.addSpecialModel(model);
+            evt.register(model);
             DragonEggRenderer.MODEL_CACHE.put(new ResourceLocation(rl.getNamespace(), id), model);
         }
     }
@@ -116,12 +122,10 @@ public class DragonMountsLegacy
         e.registerEntityRenderer(DMLRegistry.DRAGON.get(), DragonRenderer::new);
         ForgeHooksClient.registerLayerDefinition(DragonRenderer.LAYER_LOCATION, DragonModel::createBodyLayer);
 
-        e.registerEntityRenderer(DMLRegistry.DRAGON_EGG.get(), EggEntityRenderer::new);
-
         e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }
 
-    private static void cameraAngles(EntityViewRenderEvent.CameraSetup evt)
+    private static void cameraAngles(ViewportEvent.ComputeCameraAngles evt)
     {
         if (Minecraft.getInstance().player.getVehicle() instanceof TameableDragon)
         {
@@ -138,22 +142,5 @@ public class DragonMountsLegacy
             }
             camera.move(-camera.getMaxZoom(distance), vertical, 0);
         }
-    }
-
-    private static void populateSearchTrees(TagsUpdatedEvent evt)
-    {
-        var tree = Minecraft.getInstance().getSearchTree(SearchRegistry.CREATIVE_NAMES);
-        var oldContents = tree.search(DragonMountsLegacy.MOD_ID + ":");
-        NonNullList<ItemStack> newContents = NonNullList.create();
-        DMLRegistry.EGG_BLOCK_ITEM.get().fillItemCategory(CreativeModeTab.TAB_SEARCH, newContents);
-        DMLRegistry.SPAWN_EGG.get().fillItemCategory(CreativeModeTab.TAB_SEARCH, newContents);
-        newItems: // this is a sanity check if resources are reloaded
-        for (var newItem : newContents)
-        {
-            for (var oldItem : oldContents)
-                if (ItemStack.matches(newItem, oldItem)) continue newItems;
-            tree.add(newItem);
-        }
-        tree.refresh();
     }
 }

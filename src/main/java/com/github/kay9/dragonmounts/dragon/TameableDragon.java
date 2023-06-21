@@ -12,11 +12,11 @@ import com.github.kay9.dragonmounts.dragon.ai.DragonFollowOwnerGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -60,7 +60,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -109,7 +108,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private final DragonAnimator animator;
     private DragonBreed breed;
     private int reproCount;
-    private float ageProgress;
+    private float ageProgress = 1; // default to adult
     private boolean flying;
     private boolean nearGround;
 
@@ -120,11 +119,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super(type, level);
 
+        setBreed(breed = BreedRegistry.getRandom(level.m_9598_(), getRandom()));
+
         noCulling = true;
 
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
-        breed = BreedRegistry.getFallback(level.registryAccess());
 
         flyingNavigation = new FlyingPathNavigation(this, level);
         groundNavigation = new GroundPathNavigation(this, level);
@@ -186,7 +186,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> data)
     {
-        if (DATA_BREED.equals(data)) updateBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().registryAccess()));
+        if (DATA_BREED.equals(data)) updateBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().m_9598_()));
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
         else super.onSyncedDataUpdated(data);
@@ -196,7 +196,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putString(NBT_BREED, breed.id(getLevel().registryAccess()).toString());
+        compound.putString(NBT_BREED, breed.id(getLevel().m_9598_()).toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
     }
@@ -204,8 +204,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void readAdditionalSaveData(CompoundTag compound)
     {
+        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().m_9598_())); // high priority...
         super.readAdditionalSaveData(compound);
-        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().registryAccess()));
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
 
@@ -214,7 +214,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setBreed(DragonBreed dragonBreed)
     {
-        entityData.set(DATA_BREED, dragonBreed.id(getLevel().registryAccess()).toString());
+        entityData.set(DATA_BREED, dragonBreed.id(getLevel().m_9598_()).toString());
     }
 
     private void updateBreed(DragonBreed breed)
@@ -340,15 +340,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         for (var ability : getBreed().abilities()) ability.tick(this);
     }
 
-    @Override
+    @Override //TODO: looks like mojang changed how rideables work...
     public void travel(Vec3 vec3)
     {
         boolean isFlying = isFlying();
         float speed = (float) getAttributeValue(isFlying? FLYING_SPEED : MOVEMENT_SPEED) * 0.225f;
 
-        if (canBeControlledByRider()) // Were being controlled; override ai movement
+        if (hasControllingPassenger()) // Were being controlled; override ai movement
         {
-            LivingEntity driver = (LivingEntity) getControllingPassenger();
+            var driver = getControllingPassenger();
             double moveSideways = vec3.x;
             double moveY = vec3.y;
             //noinspection ConstantConditions
@@ -381,7 +381,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             }
             else if (driver instanceof Player) // other clients recieve animations
             {
-                calculateEntityAnimation(this, true);
+                m_267651_(true);
                 setDeltaMovement(Vec3.ZERO);
                 return;
             }
@@ -396,7 +396,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 setDeltaMovement(getDeltaMovement().add(0, Math.sin(tickCount / 4f) * 0.03, 0));
             setDeltaMovement(getDeltaMovement().scale(0.9f)); // smoothly slow down
 
-            calculateEntityAnimation(this, true);
+            m_267651_(true);
         }
         else super.travel(vec3);
     }
@@ -506,7 +506,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected SoundEvent getAmbientSound()
     {
-        return getBreed().ambientSound().orElse(DMLRegistry.DRAGON_AMBIENT_SOUND.get());
+        return getBreed().ambientSound().map(Holder::get).orElse(DMLRegistry.DRAGON_AMBIENT_SOUND.get());
     }
 
     @Nullable
@@ -593,13 +593,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public ItemStack getPickedResult(HitResult target)
     {
-        return DragonSpawnEgg.create(getBreed(), getLevel().registryAccess());
+        return DragonSpawnEgg.create(getBreed(), getLevel().m_9598_());
     }
 
     @Override
     protected Component getTypeName()
     {
-        return new TranslatableComponent(getBreed().getTranslationKey(getLevel().registryAccess()));
+        return Component.translatable(DragonBreed.getTranslationKey(getBreed().id(getLevel().m_9598_()).toString()));
     }
 
     public boolean isFoodItem(ItemStack stack)
@@ -706,7 +706,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @SuppressWarnings("ConstantConditions")
     public boolean doHurtTarget(Entity entityIn)
     {
-        boolean attacked = entityIn.hurt(DamageSource.mobAttack(this), (float) getAttribute(ATTACK_DAMAGE).getValue());
+        boolean attacked = entityIn.hurt(m_269291_().m_269333_(this), (float) getAttribute(ATTACK_DAMAGE).getValue());
 
         if (attacked) doEnchantDamageEffects(this, entityIn);
 
@@ -780,10 +780,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             return;
         }
 
-        DragonEgg egg = DMLRegistry.DRAGON_EGG.get().create(level);
-
-        // pick a breed to inherit from
-        egg.setEggBreed(getRandom().nextBoolean()? breed : mate.breed);
+        // pick a breed to inherit from, and place hatching.
+        var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
+        var offSpringBreed = getRandom().nextBoolean()? getBreed() : mate.getBreed();
+        var egg = HatchableEggBlock.place(level, blockPosition(), state, offSpringBreed);
 
         // mix the custom names in case both parents have one
         if (hasCustomName() && animal.hasCustomName())
@@ -821,14 +821,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 babyName = getRandom().nextBoolean()? p1Name + p2Name : p2Name + p1Name;
             }
 
-            egg.setCustomName(new TextComponent(babyName));
+            egg.setCustomName(Component.literal(babyName));
         }
 
         // increase reproduction counter
         addReproCount();
         mate.addReproCount();
-        egg.setPos(getX(), getY(), getZ());
-        level.addFreshEntity(egg);
     }
 
     @Override
@@ -843,19 +841,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean wantsToAttack(LivingEntity target, LivingEntity owner)
     {
-        return !(target instanceof TamableAnimal tameable) || !Objects.equals(tameable.getOwner(), owner);
+        return !(target instanceof TamableAnimal tameable) || !Objects.equals(tameable.m_269323_(), owner);
     }
 
     @Override
     public boolean canAttack(LivingEntity target)
     {
-        return !isHatchling() && !canBeControlledByRider() && super.canAttack(target);
-    }
-
-    @Override
-    public boolean canBeControlledByRider()
-    {
-        return getControllingPassenger() instanceof LivingEntity driver && isOwnedBy(driver);
+        return !isHatchling() && !hasControllingPassenger() && super.canAttack(target);
     }
 
     /**
@@ -863,10 +855,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * Pigs, Horses, and Boats are generally "steered" by the controlling passenger.
      */
     @Override
-    public Entity getControllingPassenger()
+    public LivingEntity getControllingPassenger()
     {
-        List<Entity> list = getPassengers();
-        return list.isEmpty()? null : list.get(0);
+        return getFirstPassenger() instanceof LivingEntity driver && isOwnedBy(driver)? driver : null;
     }
 
     public void setRidingPlayer(Player player)
@@ -886,7 +877,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void positionRider(Entity passenger)
     {
-        Entity riddenByEntity = getControllingPassenger();
+        LivingEntity riddenByEntity = getControllingPassenger();
         if (riddenByEntity != null)
         {
             Vec3 pos = new Vec3(0, getPassengersRidingOffset() + riddenByEntity.getMyRidingOffset(), getScale())
@@ -897,10 +888,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             // fix rider rotation
             if (getFirstPassenger() instanceof LivingEntity)
             {
-                LivingEntity rider = ((LivingEntity) riddenByEntity);
-                rider.xRotO = rider.getXRot();
-                rider.yRotO = rider.getYRot();
-                rider.yBodyRot = yBodyRot;
+                riddenByEntity.xRotO = riddenByEntity.getXRot();
+                riddenByEntity.yRotO = riddenByEntity.getYRot();
+                riddenByEntity.yBodyRot = yBodyRot;
             }
         }
     }
@@ -911,8 +901,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         Entity srcEnt = src.getEntity();
         if (srcEnt != null && (srcEnt == this || hasPassenger(srcEnt))) return true;
 
-        if (src == DamageSource.DRAGON_BREATH // inherited from it anyway
-                || src == DamageSource.CACTUS) // assume cactus needles don't hurt thick scaled lizards
+        if (src == m_269291_().m_269254_() // inherited from it anyway
+                || src == m_269291_().m_269325_()) // assume cactus needles don't hurt thick scaled lizards
             return true;
 
         return breed.immunities().contains(src.getMsgId()) || super.isInvulnerableTo(src);

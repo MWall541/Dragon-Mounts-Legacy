@@ -4,8 +4,8 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
@@ -39,7 +39,7 @@ public class GreenToesAbility extends FootprintAbility
         else if (steppingOn.is(BlockTags.DIRT)) // different from the actual dirt block. Could be grass or moss
         {
             //noinspection deprecation
-            placing = Registry.BLOCK
+            placing = level.m_9598_().registryOrThrow(Registries.BLOCK)
                     .getTag(BlockTags.SMALL_FLOWERS)
                     .flatMap(tag -> tag.getRandomElement(dragon.getRandom()))
                     .map(Holder::value)

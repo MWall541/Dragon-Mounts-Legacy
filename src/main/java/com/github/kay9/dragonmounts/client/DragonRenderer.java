@@ -6,7 +6,7 @@ import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -54,7 +54,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         ps.scale(scale, scale, scale);
         ps.translate(animator.getModelOffsetX(), animator.getModelOffsetY(), animator.getModelOffsetZ());
         ps.translate(0, 1.5, 0.5); // change rotation point
-        ps.mulPose(Vector3f.XP.rotationDegrees(animator.getModelPitch(partials))); // rotate near the saddle so we can support the player
+        ps.mulPose(Axis.XP.rotationDegrees(animator.getModelPitch(partials))); // rotate near the saddle so we can support the player
         ps.translate(0, -1.5, -0.5); // restore rotation point
     }
 
@@ -73,8 +73,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
     public static ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
     {
-        //noinspection DataFlowIssue
-        return TEXTURE_CACHE.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::cacheTextures)[layer];
+        return TEXTURE_CACHE.computeIfAbsent(breed.id(Minecraft.getInstance().level.m_9598_()), DragonRenderer::cacheTextures)[layer];
     }
 
     private static ResourceLocation[] cacheTextures(ResourceLocation id)
@@ -137,6 +136,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
             return GLOW_FUNC.apply(texture);
         }
 
+        @SuppressWarnings("DataFlowIssue")
         private CustomRenderTypes()
         {
             // dummy

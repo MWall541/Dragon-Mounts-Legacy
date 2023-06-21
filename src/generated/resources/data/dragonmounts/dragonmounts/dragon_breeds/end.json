@@ -1,7 +1,4 @@
 {
-  "immunities": [
-    "dragonBreath"
-  ],
   "attributes": {
     "minecraft:generic.max_health": 75.0
   },
@@ -10,9 +7,12 @@
       "type": "dragon_breath"
     }
   ],
-  "primary_color": "161616",
-  "secondary_color": "ff63e8",
   "hatch_particles": {
     "type": "minecraft:portal"
-  }
+  },
+  "immunities": [
+    "dragonBreath"
+  ],
+  "primary_color": "161616",
+  "secondary_color": "ff63e8"
 }

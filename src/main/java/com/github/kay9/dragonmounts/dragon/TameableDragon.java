@@ -16,7 +16,10 @@ import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -56,6 +59,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PlayMessages;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,7 +80,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * @author Kay9
  */
 @SuppressWarnings({"deprecation", "SameReturnValue"})
-public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable
+public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable, IEntityAdditionalSpawnData
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3;
@@ -119,8 +125,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super(type, level);
 
-        setBreed(breed = BreedRegistry.getRandom(level.m_9598_(), getRandom()));
-
         noCulling = true;
 
         moveControl = new DragonMoveController(this);
@@ -133,6 +137,20 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         groundNavigation.setCanFloat(true);
 
         navigation = groundNavigation;
+    }
+
+    /**
+     * This is unfortunately necessary as the DataManager is not quick enough when syncing over the breed data.
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static TameableDragon clientInstance(PlayMessages.SpawnEntity packet, Level level)
+    {
+        var dragon = DMLRegistry.DRAGON.get().create(level);
+        var breed = BreedRegistry.registry(level.m_9598_()).get(packet.getAdditionalData().readResourceLocation());
+        if (breed == null) // this should never happen. but just in case...
+            throw new RuntimeException(String.format("[%s] Error reading client spawn data for dragon: that breed doesn't exist here. How did THAT happen?", DragonMountsLegacy.MOD_ID));
+        dragon.setBreedAndUpdate(breed);
+        return dragon;
     }
 
     @Override
@@ -186,7 +204,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> data)
     {
-        if (DATA_BREED.equals(data)) updateBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().m_9598_()));
+        if (DATA_BREED.equals(data))
+        {
+            setBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().m_9598_()));
+            updateAgeProperties();
+        }
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
         else super.onSyncedDataUpdated(data);
@@ -204,7 +226,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void readAdditionalSaveData(CompoundTag compound)
     {
-        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().m_9598_())); // high priority...
+        setBreedAndUpdate(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().m_9598_())); // high priority...
         super.readAdditionalSaveData(compound);
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
@@ -214,14 +236,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setBreed(DragonBreed dragonBreed)
     {
-        entityData.set(DATA_BREED, dragonBreed.id(getLevel().m_9598_()).toString());
+        if (breed != null) breed.close(this);
+        this.breed = dragonBreed;
+        this.breed.initialize(this);
     }
 
-    private void updateBreed(DragonBreed breed)
+    public void setBreedAndUpdate(DragonBreed dragonBreed)
     {
-        getBreed().close(this);
-        this.breed = breed;
-        getBreed().initialize(this);
+        setBreed(dragonBreed);
+        getEntityData().set(DATA_BREED, breed.id(getLevel().m_9598_()).toString());
     }
 
     public DragonBreed getBreed()
@@ -834,7 +857,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob)
     {
         var offspring = DMLRegistry.DRAGON.get().create(level);
-        offspring.setBreed(getBreed());
+        offspring.setBreedAndUpdate(getBreed());
         return offspring;
     }
 
@@ -1043,13 +1066,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean canBreatheUnderwater()
     {
-        return breed.immunities().contains("drown");
+        return getBreed().immunities().contains("drown");
     }
 
     @Override
     public boolean fireImmune()
     {
-        return super.fireImmune() || breed.immunities().contains("onFire");
+        return super.fireImmune() || getBreed().immunities().contains("onFire");
     }
 
     @Override
@@ -1079,5 +1102,25 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public Vec3 getLightProbePosition(float p_20309_)
     {
         return new Vec3(getX(), getY() + getBbHeight(), getZ());
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getAddEntityPacket()
+    {
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    @Override
+    public void writeSpawnData(FriendlyByteBuf buffer)
+    {
+        var breed = getBreed();
+        if (breed == null) // we don't have a breed yet?
+            setBreedAndUpdate(BreedRegistry.getRandom(getLevel().m_9598_(), getRandom())); // assign one ourselves then.
+        buffer.writeResourceLocation(getBreed().id(getLevel().m_9598_()));
+    }
+
+    @Override
+    public void readSpawnData(FriendlyByteBuf additionalData)
+    {
     }
 }

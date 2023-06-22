@@ -3,13 +3,13 @@ package com.github.kay9.dragonmounts.dragon.egg;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.client.DragonEggRenderer;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,8 +31,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -41,40 +44,45 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.event.CreativeModeTabEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Consumer;
+
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
 @SuppressWarnings("deprecation")
-public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
+public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, SimpleWaterloggedBlock
 {
     public static final IntegerProperty HATCH_STAGE = IntegerProperty.create("hatch_stage", 0, 3);
     public static final BooleanProperty HATCHING = BooleanProperty.create("hatching");
 
-    public static final float DEFAULT_HATCH_WEIGHT = 0.001f;
+    public static final float DEFAULT_HATCH_WEIGHT = 0.01f;
 
-    protected static final String NBT_BLOCK_ENTITY = "BlockEntityTag";
-    protected static final String NBT_HATCH_STAGE = "HatchStage";
-    protected static final String NBT_BREED = "Breed";
-    protected static final String NBT_NAME = "CustomName";
+    public static final String NBT_HATCH_STAGE = "hatch_stage";
+    public static final String NBT_BREED = "Breed";
+    public static final String NBT_NAME = "CustomName";
 
     public HatchableEggBlock()
     {
         super(BlockBehaviour.Properties.of(Material.EGG, MaterialColor.COLOR_BLACK).strength(0f, 9f).lightLevel(s -> 1).noOcclusion());
-        registerDefaultState(defaultBlockState().setValue(HATCH_STAGE, 0).setValue(HATCHING, false));
+        registerDefaultState(defaultBlockState()
+                .setValue(HATCH_STAGE, 0)
+                .setValue(HATCHING, false)
+                .setValue(WATERLOGGED, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
-        builder.add(HATCH_STAGE, HATCHING);
+        builder.add(HATCH_STAGE, HATCHING, WATERLOGGED);
     }
 
     public static void populateTab(CreativeModeTabEvent.BuildContents evt)
@@ -106,6 +114,15 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
         return new HatchableEggBlockEntity(pPos, pState);
     }
 
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player)
+    {
+        var breed = level.getBlockEntity(pos) instanceof HatchableEggBlockEntity e?
+                e.getBreed() :
+                BreedRegistry.getRandom(player.getLevel().m_9598_(), player.getRandom());
+        return Item.create(breed, player.getLevel().m_9598_());
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level _level, BlockState _state, BlockEntityType<T> type)
@@ -123,14 +140,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
     @Override
     public RenderShape getRenderShape(BlockState pState)
     {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
-    }
-
-    @Override
-    protected void falling(FallingBlockEntity pEntity)
-    {
-        if (pEntity.getLevel().getBlockEntity(pEntity.blockPosition()) instanceof HatchableEggBlockEntity e)
-            pEntity.blockData = e.saveWithoutMetadata();
+        return RenderShape.MODEL;
     }
 
     @Override
@@ -149,12 +159,24 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
     }
 
     @Override
-    public void attack(BlockState pState, Level level, BlockPos at, Player pPlayer)
+    public void attack(BlockState state, Level level, BlockPos at, Player pPlayer)
     {
         if (level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
                 && e.getBreed().id(level.m_9598_()).getPath().equals("end")
-                && !pState.getValue(HATCHING))
-            super.attack(pState, level, at, pPlayer); // retain original dragon egg teleport behavior
+                && !state.getValue(HATCHING))
+            teleport(state, level, at); // retain original dragon egg teleport behavior
+    }
+
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos at, Player player, boolean willHarvest, FluidState fluid)
+    {
+        if (!player.getAbilities().instabuild
+                && level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
+                && e.getBreed().id(level.m_9598_()).getPath().equals("end")
+                && !state.getValue(HATCHING))
+            return false; // retain original dragon egg teleport behavior; DON'T destroy!
+
+        return super.onDestroyedByPlayer(state, level, at, player, willHarvest, fluid);
     }
 
     @Override
@@ -162,13 +184,10 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
     {
         super.appendHoverText(stack, level, tooltips, pFlag);
 
-        var tag = stack.getTagElement(NBT_BLOCK_ENTITY);
-        if (tag != null)
-        {
-            var stage = tag.getInt(NBT_HATCH_STAGE);
-            tooltips.add(Component.translatable(getDescriptionId() + ".hatch_stage." + stage)
-                    .withStyle(ChatFormatting.GRAY));
-        }
+        var tag = stack.getTagElement(BlockItem.BLOCK_STATE_TAG);
+        var stage = tag != null? tag.getString(NBT_HATCH_STAGE) : "0";
+        tooltips.add(Component.translatable(getDescriptionId() + ".hatch_stage." + stage)
+                .withStyle(ChatFormatting.GRAY));
 
         var player = Minecraft.getInstance().player;
         if (player != null && player.getAbilities().instabuild)
@@ -176,6 +195,37 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
             tooltips.add(CommonComponents.EMPTY);
             tooltips.add(Component.translatable(getDescriptionId() + ".desc1").withStyle(ChatFormatting.GRAY));
             tooltips.add(CommonComponents.m_264333_().append(Component.translatable(getDescriptionId() + ".desc2")).withStyle(ChatFormatting.BLUE));
+        }
+    }
+
+    @Override
+    public BlockState updateShape(BlockState state, Direction pDirection, BlockState pNeighborState, LevelAccessor level, BlockPos pCurrentPos, BlockPos pNeighborPos)
+    {
+        if (state.getValue(WATERLOGGED))
+            level.scheduleTick(pCurrentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+
+        return super.updateShape(state, pDirection, pNeighborState, level, pCurrentPos, pNeighborPos);
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState state)
+    {
+        return state.getValue(WATERLOGGED)? Fluids.WATER.getSource(false) : super.getFluidState(state);
+    }
+
+    @Override
+    public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom)
+    {
+        // Original logic trashes BlockEntity data. We need it, so do it ourselves.
+        if (isFree(pLevel.getBlockState(pPos.below())) && pPos.getY() >= pLevel.getMinBuildHeight())
+        {
+            CompoundTag tag = null;
+            if (pLevel.getBlockEntity(pPos) instanceof HatchableEggBlockEntity e)
+                tag = e.saveWithoutMetadata();
+
+            var entity = FallingBlockEntity.fall(pLevel, pPos, pState); // this deletes the block. We need to cache the data first and then apply it.
+            if (tag != null) entity.blockData = tag;
+            falling(entity);
         }
     }
 
@@ -188,13 +238,11 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
     @Override // will only tick when HATCHING, according to isRandomlyTicking
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random)
     {
-        var data = level.getBlockEntity(pos);
-        if (!(data instanceof HatchableEggBlockEntity e)) return;
+        if (!(level.getBlockEntity(pos) instanceof HatchableEggBlockEntity data)) return;
         int hatchStage = state.getValue(HATCH_STAGE);
         var finalStage = hatchStage == 3;
 
-        final float TEST_HATCH_CHANCE = 1f;
-        if (random.nextFloat() < TEST_HATCH_CHANCE)
+        if (random.nextFloat() < data.getBreed().hatchChance())
         {
             if (finalStage)
                 hatch(level, pos);
@@ -209,11 +257,11 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
 
         if (finalStage) // too far gone to change habitats now!
             crack(level, pos); // being closer to hatching creates more struggles to escape
-        else if (DMLConfig.updateHabitats() && !e.getTransition().isRunning())
-            e.updateHabitat();
+        else if (DMLConfig.updateHabitats() && !data.getTransition().isRunning())
+            data.updateHabitat();
     }
 
-    @Override //TODO: may have to be done in an actual ticker, not sure.
+    @Override
     public void animateTick(BlockState pState, Level pLevel, BlockPos pPos, RandomSource random)
     {
         if (pState.getValue(HATCHING) && pLevel.getBlockEntity(pPos) instanceof HatchableEggBlockEntity e)
@@ -235,7 +283,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
         level.playSound(null, pos, SoundEvents.TURTLE_EGG_HATCH, SoundSource.BLOCKS, 1.2f, 0.95f + level.getRandom().nextFloat() * 0.2f);
         level.removeBlock(pos, false); // remove block AFTER data is cached
 
-        baby.setBreed(data.getBreed());
+        baby.setBreedAndUpdate(data.getBreed());
         baby.setBaby(true);
         baby.setPos(pos.getX(), pos.getY(), pos.getZ());
         baby.setCustomName(data.getCustomName());
@@ -293,10 +341,50 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
         return false;
     }
 
+    // taken from DragonEggBlock#teleport
+    private static void teleport(BlockState state, Level level, BlockPos pos)
+    {
+        var worldBorder = level.getWorldBorder();
+
+        for (int i = 0; i < 1000; ++i) // excessive?
+        {
+            var teleportPos = pos.offset(level.random.nextInt(16) - level.random.nextInt(16), level.random.nextInt(8) - level.random.nextInt(8), level.random.nextInt(16) - level.random.nextInt(16));
+            if (level.getBlockState(teleportPos).isAir() && worldBorder.isWithinBounds(teleportPos))
+            {
+                if (level.isClientSide)
+                {
+                    for (int j = 0; j < 128; ++j)
+                    {
+                        double d0 = level.random.nextDouble();
+                        float f = (level.random.nextFloat() - 0.5F) * 0.2F;
+                        float f1 = (level.random.nextFloat() - 0.5F) * 0.2F;
+                        float f2 = (level.random.nextFloat() - 0.5F) * 0.2F;
+                        double d1 = Mth.lerp(d0, teleportPos.getX(), pos.getX()) + (level.random.nextDouble() - 0.5D) + 0.5D;
+                        double d2 = Mth.lerp(d0, teleportPos.getY(), pos.getY()) + level.random.nextDouble() - 0.5D;
+                        double d3 = Mth.lerp(d0, teleportPos.getZ(), pos.getZ()) + (level.random.nextDouble() - 0.5D) + 0.5D;
+                        level.addParticle(ParticleTypes.PORTAL, d1, d2, d3, f, f1, f2);
+                    }
+                }
+                else
+                {
+                    // Original Dragon Egg does not have a BlockEntity to account for,
+                    // so our own teleport will now restore the block data.
+
+                    var data = level.getBlockEntity(pos).saveWithoutMetadata();
+                    level.removeBlock(pos, false);
+                    level.setBlock(teleportPos, state, Block.UPDATE_CLIENTS);
+                    level.getBlockEntity(teleportPos).load(data);
+                }
+
+                return;
+            }
+        }
+    }
+
     public static class Item extends BlockItem
     {
         // "BlockStateTag"
-        //      -- "HatchStage"
+        //      -- "hatch_stage"
         // "BlockEntityTag"
         //      -- "Breed"
         //      -- "CustomName"
@@ -307,12 +395,6 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
         public Item()
         {
             super(DMLRegistry.EGG_BLOCK.get(), new net.minecraft.world.item.Item.Properties().rarity(Rarity.EPIC));
-        }
-
-        @Override
-        public void initializeClient(Consumer<IClientItemExtensions> consumer)
-        {
-            consumer.accept(DragonEggRenderer.INSTANCE);
         }
 
         @Override
@@ -332,11 +414,23 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock
                 var tag = BlockItem.getBlockEntityData(stack);
                 if (tag != null)
                 {
-                    dragon.setBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.getLevel().m_9598_()));
+                    dragon.setBreedAndUpdate(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.getLevel().m_9598_()));
                     return InteractionResult.sidedSuccess(player.level.isClientSide);
                 }
             }
             return super.interactLivingEntity(stack, player, target, hand);
+        }
+
+        @Override
+        public InteractionResult place(BlockPlaceContext pContext)
+        {
+            var result = super.place(pContext);
+            if (result.consumesAction()
+                    && pContext.getItemInHand().hasCustomHoverName()
+                    && pContext.getLevel().getBlockEntity(pContext.getClickedPos()) instanceof HatchableEggBlockEntity e
+            )
+                e.setCustomName(pContext.getItemInHand().getHoverName());
+            return result;
         }
 
         public static ItemStack create(DragonBreed breed, RegistryAccess reg)

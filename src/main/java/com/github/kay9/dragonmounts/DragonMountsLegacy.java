@@ -78,9 +78,8 @@ public class DragonMountsLegacy
             MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::cameraAngles);
             MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
             MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
-//            MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::populateSearchTrees);
 
-            bus.addListener(DragonMountsLegacy::defineBlockModels);
+            bus.addListener(DragonMountsLegacy::registerEggModelLoader);
             bus.addListener(DragonMountsLegacy::addToCreativeTab);
             bus.addListener((RegisterColorHandlersEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
             bus.addListener(DragonMountsLegacy::rendererRegistry);
@@ -99,22 +98,27 @@ public class DragonMountsLegacy
         if (evt.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(evt);
     }
 
-    private static void defineBlockModels(ModelEvent.RegisterAdditional evt)
-    {
-        var dir = "models/block/dragon_eggs";
-        var length = "models/".length();
-        var suffixLength = ".json".length();
-        for (var entry : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.getPath().endsWith(".json")).entrySet())
-        {
-            var rl = entry.getKey();
-            var path = rl.getPath();
-            path = path.substring(length, path.length() - suffixLength);
-            var model = new ResourceLocation(rl.getNamespace(), path);
-            var id = path.substring("block/dragon_eggs/".length(), path.length() - "_dragon_egg".length());
+//    private static void defineBlockModels(ModelEvent.RegisterAdditional evt)
+//    {
+//        var dir = "models/block/dragon_eggs";
+//        var length = "models/".length();
+//        var suffixLength = ".json".length();
+//        for (var entry : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.getPath().endsWith(".json")).entrySet())
+//        {
+//            var rl = entry.getKey();
+//            var path = rl.getPath();
+//            path = path.substring(length, path.length() - suffixLength);
+//            var model = new ResourceLocation(rl.getNamespace(), path);
+//            var id = path.substring("block/dragon_eggs/".length(), path.length() - "_dragon_egg".length());
+//
+//            evt.register(model);
+//            DragonEggRenderer.MODEL_CACHE.put(new ResourceLocation(rl.getNamespace(), id), model);
+//        }
+//    }
 
-            evt.register(model);
-            DragonEggRenderer.MODEL_CACHE.put(new ResourceLocation(rl.getNamespace(), id), model);
-        }
+    private static void registerEggModelLoader(ModelEvent.RegisterGeometryLoaders evt)
+    {
+        evt.register("dragon_egg", DragonEggModel.Loader.INSTANCE);
     }
 
     private static void rendererRegistry(EntityRenderersEvent.RegisterRenderers e)
@@ -122,7 +126,7 @@ public class DragonMountsLegacy
         e.registerEntityRenderer(DMLRegistry.DRAGON.get(), DragonRenderer::new);
         ForgeHooksClient.registerLayerDefinition(DragonRenderer.LAYER_LOCATION, DragonModel::createBodyLayer);
 
-        e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
+//        e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }
 
     private static void cameraAngles(ViewportEvent.ComputeCameraAngles evt)

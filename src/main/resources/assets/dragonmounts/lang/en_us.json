@@ -16,6 +16,10 @@
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
   "block.dragonmounts.dragon_egg.desc2": "Changes Breed Type",
+  "block.dragonmounts.dragon_egg.hatch_stage.0": "It looks like this Egg will take a long time to hatch.",
+  "block.dragonmounts.dragon_egg.hatch_stage.1": "What will hatch from this? It doesn't seem close to hatching.",
+  "block.dragonmounts.dragon_egg.hatch_stage.2": "It appears to move occasionally. It may be close to hatching.",
+  "block.dragonmounts.dragon_egg.hatch_stage.3": "Sounds can be heard coming from inside! It will hatch soon!",
 
   "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
   "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",

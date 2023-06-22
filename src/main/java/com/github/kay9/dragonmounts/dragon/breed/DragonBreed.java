@@ -35,7 +35,7 @@ import java.util.Optional;
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
                           ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities,
                           List<Habitat> habitats, ImmutableSet<String> immunities, Optional<Holder<SoundEvent>> ambientSound,
-                          ResourceLocation deathLoot, int growthTime, float hatchWeight, float sizeModifier,
+                          ResourceLocation deathLoot, int growthTime, float hatchChance, float sizeModifier,
                           HolderSet<Item> tamingItems, HolderSet<Item> breedingItems)
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -50,7 +50,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.BASE_GROWTH_TIME).forGetter(DragonBreed::growthTime),
-            Codec.FLOAT.optionalFieldOf("hatch_weight", HatchableEggBlock.DEFAULT_HATCH_WEIGHT).forGetter(DragonBreed::hatchWeight),
+            Codec.FLOAT.optionalFieldOf("hatch_chance", HatchableEggBlock.DEFAULT_HATCH_WEIGHT).forGetter(DragonBreed::hatchChance),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier),
             RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("taming_items", BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::tamingItems),
             RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("breeding_items", BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::breedingItems)

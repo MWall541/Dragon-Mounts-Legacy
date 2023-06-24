@@ -67,7 +67,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     public static final IntegerProperty HATCH_STAGE = IntegerProperty.create("hatch_stage", 0, 3);
     public static final BooleanProperty HATCHING = BooleanProperty.create("hatching");
 
-    public static final float DEFAULT_HATCH_WEIGHT = 0.075f;
+    public static final float DEFAULT_HATCH_CHANCE = 0.1f;
 
     public static final String NBT_HATCH_STAGE = "hatch_stage";
     public static final String NBT_BREED = TameableDragon.NBT_BREED;

@@ -218,7 +218,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putString(NBT_BREED, breed.id(getLevel().m_9598_()).toString());
+        if (getBreed() != null) compound.putString(NBT_BREED, getBreed().id(getLevel().m_9598_()).toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
     }
@@ -592,9 +592,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         playSound(getStepSound(), soundType.getVolume(), soundType.getPitch() * getVoicePitch());
     }
 
-    /**
-     * Get number of ticks, at least during which the living entity will be silent.
-     */
+    @Override
+    public void playAmbientSound()
+    {
+        if (getBreed() != null) // EntityType likes to invoke this before deserializing, so let's guard it.
+            super.playAmbientSound();
+    }
+
     @Override
     public int getAmbientSoundInterval()
     {

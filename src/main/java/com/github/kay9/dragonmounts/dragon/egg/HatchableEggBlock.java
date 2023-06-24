@@ -17,6 +17,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -51,7 +52,9 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -64,10 +67,10 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     public static final IntegerProperty HATCH_STAGE = IntegerProperty.create("hatch_stage", 0, 3);
     public static final BooleanProperty HATCHING = BooleanProperty.create("hatching");
 
-    public static final float DEFAULT_HATCH_WEIGHT = 0.01f;
+    public static final float DEFAULT_HATCH_WEIGHT = 0.075f;
 
     public static final String NBT_HATCH_STAGE = "hatch_stage";
-    public static final String NBT_BREED = "Breed";
+    public static final String NBT_BREED = TameableDragon.NBT_BREED;
     public static final String NBT_NAME = "CustomName";
 
     public HatchableEggBlock()
@@ -398,6 +401,13 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         }
 
         @Override
+        public @Nullable ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt)
+        {
+            ensureExistingBreedType(stack, BlockItem.BLOCK_ENTITY_TAG); // extremely hacky to be doing it here... but there doesn't seem to be any other options.
+            return super.initCapabilities(stack, nbt);
+        }
+
+        @Override
         public Component getName(ItemStack stack)
         {
             var tag = BlockItem.getBlockEntityData(stack);
@@ -431,6 +441,20 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
             )
                 e.setCustomName(pContext.getItemInHand().getHoverName());
             return result;
+        }
+
+        private static void ensureExistingBreedType(ItemStack stack, String subTag)
+        {
+            if (!stack.hasTag()) stack.setTag(new CompoundTag());
+            var blockEntityData = stack.getOrCreateTagElement(subTag);
+            var breed = blockEntityData.getString(NBT_BREED);
+            var reg = BreedRegistry.registry(ServerLifecycleHooks.getCurrentServer().registryAccess());
+
+            if (breed.isEmpty() || !reg.containsKey(new ResourceLocation(breed))) // this item doesn't contain a breed yet?
+            {
+                breed = reg.getRandom(RandomSource.create()).orElseThrow().key().location().toString();
+                blockEntityData.putString(NBT_BREED, breed); // assign one ourselves then.
+            }
         }
 
         public static ItemStack create(DragonBreed breed, RegistryAccess reg)

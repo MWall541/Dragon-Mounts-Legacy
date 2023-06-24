@@ -11,7 +11,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -67,8 +66,6 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     public DragonModel(ModelPart root)
     {
-        super(RenderType::entityTranslucentCull);
-
         this.body = root.getChild("body");
         this.back = body.getChild("back");
         this.neck = root.getChild("neck");

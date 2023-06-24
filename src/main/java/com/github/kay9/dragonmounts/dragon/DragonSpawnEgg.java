@@ -7,11 +7,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.server.ServerLifecycleHooks;
+import org.jetbrains.annotations.Nullable;
 
 public class DragonSpawnEgg extends ForgeSpawnEggItem
 {
@@ -53,6 +58,13 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     }
 
     @Override
+    public @Nullable ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt)
+    {
+        preconditionSpawnEgg(stack); // extremely hacky to be doing it here... but there doesn't seem to be any other options.
+        return super.initCapabilities(stack, nbt);
+    }
+
+    @Override
     public Component getName(ItemStack stack)
     {
         var name = "";
@@ -67,5 +79,23 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         if (tag != null)
             return tintIndex == 0? tag.getInt("PrimaryColor") : tag.getInt("SecondaryColor");
         return 0xffffff;
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private static void preconditionSpawnEgg(ItemStack stack)
+    {
+        var root = stack.getOrCreateTag();
+        var blockEntityData = stack.getOrCreateTagElement(EntityType.ENTITY_TAG);
+        var breedId = blockEntityData.getString(TameableDragon.NBT_BREED);
+        var regAcc = ServerLifecycleHooks.getCurrentServer().registryAccess();
+        var reg = BreedRegistry.registry(regAcc);
+
+        if (breedId.isEmpty() || !reg.containsKey(new ResourceLocation(breedId))) // this item doesn't contain a breed yet?
+        {
+            // assign one ourselves then.
+            var breed = reg.getRandom(RandomSource.create()).orElseThrow();
+            var updated = create(breed.get(), regAcc);
+            root.merge(updated.getTag());
+        }
     }
 }

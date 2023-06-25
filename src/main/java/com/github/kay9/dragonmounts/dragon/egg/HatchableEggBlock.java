@@ -445,6 +445,8 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
 
         private static void ensureExistingBreedType(ItemStack stack, String subTag)
         {
+            if (ServerLifecycleHooks.getCurrentServer() == null) return;
+
             if (!stack.hasTag()) stack.setTag(new CompoundTag());
             var blockEntityData = stack.getOrCreateTagElement(subTag);
             var breed = blockEntityData.getString(NBT_BREED);

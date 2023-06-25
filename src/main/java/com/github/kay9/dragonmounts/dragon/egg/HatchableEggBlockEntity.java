@@ -5,7 +5,6 @@ import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.habitats.Habitat;
 import com.google.common.base.Suppliers;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -70,7 +69,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         var transitioner = pTag.getCompound(TransitionHandler.NBT_TRANSITIONER);
         if (!transitioner.isEmpty()) getTransition().load(transitioner);
 
-        if (getLevel() instanceof ClientLevel) // instance check; level is nullable
+        if (getLevel() != null && getLevel().isClientSide()) // level is nullable
             getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
     }
 

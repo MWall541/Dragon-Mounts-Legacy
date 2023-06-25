@@ -42,7 +42,7 @@ public class DragonFollowOwnerGoal extends Goal
     public DragonFollowOwnerGoal(TameableDragon dragon, double speedModifier, float startDistance, float stopDistance, float teleportDistance)
     {
         this.dragon = dragon;
-        this.level = dragon.level;
+        this.level = dragon.getLevel();
         this.speedModifier = speedModifier;
         this.startDistance = startDistance;
         this.stopDistance = stopDistance;

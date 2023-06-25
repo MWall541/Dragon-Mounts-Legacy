@@ -8,7 +8,7 @@ public abstract class FootprintAbility implements Ability
     @Override
     public void onMove(TameableDragon dragon)
     {
-        if (dragon.level.isClientSide || !dragon.isAdult() || !dragon.isOnGround()) return;
+        if (dragon.getLevel().isClientSide || !dragon.isAdult() || !dragon.isOnGround()) return;
 
         var chance = getFootprintChance(dragon);
         if (chance == 0) return;

@@ -270,7 +270,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void equipSaddle(@Nullable SoundSource source)
     {
         setSaddled(true);
-        level.playSound(null, getX(), getY(), getZ(), SoundEvents.HORSE_SADDLE, getSoundSource(), 1, 1);
+        getLevel().playSound(null, getX(), getY(), getZ(), SoundEvents.HORSE_SADDLE, getSoundSource(), 1, 1);
     }
 
     /**
@@ -294,7 +294,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public boolean shouldFly()
     {
-        if (isFlying()) return !onGround; // more natural landings
+        if (isFlying()) return !isOnGround(); // more natural landings
         return canFly() && !isInWater() && !isNearGround();
     }
 
@@ -347,7 +347,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // update nearGround state when moving for flight and animation logic
-        nearGround = onGround || !getLevel().noCollision(this, new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getZ()));
+        nearGround = isOnGround() || !getLevel().noCollision(this, new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getZ()));
 
         // update flying state based on the distance to the ground
         boolean flying = shouldFly();
@@ -363,65 +363,68 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         for (var ability : getBreed().abilities()) ability.tick(this);
     }
 
-    @Override //TODO: looks like mojang changed how rideables work...
+    @Override
     public void travel(Vec3 vec3)
     {
-        boolean isFlying = isFlying();
-        float speed = (float) getAttributeValue(isFlying? FLYING_SPEED : MOVEMENT_SPEED) * 0.225f;
-
-        if (hasControllingPassenger()) // Were being controlled; override ai movement
+        if (isFlying())
         {
-            var driver = getControllingPassenger();
-            double moveSideways = vec3.x;
-            double moveY = vec3.y;
-            //noinspection ConstantConditions
-            double moveForward = Math.min(Math.abs(driver.zza) + Math.abs(driver.xxa), 1);
-
-            // rotate head to match driver.
-            float yaw = driver.yHeadRot;
-            if (moveForward > 0) // rotate in the direction of the drivers controls
-                yaw += (float) Mth.atan2(driver.zza, driver.xxa) * (180f / (float) Math.PI) - 90;
-            yHeadRot = yaw;
-            setXRot(driver.getXRot() * 0.68f);
-
-            // rotate body towards the head
-            setYRot(Mth.rotateIfNecessary(yHeadRot, getYRot(), 4));
-
-            if (isControlledByLocalInstance()) // Client applies motion
+            if (isControlledByLocalInstance())
             {
-                if (isFlying)
-                {
-                    moveForward = moveForward > 0? moveForward : 0;
-                    moveY = 0;
-                    if (driver.jumping) moveY = 1;
-                    else if (Keybinds.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
-                    else if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
-                }
-                else if (driver.jumping && canFly()) liftOff();
-
-                vec3 = new Vec3(moveSideways, moveY, moveForward);
-                setSpeed(speed);
+                // Move relative to yaw - handled in the move controller or by driver
+                moveRelative(getDrivenMovementSpeed(null), vec3);
+                move(MoverType.SELF, getDeltaMovement());
+                if (getDeltaMovement().lengthSqr() < 0.1) // we're not actually going anywhere, bob up and down.
+                    setDeltaMovement(getDeltaMovement().add(0, Math.sin(tickCount / 4f) * 0.03, 0));
+                setDeltaMovement(getDeltaMovement().scale(0.9f)); // smoothly slow down
             }
-            else if (driver instanceof Player) // other clients recieve animations
-            {
-                m_267651_(true);
-                setDeltaMovement(Vec3.ZERO);
-                return;
-            }
-        }
-
-        if (isFlying)
-        {
-            // Move relative to yaw - handled in the move controller or by driver
-            moveRelative(speed, vec3);
-            move(MoverType.SELF, getDeltaMovement());
-            if (getDeltaMovement().lengthSqr() < 0.1) // we're not actually going anywhere, bob up and down.
-                setDeltaMovement(getDeltaMovement().add(0, Math.sin(tickCount / 4f) * 0.03, 0));
-            setDeltaMovement(getDeltaMovement().scale(0.9f)); // smoothly slow down
 
             m_267651_(true);
         }
         else super.travel(vec3);
+    }
+
+    @Override
+    protected Vec3 m_274312_(Player driver, Vec3 move)
+    {
+        double moveSideways = move.x;
+        double moveY = move.y;
+        double moveForward = Math.min(Math.abs(driver.zza) + Math.abs(driver.xxa), 1);
+
+        if (isFlying())
+        {
+            moveForward = moveForward > 0? moveForward : 0;
+            moveY = 0;
+            if (driver.jumping) moveY = 1;
+            else if (Keybinds.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
+            else if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
+        }
+
+        return new Vec3(moveSideways, moveY, moveForward);
+    }
+
+    @Override
+    protected void m_274498_(Player driver, Vec3 move)
+    {
+        // rotate head to match driver.
+        float yaw = driver.yHeadRot;
+        if (move.z > 0) // rotate in the direction of the drivers controls
+            yaw += (float) Mth.atan2(driver.zza, driver.xxa) * (180f / (float) Math.PI) - 90;
+        yHeadRot = yaw;
+        setXRot(driver.getXRot() * 0.68f);
+
+        // rotate body towards the head
+        setYRot(Mth.rotateIfNecessary(yHeadRot, getYRot(), 4));
+
+        if (isControlledByLocalInstance())
+        {
+            if (!isFlying() && canFly() && driver.jumping) liftOff();
+        }
+    }
+
+    @Override
+    protected float getDrivenMovementSpeed(Player driver)
+    {
+        return (float) getAttributeValue(isFlying()? FLYING_SPEED : MOVEMENT_SPEED) * 0.225f;
     }
 
     @Override
@@ -452,7 +455,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             heal(stack.getItem().getFoodProperties(stack, this).getNutrition());
             playSound(getEatingSound(stack), 0.7f, 1);
             stack.shrink(1);
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.sidedSuccess(getLevel().isClientSide);
         }
 
         // saddle up!
@@ -460,7 +463,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             stack.shrink(1);
             equipSaddle(getSoundSource());
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.sidedSuccess(getLevel().isClientSide);
         }
 
         // sit!
@@ -472,7 +475,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 setOrderedToSit(!isOrderedToSit());
                 if (isOrderedToSit()) setTarget(null);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.sidedSuccess(getLevel().isClientSide);
         }
 
         // ride on
@@ -486,7 +489,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             }
             setOrderedToSit(false);
             setInSittingPose(false);
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.sidedSuccess(getLevel().isClientSide);
         }
 
         return super.mobInteract(player, hand);
@@ -585,8 +588,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         // override sound type if the top block is snowy
         var soundType = state.getSoundType();
-        if (level.getBlockState(entityPos.above()).getBlock() == Blocks.SNOW)
-            soundType = Blocks.SNOW.getSoundType(state, level, entityPos, this);
+        if (getLevel().getBlockState(entityPos.above()).getBlock() == Blocks.SNOW)
+            soundType = Blocks.SNOW.getSoundType(state, getLevel(), entityPos, this);
 
         // play stomping for bigger dragons
         playSound(getStepSound(), soundType.getVolume(), soundType.getPitch() * getVoicePitch());
@@ -650,11 +653,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             navigation.stop();
             setTarget(null);
             setOwnerUUID(player.getUUID());
-            level.broadcastEntityEvent(this, (byte) 7);
+            getLevel().broadcastEntityEvent(this, (byte) 7);
         }
         else
         {
-            level.broadcastEntityEvent(this, (byte) 6);
+            getLevel().broadcastEntityEvent(this, (byte) 6);
         }
     }
 
@@ -749,7 +752,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             float volume = 0.3f + (1 - speed) * 0.2f;
             pitch *= getVoicePitch();
             volume *= getSoundVolume();
-            level.playLocalSound(getX(), getY(), getZ(), getWingsSound(), SoundSource.VOICE, volume, pitch, true);
+            getLevel().playLocalSound(getX(), getY(), getZ(), getWingsSound(), SoundSource.VOICE, volume, pitch, true);
         }
     }
 
@@ -902,22 +905,21 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public void positionRider(Entity passenger)
+    protected void positionRider(Entity ridden, MoveFunction pCallback)
     {
-        LivingEntity riddenByEntity = getControllingPassenger();
-        if (riddenByEntity != null)
+        if (hasPassenger(ridden))
         {
-            Vec3 pos = new Vec3(0, getPassengersRidingOffset() + riddenByEntity.getMyRidingOffset(), getScale())
+            var rePos = new Vec3(0, getPassengersRidingOffset() + ridden.getMyRidingOffset(), getScale())
                     .yRot((float) Math.toRadians(-yBodyRot))
                     .add(position());
-            passenger.setPos(pos.x, pos.y, pos.z);
+            pCallback.accept(ridden, rePos.x, rePos.y, rePos.z);
 
             // fix rider rotation
             if (getFirstPassenger() instanceof LivingEntity)
             {
-                riddenByEntity.xRotO = riddenByEntity.getXRot();
-                riddenByEntity.yRotO = riddenByEntity.getYRot();
-                riddenByEntity.yBodyRot = yBodyRot;
+                ridden.xRotO = ridden.getXRot();
+                ridden.yRotO = ridden.getYRot();
+                ridden.setYBodyRot(yBodyRot);
             }
         }
     }
@@ -959,7 +961,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         double posXTmp = getX();
         double posYTmp = getY();
         double posZTmp = getZ();
-        boolean onGroundTmp = onGround;
+        boolean onGroundTmp = isOnGround();
 
         super.refreshDimensions();
 
@@ -968,7 +970,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         setPos(posXTmp, posYTmp, posZTmp);
 
         // otherwise, setScale stops the dragon from landing while it is growing
-        onGround = onGroundTmp;
+        setOnGround(onGroundTmp);
     }
 
     @Override
@@ -1059,7 +1061,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // simple helper method to determine if we're on the server thread.
     public boolean isServer()
     {
-        return !level.isClientSide;
+        return !getLevel().isClientSide;
     }
 
     public DragonAnimator getAnimator()
@@ -1096,8 +1098,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             var collider = getBoundingBox().deflate(getBbWidth() * 0.2f);
             return BlockPos.betweenClosedStream(collider).anyMatch((pos) ->
             {
-                BlockState state = level.getBlockState(pos);
-                return !state.isAir() && state.isSuffocating(level, pos) && Shapes.joinIsNotEmpty(state.getCollisionShape(level, pos).move(pos.getX(), pos.getY(), pos.getZ()), Shapes.create(collider), BooleanOp.AND);
+                BlockState state = getLevel().getBlockState(pos);
+                return !state.isAir() && state.isSuffocating(getLevel(), pos) && Shapes.joinIsNotEmpty(state.getCollisionShape(getLevel(), pos).move(pos.getX(), pos.getY(), pos.getZ()), Shapes.create(collider), BooleanOp.AND);
             });
         }
     }

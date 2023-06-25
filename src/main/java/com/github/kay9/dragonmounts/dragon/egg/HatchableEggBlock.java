@@ -47,13 +47,12 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,7 +74,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
 
     public HatchableEggBlock()
     {
-        super(BlockBehaviour.Properties.of(Material.EGG, MaterialColor.COLOR_BLACK).strength(0f, 9f).lightLevel(s -> 1).noOcclusion());
+        super(BlockBehaviour.Properties.m_284310_().m_284180_(MapColor.f_283927_).strength(0f, 9f).lightLevel(s -> 1).noOcclusion());
         registerDefaultState(defaultBlockState()
                 .setValue(HATCH_STAGE, 0)
                 .setValue(HATCHING, false)
@@ -88,7 +87,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         builder.add(HATCH_STAGE, HATCHING, WATERLOGGED);
     }
 
-    public static void populateTab(CreativeModeTabEvent.BuildContents evt)
+    public static void populateTab(BuildCreativeModeTabContentsEvent evt)
     {
         if (Minecraft.getInstance().level != null)
         {
@@ -425,7 +424,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
                 if (tag != null)
                 {
                     dragon.setBreedAndUpdate(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.getLevel().m_9598_()));
-                    return InteractionResult.sidedSuccess(player.level.isClientSide);
+                    return InteractionResult.sidedSuccess(player.getLevel().isClientSide);
                 }
             }
             return super.interactLivingEntity(stack, player, target, hand);

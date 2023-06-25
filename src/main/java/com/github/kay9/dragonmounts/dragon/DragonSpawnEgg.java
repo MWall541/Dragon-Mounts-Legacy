@@ -14,7 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,7 +47,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         return stack;
     }
 
-    public static void populateTab(CreativeModeTabEvent.BuildContents evt)
+    public static void populateTab(BuildCreativeModeTabContentsEvent evt)
     {
         if (Minecraft.getInstance().level != null)
         {

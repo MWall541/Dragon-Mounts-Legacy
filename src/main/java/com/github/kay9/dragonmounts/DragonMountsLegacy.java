@@ -15,7 +15,7 @@ import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -92,10 +92,11 @@ public class DragonMountsLegacy
         if (HatchableEggBlock.overrideVanillaDragonEgg(evt.getLevel(), evt.getPos(), evt.getEntity())) evt.setCanceled(true);
     }
 
-    private static void addToCreativeTab(CreativeModeTabEvent.BuildContents evt)
+    private static void addToCreativeTab(BuildCreativeModeTabContentsEvent evt)
     {
-        if (evt.getTab() == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(evt);
-        if (evt.getTab() == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(evt);
+        var tab = evt.getTabKey();
+        if (tab == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(evt);
+        if (tab == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(evt);
     }
 
 //    private static void defineBlockModels(ModelEvent.RegisterAdditional evt)

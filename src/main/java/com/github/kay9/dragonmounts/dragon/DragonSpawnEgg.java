@@ -84,6 +84,8 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     @SuppressWarnings("ConstantConditions")
     private static void preconditionSpawnEgg(ItemStack stack)
     {
+        if (ServerLifecycleHooks.getCurrentServer() == null) return;
+
         var root = stack.getOrCreateTag();
         var blockEntityData = stack.getOrCreateTagElement(EntityType.ENTITY_TAG);
         var breedId = blockEntityData.getString(TameableDragon.NBT_BREED);

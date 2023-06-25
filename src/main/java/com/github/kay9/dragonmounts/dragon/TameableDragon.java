@@ -390,7 +390,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         double moveY = move.y;
         double moveForward = Math.min(Math.abs(driver.zza) + Math.abs(driver.xxa), 1);
 
-        if (isFlying())
+        if (isFlying() && isControlledByLocalInstance())
         {
             moveForward = moveForward > 0? moveForward : 0;
             moveY = 0;

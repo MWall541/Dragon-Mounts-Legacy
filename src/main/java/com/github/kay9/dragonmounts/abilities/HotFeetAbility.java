@@ -21,7 +21,7 @@ public class HotFeetAbility extends FootprintAbility
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
-        var level = dragon.getLevel();
+        var level = dragon.level();
         var steppingOn = level.getBlockState(pos);
         if (steppingOn.is(BURNABLES_TAG))
         {

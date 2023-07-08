@@ -153,7 +153,7 @@ public class DragonEggModel implements IUnbakedGeometry<DragonEggModel>
         {
             if (level.getBlockEntity(pos) instanceof HatchableEggBlockEntity e && e.getBreed() != null)
                 return modelData.derive()
-                        .with(Data.PROPERTY, new Data(e.getBreed().id(Minecraft.getInstance().level.m_9598_()).toString()))
+                        .with(Data.PROPERTY, new Data(e.getBreed().id(Minecraft.getInstance().level.registryAccess()).toString()))
                         .build();
 
             return modelData;

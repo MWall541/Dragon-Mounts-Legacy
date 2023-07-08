@@ -52,6 +52,6 @@ class BlockTagProvider extends BlockTagsProvider
                         Blocks.SEA_LANTERN, Blocks.SEA_PICKLE);
 
         tag(HotFeetAbility.BURNABLES_TAG)
-                .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.f_278394_);
+                .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.REPLACEABLE);
     }
 }

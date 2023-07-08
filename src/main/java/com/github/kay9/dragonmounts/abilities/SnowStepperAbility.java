@@ -16,10 +16,10 @@ public class SnowStepperAbility extends FootprintAbility
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
         var state = Blocks.SNOW.defaultBlockState();
-        if (dragon.getLevel().getBlockState(pos).isAir() && state.canSurvive(dragon.getLevel(), pos))
+        if (dragon.level().getBlockState(pos).isAir() && state.canSurvive(dragon.level(), pos))
         {
-            dragon.getLevel().setBlockAndUpdate(pos, state);
-            ((ServerLevel) dragon.getLevel()).sendParticles(ParticleTypes.SNOWFLAKE,
+            dragon.level().setBlockAndUpdate(pos, state);
+            ((ServerLevel) dragon.level()).sendParticles(ParticleTypes.SNOWFLAKE,
                     pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5,
                     dragon.getRandom().nextInt(6) + 2,
                     0.5, 0.5, 0.5, 0);
@@ -30,7 +30,7 @@ public class SnowStepperAbility extends FootprintAbility
     protected float getFootprintChance(TameableDragon dragon)
     {
         var pos = dragon.blockPosition();
-        return dragon.getLevel().getBiome(pos).value().coldEnoughToSnow(pos)? 0.5f : 0;
+        return dragon.level().getBiome(pos).value().coldEnoughToSnow(pos)? 0.5f : 0;
     }
 
     @Override

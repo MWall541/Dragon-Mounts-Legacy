@@ -43,7 +43,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         super.saveAdditional(tag);
 
         if (getBreed() != null)
-            tag.putString(HatchableEggBlock.NBT_BREED, getBreed().id(getLevel().m_9598_()).toString());
+            tag.putString(HatchableEggBlock.NBT_BREED, getBreed().id(getLevel().registryAccess()).toString());
 
         if (getCustomName() != null)
             tag.putString(HatchableEggBlock.NBT_NAME, Component.Serializer.toJson(customName));
@@ -61,7 +61,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     {
         super.load(pTag);
 
-        setBreed(Suppliers.memoize(() -> BreedRegistry.get(pTag.getString(HatchableEggBlock.NBT_BREED), getLevel().m_9598_())));
+        setBreed(Suppliers.memoize(() -> BreedRegistry.get(pTag.getString(HatchableEggBlock.NBT_BREED), getLevel().registryAccess())));
 
         var name = pTag.getString(HatchableEggBlock.NBT_NAME);
         if (!name.isBlank()) setCustomName(Component.Serializer.fromJson(name));
@@ -79,7 +79,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         var tag = super.getUpdateTag();
 
         if (getBreed() == null) // We don't have a breed yet?
-            setBreed(Suppliers.memoize(() -> BreedRegistry.getRandom(getLevel().m_9598_(), getLevel().getRandom()))); // assign one ourselves.
+            setBreed(Suppliers.memoize(() -> BreedRegistry.getRandom(getLevel().registryAccess(), getLevel().getRandom()))); // assign one ourselves.
 
         saveAdditional(tag);
         return tag;
@@ -113,7 +113,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     {
         return customName != null? customName :
                 Component.translatable(DMLRegistry.EGG_BLOCK_ITEM.get().getDescriptionId(),
-                        Component.translatable(DragonBreed.getTranslationKey(getBreed().id(getLevel().m_9598_()).toString())));
+                        Component.translatable(DragonBreed.getTranslationKey(getBreed().id(getLevel().registryAccess()).toString())));
     }
 
     public void setCustomName(Component name)
@@ -135,7 +135,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     {
         DragonBreed winner = null;
         int prevPoints = 0;
-        for (var breed : BreedRegistry.registry(getLevel().m_9598_()))
+        for (var breed : BreedRegistry.registry(getLevel().registryAccess()))
         {
             int points = 0;
             for (Habitat habitat : breed.habitats()) points += habitat.getHabitatPoints(level, getBlockPos());
@@ -205,13 +205,13 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
         public void save(CompoundTag tag)
         {
-            tag.putString(NBT_TRANSITION_BREED, transitioningBreed.get().id(getLevel().m_9598_()).toString());
+            tag.putString(NBT_TRANSITION_BREED, transitioningBreed.get().id(getLevel().registryAccess()).toString());
             tag.putInt(NBT_TRANSITION_TIME,  transitionTime);
         }
 
         public void load(CompoundTag tag)
         {
-            startFrom(Suppliers.memoize(() -> BreedRegistry.get(tag.getString(NBT_TRANSITION_BREED), getLevel().m_9598_())), tag.getInt(NBT_TRANSITION_TIME));
+            startFrom(Suppliers.memoize(() -> BreedRegistry.get(tag.getString(NBT_TRANSITION_BREED), getLevel().registryAccess())), tag.getInt(NBT_TRANSITION_TIME));
         }
     }
 }

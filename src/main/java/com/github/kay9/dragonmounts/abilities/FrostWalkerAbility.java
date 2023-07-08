@@ -25,8 +25,8 @@ public class FrostWalkerAbility implements Ability
     @Override
     public void onMove(TameableDragon dragon)
     {
-        if (!dragon.getLevel().isClientSide() && dragon.isAdult())
-            FrostWalkerEnchantment.onEntityMoved(dragon, dragon.getLevel(), dragon.blockPosition(), (int) Math.max(3 * dragon.getScale(), 1));
+        if (!dragon.level().isClientSide() && dragon.isAdult())
+            FrostWalkerEnchantment.onEntityMoved(dragon, dragon.level(), dragon.blockPosition(), (int) Math.max(3 * dragon.getScale(), 1));
     }
 
     @Override

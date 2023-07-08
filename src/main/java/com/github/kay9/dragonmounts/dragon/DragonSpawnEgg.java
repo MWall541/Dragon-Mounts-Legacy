@@ -51,7 +51,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         if (Minecraft.getInstance().level != null)
         {
-            var reg = Minecraft.getInstance().level.m_9598_();
+            var reg = Minecraft.getInstance().level.registryAccess();
             for (DragonBreed breed : BreedRegistry.registry(reg))
                 evt.accept(create(breed, reg));
         }

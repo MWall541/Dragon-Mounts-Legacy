@@ -1018,7 +1018,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         updateAgeProgress();
         refreshDimensions();
 
-        maxUpStep = Math.max(2 * getAgeProgress(), 1);
+        m_274367_(Math.max(2 * getAgeProgress(), 1));
 
         var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", getScale(), AttributeModifier.Operation.ADDITION);
         for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code

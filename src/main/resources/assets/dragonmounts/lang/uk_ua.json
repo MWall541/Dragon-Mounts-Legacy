@@ -1,0 +1,30 @@
+{
+  "entity.dragonmounts.dragon": "Дракон",
+
+  "dragon_breed.dragonmounts.aether": "Етеровий дракон",
+  "dragon_breed.dragonmounts.fire": "Вогневий дракон",
+  "dragon_breed.dragonmounts.end": "Дракон Енду",
+  "dragon_breed.dragonmounts.forest": "Лісовий дракон",
+  "dragon_breed.dragonmounts.ghost": "Примарний дракон",
+  "dragon_breed.dragonmounts.ice": "Крижаний дракон",
+  "dragon_breed.dragonmounts.nether": "Незерський дракон",
+  "dragon_breed.dragonmounts.water": "Водяний дракон",
+
+  "item.dragonmounts.spawn_egg": "Яйце виклику «%s»",
+
+  "block.dragonmounts.dragon_egg": "Яйце «%s»",
+  "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
+  "block.dragonmounts.dragon_egg.change_breeds": "Режим творчості: взаємодія з драконом змінитить його породу на породу цього яйця.",
+
+  "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",
+  "key.dragonmounts.camera_flight": "Команди польоту верхового дракона",
+
+  "mount.dragon.vertical_controls": "Натисніть %s, щоб здійнятися та %s, щоб спуститися",
+  "mount.dragon.camera_controls.enabled": "%s тепер здіймається в напрямку вашого погляду",
+  "mount.dragon.camera_controls.disabled": "%s тепер здіймається лише по вашій команді",
+
+  "subtitles.entity.dragon.ambient": "Дракон ричить",
+  "subtitles.entity.dragon.step": "Дракон тупотить",
+  "subtitles.entity.dragon.death": "Дракон гарчить",
+  "subtitles.entity.dragon.ambient.ghost": "Дракон ричить"
+}

@@ -1,10 +1,10 @@
 package com.github.kay9.dragonmounts.data.loot;
 
 import com.github.kay9.dragonmounts.DMLConfig;
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -33,13 +33,11 @@ public class DragonEggLootMod extends LootModifier
         if (DMLConfig.useLootTables())
         {
             var reg = context.getLevel().registryAccess();
-            BreedRegistry.registry(reg)
-                    .getOptional(id)
-                    .ifPresentOrElse(breed -> generatedLoot.add(DMLEggBlock.Item.create(breed, reg, breed.hatchTime())),
-                            () ->
-                            {
-                                throw new JsonParseException("Unable to produce Dragon Egg Loot with unknown breed id: \"" + id + "\"");
-                            });
+            var breed = BreedRegistry.registry(reg).get(id);
+            if (breed != null)
+                generatedLoot.add(DMLEggBlock.Item.create(breed, reg, breed.hatchTime()));
+            else
+                DragonMountsLegacy.LOG.error("Attempted to add a dragon egg to loot with unknown breed id: \"{}\"", id);
         }
         return generatedLoot;
     }
@@ -50,8 +48,6 @@ public class DragonEggLootMod extends LootModifier
         public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
         {
             var in = GsonHelper.getAsString(object, "breed");
-            if (!ResourceLocation.isValidResourceLocation(in))
-                throw new JsonParseException("Not a valid ResourceLocation: \"" + in + "\"");
             return new DragonEggLootMod(conditions, new ResourceLocation(in));
         }
 

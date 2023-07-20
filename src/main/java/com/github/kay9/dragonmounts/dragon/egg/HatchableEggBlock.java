@@ -104,7 +104,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
 
         // Forcibly add new BlockEntity, so we can set the specific breed.
         var data = ((HatchableEggBlockEntity) ((HatchableEggBlock) state.getBlock()).newBlockEntity(pos, state));
-        data.setBreed(breed);
+        data.setBreed(() -> breed);
         level.setBlockEntity(data);
         return data;
     }

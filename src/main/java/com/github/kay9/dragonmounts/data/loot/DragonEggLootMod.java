@@ -34,11 +34,12 @@ public class DragonEggLootMod extends LootModifier
     {
         if (DMLConfig.useLootTables())
         {
-            var reg = context.getLevel().getServer().registryAccess();
-            BreedRegistry.registry(reg)
-                    .getOptional(id)
-                    .ifPresentOrElse(breed -> generatedLoot.add(HatchableEggBlock.Item.create(breed, reg)),
-                            () -> DragonMountsLegacy.LOG.error("Unable to produce Dragon Egg Loot with unknown breed id: \"" + id + "\""));
+            var reg = context.getLevel().m_9598_();
+            var breed = BreedRegistry.registry(reg).get(id);
+            if (breed != null)
+                generatedLoot.add(HatchableEggBlock.Item.create(breed, reg));
+            else
+                DragonMountsLegacy.LOG.error("Attempted to add a dragon egg to loot with unknown breed id: \"{}\"", id);
         }
         return generatedLoot;
     }

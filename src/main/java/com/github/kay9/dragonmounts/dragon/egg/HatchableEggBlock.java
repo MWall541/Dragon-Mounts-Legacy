@@ -104,7 +104,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
 
         // Forcibly add new BlockEntity, so we can set the specific breed.
         var data = ((HatchableEggBlockEntity) ((HatchableEggBlock) state.getBlock()).newBlockEntity(pos, state));
-        data.setBreed(() -> breed);
+        data.setBreed(breed);
         level.setBlockEntity(data);
         return data;
     }
@@ -285,7 +285,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         level.playSound(null, pos, SoundEvents.TURTLE_EGG_HATCH, SoundSource.BLOCKS, 1.2f, 0.95f + level.getRandom().nextFloat() * 0.2f);
         level.removeBlock(pos, false); // remove block AFTER data is cached
 
-        baby.setBreedAndUpdate(data.getBreed());
+        baby.setBreed(data.getBreed());
         baby.setBaby(true);
         baby.setPos(pos.getX(), pos.getY(), pos.getZ());
         baby.setCustomName(data.getCustomName());
@@ -423,7 +423,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
                 var tag = BlockItem.getBlockEntityData(stack);
                 if (tag != null)
                 {
-                    dragon.setBreedAndUpdate(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.level().registryAccess()));
+                    dragon.setBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.level().registryAccess()));
                     return InteractionResult.sidedSuccess(player.level().isClientSide);
                 }
             }

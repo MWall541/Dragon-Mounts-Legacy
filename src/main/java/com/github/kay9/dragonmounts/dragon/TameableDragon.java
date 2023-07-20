@@ -231,7 +231,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public DragonBreed getBreed()
     {
         if (breed == null) // initialize lazily if a breed was never specified or is being queried too late.
-            setBreed(BreedRegistry.getRandom(getLevel().m_9598_(), getRandom()));
+            setBreed(BreedRegistry.getRandom(level().registryAccess(), getRandom()));
         return breed;
     }
 

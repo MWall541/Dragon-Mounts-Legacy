@@ -16,7 +16,6 @@ import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -59,9 +58,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.PlayMessages;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,7 +77,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * @author Kay9
  */
 @SuppressWarnings({"deprecation", "SameReturnValue"})
-public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable, IEntityAdditionalSpawnData
+public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3;
@@ -137,20 +134,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         groundNavigation.setCanFloat(true);
 
         navigation = groundNavigation;
-    }
-
-    /**
-     * This is unfortunately necessary as the DataManager is not quick enough when syncing over the breed data.
-     */
-    @SuppressWarnings("ConstantConditions")
-    public static TameableDragon clientInstance(PlayMessages.SpawnEntity packet, Level level)
-    {
-        var dragon = DMLRegistry.DRAGON.get().create(level);
-        var breed = BreedRegistry.registry(level.m_9598_()).get(packet.getAdditionalData().readResourceLocation());
-        if (breed == null) // this should never happen. but just in case...
-            throw new RuntimeException(String.format("[%s] Error reading client spawn data for dragon: that breed doesn't exist here. How did THAT happen?", DragonMountsLegacy.MOD_ID));
-        dragon.setBreedAndUpdate(breed);
-        return dragon;
     }
 
     @Override
@@ -218,7 +201,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        if (getBreed() != null) compound.putString(NBT_BREED, getBreed().id(getLevel().m_9598_()).toString());
+        compound.putString(NBT_BREED, getBreed().id(getLevel().m_9598_()).toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
     }
@@ -226,7 +209,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void readAdditionalSaveData(CompoundTag compound)
     {
-        setBreedAndUpdate(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().m_9598_())); // high priority...
+        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().m_9598_())); // high priority...
         super.readAdditionalSaveData(compound);
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
@@ -236,19 +219,19 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setBreed(DragonBreed dragonBreed)
     {
-        if (breed != null) breed.close(this);
-        this.breed = dragonBreed;
-        this.breed.initialize(this);
-    }
-
-    public void setBreedAndUpdate(DragonBreed dragonBreed)
-    {
-        setBreed(dragonBreed);
-        getEntityData().set(DATA_BREED, breed.id(getLevel().m_9598_()).toString());
+        if (breed != dragonBreed) // prevent loops, unnecessary work, etc.
+        {
+            if (breed != null) breed.close(this);
+            this.breed = dragonBreed;
+            breed.initialize(this);
+            getEntityData().set(DATA_BREED, breed.id(getLevel().m_9598_()).toString());
+        }
     }
 
     public DragonBreed getBreed()
     {
+        if (breed == null) // initialize lazily if a breed was never specified or is being queried too late.
+            setBreed(BreedRegistry.getRandom(getLevel().m_9598_(), getRandom()));
         return breed;
     }
 
@@ -734,7 +717,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected ResourceLocation getDefaultLootTable()
     {
-        return breed.deathLoot();
+        return getBreed().deathLoot();
     }
 
     @Override
@@ -869,7 +852,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob)
     {
         var offspring = DMLRegistry.DRAGON.get().create(level);
-        offspring.setBreedAndUpdate(getBreed());
+        offspring.setBreed(getBreed());
         return offspring;
     }
 
@@ -940,7 +923,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 || src == m_269291_().m_269325_()) // assume cactus needles don't hurt thick scaled lizards
             return true;
 
-        return breed.immunities().contains(src.getMsgId()) || super.isInvulnerableTo(src);
+        return getBreed().immunities().contains(src.getMsgId()) || super.isInvulnerableTo(src);
     }
 
     /**
@@ -996,7 +979,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void updateAgeProgress()
     {
         // no reason to recalculate this value several times per tick/frame...
-        float growth = -breed.growthTime();
+        float growth = -getBreed().growthTime();
         float min = Math.min(getAge(), 0);
         ageProgress = 1 - (min / growth);
     }
@@ -1053,7 +1036,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void setBaby(boolean baby)
     {
-        setAge(baby? -breed.growthTime() : 0);
+        setAge(baby? -getBreed().growthTime() : 0);
         entityData.set(DATA_AGE, age);
     }
 
@@ -1120,19 +1103,5 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public Packet<ClientGamePacketListener> getAddEntityPacket()
     {
         return NetworkHooks.getEntitySpawningPacket(this);
-    }
-
-    @Override
-    public void writeSpawnData(FriendlyByteBuf buffer)
-    {
-        var breed = getBreed();
-        if (breed == null) // we don't have a breed yet?
-            setBreedAndUpdate(BreedRegistry.getRandom(getLevel().m_9598_(), getRandom())); // assign one ourselves then.
-        buffer.writeResourceLocation(getBreed().id(getLevel().m_9598_()));
-    }
-
-    @Override
-    public void readSpawnData(FriendlyByteBuf additionalData)
-    {
     }
 }

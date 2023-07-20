@@ -4,6 +4,7 @@ import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.habitats.Habitat;
+import com.google.common.base.Suppliers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -18,6 +19,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 @SuppressWarnings("ConstantConditions")
 public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 {
@@ -26,7 +29,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
     private final TransitionHandler transitioner = new TransitionHandler();
 
-    private DragonBreed breed;
+    private Supplier<DragonBreed> breed = () -> null;
     private Component customName;
 
     public HatchableEggBlockEntity(BlockPos pPos, BlockState pBlockState)
@@ -58,7 +61,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     {
         super.load(pTag);
 
-        setBreed(BreedRegistry.get(pTag.getString(HatchableEggBlock.NBT_BREED), getLevel().m_9598_()));
+        setBreed(Suppliers.memoize(() -> BreedRegistry.get(pTag.getString(HatchableEggBlock.NBT_BREED), getLevel().m_9598_())));
 
         var name = pTag.getString(HatchableEggBlock.NBT_NAME);
         if (!name.isBlank()) setCustomName(Component.Serializer.fromJson(name));
@@ -87,12 +90,18 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
     public DragonBreed getBreed()
     {
-        if (breed == null && getLevel() != null) // initialize lazily if a breed was never specified or is being queried too late.
-            setBreed(BreedRegistry.getRandom(getLevel().m_9598_(), getLevel().getRandom()));
-        return breed;
+        var current = breed.get();
+        if (current == null) // init lazily
+        {
+            var newBreed = BreedRegistry.getRandom(getLevel().m_9598_(), getLevel().getRandom());
+            setBreed(() -> newBreed);
+            return newBreed;
+        }
+
+        return current;
     }
 
-    public void setBreed(DragonBreed breed)
+    public void setBreed(Supplier<DragonBreed> breed)
     {
         this.breed = breed;
     }
@@ -147,9 +156,9 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         }
     }
 
-    public boolean isModelReady() // guarding lazy init of a random breed type when querying in the baked model
+    public boolean isModelReady()
     {
-        return breed != null;
+        return getLevel() != null && getBreed() != null;
     }
 
     public class TransitionHandler
@@ -158,7 +167,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         private static final String NBT_TRANSITION_BREED = "TransitionBreed";
         private static final String NBT_TRANSITION_TIME = "TransitionTime";
 
-        public DragonBreed transitioningBreed;
+        public Supplier<DragonBreed> transitioningBreed;
         public int transitionTime;
 
         public void tick(RandomSource random)
@@ -179,7 +188,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
                         var px = pos.getX() + random.nextDouble();
                         var py = pos.getY() + random.nextDouble();
                         var pz = pos.getZ() + random.nextDouble();
-                        var particle = HatchableEggBlock.dustParticleFor(transitioningBreed, random);
+                        var particle = HatchableEggBlock.dustParticleFor(transitioningBreed.get(), random);
 
                         getLevel().addParticle(particle, px, py, pz, 0, 0, 0);
                     }
@@ -187,7 +196,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
             }
         }
 
-        public void startFrom(DragonBreed transitioningBreed, int transitionTime)
+        public void startFrom(Supplier<DragonBreed> transitioningBreed, int transitionTime)
         {
             this.transitioningBreed = transitioningBreed;
             this.transitionTime = transitionTime;
@@ -195,7 +204,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
         public void begin(DragonBreed transitioningBreed)
         {
-            startFrom(transitioningBreed, BREED_TRANSITION_TIME);
+            startFrom(() -> transitioningBreed, BREED_TRANSITION_TIME);
         }
 
         public boolean isRunning()
@@ -205,13 +214,13 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
         public void save(CompoundTag tag)
         {
-            tag.putString(NBT_TRANSITION_BREED, transitioningBreed.id(getLevel().m_9598_()).toString());
+            tag.putString(NBT_TRANSITION_BREED, transitioningBreed.get().id(getLevel().m_9598_()).toString());
             tag.putInt(NBT_TRANSITION_TIME,  transitionTime);
         }
 
         public void load(CompoundTag tag)
         {
-            startFrom(BreedRegistry.get(tag.getString(NBT_TRANSITION_BREED), getLevel().m_9598_()), tag.getInt(NBT_TRANSITION_TIME));
+            startFrom(Suppliers.memoize(() -> BreedRegistry.get(tag.getString(NBT_TRANSITION_BREED), getLevel().m_9598_())), tag.getInt(NBT_TRANSITION_TIME));
         }
     }
 }

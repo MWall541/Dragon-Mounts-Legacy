@@ -87,7 +87,12 @@ public class DragonMountsLegacy
             bus.addListener((RegisterColorHandlersEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
             bus.addListener(DragonMountsLegacy::rendererRegistry);
             bus.addListener(Keybinds::registerKeybinds);
-            bus.addListener((FMLConstructModEvent e) -> e.enqueueWork(() -> ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE)));
+            bus.addListener((FMLConstructModEvent e) ->
+            {
+                //noinspection ConstantConditions
+                if (Minecraft.getInstance() != null)
+                    e.enqueueWork(() -> ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE));
+            });
         }
     }
 

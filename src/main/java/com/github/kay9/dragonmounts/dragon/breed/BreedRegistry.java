@@ -30,7 +30,6 @@ public class BreedRegistry
             0x912400,
             0xff9819,
             Optional.of(ParticleTypes.FLAME),
-            new DragonBreed.ModelProperties(false, false, false),
             ImmutableMap.of(),
             ImmutableList.of(HotFeetAbility.INSTANCE),
             ImmutableList.of(

@@ -20,6 +20,9 @@ public class DataProvider
             gen.addProvider(new LootModifierProvider(gen, DragonMountsLegacy.MOD_ID));
             gen.addProvider(new DragonBreedProvider(gen));
         }
-
+        if (event.includeClient())
+        {
+            gen.addProvider(new ModelPropertiesProvider(gen));
+        }
     }
 }

@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -13,6 +15,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.RenderType;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.NoSuchElementException;
 
 /**
  * Generic model for all winged tetrapod dragons.
@@ -36,9 +42,6 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPart tail;
     public final ModelPart tailHornLeft;
     public final ModelPart tailHornRight;
-    public final ModelPart tailScaleLeft;
-    public final ModelPart tailScaleMiddle;
-    public final ModelPart tailScaleRight;
     public final ModelPart jaw;
     public final ModelPart body;
     public final ModelPart back;
@@ -50,11 +53,13 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPart hindcrus;
     public final ModelPart hindfoot;
     public final ModelPart hindtoe;
-    public final ModelPartProxy thinForeThigh;
-    public final ModelPartProxy thinHindThigh;
-    public final ModelPart wingArm;
-    public final ModelPart wingForearm;
-    public final ModelPart[] wingFinger = new ModelPart[4];
+    public final ModelPart rightWingArm;
+    public final ModelPart rightWingForearm;
+    public final ModelPart[] rightWingFingers = new ModelPart[4];
+    public final ModelPart leftWingArm;
+    public final ModelPart leftWingForearm;
+    public final ModelPart[] leftWingFingers = new ModelPart[4];
+
 
     // model attributes
     public final ModelPartProxy[] neckProxy = new ModelPartProxy[VERTS_NECK];
@@ -62,10 +67,11 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPartProxy[] thighProxy = new ModelPartProxy[4];
 
     public float size;
-    private boolean thinLegs;
 
     public DragonModel(ModelPart root)
     {
+        super(RenderType::entityCutout);
+
         this.body = root.getChild("body");
         this.back = body.getChild("back");
         this.neck = root.getChild("neck");
@@ -73,13 +79,12 @@ public class DragonModel extends EntityModel<TameableDragon>
         this.head = root.getChild("head");
         this.jaw = head.getChild("jaw");
         this.tail = root.getChild("tail");
-        this.tailScaleLeft = tail.getChild("left_tail_scale");
-        this.tailScaleMiddle = tail.getChild("middle_tail_scale");
-        this.tailScaleRight = tail.getChild("right_tail_scale");
-        this.tailHornRight = tail.getChild("right_tail_spike");
-        this.tailHornLeft = tail.getChild("left_tail_spike");
-        this.wingArm = root.getChild("wing_arm");
-        this.wingForearm = wingArm.getChild("wing_forearm");
+        this.tailHornRight = getNullableChild(tail, "right_tail_spike");
+        this.tailHornLeft = getNullableChild(tail, "left_tail_spike");
+        this.rightWingArm = root.getChild("right_wing_arm");
+        this.rightWingForearm = rightWingArm.getChild("right_wing_forearm");
+        this.leftWingArm = root.getChild("left_wing_arm");
+        this.leftWingForearm = leftWingArm.getChild("left_wing_forearm");
         this.forethigh = root.getChild("fore_thigh");
         this.forecrus = forethigh.getChild("fore_crus");
         this.forefoot = forecrus.getChild("fore_foot");
@@ -88,19 +93,23 @@ public class DragonModel extends EntityModel<TameableDragon>
         this.hindcrus = hindthigh.getChild("hind_crus");
         this.hindfoot = hindcrus.getChild("hind_foot");
         this.hindtoe = hindfoot.getChild("hind_toe");
-        this.thinForeThigh = new ModelPartProxy(root.getChild("thin_fore_thigh"));
-        this.thinHindThigh = new ModelPartProxy(root.getChild("thin_hind_thigh"));
 
-        for (int i = 1; i < 5; i++) wingFinger[i - 1] = wingForearm.getChild("wing_finger_" + i);
+        for (int i = 1; i < 5; i++) rightWingFingers[i - 1] = rightWingForearm.getChild("right_wing_finger_" + i);
+        for (int i = 1; i < 5; i++) leftWingFingers[i - 1] = leftWingForearm.getChild("left_wing_finger_" + i);
 
         // initialize model proxies
         for (int i = 0; i < neckProxy.length; i++) neckProxy[i] = new ModelPartProxy(neck);
         for (int i = 0; i < tailProxy.length; i++) tailProxy[i] = new ModelPartProxy(tail);
         for (int i = 0; i < 4; i++) thighProxy[i] = new ModelPartProxy(i % 2 == 0? forethigh : hindthigh);
+
+
+        if (tailHornRight != null)
+            //noinspection ConstantConditions
+            tailHornRight.visible = tailHornLeft.visible = false;
     }
 
 
-    public static LayerDefinition createBodyLayer()
+    public static LayerDefinition createBodyLayer(Properties properties)
     {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
@@ -108,9 +117,9 @@ public class DragonModel extends EntityModel<TameableDragon>
         buildBody(root);
         buildNeck(root);
         buildHead(root);
-        buildTail(root);
-        buildWing(root);
-        buildLegs(root);
+        buildTail(root, properties);
+        buildWings(root);
+        buildLegs(root, properties);
 
         return LayerDefinition.create(mesh, 256, 256);
     }
@@ -163,14 +172,19 @@ public class DragonModel extends EntityModel<TameableDragon>
                 PartPose.offsetAndRotation(hornPosX * -1, hornPosY, hornPosZ, hornRotX, hornRotY * -1, hornRotZ));
     }
 
-    private static void buildTail(PartDefinition root)
+    private static void buildTail(PartDefinition root, Properties properties)
     {
         PartDefinition tail = root.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(152, 88).addBox(-5, -5, -5, TAIL_SIZE, TAIL_SIZE, TAIL_SIZE), PartPose.ZERO);
         CubeListBuilder tailSpikeCube = CubeListBuilder.create().texOffs(0, 0).addBox(-1, -8, -3, 2, 4, 6);
-        tail.addOrReplaceChild("left_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, 0.785398f));
-        tail.addOrReplaceChild("middle_tail_scale", tailSpikeCube, PartPose.ZERO);
-        tail.addOrReplaceChild("right_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, -0.785398f));
-        addTailSpikes(tail);
+        if (properties.middleTailScales())
+            tail.addOrReplaceChild("middle_tail_scale", tailSpikeCube, PartPose.ZERO);
+        else
+        {
+            tail.addOrReplaceChild("left_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, 0.785398f));
+            tail.addOrReplaceChild("right_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, -0.785398f));
+        }
+
+        if (properties.tailHorns()) addTailSpikes(tail);
     }
 
     private static void addTailSpikes(PartDefinition tail)
@@ -188,47 +202,57 @@ public class DragonModel extends EntityModel<TameableDragon>
         float hornRotY = -2.53073f;
         float hornRotZ = 0;
 
-        tail.addOrReplaceChild("right_tail_spike", CubeListBuilder.create().texOffs(0, 117).addBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength),
+        tail.addOrReplaceChild("right_tail_spike",
+                CubeListBuilder.create().texOffs(0, 117).addBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength),
                 PartPose.offsetAndRotation(hornPosX, hornPosY, hornPosZ, hornRotX, hornRotY, hornRotZ));
-        tail.addOrReplaceChild("left_tail_spike", CubeListBuilder.create().texOffs(0, 117).mirror().addBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength),
+        tail.addOrReplaceChild("left_tail_spike",
+                CubeListBuilder.create().texOffs(0, 117).mirror().addBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength),
                 PartPose.offsetAndRotation(hornPosX * -1, hornPosY, hornPosZ, hornRotX, hornRotY * -1, hornRotZ));
     }
 
-    private static void buildWing(PartDefinition root)
+    private static void buildWings(PartDefinition root)
     {
-        PartDefinition wingArm = root.addOrReplaceChild("wing_arm", CubeListBuilder.create()
-                        .texOffs(0, 152).addBox(-28, -3, -3, 28, 6, 6) // bone
-                        .texOffs(116, 232).addBox(-28, 0, 2, 28, 0.01f, 24), // skin
-                PartPose.offset(-10, 5, 4));
-
-        PartDefinition wingForearm = wingArm.addOrReplaceChild("wing_forearm", CubeListBuilder.create().texOffs(0, 164).addBox(-48, -2, -2, 48, 4, 4), PartPose.offset(-28, 0, 0)); // bone
-
-        CubeListBuilder shortSkins = CubeListBuilder.create()
-                .texOffs(0, 172).addBox(-70, -1, -1, 70, 2, 2) // bone
-                .texOffs(-49, 176).addBox(-70, 0, 1, 70, 0.01f, 48); // skin
-
-        PartPose shortSkinsPos = PartPose.offset(-47, 0, 0);
-        for (int i = 1; i < 4; i++) wingForearm.addOrReplaceChild("wing_finger_" + i, shortSkins, shortSkinsPos);
-
-        wingForearm.addOrReplaceChild("wing_finger_4", CubeListBuilder.create()
-                        .texOffs(0, 172).addBox(-70, -1, -1, 70, 2, 2) // bone
-                        .texOffs(-32, 224).addBox(-70, 0, 1, 70, 0.01f, 32), // shortskin
-                shortSkinsPos);
+        buildWing(root,false); // right wing
+        buildWing(root, true); // left wing
     }
 
-    private static void buildLegs(PartDefinition root)
+    private static void buildWing(PartDefinition root, boolean mirror)
     {
-        buildLeg(root, false, false);
-        buildLeg(root, true, false);
-        buildLeg(root, false, true);
-        buildLeg(root, true, true);
+        var direction = mirror? "left_" : "right_";
+
+        var wingArmCube = CubeListBuilder.create().mirror(mirror);
+        centerMirroredBox(wingArmCube.texOffs(0, 152), mirror, -28, -3, -3, 28, 6, 6); // bone
+        centerMirroredBox(wingArmCube.texOffs(116, 232), mirror, -28, 0, 2, 28, 0, 24); // skin
+
+        var foreArmCube = centerMirroredBox(CubeListBuilder.create().mirror(mirror).texOffs(0, 164), mirror, -48, -2, -2, 48, 4, 4); // bone
+
+        var shortSkinCube = CubeListBuilder.create().mirror(mirror);
+        centerMirroredBox(shortSkinCube.texOffs(0, 172), mirror, -70, -1, -1, 70, 2, 2); // bone
+        centerMirroredBox(shortSkinCube.texOffs(-49, 176), mirror, -70, 0, 1, 70, 0, 48); // skin
+        var shortSkinPos = mirrorXPos(-47, 0, 0, mirror);
+
+        var lastFingerCube = CubeListBuilder.create().mirror(mirror);
+        centerMirroredBox(lastFingerCube.texOffs(0, 172), mirror, -70, -1, -1, 70, 2, 2); // bone
+        centerMirroredBox(lastFingerCube.texOffs(-32, 224), mirror, -70, 0, 1, 70, 0, 32); // shortskin
+
+        var arm = root.addOrReplaceChild(direction + "wing_arm", wingArmCube, mirrorXPos(-10, 5, 4, mirror));
+        var foreArm = arm.addOrReplaceChild(direction + "wing_forearm", foreArmCube, mirrorXPos(-28, 0, 0, mirror));
+        for (int j = 1; j < 4; j++) foreArm.addOrReplaceChild(direction + "wing_finger_" + j, shortSkinCube, shortSkinPos);
+        foreArm.addOrReplaceChild(direction + "wing_finger_4", lastFingerCube, shortSkinPos);
     }
 
-    private static void buildLeg(PartDefinition root, boolean hind, boolean thin)
+    private static void buildLegs(PartDefinition root, Properties properties)
+    {
+        buildLeg(root, false, properties.thinLegs(), false); // front right
+        buildLeg(root, true, properties.thinLegs(), false); // back right
+        buildLeg(root, false, properties.thinLegs(), true); // front left
+        buildLeg(root, true, properties.thinLegs(), true); // back left
+    }
+
+    private static void buildLeg(PartDefinition root, boolean hind, boolean thin, boolean mirror)
     {
         float baseLength = 26;
         String baseName = hind? "hind_" : "fore_";
-        if (thin) baseName = "thin_" + baseName;
 
         // thigh variables
         float thighPosX = -11;
@@ -246,7 +270,7 @@ public class DragonModel extends EntityModel<TameableDragon>
 
         float thighOfs = -(thighThick / 2f);
 
-        PartDefinition thigh = root.addOrReplaceChild(baseName + "thigh", CubeListBuilder.create().texOffs(112, hind? 29 : 0).addBox(thighOfs, thighOfs, thighOfs, thighThick, thighLength, thighThick), PartPose.offset(thighPosX, thighPosY, thighPosZ));
+        PartDefinition thigh = root.addOrReplaceChild(baseName + "thigh", CubeListBuilder.create().texOffs(112, hind? 29 : 0).addBox(thighOfs, thighOfs, thighOfs, thighThick, thighLength, thighThick), mirrorXPos(thighPosX, thighPosY, thighPosZ, mirror));
 
         // crus variables
         float crusPosX = 0;
@@ -264,7 +288,9 @@ public class DragonModel extends EntityModel<TameableDragon>
 
         float crusOfs = -(crusThick / 2f);
 
-        PartDefinition crus = thigh.addOrReplaceChild(baseName + "crus", CubeListBuilder.create().texOffs(hind? 152 : 148, hind? 29 : 0).addBox(crusOfs, crusOfs, crusOfs, crusThick, crusLength, crusThick), PartPose.offset(crusPosX, crusPosY, crusPosZ));
+        PartDefinition crus = thigh.addOrReplaceChild(baseName + "crus",
+                CubeListBuilder.create().texOffs(hind? 152 : 148, hind? 29 : 0).addBox(crusOfs, crusOfs, crusOfs, crusThick, crusLength, crusThick),
+                mirrorXPos(crusPosX, crusPosY, crusPosZ, mirror));
 
         // foot variables
         float footPosX = 0;
@@ -279,7 +305,9 @@ public class DragonModel extends EntityModel<TameableDragon>
         float footOfsY = -(footHeight / 2f);
         float footOfsZ = footLength * -0.75f;
 
-        PartDefinition foot = crus.addOrReplaceChild(baseName + "foot", CubeListBuilder.create().texOffs(hind? 180 : 210, hind? 29 : 0).addBox(footOfsX, footOfsY, footOfsZ, footWidth, footHeight, footLength), PartPose.offset(footPosX, footPosY, footPosZ));
+        PartDefinition foot = crus.addOrReplaceChild(baseName + "foot",
+                CubeListBuilder.create().texOffs(hind? 180 : 210, hind? 29 : 0).addBox(footOfsX, footOfsY, footOfsZ, footWidth, footHeight, footLength),
+                mirrorXPos(footPosX, footPosY, footPosZ, mirror));
 
         // toe variables
         int toeWidth = footWidth;
@@ -294,19 +322,15 @@ public class DragonModel extends EntityModel<TameableDragon>
         float toeOfsY = -(toeHeight / 2f);
         float toeOfsZ = -toeLength;
 
-        foot.addOrReplaceChild(baseName + "toe", CubeListBuilder.create().texOffs(hind? 215 : 176, hind? 29 : 0).addBox(toeOfsX, toeOfsY, toeOfsZ, toeWidth, toeHeight, toeLength), PartPose.offset(toePosX, toePosY, toePosZ));
+        foot.addOrReplaceChild(baseName + "toe",
+                CubeListBuilder.create().texOffs(hind? 215 : 176, hind? 29 : 0).addBox(toeOfsX, toeOfsY, toeOfsZ, toeWidth, toeHeight, toeLength),
+                mirrorXPos(toePosX, toePosY, toePosZ, mirror));
     }
 
     @Override
     public void prepareMobModel(TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pPartialTick)
     {
-        var props = dragon.getBreed().modelProperties();
-        boolean middleScales = props.middleTailScales();
-        tailScaleMiddle.visible = middleScales;
-        tailScaleRight.visible = tailScaleLeft.visible = !middleScales;
         size = Math.min(dragon.getScale(), 1);
-        thinLegs = props.thinLegs();
-
         dragon.getAnimator().setPartialTicks(pPartialTick);
     }
 
@@ -348,10 +372,8 @@ public class DragonModel extends EntityModel<TameableDragon>
         ps.pushPose();
         ps.scale(1.1f, 1.1f, 1.1f);
 
-        wingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-        ps.last().pose().multiply(INVERSE_SCALE);
-        ps.last().normal().mul(INVERSE_NORMS);
-        wingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+        rightWingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+        leftWingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
 
         ps.popPose();
     }
@@ -363,12 +385,6 @@ public class DragonModel extends EntityModel<TameableDragon>
         for (int i = 0; i < thighProxy.length; i++)
         {
             var proxy = thighProxy[i];
-            if (thinLegs)
-            {
-                var thin = (i % 2 == 0)? thinForeThigh : thinHindThigh;
-                proxy.copy(thin);
-                proxy = thin;
-            }
             proxy.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
 
             if (i == 1)
@@ -379,5 +395,47 @@ public class DragonModel extends EntityModel<TameableDragon>
         }
 
         ps.popPose();
+    }
+
+    private static CubeListBuilder centerMirroredBox(CubeListBuilder builder, boolean mirror, float pOriginX, float pOriginY, float pOriginZ, float pDimensionX, float pDimensionY, float pDimensionZ)
+    {
+        if (mirror) pOriginX = 0;
+        return builder.addBox(pOriginX, pOriginY, pOriginZ, pDimensionX, pDimensionY, pDimensionZ);
+    }
+
+    private static PartPose mirrorXPos(float x, float y, float z, boolean mirror)
+    {
+        if (mirror) x = -x;
+        return PartPose.offset(x, y, z);
+    }
+
+    /**
+     * Hacky workaround for getting model parts that may or may not exist.
+     * @param parent
+     * @param child
+     * @return
+     */
+    @Nullable
+    private static ModelPart getNullableChild(ModelPart parent, String child)
+    {
+        try
+        {
+            return parent.getChild(child);
+        }
+        catch (NoSuchElementException ignore)
+        {
+            return null;
+        }
+    }
+
+    public record Properties(boolean middleTailScales, boolean tailHorns, boolean thinLegs)
+    {
+        public static final Properties STANDARD = new Properties(true, false, false);
+
+        public static final Codec<Properties> CODEC = RecordCodecBuilder.create(func -> func.group(
+                Codec.BOOL.optionalFieldOf("middle_tail_scales", true).forGetter(Properties::middleTailScales),
+                Codec.BOOL.optionalFieldOf("tail_horns", false).forGetter(Properties::tailHorns),
+                Codec.BOOL.optionalFieldOf("thin_legs", false).forGetter(Properties::thinLegs)
+        ).apply(func, Properties::new));
     }
 }

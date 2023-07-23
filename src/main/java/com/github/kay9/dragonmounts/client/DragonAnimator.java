@@ -386,14 +386,18 @@ public class DragonAnimator
         slerpArrays(wingForearm, wingForearmGround, wingForearm, ground);
 
         // apply angles
-        model.wingArm.xRot = wingArm[0];
+        model.rightWingArm.xRot = wingArm[0];
 //        model.wingArm.xRot += 1 - speed;
-        model.wingArm.yRot = wingArm[1];
-        model.wingArm.zRot = wingArm[2];
+        model.rightWingArm.yRot = wingArm[1];
+        model.rightWingArm.zRot = wingArm[2];
 
-        model.wingForearm.xRot = wingForearm[0];
-        model.wingForearm.yRot = wingForearm[1];
-        model.wingForearm.zRot = wingForearm[2];
+        mirrorRotations(model.rightWingArm, model.leftWingArm);
+
+        model.rightWingForearm.xRot = wingForearm[0];
+        model.rightWingForearm.yRot = wingForearm[1];
+        model.rightWingForearm.zRot = wingForearm[2];
+
+        mirrorRotations(model.rightWingForearm, model.leftWingForearm);
 
         // interpolate between folded and unfolded wing angles
         float[] yFold = new float[]{2.7f, 2.8f, 2.9f, 3.0f};
@@ -404,12 +408,14 @@ public class DragonAnimator
         float rotYOfs = Mth.sin(a1) * Mth.sin(a2) * 0.03f;
         float rotYMulti = 1;
 
-        for (int i = 0; i < model.wingFinger.length; i++)
+        for (int i = 0; i < model.rightWingFingers.length; i++)
         {
-            model.wingFinger[i].xRot = rotX += 0.005f; // reduce Z-fighting
-            model.wingFinger[i].yRot = terpSmoothStep(yUnfold[i],
+            model.rightWingFingers[i].xRot = rotX += 0.005f; // reduce Z-fighting
+            model.rightWingFingers[i].yRot = terpSmoothStep(yUnfold[i],
                     yFold[i] + rotYOfs * rotYMulti, ground);
             rotYMulti -= 0.2f;
+
+            mirrorRotations(model.rightWingFingers[i], model.leftWingFingers[i]);
         }
     }
 
@@ -464,9 +470,12 @@ public class DragonAnimator
             model.tail.xRot -= (1 - speed) * vertMulti * 2;
             model.tail.yRot += Math.toRadians(180 - yawOfs);
 
-            // display horns near the tip
-            boolean horn = dragon.getBreed().modelProperties().tailHorns() && i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
-            model.tailHornLeft.visible = model.tailHornRight.visible = horn;
+            if (model.tailHornRight != null)
+            {
+                // display horns near the tip
+                var atIndex = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
+                model.tailHornLeft.visible = model.tailHornRight.visible = atIndex;
+            }
 
             // update scale
             float neckScale = Mth.clampedLerp(1.5f, 0.3f, vertMulti);
@@ -608,6 +617,13 @@ public class DragonAnimator
     public void setOpenJaw(boolean openJaw)
     {
         this.openJaw = openJaw;
+    }
+
+    private static void mirrorRotations(ModelPart source, ModelPart target)
+    {
+        target.xRot = source.xRot;
+        target.yRot = -source.yRot;
+        target.zRot = -source.zRot;
     }
 
     private static void slerpArrays(float[] a, float[] b, float[] c, float x)

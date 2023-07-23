@@ -22,9 +22,6 @@
   "immunities": [
     "drown"
   ],
-  "model_properties": {
-    "thin_legs": true
-  },
   "primary_color": "c4c4c4",
   "secondary_color": "c2f8ff"
 }

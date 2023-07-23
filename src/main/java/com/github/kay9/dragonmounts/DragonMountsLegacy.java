@@ -2,7 +2,6 @@ package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.*;
 import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
-import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;

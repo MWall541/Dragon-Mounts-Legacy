@@ -25,9 +25,6 @@
     "lava",
     "hotFloor"
   ],
-  "model_properties": {
-    "middle_tail_scales": false
-  },
   "primary_color": "912400",
   "secondary_color": "ff9819"
 }

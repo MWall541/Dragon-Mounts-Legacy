@@ -58,7 +58,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
     public DragonModel getModel(TameableDragon dragon)
     {
-        return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.registryAccess()), defaultModel);
+        return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.m_9598_()), defaultModel);
     }
 
     // During death, do not use the standard rendering and let the death layer handle it. Hacky, but better than mixins.

@@ -59,7 +59,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
         {
             context.register(AETHER, builtIn(0x718AA9, 0xE6E6E6,
                     Optional.empty(),
-                    DragonBreed.ModelProperties.STANDARD,
+
                     of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.45),
                     list(),
                     list(new HeightHabitat(3, false, 200)),
@@ -81,7 +81,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                     0x161616,
                     0xff63e8,
                     Optional.of(ParticleTypes.PORTAL),
-                    DragonBreed.ModelProperties.STANDARD,
+
                     of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
                     list(), // teleport ability?
                     list(DragonBreathHabitat.INSTANCE),
@@ -91,7 +91,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                     0x054a00,
                     0x0a9600,
                     Optional.of(ParticleTypes.HAPPY_VILLAGER),
-                    DragonBreed.ModelProperties.STANDARD,
+
                     of(),
                     list(GreenToesAbility.INSTANCE),
                     list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(2, BiomeTags.IS_JUNGLE)),
@@ -101,7 +101,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                     0xc4c4c4,
                     0xc2f8ff,
                     Optional.empty(),
-                    new DragonBreed.ModelProperties(true, false, true),
+
                     of(),
                     list(),
                     list(new PickyHabitat(list(new HeightHabitat(1, true, 0), new LightHabitat(2, true, 3)))),
@@ -111,7 +111,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                     0xffffff,
                     0x00E1FF,
                     Optional.of(ParticleTypes.SNOWFLAKE),
-                    DragonBreed.ModelProperties.STANDARD,
+
                     of(),
                     list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
                     list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
@@ -121,7 +121,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                     0x912400,
                     0x2e0b00,
                     Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
-                    DragonBreed.ModelProperties.STANDARD,
+
                     of(Attributes.ARMOR, 8d),
                     list(),
                     list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(3, BiomeTags.IS_NETHER)),
@@ -131,7 +131,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                     0x0062ff,
                     0x5999ff,
                     Optional.of(ParticleTypes.DRIPPING_WATER),
-                    new DragonBreed.ModelProperties(true, true, false),
+
                     of(),
                     list(),
                     list(new FluidHabitat(1f, FluidTags.WATER), new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)),

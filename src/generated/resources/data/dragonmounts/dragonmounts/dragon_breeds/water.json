@@ -16,9 +16,6 @@
   "immunities": [
     "drown"
   ],
-  "model_properties": {
-    "tail_horns": true
-  },
   "primary_color": "62ff",
   "secondary_color": "5999ff"
 }

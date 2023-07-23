@@ -1,12 +1,14 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.*;
+import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -21,6 +23,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkRegistry;
@@ -84,6 +87,7 @@ public class DragonMountsLegacy
             bus.addListener((RegisterColorHandlersEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
             bus.addListener(DragonMountsLegacy::rendererRegistry);
             bus.addListener(Keybinds::registerKeybinds);
+            bus.addListener((FMLConstructModEvent e) -> e.enqueueWork(() -> ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE)));
         }
     }
 
@@ -125,7 +129,7 @@ public class DragonMountsLegacy
     private static void rendererRegistry(EntityRenderersEvent.RegisterRenderers e)
     {
         e.registerEntityRenderer(DMLRegistry.DRAGON.get(), DragonRenderer::new);
-        ForgeHooksClient.registerLayerDefinition(DragonRenderer.LAYER_LOCATION, DragonModel::createBodyLayer);
+        ForgeHooksClient.registerLayerDefinition(DragonRenderer.MODEL_LOCATION, () -> DragonModel.createBodyLayer(DragonModel.Properties.STANDARD));
 
 //        e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
     }

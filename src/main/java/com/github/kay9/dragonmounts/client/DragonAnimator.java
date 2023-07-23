@@ -386,18 +386,11 @@ public class DragonAnimator
         slerpArrays(wingForearm, wingForearmGround, wingForearm, ground);
 
         // apply angles
-        model.rightWingArm.xRot = wingArm[0];
+        model.wingArms.rotate(wingArm[0], wingArm[1], wingArm[2]);
 //        model.wingArm.xRot += 1 - speed;
-        model.rightWingArm.yRot = wingArm[1];
-        model.rightWingArm.zRot = wingArm[2];
 
-        mirrorRotations(model.rightWingArm, model.leftWingArm);
+        model.wingForearms.rotate(wingForearm[0],wingForearm[1],wingForearm[2]);
 
-        model.rightWingForearm.xRot = wingForearm[0];
-        model.rightWingForearm.yRot = wingForearm[1];
-        model.rightWingForearm.zRot = wingForearm[2];
-
-        mirrorRotations(model.rightWingForearm, model.leftWingForearm);
 
         // interpolate between folded and unfolded wing angles
         float[] yFold = new float[]{2.7f, 2.8f, 2.9f, 3.0f};
@@ -408,14 +401,13 @@ public class DragonAnimator
         float rotYOfs = Mth.sin(a1) * Mth.sin(a2) * 0.03f;
         float rotYMulti = 1;
 
-        for (int i = 0; i < model.rightWingFingers.length; i++)
+        for (int i = 0; i < model.wingFingers.length; i++)
         {
-            model.rightWingFingers[i].xRot = rotX += 0.005f; // reduce Z-fighting
-            model.rightWingFingers[i].yRot = terpSmoothStep(yUnfold[i],
-                    yFold[i] + rotYOfs * rotYMulti, ground);
-            rotYMulti -= 0.2f;
+            model.wingFingers[i].rotate(rotX += 0.005f,
+                    terpSmoothStep(yUnfold[i], yFold[i] + rotYOfs * rotYMulti, ground),
+                    0);
 
-            mirrorRotations(model.rightWingFingers[i], model.leftWingFingers[i]);
+            rotYMulti -= 0.2f;
         }
     }
 
@@ -515,28 +507,14 @@ public class DragonAnimator
         // 1 - hind leg, right side
         // 2 - front leg, left side
         // 3 - hind leg, left side
-        for (int i = 0; i < model.thighProxy.length; i++)
+        for (int i = 0; i < model.legs.length; i++)
         {
-            ModelPart thigh, crus, foot, toe;
+            var thigh = model.legs[i][0];
+            var crus = model.legs[i][1];
+            var foot = model.legs[i][2];
+            var toe = model.legs[i][3];
 
-            if (i % 2 == 0)
-            {
-                thigh = model.forethigh;
-                crus = model.forecrus;
-                foot = model.forefoot;
-                toe = model.foretoe;
-
-                thigh.z = 4;
-            }
-            else
-            {
-                thigh = model.hindthigh;
-                crus = model.hindcrus;
-                foot = model.hindfoot;
-                toe = model.hindtoe;
-
-                thigh.z = 46;
-            }
+            thigh.z = (i % 2 == 0)? 4 : 46;
 
             // final X rotation angles for air
             float[] xAir = xAirAll[i % 2];
@@ -575,8 +553,7 @@ public class DragonAnimator
             foot.xRot = terpSmoothStep(xAir[2], xGround[2], ground);
             toe.xRot = terpSmoothStep(xAir[3], xGround[3], ground);
 
-            // update proxy
-            model.thighProxy[i].update();
+            if (i > 1) thigh.yRot *= -1;
         }
     }
 

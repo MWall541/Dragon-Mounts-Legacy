@@ -4,8 +4,6 @@ import com.github.kay9.dragonmounts.accessors.ModelPartAccess;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.model.EntityModel;
@@ -45,26 +43,17 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPart jaw;
     public final ModelPart body;
     public final ModelPart back;
-    public final ModelPart forethigh;
-    public final ModelPart forecrus;
-    public final ModelPart forefoot;
-    public final ModelPart foretoe;
-    public final ModelPart hindthigh;
-    public final ModelPart hindcrus;
-    public final ModelPart hindfoot;
-    public final ModelPart hindtoe;
-    public final ModelPart rightWingArm;
-    public final ModelPart rightWingForearm;
-    public final ModelPart[] rightWingFingers = new ModelPart[4];
-    public final ModelPart leftWingArm;
-    public final ModelPart leftWingForearm;
-    public final ModelPart[] leftWingFingers = new ModelPart[4];
+
+    public final ModelPart[][] legs = new ModelPart[4][4];
+
+    public final BipedModelPartPair wingArms;
+    public final BipedModelPartPair wingForearms;
+    public final BipedModelPartPair[] wingFingers = new BipedModelPartPair[4];
 
 
     // model attributes
     public final ModelPartProxy[] neckProxy = new ModelPartProxy[VERTS_NECK];
     public final ModelPartProxy[] tailProxy = new ModelPartProxy[VERTS_TAIL];
-    public final ModelPartProxy[] thighProxy = new ModelPartProxy[4];
 
     public float size;
 
@@ -81,27 +70,34 @@ public class DragonModel extends EntityModel<TameableDragon>
         this.tail = root.getChild("tail");
         this.tailHornRight = getNullableChild(tail, "right_tail_spike");
         this.tailHornLeft = getNullableChild(tail, "left_tail_spike");
-        this.rightWingArm = root.getChild("right_wing_arm");
-        this.rightWingForearm = rightWingArm.getChild("right_wing_forearm");
-        this.leftWingArm = root.getChild("left_wing_arm");
-        this.leftWingForearm = leftWingArm.getChild("left_wing_forearm");
-        this.forethigh = root.getChild("fore_thigh");
-        this.forecrus = forethigh.getChild("fore_crus");
-        this.forefoot = forecrus.getChild("fore_foot");
-        this.foretoe = forefoot.getChild("fore_toe");
-        this.hindthigh = root.getChild("hind_thigh");
-        this.hindcrus = hindthigh.getChild("hind_crus");
-        this.hindfoot = hindcrus.getChild("hind_foot");
-        this.hindtoe = hindfoot.getChild("hind_toe");
 
-        for (int i = 1; i < 5; i++) rightWingFingers[i - 1] = rightWingForearm.getChild("right_wing_finger_" + i);
-        for (int i = 1; i < 5; i++) leftWingFingers[i - 1] = leftWingForearm.getChild("left_wing_finger_" + i);
+        var rightWingArm = root.getChild("right_wing_arm");
+        var leftWingArm = root.getChild("left_wing_arm");
+        this.wingArms = new BipedModelPartPair(rightWingArm, leftWingArm, 1, -1, -1);
+        var rightWingForearm = rightWingArm.getChild("right_wing_forearm");
+        var leftWingForearm = leftWingArm.getChild("left_wing_forearm");
+        this.wingForearms = new BipedModelPartPair(rightWingForearm, leftWingForearm, 1, -1, -1);
+
+        for (int i = 1; i < 5; i++)
+            wingFingers[i - 1] = new BipedModelPartPair(
+                    rightWingForearm.getChild("right_wing_finger_" + i),
+                    leftWingForearm.getChild("left_wing_finger_" + i),
+                    1, -1, -1);
+
+        for (int i = 0; i < legs.length; i++)
+        {
+            var right = i < 2;
+            var dirName = right? "right_" : "left_";
+            var type = i % 2 == 0? "fore_" : "hind_";
+            var parts = new String[]{"thigh", "crus", "foot", "toe"};
+            var parent = root;
+            for (int j = 0; j < parts.length; j++)
+                parent = legs[i][j] = parent.getChild(dirName + type + parts[j]);
+        }
 
         // initialize model proxies
         for (int i = 0; i < neckProxy.length; i++) neckProxy[i] = new ModelPartProxy(neck);
         for (int i = 0; i < tailProxy.length; i++) tailProxy[i] = new ModelPartProxy(tail);
-        for (int i = 0; i < 4; i++) thighProxy[i] = new ModelPartProxy(i % 2 == 0? forethigh : hindthigh);
-
 
         if (tailHornRight != null)
             //noinspection ConstantConditions
@@ -252,7 +248,7 @@ public class DragonModel extends EntityModel<TameableDragon>
     private static void buildLeg(PartDefinition root, boolean hind, boolean thin, boolean mirror)
     {
         float baseLength = 26;
-        String baseName = hind? "hind_" : "fore_";
+        var baseName = (mirror? "left_" : "right_") + (hind? "hind_" : "fore_");
 
         // thigh variables
         float thighPosX = -11;
@@ -358,43 +354,24 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     protected void renderHead(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
-        float headScale = 1.4f / (size + 0.5f);
+        float headScale = 1.4f / (size + 0.4f);
         //noinspection DataFlowIssue
         ((ModelPartAccess) (Object) head).setRenderScale(headScale, headScale, headScale);
         head.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
     }
 
-    private static final Matrix4f INVERSE_SCALE = Matrix4f.createScaleMatrix(-1, 1, 1);
-    private static final Matrix3f INVERSE_NORMS = new Matrix3f(INVERSE_SCALE);
-
     public void renderWings(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
         ps.pushPose();
         ps.scale(1.1f, 1.1f, 1.1f);
-
-        rightWingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-        leftWingArm.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-
+        wingArms.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
         ps.popPose();
     }
 
     protected void renderLegs(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
-        ps.pushPose();
-
-        for (int i = 0; i < thighProxy.length; i++)
-        {
-            var proxy = thighProxy[i];
-            proxy.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-
-            if (i == 1)
-            {
-                ps.last().pose().multiply(INVERSE_SCALE);
-                ps.last().normal().mul(INVERSE_NORMS);
-            }
-        }
-
-        ps.popPose();
+        for (ModelPart[] leg : legs)
+            leg[0].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
     }
 
     private static CubeListBuilder centerMirroredBox(CubeListBuilder builder, boolean mirror, float pOriginX, float pOriginY, float pOriginZ, float pDimensionX, float pDimensionY, float pDimensionZ)
@@ -411,9 +388,6 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     /**
      * Hacky workaround for getting model parts that may or may not exist.
-     * @param parent
-     * @param child
-     * @return
      */
     @Nullable
     private static ModelPart getNullableChild(ModelPart parent, String child)

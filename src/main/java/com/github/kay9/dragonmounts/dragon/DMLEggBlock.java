@@ -1,8 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
-import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonEggRenderer;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
@@ -102,22 +100,6 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             egg.setPos(pos.getX() + 0.5d, pos.getY() + 0.1d, pos.getZ() + 0.5d);
             level.addFreshEntity(egg);
         }
-    }
-
-    public static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
-    {
-        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
-        {
-            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonMountsLegacy.id("end"));
-            if (end.isPresent())
-            {
-                level.removeBlock(pos, false);
-                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
-                startHatching(end.get(), level, pos);
-                return true;
-            }
-        }
-        return false;
     }
 
     public static class Item extends BlockItem

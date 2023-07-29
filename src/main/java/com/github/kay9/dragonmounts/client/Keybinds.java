@@ -7,7 +7,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.client.ClientRegistry;
-import net.minecraftforge.client.event.InputEvent;
 import org.lwjgl.glfw.GLFW;
 
 public class Keybinds
@@ -23,10 +22,10 @@ public class Keybinds
         return keymap;
     }
 
-    public static void handleKeyPress(InputEvent.KeyInputEvent evt)
+    public static void handleKeyPress(int key, int action)
     {
-        if (evt.getKey() == CAMERA_CONTROLS.getKey().getValue()
-                && evt.getAction() == GLFW.GLFW_PRESS
+        if (key == CAMERA_CONTROLS.getKey().getValue()
+                && action == GLFW.GLFW_PRESS
                 && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon d)
         {
             DMLConfig.cameraFlight = !DMLConfig.cameraFlight();

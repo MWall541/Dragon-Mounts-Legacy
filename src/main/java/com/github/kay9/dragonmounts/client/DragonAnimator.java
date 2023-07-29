@@ -386,10 +386,10 @@ public class DragonAnimator
         slerpArrays(wingForearm, wingForearmGround, wingForearm, ground);
 
         // apply angles
-        model.wingArms.rotate(wingArm[0], wingArm[1], wingArm[2]);
+        mirrorRotate(model.wingArms[0], model.wingArms[1], wingArm[0], wingArm[1], wingArm[2]);
 //        model.wingArm.xRot += 1 - speed;
 
-        model.wingForearms.rotate(wingForearm[0],wingForearm[1],wingForearm[2]);
+        mirrorRotate(model.wingForearms[0], model.wingForearms[1], wingForearm[0],wingForearm[1],wingForearm[2]);
 
 
         // interpolate between folded and unfolded wing angles
@@ -401,9 +401,11 @@ public class DragonAnimator
         float rotYOfs = Mth.sin(a1) * Mth.sin(a2) * 0.03f;
         float rotYMulti = 1;
 
-        for (int i = 0; i < model.wingFingers.length; i++)
+        for (int i = 0; i < model.wingFingers[0].length; i++)
         {
-            model.wingFingers[i].rotate(rotX += 0.005f,
+            mirrorRotate(model.wingFingers[0][i],
+                    model.wingFingers[1][i],
+                    rotX += 0.005f,
                     terpSmoothStep(yUnfold[i], yFold[i] + rotYOfs * rotYMulti, ground),
                     0);
 
@@ -596,11 +598,14 @@ public class DragonAnimator
         this.openJaw = openJaw;
     }
 
-    private static void mirrorRotations(ModelPart source, ModelPart target)
+    private static void mirrorRotate(ModelPart rightLimb, ModelPart leftLimb, float xRot, float yRot, float zRot)
     {
-        target.xRot = source.xRot;
-        target.yRot = -source.yRot;
-        target.zRot = -source.zRot;
+        rightLimb.xRot = xRot;
+        rightLimb.yRot = yRot;
+        rightLimb.zRot = zRot;
+        leftLimb.xRot = xRot;
+        leftLimb.yRot = -yRot;
+        leftLimb.zRot = -zRot;
     }
 
     private static void slerpArrays(float[] a, float[] b, float[] c, float x)

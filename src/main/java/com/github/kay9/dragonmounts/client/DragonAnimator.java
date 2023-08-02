@@ -6,13 +6,13 @@ import com.github.kay9.dragonmounts.util.CircularBuffer;
 import com.github.kay9.dragonmounts.util.LerpedFloat;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * Animation control class to put useless reptiles in motion.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
+@SuppressWarnings({"unused", "DataFlowIssue"})
 public class DragonAnimator
 {
     // constants
@@ -205,8 +205,10 @@ public class DragonAnimator
         }
 
         float speedMax = 0.05f;
-        Vec3 motion = dragon.getDeltaMovement();
-        float speedEnt = (float) (motion.x * motion.x + motion.z * motion.z);
+        float xD = (float) dragon.getX() - (float) dragon.xo;
+        float yD = (float) dragon.getY() - (float) dragon.yo;
+        float zD = (float) dragon.getZ() - (float) dragon.zo;
+        float speedEnt = (xD * xD + zD * zD);
         float speedMulti = Mth.clamp(speedEnt / speedMax, 0, 1);
 
         // update main animation timer
@@ -234,7 +236,7 @@ public class DragonAnimator
         groundTimer.set(groundVal);
 
         // update flutter transition
-        boolean flutterFlag = !onGround && (dragon.verticalCollision || motion.y > -0.1 || speedEnt < speedMax);
+        boolean flutterFlag = !onGround && (dragon.horizontalCollision || yD > -0.1 || speedEnt < speedMax);
         flutterTimer.add(flutterFlag? 0.1f : -0.1f);
 
         // update walking transition
@@ -255,8 +257,7 @@ public class DragonAnimator
 //        jawTimer.add(jawFlag? 0.2f : -0.2f);
 
         // update speed transition
-        boolean nearGround = onGround || !dragon.isHighEnough((int) (4 * dragon.getScale()));
-        boolean speedFlag = speedEnt > speedMax || nearGround;
+        boolean speedFlag = speedEnt > speedMax || dragon.isNearGround();
         float speedValue = 0.05f;
         speedTimer.add(speedFlag? speedValue : -speedValue);
 
@@ -385,14 +386,11 @@ public class DragonAnimator
         slerpArrays(wingForearm, wingForearmGround, wingForearm, ground);
 
         // apply angles
-        model.wingArm.xRot = wingArm[0];
+        mirrorRotate(model.wingArms[0], model.wingArms[1], wingArm[0], wingArm[1], wingArm[2]);
 //        model.wingArm.xRot += 1 - speed;
-        model.wingArm.yRot = wingArm[1];
-        model.wingArm.zRot = wingArm[2];
 
-        model.wingForearm.xRot = wingForearm[0];
-        model.wingForearm.yRot = wingForearm[1];
-        model.wingForearm.zRot = wingForearm[2];
+        mirrorRotate(model.wingForearms[0], model.wingForearms[1], wingForearm[0],wingForearm[1],wingForearm[2]);
+
 
         // interpolate between folded and unfolded wing angles
         float[] yFold = new float[]{2.7f, 2.8f, 2.9f, 3.0f};
@@ -403,15 +401,19 @@ public class DragonAnimator
         float rotYOfs = Mth.sin(a1) * Mth.sin(a2) * 0.03f;
         float rotYMulti = 1;
 
-        for (int i = 0; i < model.wingFinger.length; i++)
+        for (int i = 0; i < model.wingFingers[0].length; i++)
         {
-            model.wingFinger[i].xRot = rotX += 0.005f; // reduce Z-fighting
-            model.wingFinger[i].yRot = terpSmoothStep(yUnfold[i],
-                    yFold[i] + rotYOfs * rotYMulti, ground);
+            mirrorRotate(model.wingFingers[0][i],
+                    model.wingFingers[1][i],
+                    rotX += 0.005f,
+                    terpSmoothStep(yUnfold[i], yFold[i] + rotYOfs * rotYMulti, ground),
+                    0);
+
             rotYMulti -= 0.2f;
         }
     }
 
+    @SuppressWarnings("UnusedAssignment")
     protected void animTail(DragonModel model)
     {
         model.tail.x = 0;
@@ -462,9 +464,12 @@ public class DragonAnimator
             model.tail.xRot -= (1 - speed) * vertMulti * 2;
             model.tail.yRot += Math.toRadians(180 - yawOfs);
 
-            // display horns near the tip
-            boolean horn = dragon.getBreed().modelProperties().tailHorns() && i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
-            model.tailHornLeft.visible = model.tailHornRight.visible = horn;
+            if (model.tailHornRight != null)
+            {
+                // display horns near the tip
+                var atIndex = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
+                model.tailHornLeft.visible = model.tailHornRight.visible = atIndex;
+            }
 
             // update scale
             float neckScale = Mth.clampedLerp(1.5f, 0.3f, vertMulti);
@@ -504,28 +509,14 @@ public class DragonAnimator
         // 1 - hind leg, right side
         // 2 - front leg, left side
         // 3 - hind leg, left side
-        for (int i = 0; i < model.thighProxy.length; i++)
+        for (int i = 0; i < model.legs.length; i++)
         {
-            ModelPart thigh, crus, foot, toe;
+            var thigh = model.legs[i][0];
+            var crus = model.legs[i][1];
+            var foot = model.legs[i][2];
+            var toe = model.legs[i][3];
 
-            if (i % 2 == 0)
-            {
-                thigh = model.forethigh;
-                crus = model.forecrus;
-                foot = model.forefoot;
-                toe = model.foretoe;
-
-                thigh.z = 4;
-            }
-            else
-            {
-                thigh = model.hindthigh;
-                crus = model.hindcrus;
-                foot = model.hindfoot;
-                toe = model.hindtoe;
-
-                thigh.z = 46;
-            }
+            thigh.z = (i % 2 == 0)? 4 : 46;
 
             // final X rotation angles for air
             float[] xAir = xAirAll[i % 2];
@@ -564,8 +555,7 @@ public class DragonAnimator
             foot.xRot = terpSmoothStep(xAir[2], xGround[2], ground);
             toe.xRot = terpSmoothStep(xAir[3], xGround[3], ground);
 
-            // update proxy
-            model.thighProxy[i].update();
+            if (i > 1) thigh.yRot *= -1;
         }
     }
 
@@ -582,6 +572,7 @@ public class DragonAnimator
         return terpSmoothStep(pitchHover, pitchMoving, speed);
     }
 
+    @SuppressWarnings("SameReturnValue")
     public float getModelOffsetX()
     {
         return 0;
@@ -605,6 +596,16 @@ public class DragonAnimator
     public void setOpenJaw(boolean openJaw)
     {
         this.openJaw = openJaw;
+    }
+
+    private static void mirrorRotate(ModelPart rightLimb, ModelPart leftLimb, float xRot, float yRot, float zRot)
+    {
+        rightLimb.xRot = xRot;
+        rightLimb.yRot = yRot;
+        rightLimb.zRot = zRot;
+        leftLimb.xRot = xRot;
+        leftLimb.yRot = -yRot;
+        leftLimb.zRot = -zRot;
     }
 
     private static void slerpArrays(float[] a, float[] b, float[] c, float x)

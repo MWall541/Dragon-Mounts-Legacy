@@ -10,8 +10,8 @@
       "type": "dragon_breath"
     }
   ],
-  "primary_color": 1447446,
-  "secondary_color": 16737256,
+  "primary_color": "161616",
+  "secondary_color": "ff63e8",
   "hatch_particles": {
     "type": "minecraft:portal"
   }

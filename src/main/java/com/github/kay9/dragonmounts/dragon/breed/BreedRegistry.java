@@ -30,7 +30,6 @@ public class BreedRegistry
             0x912400,
             0xff9819,
             Optional.of(ParticleTypes.FLAME),
-            new DragonBreed.ModelProperties(false, false, false),
             ImmutableMap.of(),
             ImmutableList.of(HotFeetAbility.INSTANCE),
             ImmutableList.of(
@@ -62,6 +61,8 @@ public class BreedRegistry
 
     public static Registry<DragonBreed> registry(RegistryAccess reg)
     {
-        return reg.registryOrThrow(REGISTRY_KEY);
+        var opt = reg.registry(REGISTRY_KEY);
+        if (opt.isPresent()) return opt.get();
+        return RegistryAccess.BUILTIN.get().registryOrThrow(REGISTRY_KEY); // last resort.
     }
 }

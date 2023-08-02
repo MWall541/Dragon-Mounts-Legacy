@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -57,17 +58,17 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
         ps.pushPose();
         if (offset) ps.translate(-0.5D, 0.0D, -0.5D);
         var model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.get(breed));
-        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, null, model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY);
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, null, model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
         ps.popPose();
     }
 
     /**
      * Here to provide a way to create a method reference factory to return the instance.
      * Still confused? I'm exploiting javas shitty class loading ways.
-     *
+     * <p>
      * Don't use this as a getter. Simply use the public field.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "SameReturnValue"})
     @NotNull
     public static DragonEggRenderer instance(Object context)
     {

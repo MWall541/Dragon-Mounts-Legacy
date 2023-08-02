@@ -1,8 +1,10 @@
 package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -25,16 +27,38 @@ import java.util.function.Function;
 
 public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(DragonMountsLegacy.id("dragon"), "main");
+    public static final ModelLayerLocation MODEL_LOCATION = new ModelLayerLocation(DragonMountsLegacy.id("dragon"), "main");
     private static final ResourceLocation DISSOLVE_TEXTURE = DragonMountsLegacy.id("textures/entity/dragon/dissolve.png");
-    private static final Map<ResourceLocation, ResourceLocation[]> TEXTURE_CACHE = new HashMap<>(8);
+    private static final int LAYER_BODY = 0;
+    private static final int LAYER_GLOW = 1;
+    private static final int LAYER_SADDLE = 2;
+
+    private final DragonModel defaultModel;
+    private final Map<ResourceLocation, DragonModel> modelCache;
+    private final Map<ResourceLocation, ResourceLocation[]> textureCache = new HashMap<>(8);
 
     public DragonRenderer(EntityRendererProvider.Context modelBakery)
     {
-        super(modelBakery, new DragonModel(modelBakery.bakeLayer(LAYER_LOCATION)), 2);
+        super(modelBakery, new DragonModel(modelBakery.bakeLayer(MODEL_LOCATION)), 2);
+
+        this.defaultModel = model;
+        this.modelCache = bakeModels(modelBakery);
+
         addLayer(GLOW_LAYER);
         addLayer(SADDLE_LAYER);
         addLayer(DEATH_LAYER);
+    }
+
+    @Override
+    public void render(TameableDragon dragon, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight)
+    {
+        this.model = getModel(dragon);
+        super.render(dragon, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
+    }
+
+    public DragonModel getModel(TameableDragon dragon)
+    {
+        return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.registryAccess()), defaultModel);
     }
 
     // During death, do not use the standard rendering and let the death layer handle it. Hacky, but better than mixins.
@@ -43,6 +67,19 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     protected RenderType getRenderType(TameableDragon entity, boolean visible, boolean invisToClient, boolean glowing)
     {
         return entity.deathTime > 0? null : super.getRenderType(entity, visible, invisToClient, glowing);
+    }
+
+    @Override
+    public ResourceLocation getTextureLocation(TameableDragon dragon)
+    {
+        return getTextureForLayer(dragon.getBreed(), LAYER_BODY);
+    }
+
+    public ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
+    {
+        // we need to compute texture locations now rather than earlier due to the fact that breeds don't exist then.
+        //noinspection DataFlowIssue
+        return textureCache.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::getTexturesFor)[layer];
     }
 
     @Override
@@ -65,18 +102,15 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         return 0;
     }
 
-    @Override
-    public ResourceLocation getTextureLocation(TameableDragon dragon)
+    private Map<ResourceLocation, DragonModel> bakeModels(EntityRendererProvider.Context bakery)
     {
-        return getTextureForLayer(dragon.getBreed(), 0);
+        var builder = ImmutableMap.<ResourceLocation, DragonModel>builder();
+        for (var entry : DragonModelPropertiesListener.INSTANCE.pollDefinitions().entrySet())
+            builder.put(entry.getKey(), new DragonModel(bakery.bakeLayer(entry.getValue())));
+        return builder.build();
     }
 
-    public static ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
-    {
-        return TEXTURE_CACHE.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::cacheTextures)[layer];
-    }
-
-    private static ResourceLocation[] cacheTextures(ResourceLocation id)
+    private static ResourceLocation[] getTexturesFor(ResourceLocation id)
     {
         final String[] TEXTURES = {"body", "glow", "saddle"}; // 0, 1, 2
 
@@ -93,7 +127,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         {
             if (dragon.deathTime == 0)
             {
-                var type = CustomRenderTypes.glow(getTextureForLayer(dragon.getBreed(), 1));
+                var type = CustomRenderTypes.glow(getTextureForLayer(dragon.getBreed(), LAYER_GLOW));
                 model.renderToBuffer(pMatrixStack, buffer.getBuffer(type), pPackedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
             }
        }
@@ -104,7 +138,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         public void render(PoseStack ps, MultiBufferSource buffer, int light, TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch)
         {
             if (dragon.isSaddled())
-                renderColoredCutoutModel(model, getTextureForLayer(dragon.getBreed(), 2), ps, buffer, light, dragon, 1f, 1f, 1f);
+                renderColoredCutoutModel(model, getTextureForLayer(dragon.getBreed(), LAYER_SADDLE), ps, buffer, light, dragon, 1f, 1f, 1f);
         }
     };
     public final RenderLayer<TameableDragon, DragonModel> DEATH_LAYER = new RenderLayer<>(this)
@@ -136,7 +170,6 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
             return GLOW_FUNC.apply(texture);
         }
 
-        @SuppressWarnings("ConstantConditions")
         private CustomRenderTypes()
         {
             // dummy

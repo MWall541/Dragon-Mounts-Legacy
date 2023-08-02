@@ -25,8 +25,8 @@
       "type": "in_fluid"
     }
   ],
-  "primary_color": 9511936,
-  "secondary_color": 16750617,
+  "primary_color": "912400",
+  "secondary_color": "ff9819",
   "hatch_particles": {
     "type": "minecraft:flame"
   }

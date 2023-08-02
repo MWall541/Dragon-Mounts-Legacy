@@ -7,7 +7,10 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 #logoFile="examplemod.png"
-credits="ata4/barracuda for the original project and idea."
+credits='''
+ata4/barracuda - original project and idea.
+Mojang - Base game and sound assets.
+'''
 authors="Kay9"
 description='''This is a mod that allows you to hatch previously useless dragon eggs.
 Once fostered and tamed, they'll be your faithful companion in all situations and, of course, can be used for a ride!'''

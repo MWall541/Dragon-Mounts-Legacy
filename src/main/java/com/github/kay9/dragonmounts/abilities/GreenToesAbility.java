@@ -38,6 +38,7 @@ public class GreenToesAbility extends FootprintAbility
             placing = (level.getRandom().nextBoolean()? Blocks.RED_MUSHROOM : Blocks.BROWN_MUSHROOM).defaultBlockState();
         else if (steppingOn.is(BlockTags.DIRT)) // different from the actual dirt block. Could be grass or moss
         {
+            //noinspection deprecation
             placing = Registry.BLOCK
                     .getTag(BlockTags.SMALL_FLOWERS)
                     .flatMap(tag -> tag.getRandomElement(dragon.getRandom()))

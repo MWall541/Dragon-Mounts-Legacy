@@ -2,7 +2,7 @@
   "immunities": [
     "drown"
   ],
-  "ambient_sound": "minecraft:entity.skeleton.ambient",
+  "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
   "model_properties": {
     "thin_legs": true
   },
@@ -25,6 +25,6 @@
       "type": "picky"
     }
   ],
-  "primary_color": 12895428,
-  "secondary_color": 12777727
+  "primary_color": "c4c4c4",
+  "secondary_color": "c2f8ff"
 }

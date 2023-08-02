@@ -1,0 +1,15 @@
+{
+  "entity.dragon.ambient.example": {
+    "sounds": [
+      {
+        "name": "dragonmounts:entity.dragon.ambient",
+        "type": "event"
+      },
+      {
+        "name": "minecraft:entity.cat.ambient",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.entity.dragon.ambient.example"
+  }
+}

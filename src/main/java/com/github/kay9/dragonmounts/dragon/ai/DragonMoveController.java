@@ -43,7 +43,7 @@ public class DragonMoveController extends MoveControl
             double distSq = Math.sqrt(xDif * xDif + zDif * zDif);
             mob.setSpeed(speed);
             if (Math.abs(yDif) > (double) 1.0E-5F || Math.abs(distSq) > (double) 1.0E-5F)
-                mob.setYya(yDif > 0d? speed : -speed);
+                mob.setYya((float) yDif * speed);
 
             float yaw = (float) (Mth.atan2(zDif, xDif) * (double) (180F / (float) Math.PI)) - 90.0F;
             mob.setYRot(rotlerp(mob.getYRot(), yaw, 6));

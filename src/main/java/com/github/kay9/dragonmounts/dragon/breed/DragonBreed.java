@@ -1,18 +1,19 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.Habitat;
+import com.github.kay9.dragonmounts.util.DMLUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.math.Vector3f;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.*;
-import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -22,34 +23,30 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
+@SuppressWarnings("deprecation")
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
-                          ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities,
-                          List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound,
+                          Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats,
+                          ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound,
                           ResourceLocation deathLoot, int growthTime, int hatchTime, float sizeModifier,
                           HolderSet<Item> tamingItems, HolderSet<Item> breedingItems)
     implements IForgeRegistryEntry<DragonBreed>
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
-            Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
+            DMLUtil.HEX_CODEC.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
+            DMLUtil.HEX_CODEC.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
-            ModelProperties.CODEC.optionalFieldOf("model_properties", ModelProperties.STANDARD).forGetter(DragonBreed::modelProperties),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
             Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
-            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
+            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
             ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.BASE_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime),
@@ -62,23 +59,20 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
-            ModelProperties.CODEC.fieldOf("model_properties").forGetter(DragonBreed::modelProperties),
-            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::specialSound),
+            Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
             Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
             Codec.INT.fieldOf("hatch_time").forGetter(DragonBreed::hatchTime),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier)
     ).apply(instance, DragonBreed::fromNetwork));
 
-    private static final HolderSet<Item> EMPTY_SET = new HolderSet.Named<>(Registry.ITEM, ItemTags.create(DragonMountsLegacy.id("empty"))); // dummy for client instances
-
-    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> specialSound)
+    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, attributes, abilities, habitats, immunities, specialSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES));
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES));
     }
 
-    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, ModelProperties modelProperties, Optional<SoundEvent> specialSound, int growthTime, int hatchTime, float sizeModifier)
+    public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Optional<SoundEvent> ambientSound, int growthTime, int hatchTime, float sizeModifier)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, modelProperties, Map.of(), List.of(), List.of(), ImmutableSet.of(), specialSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, EMPTY_SET, EMPTY_SET);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, Map.of(), List.of(), List.of(), ImmutableSet.of(), ambientSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, DMLUtil.EMPTY_ITEM_HOLDER_SET, DMLUtil.EMPTY_ITEM_HOLDER_SET);
     }
 
     public void initialize(TameableDragon dragon)
@@ -93,40 +87,10 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         for (Ability a : abilities()) a.close(dragon);
     }
 
-    public ParticleOptions getHatchParticles(Random random)
-    {
-        return hatchParticles().orElseGet(() -> getDustParticles(random));
-    }
-
-    public DustParticleOptions getDustParticles(Random random)
-    {
-        return new DustParticleOptions(new Vector3f(Vec3.fromRGB24(random.nextDouble() < 0.75? primaryColor() : secondaryColor())), 1);
-    }
-
-    @Nullable
-    public SoundEvent getAmbientSound()
-    {
-        return specialSound().orElse(null);
-    }
-
-    public String getTranslationKey(RegistryAccess reg)
-    {
-        var name = id(reg);
-        return "dragon_breed." + name.getNamespace() + "." + name.getPath();
-    }
-
-    public int getHabitatPoints(Level level, BlockPos pos)
-    {
-        int points = 0;
-        for (Habitat habitat : habitats()) points += habitat.getHabitatPoints(level, pos);
-        return points;
-    }
-
     private void applyAttributes(TameableDragon dragon)
     {
         float healthPercentile = dragon.getHealth() / dragon.getMaxHealth();
 
-        //todo: use attributes().replaceFrom instead
         attributes().forEach((att, value) ->
         {
             AttributeInstance inst = dragon.getAttribute(att);
@@ -134,6 +98,12 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         });
 
         dragon.setHealth(dragon.getMaxHealth() * healthPercentile); // in case we have less than max health
+    }
+
+    public String getTranslationKey(RegistryAccess reg)
+    {
+        var name = id(reg);
+        return "dragon_breed." + name.getNamespace() + "." + name.getPath();
     }
 
     @Override
@@ -158,16 +128,5 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public Class<DragonBreed> getRegistryType()
     {
         return DragonBreed.class;
-    }
-
-    public record ModelProperties(boolean middleTailScales, boolean tailHorns, boolean thinLegs)
-    {
-        public static final ModelProperties STANDARD = new ModelProperties(true, false, false);
-
-        public static Codec<ModelProperties> CODEC = RecordCodecBuilder.create(func -> func.group(
-                Codec.BOOL.optionalFieldOf("middle_tail_scales", true).forGetter(ModelProperties::middleTailScales),
-                Codec.BOOL.optionalFieldOf("tail_horns", false).forGetter(ModelProperties::tailHorns),
-                Codec.BOOL.optionalFieldOf("thin_legs", false).forGetter(ModelProperties::thinLegs)
-        ).apply(func, ModelProperties::new));
     }
 }

@@ -16,8 +16,8 @@
       "type": "nearby_blocks"
     }
   ],
-  "primary_color": 25343,
-  "secondary_color": 5872127,
+  "primary_color": "62ff",
+  "secondary_color": "5999ff",
   "hatch_particles": {
     "type": "minecraft:dripping_water"
   }

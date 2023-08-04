@@ -58,7 +58,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
     public DragonModel getModel(TameableDragon dragon)
     {
-        return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.m_9598_()), defaultModel);
+        return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.registryAccess()), defaultModel);
     }
 
     // During death, do not use the standard rendering and let the death layer handle it. Hacky, but better than mixins.
@@ -79,7 +79,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     {
         // we need to compute texture locations now rather than earlier due to the fact that breeds don't exist then.
         //noinspection DataFlowIssue
-        return textureCache.computeIfAbsent(breed.id(Minecraft.getInstance().level.m_9598_()), DragonRenderer::getTexturesFor)[layer];
+        return textureCache.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::getTexturesFor)[layer];
     }
 
     @Override

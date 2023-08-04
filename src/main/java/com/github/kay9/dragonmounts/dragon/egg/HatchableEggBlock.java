@@ -92,7 +92,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     {
         if (Minecraft.getInstance().level != null)
         {
-            var reg = Minecraft.getInstance().level.m_9598_();
+            var reg = Minecraft.getInstance().level.registryAccess();
             for (DragonBreed breed : BreedRegistry.registry(reg))
                 evt.accept(Item.create(breed, reg));
         }
@@ -122,8 +122,8 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     {
         var breed = level.getBlockEntity(pos) instanceof HatchableEggBlockEntity e?
                 e.getBreed() :
-                BreedRegistry.getRandom(player.getLevel().m_9598_(), player.getRandom());
-        return Item.create(breed, player.getLevel().m_9598_());
+                BreedRegistry.getRandom(player.getLevel().registryAccess(), player.getRandom());
+        return Item.create(breed, player.getLevel().registryAccess());
     }
 
     @Nullable
@@ -165,7 +165,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     public void attack(BlockState state, Level level, BlockPos at, Player pPlayer)
     {
         if (level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
-                && e.getBreed().id(level.m_9598_()).getPath().equals("end")
+                && e.getBreed().id(level.registryAccess()).getPath().equals("end")
                 && !state.getValue(HATCHING))
             teleport(state, level, at); // retain original dragon egg teleport behavior
     }
@@ -175,7 +175,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     {
         if (!player.getAbilities().instabuild
                 && level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
-                && e.getBreed().id(level.m_9598_()).getPath().equals("end")
+                && e.getBreed().id(level.registryAccess()).getPath().equals("end")
                 && !state.getValue(HATCHING))
             return false; // retain original dragon egg teleport behavior; DON'T destroy!
 
@@ -197,7 +197,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         {
             tooltips.add(CommonComponents.EMPTY);
             tooltips.add(Component.translatable(getDescriptionId() + ".desc1").withStyle(ChatFormatting.GRAY));
-            tooltips.add(CommonComponents.m_264333_().append(Component.translatable(getDescriptionId() + ".desc2")).withStyle(ChatFormatting.BLUE));
+            tooltips.add(CommonComponents.space().append(Component.translatable(getDescriptionId() + ".desc2")).withStyle(ChatFormatting.BLUE));
         }
     }
 
@@ -329,7 +329,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     {
         if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
-            var end = BreedRegistry.registry(level.m_9598_()).getOptional(DragonMountsLegacy.id("end"));
+            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonMountsLegacy.id("end"));
             if (end.isPresent())
             {
                 if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
@@ -424,7 +424,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
                 var tag = BlockItem.getBlockEntityData(stack);
                 if (tag != null)
                 {
-                    dragon.setBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.getLevel().m_9598_()));
+                    dragon.setBreed(BreedRegistry.get(tag.getString(TameableDragon.NBT_BREED), player.getLevel().registryAccess()));
                     return InteractionResult.sidedSuccess(player.level.isClientSide);
                 }
             }

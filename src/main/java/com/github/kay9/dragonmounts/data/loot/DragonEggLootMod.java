@@ -34,7 +34,7 @@ public class DragonEggLootMod extends LootModifier
     {
         if (DMLConfig.useLootTables())
         {
-            var reg = context.getLevel().m_9598_();
+            var reg = context.getLevel().registryAccess();
             var breed = BreedRegistry.registry(reg).get(id);
             if (breed != null)
                 generatedLoot.add(HatchableEggBlock.Item.create(breed, reg));

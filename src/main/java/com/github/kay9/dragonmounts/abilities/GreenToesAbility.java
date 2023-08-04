@@ -39,7 +39,7 @@ public class GreenToesAbility extends FootprintAbility
         else if (steppingOn.is(BlockTags.DIRT)) // different from the actual dirt block. Could be grass or moss
         {
             //noinspection deprecation
-            placing = level.m_9598_().registryOrThrow(Registries.BLOCK)
+            placing = level.registryAccess().registryOrThrow(Registries.BLOCK)
                     .getTag(BlockTags.SMALL_FLOWERS)
                     .flatMap(tag -> tag.getRandomElement(dragon.getRandom()))
                     .map(Holder::value)

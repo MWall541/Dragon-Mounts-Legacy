@@ -14,12 +14,18 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+
 public class DragonSpawnEgg extends ForgeSpawnEggItem
 {
+    private static final String DATA_TAG = "ItemData";
+    private static final String DATA_ITEM_NAME = "ItemName";
+    private static final String DATA_PRIM_COLOR = "PrimaryColor";
+    private static final String DATA_SEC_COLOR = "SecondaryColor";
+
     public DragonSpawnEgg()
     {
         super(DMLRegistry.DRAGON, 0, 0, new Item.Properties());
@@ -27,33 +33,34 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
 
     public static ItemStack create(DragonBreed breed, RegistryAccess reg)
     {
-        CompoundTag root = new CompoundTag();
+        var id = breed.id(reg);
+        var root = new CompoundTag();
 
         // entity tag
-        CompoundTag entityTag = new CompoundTag();
-        entityTag.putString(TameableDragon.NBT_BREED, breed.id(reg).toString());
+        var entityTag = new CompoundTag();
+        entityTag.putString(TameableDragon.NBT_BREED, id.toString());
         root.put(EntityType.ENTITY_TAG, entityTag);
 
         // name & colors
         // storing these in the stack nbt is more performant than getting the breed everytime
-        CompoundTag itemDataTag = new CompoundTag();
-        itemDataTag.putString("ItemName", DragonBreed.getTranslationKey(breed.id(reg).toString()));
-        itemDataTag.putInt("PrimaryColor", breed.primaryColor());
-        itemDataTag.putInt("SecondaryColor", breed.secondaryColor());
-        root.put("ItemData", itemDataTag);
+        var itemDataTag = new CompoundTag();
+        itemDataTag.putString(DATA_ITEM_NAME, String.join(".", DMLRegistry.SPAWN_EGG.get().getDescriptionId(), id.getNamespace(), id.getPath()));
+        itemDataTag.putInt(DATA_PRIM_COLOR, breed.primaryColor());
+        itemDataTag.putInt(DATA_SEC_COLOR, breed.secondaryColor());
+        root.put(DATA_TAG, itemDataTag);
 
         ItemStack stack = new ItemStack(DMLRegistry.SPAWN_EGG.get());
         stack.setTag(root);
         return stack;
     }
 
-    public static void populateTab(BuildCreativeModeTabContentsEvent evt)
+    public static void populateTab(Consumer<ItemStack> registrar)
     {
         if (Minecraft.getInstance().level != null)
         {
             var reg = Minecraft.getInstance().level.registryAccess();
             for (DragonBreed breed : BreedRegistry.registry(reg))
-                evt.accept(create(breed, reg));
+                registrar.accept(create(breed, reg));
         }
     }
 
@@ -67,17 +74,17 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     @Override
     public Component getName(ItemStack stack)
     {
-        var name = "";
-        var tag = stack.getTagElement("ItemData");
-        if (tag != null) name = tag.getString("ItemName");
-        return Component.translatable(getDescriptionId(), Component.translatable(name));
+        var tag = stack.getTagElement(DATA_TAG);
+        if (tag == null || tag.contains(DATA_ITEM_NAME))
+            return Component.translatable(tag.getString(DATA_ITEM_NAME));
+        return super.getName(stack);
     }
 
     public static int getColor(ItemStack stack, int tintIndex)
     {
-        var tag = stack.getTagElement("ItemData");
+        var tag = stack.getTagElement(DATA_TAG);
         if (tag != null)
-            return tintIndex == 0? tag.getInt("PrimaryColor") : tag.getInt("SecondaryColor");
+            return tintIndex == 0? tag.getInt(DATA_PRIM_COLOR) : tag.getInt(DATA_SEC_COLOR);
         return 0xffffff;
     }
 

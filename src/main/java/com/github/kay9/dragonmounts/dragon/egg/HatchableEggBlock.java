@@ -2,7 +2,6 @@ package com.github.kay9.dragonmounts.dragon.egg;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
@@ -52,11 +51,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
@@ -87,13 +86,13 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         builder.add(HATCH_STAGE, HATCHING, WATERLOGGED);
     }
 
-    public static void populateTab(BuildCreativeModeTabContentsEvent evt)
+    public static void populateTab(Consumer<ItemStack> registrar)
     {
         if (Minecraft.getInstance().level != null)
         {
             var reg = Minecraft.getInstance().level.registryAccess();
             for (DragonBreed breed : BreedRegistry.registry(reg))
-                evt.accept(Item.create(breed, reg));
+                registrar.accept(Item.create(breed, reg));
         }
     }
 
@@ -323,26 +322,6 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         return new DustParticleOptions(Vec3.fromRGB24(random.nextDouble() < 0.75? breed.primaryColor() : breed.secondaryColor()).toVector3f(), 1);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
-    {
-        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
-        {
-            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonMountsLegacy.id("end"));
-            if (end.isPresent())
-            {
-                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
-                else
-                {
-                    var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HATCHING, true);
-                    place((ServerLevel) level, pos, state, end.get());
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
     // taken from DragonEggBlock#teleport
     private static void teleport(BlockState state, Level level, BlockPos pos)
     {
@@ -411,7 +390,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         {
             var tag = BlockItem.getBlockEntityData(stack);
             if (tag != null)
-                return Component.translatable(getDescriptionId(), Component.translatable(DragonBreed.getTranslationKey(tag.getString(NBT_BREED))));
+                return Component.translatable(String.join(".", getDescriptionId(), tag.getString(NBT_BREED).replace(':', '.')));
             return super.getName(stack);
         }
 

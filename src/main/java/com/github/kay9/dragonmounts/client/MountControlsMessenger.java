@@ -3,7 +3,6 @@ package com.github.kay9.dragonmounts.client;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.event.TickEvent;
 
 /**
  * A heavily hardcoded class to display a message after the dismount controls display when a player mounts a dragon.
@@ -24,9 +23,9 @@ public class MountControlsMessenger
         delay = 60;
     }
 
-    public static void tick(TickEvent.ClientTickEvent evt)
+    public static void tick()
     {
-        if (evt.phase == TickEvent.Phase.END && delay > 0)
+        if (delay > 0)
         {
             var player = Minecraft.getInstance().player;
             if (!(player.getVehicle() instanceof TameableDragon))

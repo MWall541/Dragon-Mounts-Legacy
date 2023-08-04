@@ -5,145 +5,127 @@ import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
+import com.mojang.serialization.Codec;
+import net.minecraft.client.Camera;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraftforge.api.distmarker.Dist;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.TriConsumer;
 
-@Mod(DragonMountsLegacy.MOD_ID)
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 public class DragonMountsLegacy
 {
     public static final String MOD_ID = "dragonmounts";
-    public static final Logger LOG = LogManager.getLogger();
-    public static final SimpleChannel NETWORK;
-
-    public DragonMountsLegacy()
-    {
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        DMLRegistry.init(bus);
-//        BreedRegistry.DEFERRED_REGISTRY.register(bus);
-
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
-//        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
-
-        setupEvents();
-    }
+    public static final Logger LOG = LogManager.getLogger(MOD_ID);
 
     public static ResourceLocation id(String path)
     {
         return new ResourceLocation(MOD_ID, path);
     }
 
-    static
-    {
-        var PROTOCOL_VERSION = "1.O";
-        NETWORK = NetworkRegistry.ChannelBuilder.named(id("network"))
-                .clientAcceptedVersions(PROTOCOL_VERSION::equals)
-                .serverAcceptedVersions(PROTOCOL_VERSION::equals)
-                .networkProtocolVersion(() -> PROTOCOL_VERSION)
-                .simpleChannel();
-    }
+    // ========================
+    //          Events
+    // ========================
 
-    private static void setupEvents()
-    {
-        var bus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
-
-        bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
-        bus.addListener(BreedRegistry::hookRegistry);
-
-        if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
-        {
-            MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::cameraAngles);
-            MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
-            MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
-
-            bus.addListener(DragonMountsLegacy::registerEggModelLoader);
-            bus.addListener(DragonMountsLegacy::addToCreativeTab);
-            bus.addListener((RegisterColorHandlersEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
-            bus.addListener(DragonMountsLegacy::rendererRegistry);
-            bus.addListener(Keybinds::registerKeybinds);
-            bus.addListener((FMLConstructModEvent e) ->
-            {
-                //noinspection ConstantConditions
-                if (Minecraft.getInstance() != null)
-                    e.enqueueWork(() -> ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE));
-            });
-        }
-    }
-
-    private static void attemptVanillaEggReplacement(PlayerInteractEvent.RightClickBlock evt)
-    {
-        if (HatchableEggBlock.overrideVanillaDragonEgg(evt.getLevel(), evt.getPos(), evt.getEntity())) evt.setCanceled(true);
-    }
-
-    private static void addToCreativeTab(BuildCreativeModeTabContentsEvent evt)
-    {
-        var tab = evt.getTabKey();
-        if (tab == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(evt);
-        if (tab == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(evt);
-    }
-
-//    private static void defineBlockModels(ModelEvent.RegisterAdditional evt)
+//        private static void setupEvents()
 //    {
-//        var dir = "models/block/dragon_eggs";
-//        var length = "models/".length();
-//        var suffixLength = ".json".length();
-//        for (var entry : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.getPath().endsWith(".json")).entrySet())
-//        {
-//            var rl = entry.getKey();
-//            var path = rl.getPath();
-//            path = path.substring(length, path.length() - suffixLength);
-//            var model = new ResourceLocation(rl.getNamespace(), path);
-//            var id = path.substring("block/dragon_eggs/".length(), path.length() - "_dragon_egg".length());
+//        var bus = FMLJavaModLoadingContext.get().getModEventBus();
 //
-//            evt.register(model);
-//            DragonEggRenderer.MODEL_CACHE.put(new ResourceLocation(rl.getNamespace(), id), model);
+//        MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::attemptVanillaEggReplacement);
+//
+//        bus.addListener((EntityAttributeCreationEvent e) -> e.put(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build()));
+//        bus.addListener(BreedRegistry::hookRegistry);
+//
+//        if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
+//        {
+//            MinecraftForge.EVENT_BUS.addListener(DragonMountsLegacy::cameraAngles);
+//            MinecraftForge.EVENT_BUS.addListener(Keybinds::handleKeyPress);
+//            MinecraftForge.EVENT_BUS.addListener(MountControlsMessenger::tick);
+//
+//            bus.addListener(DragonMountsLegacy::registerEggModelLoader);
+//            bus.addListener(DragonMountsLegacy::addToCreativeTab);
+//            bus.addListener((RegisterColorHandlersEvent.Item e) -> e.getItemColors().register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get()));
+//            bus.addListener(DragonMountsLegacy::rendererRegistry);
+//            bus.addListener(Keybinds::registerKeybinds);
+//            bus.addListener((FMLConstructModEvent e) ->
+//            {
+//                //noinspection ConstantConditions
+//                if (Minecraft.getInstance() != null)
+//                    e.enqueueWork(() -> ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE));
+//            });
 //        }
 //    }
 
-    private static void registerEggModelLoader(ModelEvent.RegisterGeometryLoaders evt)
+    static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
     {
-        evt.register("dragon_egg", DragonEggModel.Loader.INSTANCE);
+        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
+        {
+            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonMountsLegacy.id("end"));
+            if (end.isPresent())
+            {
+                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
+                else
+                {
+                    var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
+                    HatchableEggBlock.place((ServerLevel) level, pos, state, end.get());
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
-    private static void rendererRegistry(EntityRenderersEvent.RegisterRenderers e)
+    static void registerEntityAttributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> registrar)
     {
-        e.registerEntityRenderer(DMLRegistry.DRAGON.get(), DragonRenderer::new);
-        ForgeHooksClient.registerLayerDefinition(DragonRenderer.MODEL_LOCATION, () -> DragonModel.createBodyLayer(DragonModel.Properties.STANDARD));
-
-//        e.registerBlockEntityRenderer(DMLRegistry.EGG_BLOCK_ENTITY.get(), DragonEggRenderer::instance);
+        registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
     }
 
-    private static void cameraAngles(ViewportEvent.ComputeCameraAngles evt)
+    static void hookRegistry(TriConsumer<ResourceKey<Registry<DragonBreed>>, Codec<DragonBreed>, Codec<DragonBreed>> registrar)
+    {
+        registrar.accept(BreedRegistry.REGISTRY_KEY, DragonBreed.CODEC, DragonBreed.NETWORK_CODEC);
+    }
+
+    static void clientTick(boolean pre)
+    {
+        if (!pre) MountControlsMessenger.tick();
+    }
+
+    static void registerCreativeTabItems(CreativeModeTab tab, Consumer<ItemStack> registrar)
+    {
+        if (tab == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(registrar);
+        if (tab == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(registrar);
+    }
+
+    @SuppressWarnings("ConstantConditions") // player should never be null at time of calling
+    static void modifyMountCameraAngles(Camera camera)
     {
         if (Minecraft.getInstance().player.getVehicle() instanceof TameableDragon)
         {
-            var camera = evt.getCamera();
             var distance = 0;
             var vertical = 0;
             switch (Minecraft.getInstance().options.getCameraType())
@@ -156,5 +138,40 @@ public class DragonMountsLegacy
             }
             camera.move(-camera.getMaxZoom(distance), vertical, 0);
         }
+    }
+
+    static void onKeyPress(int key, int action, int modifiers)
+    {
+        Keybinds.handleKeyPress(key, action);
+    }
+
+    static void registerRenderers()
+    {
+        EntityRenderers.register(DMLRegistry.DRAGON.get(), DragonRenderer::new);
+        ForgeHooksClient.registerLayerDefinition(DragonRenderer.MODEL_LOCATION, () -> DragonModel.createBodyLayer(DragonModel.Properties.STANDARD));
+    }
+
+    static void registerEggModelLoader(BiConsumer<String, IGeometryLoader<DragonEggModel>> registrar)
+    {
+        registrar.accept("dragon_egg", DragonEggModel.Loader.INSTANCE);
+    }
+
+    static void registerItemColors(ItemColors colors)
+    {
+        colors.register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get());
+    }
+
+    @SuppressWarnings("ConstantConditions") // client instance is null on data gen
+    static void registerReloadListenersEarly()
+    {
+        if (Minecraft.getInstance() != null)
+        {
+            ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE); // Dragon Model Properties need to be reloaded before Entity Models are!
+        }
+    }
+
+    static void registerKeyBindings(Consumer<KeyMapping> registrar)
+    {
+        Keybinds.registerKeybinds(registrar);
     }
 }

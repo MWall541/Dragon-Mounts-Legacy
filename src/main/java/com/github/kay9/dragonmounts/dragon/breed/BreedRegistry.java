@@ -6,16 +6,10 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraftforge.registries.DataPackRegistryEvent;
 
 public class BreedRegistry
 {
     public static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
-
-    public static void hookRegistry(DataPackRegistryEvent.NewRegistry evt)
-    {
-        evt.dataPackRegistry(REGISTRY_KEY, DragonBreed.CODEC, DragonBreed.NETWORK_CODEC);
-    }
 
     public static DragonBreed get(String byString, RegistryAccess reg)
     {

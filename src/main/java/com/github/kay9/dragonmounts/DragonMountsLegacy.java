@@ -115,7 +115,7 @@ public class DragonMountsLegacy
         if (!pre) MountControlsMessenger.tick();
     }
 
-    static void registerCreativeTabItems(CreativeModeTab tab, Consumer<ItemStack> registrar)
+    static void registerCreativeTabItems(ResourceKey<CreativeModeTab> tab, Consumer<ItemStack> registrar)
     {
         if (tab == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(registrar);
         if (tab == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(registrar);

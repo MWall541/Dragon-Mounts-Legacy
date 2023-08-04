@@ -3,7 +3,7 @@ package com.github.kay9.dragonmounts;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -64,7 +64,7 @@ public class ForgeModImpl
             bus.addListener((InputEvent.Key e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
 
             modBus.addListener((ModelEvent.RegisterGeometryLoaders e) -> registerEggModelLoader(e::register));
-            modBus.addListener((CreativeModeTabEvent.BuildContents e) -> DragonMountsLegacy.registerCreativeTabItems(e.getTab(), e::accept));
+            modBus.addListener((BuildCreativeModeTabContentsEvent e) -> DragonMountsLegacy.registerCreativeTabItems(e.getTabKey(), e::accept));
             modBus.addListener((EntityRenderersEvent.RegisterRenderers e) -> registerRenderers());
             modBus.addListener((RegisterColorHandlersEvent.Item e) -> registerItemColors(e.getItemColors()));
             modBus.addListener((FMLConstructModEvent e) -> e.enqueueWork(DragonMountsLegacy::registerReloadListenersEarly));

@@ -5,9 +5,8 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraftforge.client.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 public class Keybinds
@@ -27,10 +26,10 @@ public class Keybinds
         evt.register(CAMERA_CONTROLS);
     }
 
-    public static void handleKeyPress(InputEvent.Key evt)
+    public static void handleKeyPress(int key, int action)
     {
-        if (evt.getKey() == CAMERA_CONTROLS.getKey().getValue()
-                && evt.getAction() == GLFW.GLFW_PRESS
+        if (key == CAMERA_CONTROLS.getKey().getValue()
+                && action == GLFW.GLFW_PRESS
                 && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon d)
         {
             DMLConfig.cameraFlight = !DMLConfig.cameraFlight();

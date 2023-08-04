@@ -46,11 +46,16 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPart body;
     public final ModelPart back;
 
+    // [0][]: right fore  [1][]: right hind  [2][]: left fore  [3][]: left hind
+    // [][0]: thigh       [][1]: crus        [][2]: foot       [][3]: toe
     public final ModelPart[][] legs = new ModelPart[4][4];
 
-    public final BipedModelPartPair wingArms;
-    public final BipedModelPartPair wingForearms;
-    public final BipedModelPartPair[] wingFingers = new BipedModelPartPair[4];
+    // [0]: right  [1]: left
+    public final ModelPart[] wingArms;
+    public final ModelPart[] wingForearms;
+
+    // [][0]: finger 1  [][1]: finger 2  [][2]: finger 3  [][3]: finger 4
+    public final ModelPart[][] wingFingers = new ModelPart[2][4];
 
 
     // model attributes
@@ -75,16 +80,17 @@ public class DragonModel extends EntityModel<TameableDragon>
 
         var rightWingArm = root.getChild("right_wing_arm");
         var leftWingArm = root.getChild("left_wing_arm");
-        this.wingArms = new BipedModelPartPair(rightWingArm, leftWingArm, 1, -1, -1);
         var rightWingForearm = rightWingArm.getChild("right_wing_forearm");
         var leftWingForearm = leftWingArm.getChild("left_wing_forearm");
-        this.wingForearms = new BipedModelPartPair(rightWingForearm, leftWingForearm, 1, -1, -1);
+
+        this.wingArms = new ModelPart[] {rightWingArm, leftWingArm};
+        this.wingForearms = new ModelPart[] {rightWingForearm, leftWingForearm};
 
         for (int i = 1; i < 5; i++)
-            wingFingers[i - 1] = new BipedModelPartPair(
-                    rightWingForearm.getChild("right_wing_finger_" + i),
-                    leftWingForearm.getChild("left_wing_finger_" + i),
-                    1, -1, -1);
+        {
+            wingFingers[0][i - 1] = rightWingForearm.getChild("right_wing_finger_" + i);
+            wingFingers[1][i - 1] = leftWingForearm.getChild("left_wing_finger_" + i);
+        }
 
         for (int i = 0; i < legs.length; i++)
         {
@@ -366,7 +372,8 @@ public class DragonModel extends EntityModel<TameableDragon>
     {
         ps.pushPose();
         ps.scale(1.1f, 1.1f, 1.1f);
-        wingArms.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+        wingArms[0].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+        wingArms[1].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
         ps.popPose();
     }
 

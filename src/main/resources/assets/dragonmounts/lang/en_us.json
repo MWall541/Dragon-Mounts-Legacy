@@ -10,11 +10,26 @@
   "dragon_breed.dragonmounts.nether": "Nether Dragon",
   "dragon_breed.dragonmounts.water": "Water Dragon",
 
-  "item.dragonmounts.spawn_egg": "%s Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.end": "End Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.forest": "Forest Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.ghost": "Ghost Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.ice": "Ice Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.nether": "Nether Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.water": "Water Dragon Spawn Egg",
 
-  "block.dragonmounts.dragon_egg": "%s Egg",
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.change_breeds": "Creative mode: Interacting with a dragon will change it's breed to this egg's breed.",
+
+  "block.dragonmounts.dragon_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.end": "End Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.forest": "Forest Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.ghost": "Ghost Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.ice": "Ice Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.nether": "Nether Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.water": "Water Dragon Spawn Egg",
 
   "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
   "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",

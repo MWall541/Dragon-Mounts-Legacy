@@ -5,9 +5,10 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.ClientRegistry;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.function.Consumer;
 
 public class Keybinds
 {
@@ -20,10 +21,10 @@ public class Keybinds
         return new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
     }
 
-    public static void registerKeybinds(RegisterKeyMappingsEvent evt)
+    public static void registerKeybinds(Consumer<KeyMapping> registrar)
     {
-        evt.register(FLIGHT_DESCENT_KEY);
-        evt.register(CAMERA_CONTROLS);
+        registrar.accept(FLIGHT_DESCENT_KEY);
+        registrar.accept(CAMERA_CONTROLS);
     }
 
     public static void handleKeyPress(int key, int action)

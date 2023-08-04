@@ -14,9 +14,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 public class DragonSpawnEgg extends ForgeSpawnEggItem
 {
@@ -53,13 +54,13 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         return stack;
     }
 
-    public static void populateTab(CreativeModeTabEvent.BuildContents evt)
+    public static void populateTab(Consumer<ItemStack> registrar)
     {
         if (Minecraft.getInstance().level != null)
         {
             var reg = Minecraft.getInstance().level.registryAccess();
             for (DragonBreed breed : BreedRegistry.registry(reg))
-                evt.accept(create(breed, reg));
+                registrar.accept(create(breed, reg));
         }
     }
 
@@ -75,7 +76,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         var tag = stack.getTagElement(DATA_TAG);
         if (tag == null || tag.contains(DATA_ITEM_NAME))
-            return new TranslatableComponent(tag.getString(DATA_ITEM_NAME));
+            return Component.translatable(tag.getString(DATA_ITEM_NAME));
         return super.getName(stack);
     }
 

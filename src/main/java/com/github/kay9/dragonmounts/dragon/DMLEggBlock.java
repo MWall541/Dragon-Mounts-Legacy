@@ -104,20 +104,21 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
 
     public static class Item extends BlockItem
     {
+        private static final String DATA_ITEM_NAME = "ItemName";
+
         public Item()
         {
             super(DMLRegistry.EGG_BLOCK.get(), new net.minecraft.world.item.Item.Properties().rarity(Rarity.RARE).tab(CreativeModeTab.TAB_MISC));
         }
 
+        @SuppressWarnings("ConstantConditions")
         @Override
         public Component getName(ItemStack stack)
         {
-            String name;
             var tag = stack.getTag();
-            if (tag == null || (name = tag.getString("ItemName")).isEmpty())
-                name = BreedRegistry.getFallback(Minecraft.getInstance().level.registryAccess())
-                        .getTranslationKey(Minecraft.getInstance().level.registryAccess());
-            return new TranslatableComponent(getDescriptionId(), new TranslatableComponent(name));
+            if (tag == null || tag.contains(DATA_ITEM_NAME))
+                return new TranslatableComponent(tag.getString(DATA_ITEM_NAME));
+            return super.getName(stack);
         }
 
         @Override
@@ -170,14 +171,15 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
 
         public static ItemStack create(DragonBreed breed, RegistryAccess reg, int hatchTime)
         {
+            var id = breed.id(reg);
             var rootTag = new CompoundTag();
 
             var bETag = new CompoundTag();
-            bETag.putString(TameableDragon.NBT_BREED, breed.id(reg).toString());
+            bETag.putString(TameableDragon.NBT_BREED, id.toString());
             bETag.putInt(DragonEgg.NBT_HATCH_TIME, hatchTime);
 
             rootTag.put("BlockEntityTag", bETag);
-            rootTag.putString("ItemName", breed.getTranslationKey(reg));
+            rootTag.putString(DATA_ITEM_NAME, String.join(".", DMLRegistry.EGG_BLOCK.get().getDescriptionId(), id.getNamespace(), id.getPath()));
 
             var stack = new ItemStack(DMLRegistry.EGG_BLOCK_ITEM.get());
             stack.setTag(rootTag);

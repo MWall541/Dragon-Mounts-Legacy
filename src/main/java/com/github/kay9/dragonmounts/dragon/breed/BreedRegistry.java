@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
 import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
@@ -31,7 +32,7 @@ public class BreedRegistry
             0xff9819,
             Optional.of(ParticleTypes.FLAME),
             ImmutableMap.of(),
-            ImmutableList.of(HotFeetAbility.INSTANCE),
+            ImmutableList.of(new Ability.Factory<>(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
             ImmutableList.of(
                     new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
                     new FluidHabitat(3, FluidTags.LAVA)),

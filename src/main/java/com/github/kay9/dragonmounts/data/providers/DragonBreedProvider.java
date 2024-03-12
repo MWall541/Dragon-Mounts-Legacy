@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.abilities.FrostWalkerAbility;
 import com.github.kay9.dragonmounts.abilities.GreenToesAbility;
 import com.github.kay9.dragonmounts.abilities.SnowStepperAbility;
@@ -29,6 +30,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.collect.ImmutableMap.of;
 
@@ -42,7 +44,9 @@ class DragonBreedProvider implements DataProvider
             Optional.empty(),
             of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.45),
             list(),
-            list(new HeightHabitat(3, false, 200)),
+            list(
+                    new HeightHabitat(3, false, 200)
+            ),
             set(),
             Optional.empty()));
 
@@ -52,7 +56,9 @@ class DragonBreedProvider implements DataProvider
             Optional.of(ParticleTypes.PORTAL),
             of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
             list(), // teleport ability?
-            list(DragonBreathHabitat.INSTANCE),
+            list(
+                    DragonBreathHabitat.INSTANCE
+            ),
             set("dragonBreath"),
             Optional.empty()));
 
@@ -61,8 +67,13 @@ class DragonBreedProvider implements DataProvider
             0x0a9600,
             Optional.of(ParticleTypes.HAPPY_VILLAGER),
             of(),
-            list(GreenToesAbility.INSTANCE),
-            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(2, BiomeTags.IS_JUNGLE)),
+            list(
+                    ability(SnowStepperAbility.GREEN_TOES, () -> GreenToesAbility.INSTANCE)
+            ),
+            list(
+                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS),
+                    new BiomeHabitat(2, BiomeTags.IS_JUNGLE)
+            ),
             set(),
             Optional.empty()));
 
@@ -72,7 +83,12 @@ class DragonBreedProvider implements DataProvider
             Optional.empty(),
             of(),
             list(),
-            list(new PickyHabitat(list(new HeightHabitat(1, true, 0), new LightHabitat(2, true, 3)))),
+            list(
+                    new PickyHabitat(list(
+                            new HeightHabitat(1, true, 0),
+                            new LightHabitat(2, true, 3)
+                    ))
+            ),
             set("drown"),
             Optional.of(DMLRegistry.GHOST_DRAGON_AMBIENT.get())));
 
@@ -81,7 +97,10 @@ class DragonBreedProvider implements DataProvider
             0x00E1FF,
             Optional.of(ParticleTypes.SNOWFLAKE),
             of(),
-            list(FrostWalkerAbility.INSTANCE, SnowStepperAbility.INSTANCE),
+            list(
+                    ability(Ability.FROST_WALKER, () -> new FrostWalkerAbility(3)),
+                    ability(Ability.SNOW_STEPPER, () -> SnowStepperAbility.INSTANCE)
+            ),
             list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
             set("drown", "freeze"),
             Optional.empty()));
@@ -155,5 +174,10 @@ class DragonBreedProvider implements DataProvider
     protected static <T> ImmutableSet<T> set(T... objs)
     {
         return ImmutableSet.copyOf(objs);
+    }
+
+    protected static Ability.Factory<Ability> ability(ResourceLocation id, Supplier<Ability> fact)
+    {
+        return new Ability.Factory<>(id, fact);
     }
 }

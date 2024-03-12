@@ -11,10 +11,12 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 
+import java.util.function.Supplier;
+
 public class HotFeetAbility extends FootprintAbility
 {
     public static final HotFeetAbility INSTANCE = new HotFeetAbility();
-    public static final Codec<HotFeetAbility> CODEC = Codec.unit(INSTANCE);
+    public static final Codec<Supplier<HotFeetAbility>> CODEC = Codec.unit(() -> () -> INSTANCE);
 
     public static final TagKey<Block> BURNABLES_TAG = BlockTags.create(DragonMountsLegacy.id("hot_feet_burnables"));
 
@@ -29,11 +31,5 @@ public class HotFeetAbility extends FootprintAbility
             level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, dragon.getSoundSource(), 0.1f, 2f);
             ((ServerLevel) level).sendParticles(ParticleTypes.LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 1, 0, 0.05);
         }
-    }
-
-    @Override
-    public String type()
-    {
-        return Ability.HOT_FEET;
     }
 }

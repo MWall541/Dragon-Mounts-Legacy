@@ -32,7 +32,7 @@ import java.util.Optional;
 
 @SuppressWarnings("deprecation")
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
-                          Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats,
+                          Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilityTypes, List<Habitat> habitats,
                           ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound,
                           ResourceLocation deathLoot, int growthTime, int hatchTime, float sizeModifier,
                           HolderSet<Item> tamingItems, HolderSet<Item> breedingItems)
@@ -43,7 +43,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             DMLUtil.HEX_CODEC.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             Codec.unboundedMap(Registry.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
-            Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilities),
+            Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilityTypes),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
             Codec.STRING.listOf().xmap(ImmutableSet::copyOf, ImmutableList::copyOf).optionalFieldOf("immunities", ImmutableSet.of()).forGetter(DragonBreed::immunities), // convert to Set for "contains" performance
             Registry.SOUND_EVENT.byNameCodec().optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
@@ -65,7 +65,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier)
     ).apply(instance, DragonBreed::fromNetwork));
 
-    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound)
+    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound)
     {
         return new DragonBreed(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES));
     }
@@ -78,13 +78,19 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public void initialize(TameableDragon dragon)
     {
         applyAttributes(dragon);
-        for (Ability a : abilities()) a.initialize(dragon);
+        for (Ability.Factory<Ability> factory : abilityTypes())
+        {
+            Ability instance = factory.get();
+            dragon.getAbilities().add(instance);
+            instance.initialize(dragon);
+        }
     }
 
     public void close(TameableDragon dragon)
     {
         dragon.getAttributes().assignValues(new AttributeMap(TameableDragon.createAttributes().build())); // restore default attributes
-        for (Ability a : abilities()) a.close(dragon);
+        for (Ability ability : dragon.getAbilities()) ability.close(dragon);
+        dragon.getAbilities().clear();
     }
 
     private void applyAttributes(TameableDragon dragon)

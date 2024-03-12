@@ -7,10 +7,12 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.function.Supplier;
+
 public class SnowStepperAbility extends FootprintAbility
 {
     public static final SnowStepperAbility INSTANCE = new SnowStepperAbility();
-    public static final Codec<SnowStepperAbility> CODEC = Codec.unit(INSTANCE);
+    public static final Codec<Supplier<SnowStepperAbility>> CODEC = Codec.unit(() -> () -> INSTANCE);
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
@@ -31,11 +33,5 @@ public class SnowStepperAbility extends FootprintAbility
     {
         var pos = dragon.blockPosition();
         return dragon.level.getBiome(pos).value().coldEnoughToSnow(pos)? 0.5f : 0;
-    }
-
-    @Override
-    public String type()
-    {
-        return Ability.SNOW_STEPPER;
     }
 }

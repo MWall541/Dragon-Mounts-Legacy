@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.dragon;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
 import com.github.kay9.dragonmounts.client.Keybinds;
 import com.github.kay9.dragonmounts.client.MountControlsMessenger;
@@ -60,6 +61,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -108,6 +110,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // server/client delegates
     private final DragonAnimator animator;
     private DragonBreed breed;
+    private List<Ability> abilities = new ArrayList<>();
     private int reproCount;
     private float ageProgress;
     private boolean flying;
@@ -229,6 +232,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return breed;
     }
 
+    public List<Ability> getAbilities()
+    {
+        return abilities;
+    }
+
     /**
      * Returns true if the dragon is saddled.
      */
@@ -337,7 +345,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         updateAgeProgress();
-        for (var ability : getBreed().abilities()) ability.tick(this);
+        for (var ability : getAbilities()) ability.tick(this);
     }
 
     @Override
@@ -1066,7 +1074,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected void onChangedBlock(BlockPos pos)
     {
         super.onChangedBlock(pos);
-        for (var ability : getBreed().abilities()) ability.onMove(this);
+        for (var ability : getBreed().abilityTypes()) ability.onMove(this);
     }
 
     @Override

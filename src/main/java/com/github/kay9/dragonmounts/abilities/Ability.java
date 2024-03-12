@@ -1,26 +1,61 @@
 package com.github.kay9.dragonmounts.abilities;
 
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+/**
+ * Each ability type has its own number of factories. One type can have multiple factories
+ * to specify behavior.
+ * Factories create instances that are unique to each dragon entity
+ * this is due to the fact that sometimes an ability needs entity-specific actions,
+ * and sometimes we don't (so we memoize the instance instead of making dozens of copies)
+ * For example:
+ *  - Ability X is defined in the datapack to place blocks in Y radius for Dragon Breed A.
+ *  - Ability X is defined in the datapack to place blocks in Z radius for Dragon Breed B.
+ *  - Ability X also requires a cooldown timer that has to be specific to each entity.
+ *  Breed A has:
+ *   - Ability X:
+ *      - final int radius = Y; // finals are Breed Specific variables
+ *      - int cooldown = 50 // other variables are Dragon-entity specific.
+ *  Breed B has:
+ *   - Ability X:
+ *      - final int radius = Z;
+ *      - int cooldown = 1000
+ *  <br>
+ *  Same ability type, different constants, instance-based variables.
+ *  <br>
+ *  Other abilities that don't require the second two options are instead created as singletons and memoized.
+ *  Other situations vary. Bottom line: Create factories based on needs!
+ */
 public interface Ability
 {
-    Map<String, Codec<? extends Ability>> REGISTRY = new HashMap<>();
+    Map<ResourceLocation, Codec<Factory<Ability>>> REGISTRY = new HashMap<>();
 
-    Codec<Ability> CODEC = Codec.STRING.dispatch(Ability::type, REGISTRY::get);
+    Codec<Factory<Ability>> CODEC = ResourceLocation.CODEC.dispatch(Factory::id, REGISTRY::get);
 
-    String FROST_WALKER = register("frost_walker", FrostWalkerAbility.CODEC);
-    String GREEN_TOES = register("green_toes", GreenToesAbility.CODEC);
-    String SNOW_STEPPER = register("snow_stepper", SnowStepperAbility.CODEC);
-    String HOT_FEET = register("hot_feet", HotFeetAbility.CODEC);
+    ResourceLocation FROST_WALKER = reg("frost_walker", FrostWalkerAbility.CODEC);
+    ResourceLocation GREEN_TOES = reg("green_toes", GreenToesAbility.CODEC);
+    ResourceLocation SNOW_STEPPER = reg("snow_stepper", SnowStepperAbility.CODEC);
+    ResourceLocation HOT_FEET = reg("hot_feet", HotFeetAbility.CODEC);
 
-    static String register(String name, Codec<? extends Ability> codec)
+    @SuppressWarnings({"unchecked", "rawtypes"}) // hacky generics shit
+    static <T extends Ability> ResourceLocation register(ResourceLocation name, Codec<Supplier<T>> codec)
     {
-        REGISTRY.put(name, codec);
+        Codec<Supplier<Ability>> cast = (Codec) codec;
+        REGISTRY.put(name, cast.xmap(s -> new Factory<>(name, s), Function.identity()));
         return name;
+    }
+
+    private static <T extends Ability> ResourceLocation reg(String name, Codec<Supplier<T>> codec)
+    {
+        return register(DragonMountsLegacy.id(name), codec);
     }
 
     default void initialize(TameableDragon dragon) {}
@@ -31,5 +66,11 @@ public interface Ability
 
     default void onMove(TameableDragon dragon) {}
 
-    String type();
+    record Factory<T extends Ability>(ResourceLocation id, Supplier<? extends T> factory) implements Supplier<T>
+    {
+        public T get()
+        {
+            return factory.get();
+        }
+    }
 }

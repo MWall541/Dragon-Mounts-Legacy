@@ -1,5 +1,10 @@
 {
   "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
+  "abilities": [
+    {
+      "type": "dragonmounts:reaper_step"
+    }
+  ],
   "habitats": [
     {
       "required_habitats": [

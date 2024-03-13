@@ -2,10 +2,7 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.abilities.Ability;
-import com.github.kay9.dragonmounts.abilities.FrostWalkerAbility;
-import com.github.kay9.dragonmounts.abilities.GreenToesAbility;
-import com.github.kay9.dragonmounts.abilities.SnowStepperAbility;
+import com.github.kay9.dragonmounts.abilities.*;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
@@ -68,7 +65,7 @@ class DragonBreedProvider implements DataProvider
             Optional.of(ParticleTypes.HAPPY_VILLAGER),
             of(),
             list(
-                    ability(SnowStepperAbility.GREEN_TOES, () -> GreenToesAbility.INSTANCE)
+                    ability(Ability.GREEN_TOES, () -> GreenToesAbility.INSTANCE)
             ),
             list(
                     new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS),
@@ -82,7 +79,9 @@ class DragonBreedProvider implements DataProvider
             0xc2f8ff,
             Optional.empty(),
             of(),
-            list(),
+            list(
+                    ability(Ability.REAPER_STEP, () -> ReaperStepAbility.INSTANCE)
+            ),
             list(
                     new PickyHabitat(list(
                             new HeightHabitat(1, true, 0),
@@ -101,7 +100,9 @@ class DragonBreedProvider implements DataProvider
                     new FrostWalkerAbility.Factory(3),
                     ability(Ability.SNOW_STEPPER, () -> SnowStepperAbility.INSTANCE)
             ),
-            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
+            list(
+                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)
+            ),
             set("drown", "freeze"),
             Optional.empty()));
 
@@ -111,7 +112,10 @@ class DragonBreedProvider implements DataProvider
             Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
             of(Attributes.ARMOR, 8d),
             list(),
-            list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS), new BiomeHabitat(3, BiomeTags.IS_NETHER)),
+            list(
+                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS),
+                    new BiomeHabitat(3, BiomeTags.IS_NETHER)
+            ),
             set("inFire", "onFire", "lava", "hotFloor"),
             Optional.empty()));
 
@@ -121,7 +125,10 @@ class DragonBreedProvider implements DataProvider
             Optional.of(ParticleTypes.DRIPPING_WATER),
             of(),
             list(),
-            list(new FluidHabitat(1f, FluidTags.WATER), new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)),
+            list(
+                    new FluidHabitat(1f, FluidTags.WATER),
+                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)
+            ),
             set("drown"),
             Optional.empty()));
 

@@ -28,7 +28,7 @@ class LootModifierProvider extends GlobalLootModifierProvider
     {
         var conditions = new LootItemCondition[]{
                 LootTableIdCondition.builder(table).build(),
-                RandomChanceByConfigOrPreset.create(DMLConfig.formatTargetAsPath(breed, table), chance)
+                new RandomChanceByConfigOrPreset(DMLConfig.formatTargetAsPath(breed, table), chance)
         };
 
         var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());

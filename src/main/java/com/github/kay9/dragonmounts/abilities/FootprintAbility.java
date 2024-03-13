@@ -2,13 +2,16 @@ package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public abstract class FootprintAbility implements Ability
 {
     @Override
     public void onMove(TameableDragon dragon)
     {
-        if (dragon.level.isClientSide || !dragon.isAdult() || !dragon.isOnGround()) return;
+        if (dragon.getLevel().isClientSide()) return;
+        if (!dragon.isAdult() || !dragon.isOnGround()) return;
+        if (!ForgeEventFactory.getMobGriefingEvent(dragon.getLevel(), dragon)) return;
 
         var chance = getFootprintChance(dragon);
         if (chance == 0) return;

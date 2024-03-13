@@ -1,14 +1,11 @@
 {
-  "immunities": [
-    "drown",
-    "freeze"
-  ],
   "abilities": [
     {
-      "type": "frost_walker"
+      "radius_multiplier": 3.0,
+      "type": "dragonmounts:frost_walker"
     },
     {
-      "type": "snow_stepper"
+      "type": "dragonmounts:snow_stepper"
     }
   ],
   "habitats": [
@@ -16,6 +13,10 @@
       "block_tag": "dragonmounts:ice_dragon_habitat_blocks",
       "type": "nearby_blocks"
     }
+  ],
+  "immunities": [
+    "drown",
+    "freeze"
   ],
   "primary_color": "ffffff",
   "secondary_color": "e1ff",

@@ -98,7 +98,7 @@ class DragonBreedProvider implements DataProvider
             Optional.of(ParticleTypes.SNOWFLAKE),
             of(),
             list(
-                    ability(Ability.FROST_WALKER, () -> new FrostWalkerAbility(3)),
+                    new FrostWalkerAbility.Factory(3),
                     ability(Ability.SNOW_STEPPER, () -> SnowStepperAbility.INSTANCE)
             ),
             list(new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)),
@@ -164,10 +164,10 @@ class DragonBreedProvider implements DataProvider
         return "Dragon Breeds";
     }
 
-    @SafeVarargs
-    protected static <T> ImmutableList<T> list(T... objs)
+    @SuppressWarnings("unchecked")
+    protected static <T> ImmutableList<T> list(Object... objs)
     {
-        return ImmutableList.copyOf(objs);
+        return (ImmutableList<T>) ImmutableList.copyOf(objs);
     }
 
     @SafeVarargs
@@ -178,6 +178,6 @@ class DragonBreedProvider implements DataProvider
 
     protected static Ability.Factory<Ability> ability(ResourceLocation id, Supplier<Ability> fact)
     {
-        return new Ability.Factory<>(id, fact);
+        return Ability.simpleFactory(id, fact);
     }
 }

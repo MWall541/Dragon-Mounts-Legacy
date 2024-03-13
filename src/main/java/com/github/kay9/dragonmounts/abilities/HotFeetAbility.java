@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public class HotFeetAbility extends FootprintAbility
 {
     public static final HotFeetAbility INSTANCE = new HotFeetAbility();
-    public static final Codec<Supplier<HotFeetAbility>> CODEC = Codec.unit(() -> () -> INSTANCE);
+    public static final Codec<Factory<HotFeetAbility>> CODEC = Ability.singleton(HOT_FEET, INSTANCE);
 
     public static final TagKey<Block> BURNABLES_TAG = BlockTags.create(DragonMountsLegacy.id("hot_feet_burnables"));
 

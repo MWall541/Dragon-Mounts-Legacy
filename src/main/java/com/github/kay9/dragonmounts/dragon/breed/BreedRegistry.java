@@ -32,7 +32,7 @@ public class BreedRegistry
             0xff9819,
             Optional.of(ParticleTypes.FLAME),
             ImmutableMap.of(),
-            ImmutableList.of(new Ability.Factory<>(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
+            ImmutableList.of(Ability.simpleFactory(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
             ImmutableList.of(
                     new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
                     new FluidHabitat(3, FluidTags.LAVA)),

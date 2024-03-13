@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class GreenToesAbility extends FootprintAbility
 {
     public static final GreenToesAbility INSTANCE = new GreenToesAbility();
-    public static final Codec<Supplier<GreenToesAbility>> CODEC = Codec.unit(() -> () -> INSTANCE);
+    public static final Codec<Factory<GreenToesAbility>> CODEC = Ability.singleton(GREEN_TOES, INSTANCE);
     private static final int GRASS_LIGHT_THRESHOLD = 4;
 
     // grow mushrooms and plants

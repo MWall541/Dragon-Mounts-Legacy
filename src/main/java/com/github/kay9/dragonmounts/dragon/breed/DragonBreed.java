@@ -80,7 +80,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         applyAttributes(dragon);
         for (Ability.Factory<Ability> factory : abilityTypes())
         {
-            Ability instance = factory.get();
+            Ability instance = factory.create();
             dragon.getAbilities().add(instance);
             instance.initialize(dragon);
         }

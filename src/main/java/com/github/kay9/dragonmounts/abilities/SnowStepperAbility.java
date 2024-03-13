@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public class SnowStepperAbility extends FootprintAbility
 {
     public static final SnowStepperAbility INSTANCE = new SnowStepperAbility();
-    public static final Codec<Supplier<SnowStepperAbility>> CODEC = Codec.unit(() -> () -> INSTANCE);
+    public static final Codec<Factory<SnowStepperAbility>> CODEC = Ability.singleton(SNOW_STEPPER, INSTANCE);
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)

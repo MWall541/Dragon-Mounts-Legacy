@@ -1,16 +1,7 @@
 {
-  "immunities": [
-    "onFire",
-    "inFire",
-    "lava",
-    "hotFloor"
-  ],
-  "model_properties": {
-    "middle_tail_scales": false
-  },
   "abilities": [
     {
-      "type": "hot_feet"
+      "type": "dragonmounts:hot_feet"
     }
   ],
   "habitats": [
@@ -24,6 +15,12 @@
       "fluid_tag": "minecraft:lava",
       "type": "in_fluid"
     }
+  ],
+  "immunities": [
+    "onFire",
+    "inFire",
+    "lava",
+    "hotFloor"
   ],
   "primary_color": "912400",
   "secondary_color": "ff9819",

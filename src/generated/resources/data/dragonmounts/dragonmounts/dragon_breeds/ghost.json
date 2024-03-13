@@ -1,11 +1,5 @@
 {
-  "immunities": [
-    "drown"
-  ],
   "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
-  "model_properties": {
-    "thin_legs": true
-  },
   "habitats": [
     {
       "required_habitats": [
@@ -24,6 +18,9 @@
       ],
       "type": "picky"
     }
+  ],
+  "immunities": [
+    "drown"
   ],
   "primary_color": "c4c4c4",
   "secondary_color": "c2f8ff"

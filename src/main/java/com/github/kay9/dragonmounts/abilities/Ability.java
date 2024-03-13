@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -36,24 +35,23 @@ import java.util.function.Supplier;
  */
 public interface Ability
 {
-    Map<ResourceLocation, Codec<Factory<Ability>>> REGISTRY = new HashMap<>();
+    Map<ResourceLocation, Codec<? extends Factory<Ability>>> REGISTRY = new HashMap<>();
 
-    Codec<Factory<Ability>> CODEC = ResourceLocation.CODEC.dispatch(Factory::id, REGISTRY::get);
+    Codec<Factory<Ability>> CODEC = ResourceLocation.CODEC.dispatch(Factory::type, REGISTRY::get);
 
     ResourceLocation FROST_WALKER = reg("frost_walker", FrostWalkerAbility.CODEC);
     ResourceLocation GREEN_TOES = reg("green_toes", GreenToesAbility.CODEC);
     ResourceLocation SNOW_STEPPER = reg("snow_stepper", SnowStepperAbility.CODEC);
     ResourceLocation HOT_FEET = reg("hot_feet", HotFeetAbility.CODEC);
+    ResourceLocation REAPER_STEP = reg("reaper_step", ReaperStepAbility.CODEC);
 
-    @SuppressWarnings({"unchecked", "rawtypes"}) // hacky generics shit
-    static <T extends Ability> ResourceLocation register(ResourceLocation name, Codec<Supplier<T>> codec)
+    static <T extends Ability> ResourceLocation register(ResourceLocation name, Codec<? extends Factory<T>> codec)
     {
-        Codec<Supplier<Ability>> cast = (Codec) codec;
-        REGISTRY.put(name, cast.xmap(s -> new Factory<>(name, s), Function.identity()));
+        REGISTRY.put(name, (Codec) codec); // hacky generics cast
         return name;
     }
 
-    private static <T extends Ability> ResourceLocation reg(String name, Codec<Supplier<T>> codec)
+    private static <T extends Ability> ResourceLocation reg(String name, Codec<? extends Factory<T>> codec)
     {
         return register(DragonMountsLegacy.id(name), codec);
     }
@@ -66,11 +64,33 @@ public interface Ability
 
     default void onMove(TameableDragon dragon) {}
 
-    record Factory<T extends Ability>(ResourceLocation id, Supplier<? extends T> factory) implements Supplier<T>
+    interface Factory<T extends Ability>
     {
-        public T get()
+        T create();
+
+        ResourceLocation type();
+    }
+
+    static <T extends Ability> Factory<T> simpleFactory(ResourceLocation id, Supplier<T> factory)
+    {
+        return new Factory<T>()
         {
-            return factory.get();
-        }
+            @Override
+            public T create()
+            {
+                return factory.get();
+            }
+
+            @Override
+            public ResourceLocation type()
+            {
+                return id;
+            }
+        };
+    }
+
+    static <T extends Ability> Codec<Factory<T>> singleton(ResourceLocation id, T instance)
+    {
+        return Codec.unit(simpleFactory(id, () -> instance));
     }
 }

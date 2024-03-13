@@ -1074,7 +1074,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected void onChangedBlock(BlockPos pos)
     {
         super.onChangedBlock(pos);
-        for (var ability : getBreed().abilityTypes()) ability.onMove(this);
+        for (var ability : getAbilities()) ability.onMove(this);
     }
 
     @Override

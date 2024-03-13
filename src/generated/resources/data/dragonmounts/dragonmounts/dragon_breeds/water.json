@@ -1,10 +1,4 @@
 {
-  "immunities": [
-    "drown"
-  ],
-  "model_properties": {
-    "tail_horns": true
-  },
   "habitats": [
     {
       "point_multiplier": 1.0,
@@ -15,6 +9,9 @@
       "block_tag": "dragonmounts:water_dragon_habitat_blocks",
       "type": "nearby_blocks"
     }
+  ],
+  "immunities": [
+    "drown"
   ],
   "primary_color": "62ff",
   "secondary_color": "5999ff",

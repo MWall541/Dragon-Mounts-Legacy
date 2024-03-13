@@ -1,10 +1,4 @@
 {
-  "immunities": [
-    "inFire",
-    "onFire",
-    "lava",
-    "hotFloor"
-  ],
   "attributes": {
     "minecraft:generic.armor": 8.0
   },
@@ -18,6 +12,12 @@
       "biome_tag": "minecraft:is_nether",
       "type": "biome"
     }
+  ],
+  "immunities": [
+    "inFire",
+    "onFire",
+    "lava",
+    "hotFloor"
   ],
   "primary_color": "912400",
   "secondary_color": "2e0b00",

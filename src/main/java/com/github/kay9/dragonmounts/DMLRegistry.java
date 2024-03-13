@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
-import com.github.kay9.dragonmounts.data.loot.conditions.EggLootConditions;
+import com.github.kay9.dragonmounts.data.loot.conditions.RandomChanceByConfigOrPreset;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
@@ -56,7 +56,7 @@ public class DMLRegistry
 
     public static final RegistryObject<GlobalLootModifierSerializer<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.LOOT_MODIFIER_SERIALIZERS, DragonEggLootMod.Serializer::new);
 
-    public static final LootItemConditionType EGG_LOOT_CONDITION = new LootItemConditionType(new EggLootConditions.Serializer());
+    public static final LootItemConditionType EGG_LOOT_CONDITION = new LootItemConditionType(new RandomChanceByConfigOrPreset.Serializer());
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {
@@ -82,6 +82,6 @@ public class DMLRegistry
 
     public static void registerLootConditions() // no forge registry type for this, so do it ourselves.
     {
-        Registry.register(Registry.LOOT_CONDITION_TYPE, DragonMountsLegacy.id("enabled_by_config"), EGG_LOOT_CONDITION);
+        Registry.register(Registry.LOOT_CONDITION_TYPE, DragonMountsLegacy.id("random_chance_by_config_or_preset"), EGG_LOOT_CONDITION);
     }
 }

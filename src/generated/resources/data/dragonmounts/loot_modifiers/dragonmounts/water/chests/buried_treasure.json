@@ -1,15 +1,13 @@
 {
   "conditions": [
     {
-      "condition": "dragonmounts:enabled_by_config"
-    },
-    {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/buried_treasure"
     },
     {
-      "condition": "minecraft:random_chance",
-      "chance": 0.175
+      "condition": "dragonmounts:random_chance_by_config_or_preset",
+      "config_chance_target": "dragonmounts:water",
+      "preset_chance": 0.175
     }
   ],
   "breed": "dragonmounts:water",

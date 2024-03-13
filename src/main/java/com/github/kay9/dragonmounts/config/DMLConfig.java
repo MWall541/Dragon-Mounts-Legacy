@@ -41,11 +41,11 @@ public class DMLConfig
         return USE_LOOT_TABLES.get();
     }
 
-    private static final ForgeConfigSpec.BooleanValue CONFIG_LOOT_VALUES;
+    private static final ForgeConfigSpec.BooleanValue CONFIG_LOOT_CHANCES;
 
     public static boolean useConfigLootValues()
     {
-        return CONFIG_LOOT_VALUES.get();
+        return CONFIG_LOOT_CHANCES.get();
     }
 
     private static final ForgeConfigSpec.BooleanValue UPDATE_HABITATS;
@@ -64,18 +64,18 @@ public class DMLConfig
 
     static // common
     {
-        var configurator = new ForgeConfigSpec.Builder();
+        var configurator = new ForgeConfigSpec.Builder().push("common");
 
         ALLOW_EGG_OVERRIDE = configurator.comment("Allow the vanilla ender egg to be interacted with? (Hatchable)",
                         "Useful to help with mod compatibility")
                 .define("allow_egg_override", true);
 
-        COMMON = configurator.build();
+        COMMON = configurator.pop().build();
     }
 
     static // server
     {
-        var configurator = new ForgeConfigSpec.Builder();
+        var configurator = new ForgeConfigSpec.Builder().push("server");
 
         REPLENISH_EGGS = configurator.comment("Should Ender Dragon Eggs replenish on the exit portal after a respawned dragon is defeated?",
                         "Useful for multiplayer scenarios.")
@@ -84,16 +84,19 @@ public class DMLConfig
                         "Useful for multiplayer scenarios and offering alternative ways to obtain eggs.",
                         "Different types of egg breeds can be found in different chests (if configured.)")
                 .define("use_loot_tables", false);
-        CONFIG_LOOT_VALUES = configurator.comment("Should we instead use the loot table values found in the config instead of the datapack values?",
-                        "While this enhances convenience, it reduces customization.",
-                        "Due to the static nature of configs in general, DML cannot modify values outside of the built-in defaults.",
-                        "(It is however, possible to point custom breed eggs chances to the built-in values via loot modifier.)")
+        CONFIG_LOOT_CHANCES = configurator.comment(
+                "Should we instead use the loot table chance values found in the config instead of the datapack values?",
+                "Enabling this will cause the built-in dragon eggs to use the config chance values found in `egg-loot.toml`",
+                "(found in the same folder) INSTEAD of the datapack presets.",
+                "Due to the static nature of configs in general, DML cannot modify the chances of custom breed eggs",
+                "outside of the built-in defaults, so those will continue to use their datapack presets instead.",
+                "(It is however, possible to point custom breed egg chances to the built-in values via loot modifier.)")
                 .define("use_config_loot_values", false);
         UPDATE_HABITATS = configurator.comment("Should Dragon Eggs adapt to their environments and change breeds?")
                 .define("update_habitats", true);
         REPRO_LIMIT = configurator.comment("Number of times a dragon is able to breed.")
                 .defineInRange("breed_limit", TameableDragon.BASE_REPRO_LIMIT, 0, Integer.MAX_VALUE);
 
-        SERVER = configurator.build();
+        SERVER = configurator.pop().build();
     }
 }

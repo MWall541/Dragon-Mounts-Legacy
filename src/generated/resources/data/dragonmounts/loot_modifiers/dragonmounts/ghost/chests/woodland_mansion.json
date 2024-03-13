@@ -1,15 +1,13 @@
 {
   "conditions": [
     {
-      "condition": "dragonmounts:enabled_by_config"
-    },
-    {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/woodland_mansion"
     },
     {
-      "condition": "minecraft:random_chance",
-      "chance": 0.2
+      "condition": "dragonmounts:random_chance_by_config_or_preset",
+      "config_chance_target": "dragonmounts:ghost",
+      "preset_chance": 0.2
     }
   ],
   "breed": "dragonmounts:ghost",

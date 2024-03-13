@@ -1,15 +1,13 @@
 {
   "conditions": [
     {
-      "condition": "dragonmounts:enabled_by_config"
-    },
-    {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/bastion_treasure"
     },
     {
-      "condition": "minecraft:random_chance",
-      "chance": 0.35
+      "condition": "dragonmounts:random_chance_by_config_or_preset",
+      "config_chance_target": "dragonmounts:nether",
+      "preset_chance": 0.35
     }
   ],
   "breed": "dragonmounts:nether",

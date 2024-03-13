@@ -1,6 +1,9 @@
 {
   "conditions": [
     {
+      "condition": "dragonmounts:enabled_by_config"
+    },
+    {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/bastion_treasure"
     },

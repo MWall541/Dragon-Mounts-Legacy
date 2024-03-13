@@ -1,6 +1,5 @@
 package com.github.kay9.dragonmounts.data.loot;
 
-import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
@@ -30,15 +29,13 @@ public class DragonEggLootMod extends LootModifier
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
     {
-        if (DMLConfig.useLootTables())
-        {
-            var reg = context.getLevel().registryAccess();
-            var breed = BreedRegistry.registry(reg).get(id);
-            if (breed != null)
-                generatedLoot.add(DMLEggBlock.Item.create(breed, reg, breed.hatchTime()));
-            else
-                DragonMountsLegacy.LOG.error("Attempted to add a dragon egg to loot with unknown breed id: \"{}\"", id);
-        }
+        var reg = context.getLevel().registryAccess();
+        var breed = BreedRegistry.registry(reg).get(id);
+        if (breed != null)
+            generatedLoot.add(DMLEggBlock.Item.create(breed, reg, breed.hatchTime()));
+        else
+            DragonMountsLegacy.LOG.error("Attempted to add a dragon egg to loot with unknown breed id: \"{}\"", id);
+
         return generatedLoot;
     }
 

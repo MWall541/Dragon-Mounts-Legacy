@@ -2,7 +2,7 @@ package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -37,7 +37,7 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
         ResourceLocation breed;
         var tag = pStack.getTagElement("BlockEntityTag");
         if (tag == null || (breed = ResourceLocation.tryParse(tag.getString(TameableDragon.NBT_BREED))) == null)
-            breed = BreedRegistry.FIRE_BUILTIN.getId();
+            breed = DragonBreed.BuiltIn.FIRE_BUILTIN.getId();
         renderEgg(pPoseStack, buffer.getBuffer(Sheets.translucentItemSheet()), pPackedLight, breed, false);
     }
 

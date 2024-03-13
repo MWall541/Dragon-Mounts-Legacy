@@ -60,5 +60,9 @@ class BlockTagProvider extends BlockTagsProvider
                 .addTags(BlockTags.SMALL_FLOWERS)
                 .add(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM)
                 .remove(Blocks.WITHER_ROSE);
+
+        tag(ReaperStepAbility.REAPER_TRANSFORM)
+                .addTags(BlockTags.SAND, BlockTags.DIRT)
+                .add(Blocks.GRASS_BLOCK);
     }
 }

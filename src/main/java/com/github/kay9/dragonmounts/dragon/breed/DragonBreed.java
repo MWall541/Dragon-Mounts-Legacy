@@ -1,9 +1,13 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
+import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.Habitat;
+import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
 import com.github.kay9.dragonmounts.util.DMLUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -18,6 +22,8 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -25,6 +31,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Map;
@@ -134,5 +141,28 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public Class<DragonBreed> getRegistryType()
     {
         return DragonBreed.class;
+    }
+
+    public static class BuiltIn
+    {
+        public static final ResourceLocation AETHER = DragonMountsLegacy.id("aether");
+        public static final ResourceLocation END = DragonMountsLegacy.id("end");
+        public static final ResourceLocation FIRE = DragonMountsLegacy.id("fire");
+        public static final ResourceLocation FOREST = DragonMountsLegacy.id("forest");
+        public static final ResourceLocation GHOST = DragonMountsLegacy.id("ghost");
+        public static final ResourceLocation ICE = DragonMountsLegacy.id("ice");
+        public static final ResourceLocation NETHER = DragonMountsLegacy.id("nether");
+        public static final ResourceLocation WATER = DragonMountsLegacy.id("water");
+        public static final RegistryObject<DragonBreed> FIRE_BUILTIN = BreedRegistry.DEFERRED_REGISTRY.register(FIRE.getPath(), () -> builtIn(
+                0x912400,
+                0xff9819,
+                Optional.of(ParticleTypes.FLAME),
+                ImmutableMap.of(),
+                ImmutableList.of(Ability.simpleFactory(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
+                ImmutableList.of(
+                        new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
+                        new FluidHabitat(3, FluidTags.LAVA)),
+                ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
+                Optional.empty()));
     }
 }

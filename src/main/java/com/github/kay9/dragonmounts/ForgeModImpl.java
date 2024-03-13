@@ -1,10 +1,14 @@
 package com.github.kay9.dragonmounts;
 
+import com.github.kay9.dragonmounts.config.DMLConfig;
+import com.github.kay9.dragonmounts.config.EggLootConfig;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -33,8 +37,9 @@ public class ForgeModImpl
         BreedRegistry.DEFERRED_REGISTRY.register(bus);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
 //        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER, MOD_ID + "/server.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, EggLootConfig.SPEC, MOD_ID + "/egg_loot.toml");
 
         setupEvents();
     }
@@ -57,6 +62,7 @@ public class ForgeModImpl
         bus.addListener((PlayerInteractEvent.RightClickBlock e) -> e.setCanceled(overrideVanillaDragonEgg(e.getWorld(), e.getPos(), e.getPlayer())));
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
+        modBus.addGenericListener(GlobalLootModifierSerializer.class, (RegistryEvent.Register<GlobalLootModifierSerializer<?>> e) -> DMLRegistry.registerLootConditions());
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {

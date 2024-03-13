@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.DMLConfig;
+import com.github.kay9.dragonmounts.config.DMLConfig;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.KeyMapping;

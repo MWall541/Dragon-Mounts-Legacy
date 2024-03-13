@@ -51,7 +51,7 @@ public class ReaperStepAbility extends FootprintAbility
             sticks.setPickUpDelay(40);
             level.addFreshEntity(sticks);
         }
-        else if (steppingOn.is(REAPER_TRANSFORM)) // todo: this isn't very customizable...
+        else if ((steppingOn = level.getBlockState(pos = pos.below())).is(REAPER_TRANSFORM)) // todo: this isn't very customizable...
         {
             if (steppingOn.is(Blocks.GRASS_BLOCK))
                 destroyAndReplace(level, Blocks.DIRT.defaultBlockState(), pos);
@@ -61,6 +61,12 @@ public class ReaperStepAbility extends FootprintAbility
                 destroyAndReplace(level, Blocks.SOUL_SOIL.defaultBlockState(), pos);
 
         }
+    }
+
+    @Override
+    protected float getFootprintChance(TameableDragon dragon)
+    {
+        return 0.025f;
     }
 
     private static void destroyAndReplace(Level level, BlockState state, BlockPos pos)

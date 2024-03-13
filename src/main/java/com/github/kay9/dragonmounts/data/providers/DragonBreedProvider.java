@@ -151,7 +151,7 @@ class DragonBreedProvider implements DataProvider
 
     protected Pair<ResourceLocation, DragonBreed>[] breeds()
     {
-        var fire = Pair.of(BreedRegistry.FIRE_BUILTIN.getId(), BreedRegistry.FIRE_BUILTIN.get());
+        var fire = Pair.of(DragonBreed.BuiltIn.FIRE_BUILTIN.getId(), DragonBreed.BuiltIn.FIRE_BUILTIN.get());
         //noinspection unchecked
         return new Pair[]{AETHER, END, fire, FOREST, GHOST, ICE, NETHER, WATER};
     }

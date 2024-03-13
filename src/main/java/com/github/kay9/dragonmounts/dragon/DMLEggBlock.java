@@ -195,7 +195,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public Entity(BlockPos pWorldPosition, BlockState pBlockState)
         {
             super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pWorldPosition, pBlockState);
-            setBreedId(BreedRegistry.FIRE_BUILTIN.getId());
+            setBreedId(DragonBreed.BuiltIn.FIRE_BUILTIN.getId());
             setHatchTime(DragonEgg.DEFAULT_HATCH_TIME);
         }
 

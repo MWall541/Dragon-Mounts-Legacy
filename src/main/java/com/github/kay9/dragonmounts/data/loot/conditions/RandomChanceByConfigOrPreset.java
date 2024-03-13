@@ -1,8 +1,7 @@
 package com.github.kay9.dragonmounts.data.loot.conditions;
 
-import com.github.kay9.dragonmounts.config.DMLConfig;
+import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.config.EggLootConfig;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -14,19 +13,19 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
 public class RandomChanceByConfigOrPreset implements LootItemCondition
 {
-    private final ResourceLocation configTargetID;
+    private final String configTargetID;
     private final float presetProbability;
 
-    RandomChanceByConfigOrPreset(ResourceLocation forBreed, float dataProbability)
+    RandomChanceByConfigOrPreset(String forTarget, float dataProbability)
     {
-        this.configTargetID = forBreed;
+        this.configTargetID = forTarget;
         this.presetProbability = dataProbability;
     }
 
     // typically uses a builder but... why. we'll just do this instead...
-    public static RandomChanceByConfigOrPreset create(ResourceLocation forBreed, float chance)
+    public static RandomChanceByConfigOrPreset create(String forTarget, float chance)
     {
-        return new RandomChanceByConfigOrPreset(forBreed, chance);
+        return new RandomChanceByConfigOrPreset(forTarget, chance);
     }
 
     @Override
@@ -40,7 +39,7 @@ public class RandomChanceByConfigOrPreset implements LootItemCondition
     {
         if (!DMLConfig.useLootTables()) return false;
 
-        var probability = DMLConfig.useConfigLootValues()? EggLootConfig.getProbabilityFor(configTargetID, lootContext.getQueriedLootTableId()) : presetProbability;
+        var probability = DMLConfig.useConfigLootValues()? DMLConfig.getProbabilityFor(configTargetID) : presetProbability;
         if (probability < 0) probability = presetProbability; // not a built-in breed type, default to data preset
 
         return lootContext.getRandom().nextFloat() < probability;
@@ -58,7 +57,7 @@ public class RandomChanceByConfigOrPreset implements LootItemCondition
         @Override
         public RandomChanceByConfigOrPreset deserialize(JsonObject json, JsonDeserializationContext context)
         {
-            return RandomChanceByConfigOrPreset.create(new ResourceLocation(GsonHelper.getAsString(json, "config_chance_target")), GsonHelper.getAsFloat(json, "preset_chance"));
+            return RandomChanceByConfigOrPreset.create(GsonHelper.getAsString(json, "config_chance_target"), GsonHelper.getAsFloat(json, "preset_chance"));
         }
     }
 }

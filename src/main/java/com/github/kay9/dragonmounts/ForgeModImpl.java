@@ -1,7 +1,5 @@
 package com.github.kay9.dragonmounts;
 
-import com.github.kay9.dragonmounts.config.DMLConfig;
-import com.github.kay9.dragonmounts.config.EggLootConfig;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
@@ -36,10 +34,7 @@ public class ForgeModImpl
         DMLRegistry.init(bus);
         BreedRegistry.DEFERRED_REGISTRY.register(bus);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
-//        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER, MOD_ID + "/server.toml");
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, EggLootConfig.SPEC, MOD_ID + "/egg_loot.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.SPEC);
 
         setupEvents();
     }

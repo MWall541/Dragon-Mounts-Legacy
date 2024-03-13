@@ -6,10 +6,10 @@
     },
     {
       "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "dragonmounts:ice",
+      "config_chance_target": "ice_in_igloo_chest_chance",
       "preset_chance": 0.2
     }
   ],
-  "breed": "dragonmounts:ice",
+  "egg_breed": "dragonmounts:ice",
   "type": "dragonmounts:dragon_egg_loot"
 }

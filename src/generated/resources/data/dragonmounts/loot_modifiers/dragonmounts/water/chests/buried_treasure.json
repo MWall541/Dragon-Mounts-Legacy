@@ -6,10 +6,10 @@
     },
     {
       "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "dragonmounts:water",
+      "config_chance_target": "water_in_buried_treasure_chance",
       "preset_chance": 0.175
     }
   ],
-  "breed": "dragonmounts:water",
+  "egg_breed": "dragonmounts:water",
   "type": "dragonmounts:dragon_egg_loot"
 }

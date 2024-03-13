@@ -6,10 +6,10 @@
     },
     {
       "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "dragonmounts:ghost",
+      "config_chance_target": "ghost_in_abandoned_mineshaft_chance",
       "preset_chance": 0.075
     }
   ],
-  "breed": "dragonmounts:ghost",
+  "egg_breed": "dragonmounts:ghost",
   "type": "dragonmounts:dragon_egg_loot"
 }

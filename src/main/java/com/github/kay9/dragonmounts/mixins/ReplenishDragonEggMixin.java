@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.mixins;
 
-import com.github.kay9.dragonmounts.config.DMLConfig;
+import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;

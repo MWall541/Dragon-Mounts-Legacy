@@ -6,10 +6,10 @@
     },
     {
       "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "dragonmounts:nether",
+      "config_chance_target": "nether_in_bastion_treasure_chance",
       "preset_chance": 0.35
     }
   ],
-  "breed": "dragonmounts:nether",
+  "egg_breed": "dragonmounts:nether",
   "type": "dragonmounts:dragon_egg_loot"
 }

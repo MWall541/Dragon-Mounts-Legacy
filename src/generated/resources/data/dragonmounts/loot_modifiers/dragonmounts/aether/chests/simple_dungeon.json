@@ -6,10 +6,10 @@
     },
     {
       "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "dragonmounts:aether",
+      "config_chance_target": "aether_in_simple_dungeon_chance",
       "preset_chance": 0.2
     }
   ],
-  "breed": "dragonmounts:aether",
+  "egg_breed": "dragonmounts:aether",
   "type": "dragonmounts:dragon_egg_loot"
 }

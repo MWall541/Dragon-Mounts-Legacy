@@ -6,10 +6,10 @@
     },
     {
       "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "dragonmounts:fire",
+      "config_chance_target": "fire_in_desert_pyramid_chance",
       "preset_chance": 0.085
     }
   ],
-  "breed": "dragonmounts:fire",
+  "egg_breed": "dragonmounts:fire",
   "type": "dragonmounts:dragon_egg_loot"
 }

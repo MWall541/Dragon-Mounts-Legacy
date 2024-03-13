@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
-import com.github.kay9.dragonmounts.config.DMLConfig;
+import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;

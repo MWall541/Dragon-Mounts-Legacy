@@ -33,13 +33,6 @@ public class DMLConfig
         return USE_LOOT_TABLES.get();
     }
 
-    private static final ForgeConfigSpec.BooleanValue CONFIG_LOOT_CHANCES;
-
-    public static boolean useConfigLootValues()
-    {
-        return CONFIG_LOOT_CHANCES.get();
-    }
-
     private static final ForgeConfigSpec.BooleanValue UPDATE_HABITATS;
 
     public static boolean updateHabitats()
@@ -63,7 +56,6 @@ public class DMLConfig
                         "Allow the vanilla ender egg to be interacted with? (Hatchable)",
                         "Useful to help with mod compatibility")
                 .define("allow_egg_override", true);
-
         REPLENISH_EGGS = configurator.comment(
                         "Should Ender Dragon Eggs replenish on the exit portal after a respawned dragon is defeated?",
                         "Useful for multiplayer scenarios.")
@@ -71,16 +63,9 @@ public class DMLConfig
         USE_LOOT_TABLES = configurator.comment(
                         "Should dragon eggs generate in treasure chest loot tables?",
                         "Useful for multiplayer scenarios and offering alternative ways to obtain eggs.",
-                        "Different types of egg breeds can be found in different chests (if configured.)")
+                        "Egg chance values can be modified below. If you'd like to change the loot tables the eggs appear",
+                        "in, consider using a datapack, since the static nature of configs complicates things.")
                 .define("use_loot_tables", false);
-        CONFIG_LOOT_CHANCES = configurator.comment(
-                        "Should we instead use the loot table chance values defined below for the egg loot instead of the datapack values?",
-                        "Enabling this will cause the built-in dragon eggs to use the config chance values defined below",
-                        "INSTEAD of the datapack presets.",
-                        "Due to the static nature of configs in general, DML cannot modify the chances of custom breed eggs",
-                        "outside of the built-in defaults, so those will continue to use their datapack presets instead.",
-                        "(It is however, possible to point custom breed egg chances to the built-in values via loot modifier.)")
-                .define("use_config_loot_values", false);
         UPDATE_HABITATS = configurator.comment("Should Dragon Eggs adapt to their environments and change breeds?")
                 .define("update_habitats", true);
         REPRO_LIMIT = configurator.comment("Number of times a dragon is able to breed.")

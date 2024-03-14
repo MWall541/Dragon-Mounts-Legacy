@@ -20,6 +20,7 @@ import static com.github.kay9.dragonmounts.dragon.breed.DragonBreed.BuiltIn.*;
 
 public class DragonEggLootMod extends LootModifier
 {
+    public record Target(ResourceLocation forBreed, ResourceLocation target, double chance) {}
     public static Target[] BUILT_IN_CHANCES = new Target[]{
             new Target(AETHER, BuiltInLootTables.SIMPLE_DUNGEON, 0.2),
             new Target(FIRE, BuiltInLootTables.DESERT_PYRAMID, 0.085),
@@ -70,6 +71,4 @@ public class DragonEggLootMod extends LootModifier
             return json;
         }
     }
-
-    public record Target(ResourceLocation forBreed, ResourceLocation target, double chance) {}
 }

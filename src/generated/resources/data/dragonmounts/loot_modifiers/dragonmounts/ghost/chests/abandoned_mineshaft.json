@@ -5,9 +5,8 @@
       "loot_table_id": "minecraft:chests/abandoned_mineshaft"
     },
     {
-      "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "ghost_in_abandoned_mineshaft_chance",
-      "preset_chance": 0.075
+      "condition": "dragonmounts:random_chance_by_config",
+      "config_chance_target": "ghost_in_abandoned_mineshaft_chance"
     }
   ],
   "egg_breed": "dragonmounts:ghost",

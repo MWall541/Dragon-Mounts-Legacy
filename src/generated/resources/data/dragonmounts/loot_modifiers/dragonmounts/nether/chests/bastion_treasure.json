@@ -5,9 +5,8 @@
       "loot_table_id": "minecraft:chests/bastion_treasure"
     },
     {
-      "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "nether_in_bastion_treasure_chance",
-      "preset_chance": 0.35
+      "condition": "dragonmounts:random_chance_by_config",
+      "config_chance_target": "nether_in_bastion_treasure_chance"
     }
   ],
   "egg_breed": "dragonmounts:nether",

@@ -5,9 +5,8 @@
       "loot_table_id": "minecraft:chests/jungle_temple"
     },
     {
-      "condition": "dragonmounts:random_chance_by_config_or_preset",
-      "config_chance_target": "forest_in_jungle_temple_chance",
-      "preset_chance": 0.3
+      "condition": "dragonmounts:random_chance_by_config",
+      "config_chance_target": "forest_in_jungle_temple_chance"
     }
   ],
   "egg_breed": "dragonmounts:forest",

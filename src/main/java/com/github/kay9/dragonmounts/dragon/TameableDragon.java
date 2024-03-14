@@ -763,20 +763,23 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public boolean canMate(Animal mate)
     {
         if (mate == this) return false; // No. Just... no.
-        else if (!(mate instanceof TameableDragon)) return false;
-        else if (!canReproduce()) return false;
+        if (!(mate instanceof TameableDragon)) return false;
+        if (!canReproduce()) return false;
 
         TameableDragon dragonMate = (TameableDragon) mate;
 
-        if (!dragonMate.isTame()) return false;
-        else if (!dragonMate.canReproduce()) return false;
-        else return isInLove() && dragonMate.isInLove();
+        if (!dragonMate.canReproduce()) return false;
+
+        return isInLove() && mate.isInLove();
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canReproduce()
     {
-        return isTame() && reproCount < DMLConfig.reproLimit();
+        if (!isTame()) return false;
+
+        var limit = getBreed().getReproductionLimit();
+        return reproCount < limit || limit == -1;
     }
 
     @Override

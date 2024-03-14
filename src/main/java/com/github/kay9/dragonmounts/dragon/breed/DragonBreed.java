@@ -1,17 +1,16 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
-import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.habitats.FluidHabitat;
 import com.github.kay9.dragonmounts.habitats.Habitat;
-import com.github.kay9.dragonmounts.habitats.NearbyBlocksHabitat;
 import com.github.kay9.dragonmounts.util.DMLUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
@@ -20,10 +19,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -31,18 +29,18 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 @SuppressWarnings("deprecation")
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
                           Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilityTypes, List<Habitat> habitats,
                           ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound,
                           ResourceLocation deathLoot, int growthTime, int hatchTime, float sizeModifier,
-                          HolderSet<Item> tamingItems, HolderSet<Item> breedingItems)
+                          HolderSet<Item> tamingItems, HolderSet<Item> breedingItems, Either<Integer, String> reproLimit)
     implements IForgeRegistryEntry<DragonBreed>
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -60,8 +58,8 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier),
             RegistryCodecs.homogeneousList(Registry.ITEM_REGISTRY).optionalFieldOf("taming_items", Registry.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::tamingItems),
             RegistryCodecs.homogeneousList(Registry.ITEM_REGISTRY).optionalFieldOf("breeding_items", Registry.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::breedingItems)
+            Codec.either(Codec.INT, Codec.STRING).optionalFieldOf("reproduction_limit", Either.left(-1)).forGetter(DragonBreed::reproLimit)
     ).apply(instance, DragonBreed::new));
-
     public static final Codec<DragonBreed> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
@@ -72,14 +70,9 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier)
     ).apply(instance, DragonBreed::fromNetwork));
 
-    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound)
-    {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES));
-    }
-
     public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Optional<SoundEvent> ambientSound, int growthTime, int hatchTime, float sizeModifier)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, Map.of(), List.of(), List.of(), ImmutableSet.of(), ambientSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, DMLUtil.EMPTY_ITEM_HOLDER_SET, DMLUtil.EMPTY_ITEM_HOLDER_SET);
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, Map.of(), List.of(), List.of(), ImmutableSet.of(), ambientSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, DMLUtil.EMPTY_ITEM_HOLDER_SET, DMLUtil.EMPTY_ITEM_HOLDER_SET, Either.left(0));
     }
 
     public void initialize(TameableDragon dragon)
@@ -113,6 +106,11 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         dragon.setHealth(dragon.getMaxHealth() * healthPercentile); // in case we have less than max health
     }
 
+    public int getReproductionLimit()
+    {
+        return reproLimit().map(Function.identity(), DMLConfig::getReproLimitFor);
+    }
+
     public String getTranslationKey(RegistryAccess reg)
     {
         var name = id(reg);
@@ -143,26 +141,23 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         return DragonBreed.class;
     }
 
-    public static class BuiltIn
+    public static final class BuiltIn
     {
-        public static final ResourceLocation AETHER = DragonMountsLegacy.id("aether");
-        public static final ResourceLocation END = DragonMountsLegacy.id("end");
-        public static final ResourceLocation FIRE = DragonMountsLegacy.id("fire");
-        public static final ResourceLocation FOREST = DragonMountsLegacy.id("forest");
-        public static final ResourceLocation GHOST = DragonMountsLegacy.id("ghost");
-        public static final ResourceLocation ICE = DragonMountsLegacy.id("ice");
-        public static final ResourceLocation NETHER = DragonMountsLegacy.id("nether");
-        public static final ResourceLocation WATER = DragonMountsLegacy.id("water");
-        public static final RegistryObject<DragonBreed> FIRE_BUILTIN = BreedRegistry.DEFERRED_REGISTRY.register(FIRE.getPath(), () -> builtIn(
-                0x912400,
-                0xff9819,
-                Optional.of(ParticleTypes.FLAME),
-                ImmutableMap.of(),
-                ImmutableList.of(Ability.simpleFactory(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
-                ImmutableList.of(
-                        new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
-                        new FluidHabitat(3, FluidTags.LAVA)),
-                ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
-                Optional.empty()));
+        public static final ResourceKey<DragonBreed> AETHER = key("aether");
+        public static final ResourceKey<DragonBreed> END = key("end");
+        public static final ResourceKey<DragonBreed> FIRE = key("fire");
+        public static final ResourceKey<DragonBreed> FOREST = key("forest");
+        public static final ResourceKey<DragonBreed> GHOST = key("ghost");
+        public static final ResourceKey<DragonBreed> ICE = key("ice");
+        public static final ResourceKey<DragonBreed> NETHER = key("nether");
+        public static final ResourceKey<DragonBreed> WATER = key("water");
+//        public static final RegistryObject<DragonBreed> FIRE_BUILTIN = BreedRegistry.DEFERRED_REGISTRY.register(FIRE.getRegistryName().getPath(), () -> );
+
+        private static ResourceKey<DragonBreed> key(String id)
+        {
+            return ResourceKey.create(BreedRegistry.REGISTRY_KEY, DragonMountsLegacy.id(id));
+        }
+
+        private BuiltIn() {}
     }
 }

@@ -31,7 +31,7 @@ public class RandomChanceByConfig implements LootItemCondition
         if (!DMLConfig.useLootTables()) return false;
 
         // non-existing config targets fail silently with probability -1f
-        return lootContext.getRandom().nextFloat() < DMLConfig.getProbabilityFor(configTargetID);
+        return lootContext.getRandom().nextFloat() < DMLConfig.getEggChanceFor(configTargetID);
     }
 
     public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<RandomChanceByConfig>

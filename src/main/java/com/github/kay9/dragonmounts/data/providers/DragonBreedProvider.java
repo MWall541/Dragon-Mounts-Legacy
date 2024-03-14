@@ -3,29 +3,42 @@ package com.github.kay9.dragonmounts.data.providers;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.*;
+import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.habitats.*;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -35,7 +48,7 @@ class DragonBreedProvider implements DataProvider
 {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    static final Pair<ResourceLocation, DragonBreed> AETHER = Pair.of(DragonMountsLegacy.id("aether"), DragonBreed.builtIn(
+    static final Pair<ResourceLocation, DragonBreed> AETHER = builtIn(DragonBreed.BuiltIn.AETHER,
             0x718AA9,
             0xE6E6E6,
             Optional.empty(),
@@ -45,9 +58,9 @@ class DragonBreedProvider implements DataProvider
                     new HeightHabitat(3, false, 200)
             ),
             set(),
-            Optional.empty()));
+            Optional.empty());
 
-    static final Pair<ResourceLocation, DragonBreed> END = Pair.of(DragonMountsLegacy.id("end"), DragonBreed.builtIn(
+    static final Pair<ResourceLocation, DragonBreed> END = builtIn(DragonBreed.BuiltIn.END,
             0x161616,
             0xff63e8,
             Optional.of(ParticleTypes.PORTAL),
@@ -57,9 +70,21 @@ class DragonBreedProvider implements DataProvider
                     DragonBreathHabitat.INSTANCE
             ),
             set("dragonBreath"),
-            Optional.empty()));
+            Optional.empty());
 
-    static final Pair<ResourceLocation, DragonBreed> FOREST = Pair.of(DragonMountsLegacy.id("forest"), DragonBreed.builtIn(
+    static final Pair<ResourceLocation, DragonBreed> FIRE = builtIn(DragonBreed.BuiltIn.FIRE,
+            0x912400,
+            0xff9819,
+            Optional.of(ParticleTypes.FLAME),
+            ImmutableMap.of(),
+            ImmutableList.of(Ability.simpleFactory(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
+            ImmutableList.of(
+                    new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
+                    new FluidHabitat(3, FluidTags.LAVA)),
+            ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
+            Optional.empty());
+
+    static final Pair<ResourceLocation, DragonBreed> FOREST = builtIn(DragonBreed.BuiltIn.FOREST,
             0x054a00,
             0x0a9600,
             Optional.of(ParticleTypes.HAPPY_VILLAGER),
@@ -72,9 +97,9 @@ class DragonBreedProvider implements DataProvider
                     new BiomeHabitat(2, BiomeTags.IS_JUNGLE)
             ),
             set(),
-            Optional.empty()));
+            Optional.empty());
 
-    static final Pair<ResourceLocation, DragonBreed> GHOST = Pair.of(DragonMountsLegacy.id("ghost"), DragonBreed.builtIn(
+    static final Pair<ResourceLocation, DragonBreed> GHOST = builtIn(DragonBreed.BuiltIn.GHOST,
             0xc4c4c4,
             0xc2f8ff,
             Optional.empty(),
@@ -89,9 +114,9 @@ class DragonBreedProvider implements DataProvider
                     ))
             ),
             set("drown"),
-            Optional.of(DMLRegistry.GHOST_DRAGON_AMBIENT.get())));
+            Optional.of(DMLRegistry.GHOST_DRAGON_AMBIENT.get()));
 
-    static final Pair<ResourceLocation, DragonBreed> ICE = Pair.of(DragonMountsLegacy.id("ice"), DragonBreed.builtIn(
+    static final Pair<ResourceLocation, DragonBreed> ICE = builtIn(DragonBreed.BuiltIn.ICE,
             0xffffff,
             0x00E1FF,
             Optional.of(ParticleTypes.SNOWFLAKE),
@@ -104,9 +129,9 @@ class DragonBreedProvider implements DataProvider
                     new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)
             ),
             set("drown", "freeze"),
-            Optional.empty()));
+            Optional.empty());
 
-    static final Pair<ResourceLocation, DragonBreed> NETHER = Pair.of(DragonMountsLegacy.id("nether"), DragonBreed.builtIn(
+    static final Pair<ResourceLocation, DragonBreed> NETHER = builtIn(DragonBreed.BuiltIn.NETHER,
             0x912400,
             0x2e0b00,
             Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
@@ -117,9 +142,9 @@ class DragonBreedProvider implements DataProvider
                     new BiomeHabitat(3, BiomeTags.IS_NETHER)
             ),
             set("inFire", "onFire", "lava", "hotFloor"),
-            Optional.empty()));
+            Optional.empty());
 
-    static final Pair<ResourceLocation, DragonBreed> WATER = Pair.of(DragonMountsLegacy.id("water"), DragonBreed.builtIn(
+    static final Pair<ResourceLocation, DragonBreed> WATER = builtIn(DragonBreed.BuiltIn.WATER,
             0x0062ff,
             0x5999ff,
             Optional.of(ParticleTypes.DRIPPING_WATER),
@@ -132,7 +157,7 @@ class DragonBreedProvider implements DataProvider
                     new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)
             ),
             set("drown"),
-            Optional.empty()));
+            Optional.empty());
 
     private final DataGenerator generator;
     private HashCache cache;
@@ -153,9 +178,8 @@ class DragonBreedProvider implements DataProvider
 
     protected Pair<ResourceLocation, DragonBreed>[] breeds()
     {
-        var fire = Pair.of(DragonBreed.BuiltIn.FIRE_BUILTIN.getId(), DragonBreed.BuiltIn.FIRE_BUILTIN.get());
         //noinspection unchecked
-        return new Pair[]{AETHER, END, fire, FOREST, GHOST, ICE, NETHER, WATER};
+        return new Pair[]{AETHER, END, FIRE, FOREST, GHOST, ICE, NETHER, WATER};
     }
 
     protected void encode(ResourceLocation id, DragonBreed breed, RegistryOps<JsonElement> ops) throws IOException
@@ -171,6 +195,17 @@ class DragonBreedProvider implements DataProvider
     public String getName()
     {
         return "Dragon Breeds";
+    }
+
+    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound, Either<Integer, String> reproduction)
+    {
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES), reproduction);
+    }
+
+    private static Pair<ResourceLocation, DragonBreed> builtIn(ResourceKey<DragonBreed> id, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound)
+    {
+        Either<Integer, String> reproConfigTarget = Either.right();
+        return Pair.of(id.getRegistryName(), builtIn(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, reproConfigTarget));
     }
 
     @SuppressWarnings("unchecked")

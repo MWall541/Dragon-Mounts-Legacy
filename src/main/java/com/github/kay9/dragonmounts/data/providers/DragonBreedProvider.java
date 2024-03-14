@@ -124,7 +124,9 @@ class DragonBreedProvider implements DataProvider
             0x5999ff,
             Optional.of(ParticleTypes.DRIPPING_WATER),
             of(),
-            list(),
+            list(
+                    ability(Ability.HYDRO_STEP, () -> HydroStepAbility.INSTANCE)
+            ),
             list(
                     new FluidHabitat(1f, FluidTags.WATER),
                     new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)

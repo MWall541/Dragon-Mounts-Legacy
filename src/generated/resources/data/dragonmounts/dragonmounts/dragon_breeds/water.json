@@ -1,4 +1,9 @@
 {
+  "abilities": [
+    {
+      "type": "dragonmounts:hydro_step"
+    }
+  ],
   "habitats": [
     {
       "point_multiplier": 1.0,

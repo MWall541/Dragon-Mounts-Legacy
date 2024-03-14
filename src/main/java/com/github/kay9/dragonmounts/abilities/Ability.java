@@ -44,6 +44,7 @@ public interface Ability
     ResourceLocation SNOW_STEPPER = reg("snow_stepper", SnowStepperAbility.CODEC);
     ResourceLocation HOT_FEET = reg("hot_feet", HotFeetAbility.CODEC);
     ResourceLocation REAPER_STEP = reg("reaper_step", ReaperStepAbility.CODEC);
+    ResourceLocation HYDRO_STEP = reg("hydro_step", HydroStepAbility.CODEC);
 
     static <T extends Ability> ResourceLocation register(ResourceLocation name, Codec<? extends Factory<T>> codec)
     {

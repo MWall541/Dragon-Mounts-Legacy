@@ -3,7 +3,9 @@ package com.github.kay9.dragonmounts.data.loot;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.google.gson.JsonObject;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +22,7 @@ import static com.github.kay9.dragonmounts.dragon.breed.DragonBreed.BuiltIn.*;
 
 public class DragonEggLootMod extends LootModifier
 {
-    public record Target(ResourceLocation forBreed, ResourceLocation target, double chance) {}
+    public record Target(ResourceKey<DragonBreed> forBreed, ResourceLocation target, double chance) {}
     public static Target[] BUILT_IN_CHANCES = new Target[]{
             new Target(AETHER, BuiltInLootTables.SIMPLE_DUNGEON, 0.2),
             new Target(FIRE, BuiltInLootTables.DESERT_PYRAMID, 0.085),

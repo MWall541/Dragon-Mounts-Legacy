@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.habitats;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -22,7 +23,7 @@ public enum DragonBreathHabitat implements Habitat
     }
 
     @Override
-    public String type()
+    public ResourceLocation type()
     {
         return Habitat.DRAGON_BREATH;
     }

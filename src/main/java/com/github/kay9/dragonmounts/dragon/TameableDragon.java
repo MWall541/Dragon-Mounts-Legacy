@@ -109,10 +109,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     // server/client delegates
     private final DragonAnimator animator;
+    private final List<Ability> abilities = new ArrayList<>();
     private DragonBreed breed;
-    private List<Ability> abilities = new ArrayList<>();
     private int reproCount;
-    private float ageProgress;
+    private float ageProgress = 1; // default to adult
     private boolean flying;
     private boolean nearGround;
 
@@ -127,7 +127,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         moveControl = new DragonMoveController(this);
         animator = level.isClientSide? new DragonAnimator(this) : null;
-        breed = BreedRegistry.getFallback(level.registryAccess());
 
         flyingNavigation = new FlyingPathNavigation(this, level);
         groundNavigation = new GroundPathNavigation(this, level);
@@ -189,7 +188,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> data)
     {
-        if (DATA_BREED.equals(data)) updateBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().registryAccess()));
+        if (DATA_BREED.equals(data))
+        {
+            setBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().registryAccess()));
+            updateAgeProgress();
+        }
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
         else super.onSyncedDataUpdated(data);
@@ -217,18 +220,19 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void setBreed(DragonBreed dragonBreed)
     {
-        entityData.set(DATA_BREED, dragonBreed.id(getLevel().registryAccess()).toString());
-    }
-
-    private void updateBreed(DragonBreed breed)
-    {
-        getBreed().close(this);
-        this.breed = breed;
-        getBreed().initialize(this);
+        if (breed != dragonBreed) // prevent loops, unnecessary work, etc.
+        {
+            if (breed != null) breed.close(this);
+            this.breed = dragonBreed;
+            breed.initialize(this);
+            getEntityData().set(DATA_BREED, breed.id(getLevel().registryAccess()).toString());
+        }
     }
 
     public DragonBreed getBreed()
     {
+        if (breed == null)
+            setBreed(BreedRegistry.getRandom(getLevel().registryAccess(), getRandom()));
         return breed;
     }
 
@@ -763,10 +767,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public boolean canMate(Animal mate)
     {
         if (mate == this) return false; // No. Just... no.
-        if (!(mate instanceof TameableDragon)) return false;
+        if (!(mate instanceof TameableDragon dragonMate)) return false;
         if (!canReproduce()) return false;
-
-        TameableDragon dragonMate = (TameableDragon) mate;
 
         if (!dragonMate.canReproduce()) return false;
 

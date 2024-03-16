@@ -62,7 +62,7 @@ public class DragonEgg extends Entity
     {
         super(type, level);
 
-        breed = BreedRegistry.getFallback(level.registryAccess());
+        breed = BreedRegistry.getRandom(level.registryAccess(), level.getRandom());
         hatchTime = breed.hatchTime();
         transitioner = new TransitionHandler();
 //        wiggleTime = LerpedFloat.unit();

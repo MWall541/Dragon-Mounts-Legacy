@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.habitats;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 public record HeightHabitat(int points, boolean below, int height) implements Habitat
@@ -22,7 +23,7 @@ public record HeightHabitat(int points, boolean below, int height) implements Ha
     }
 
     @Override
-    public String type()
+    public ResourceLocation type()
     {
         return Habitat.WORLD_HEIGHT;
     }

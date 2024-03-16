@@ -1,4 +1,5 @@
 {
+  "reproduction_limit": "config:forest",
   "abilities": [
     {
       "type": "dragonmounts:green_toes"
@@ -7,11 +8,11 @@
   "habitats": [
     {
       "block_tag": "dragonmounts:forest_dragon_habitat_blocks",
-      "type": "nearby_blocks"
+      "type": "dragonmounts:nearby_blocks"
     },
     {
       "biome_tag": "minecraft:is_jungle",
-      "type": "biome"
+      "type": "dragonmounts:biome"
     }
   ],
   "primary_color": "54a00",

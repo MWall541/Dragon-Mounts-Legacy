@@ -9,12 +9,18 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.server.ServerLifecycleHooks;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Random;
 
 @SuppressWarnings("DataFlowIssue")
 public class DragonSpawnEgg extends ForgeSpawnEggItem
@@ -63,6 +69,13 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         return stack;
     }
 
+    @Override
+    public @Nullable ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt)
+    {
+        preconditionSpawnEgg(stack); // extremely hacky to be doing it here... but there doesn't seem to be any other options.
+        return super.initCapabilities(stack, nbt);
+    }
+
     @SuppressWarnings("DataFlowIssue")
     @Override
     public Component getName(ItemStack stack)
@@ -75,21 +88,29 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
 
     public static int getColor(ItemStack stack, int tintIndex)
     {
-        int prim;
-        int sec;
         var tag = stack.getTagElement(DATA_TAG);
         if (tag != null)
-        {
-            prim = tag.getInt(DATA_PRIM_COLOR);
-            sec = tag.getInt(DATA_SEC_COLOR);
-        }
-        else
-        {
-            var fire = BreedRegistry.getFallback(Minecraft.getInstance().level.registryAccess());
-            prim = fire.primaryColor();
-            sec = fire.secondaryColor();
-        }
+            return tintIndex == 0? tag.getInt(DATA_PRIM_COLOR) : tag.getInt(DATA_SEC_COLOR);
+        return 0xffffff;
+    }
 
-        return tintIndex == 0? prim : sec;
+    @SuppressWarnings("ConstantConditions")
+    private static void preconditionSpawnEgg(ItemStack stack)
+    {
+        if (ServerLifecycleHooks.getCurrentServer() == null) return;
+
+        var root = stack.getOrCreateTag();
+        var blockEntityData = stack.getOrCreateTagElement(EntityType.ENTITY_TAG);
+        var breedId = blockEntityData.getString(TameableDragon.NBT_BREED);
+        var regAcc = ServerLifecycleHooks.getCurrentServer().registryAccess();
+        var reg = BreedRegistry.registry(regAcc);
+
+        if (breedId.isEmpty() || !reg.containsKey(new ResourceLocation(breedId))) // this item doesn't contain a breed yet?
+        {
+            // assign one ourselves then.
+            var breed = reg.getRandom(new Random()).orElseThrow();
+            var updated = create(breed.value(), regAcc);
+            root.merge(updated.getTag());
+        }
     }
 }

@@ -9,6 +9,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
+import java.util.Random;
 import java.util.function.Supplier;
 
 public class BreedRegistry
@@ -17,8 +18,7 @@ public class BreedRegistry
     public static final DeferredRegister<DragonBreed> DEFERRED_REGISTRY = DeferredRegister.create(REGISTRY_KEY, DragonMountsLegacy.MOD_ID);
     public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(DragonBreed.class, () -> new RegistryBuilder<DragonBreed>()
             .disableSaving()
-            .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC)
-            .setDefaultKey(DragonBreed.BuiltIn.FIRE_BUILTIN.getId()));
+            .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC));
 
     public static DragonBreed get(String byString, RegistryAccess reg)
     {
@@ -28,13 +28,12 @@ public class BreedRegistry
     public static DragonBreed get(ResourceLocation byId, RegistryAccess reg)
     {
         var breed = registry(reg).get(byId);
-        if (breed == null) breed = getFallback(reg); // guard for if/when the registry is not defaulted...
-        return breed;
+        return breed != null? breed : getRandom(reg, new Random());
     }
 
-    public static DragonBreed getFallback(RegistryAccess reg)
+    public static DragonBreed getRandom(RegistryAccess reg, Random random)
     {
-        return get(DragonBreed.BuiltIn.FIRE_BUILTIN.getId(), reg);
+        return registry(reg).getRandom(random).orElseThrow().value();
     }
 
     public static Registry<DragonBreed> registry(RegistryAccess reg)

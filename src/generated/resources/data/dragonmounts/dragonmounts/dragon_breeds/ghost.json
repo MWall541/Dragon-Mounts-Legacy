@@ -1,4 +1,5 @@
 {
+  "reproduction_limit": "config:ghost",
   "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
   "abilities": [
     {
@@ -12,16 +13,16 @@
           "points": 1,
           "below": true,
           "height": 0,
-          "type": "world_height"
+          "type": "dragonmounts:world_height"
         },
         {
           "points": 2,
           "below": true,
           "light": 3,
-          "type": "light"
+          "type": "dragonmounts:light"
         }
       ],
-      "type": "picky"
+      "type": "dragonmounts:picky"
     }
   ],
   "immunities": [

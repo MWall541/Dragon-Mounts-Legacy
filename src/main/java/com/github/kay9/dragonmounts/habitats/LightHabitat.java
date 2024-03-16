@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.habitats;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 public record LightHabitat(int points, boolean below, int light) implements Habitat
@@ -21,7 +22,7 @@ public record LightHabitat(int points, boolean below, int light) implements Habi
     }
 
     @Override
-    public String type()
+    public ResourceLocation type()
     {
         return Habitat.LIGHT;
     }

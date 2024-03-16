@@ -1,16 +1,17 @@
 {
+  "reproduction_limit": "config:nether",
   "attributes": {
     "minecraft:generic.armor": 8.0
   },
   "habitats": [
     {
       "block_tag": "dragonmounts:nether_dragon_habitat_blocks",
-      "type": "nearby_blocks"
+      "type": "dragonmounts:nearby_blocks"
     },
     {
       "points": 3,
       "biome_tag": "minecraft:is_nether",
-      "type": "biome"
+      "type": "dragonmounts:biome"
     }
   ],
   "immunities": [

@@ -1,4 +1,5 @@
 {
+  "reproduction_limit": "config:ice",
   "abilities": [
     {
       "radius_multiplier": 3.0,
@@ -11,7 +12,7 @@
   "habitats": [
     {
       "block_tag": "dragonmounts:ice_dragon_habitat_blocks",
-      "type": "nearby_blocks"
+      "type": "dragonmounts:nearby_blocks"
     }
   ],
   "immunities": [

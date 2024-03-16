@@ -1,8 +1,10 @@
 package com.github.kay9.dragonmounts.habitats;
 
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -11,22 +13,27 @@ import java.util.function.Function;
 
 public interface Habitat
 {
-    Map<String, Codec<? extends Habitat>> REGISTRY = new HashMap<>();
+    Map<ResourceLocation, Codec<? extends Habitat>> REGISTRY = new HashMap<>();
 
-    Codec<Habitat> CODEC = Codec.STRING.dispatch(Habitat::type, REGISTRY::get);
+    Codec<Habitat> CODEC = ResourceLocation.CODEC.dispatch(Habitat::type, REGISTRY::get);
 
-    String PICKY = register("picky", PickyHabitat.CODEC);
-    String BIOMES = register("biome", BiomeHabitat.CODEC);
-    String IN_FLUID = register("in_fluid", FluidHabitat.CODEC);
-    String WORLD_HEIGHT = register("world_height", HeightHabitat.CODEC);
-    String LIGHT = register("light", LightHabitat.CODEC);
-    String NEARBY_BLOCKS = register("nearby_blocks", NearbyBlocksHabitat.CODEC);
-    String DRAGON_BREATH = register("dragon_breath", DragonBreathHabitat.CODEC);
+    ResourceLocation PICKY = reg("picky", PickyHabitat.CODEC);
+    ResourceLocation BIOMES = reg("biome", BiomeHabitat.CODEC);
+    ResourceLocation IN_FLUID = reg("in_fluid", FluidHabitat.CODEC);
+    ResourceLocation WORLD_HEIGHT = reg("world_height", HeightHabitat.CODEC);
+    ResourceLocation LIGHT = reg("light", LightHabitat.CODEC);
+    ResourceLocation NEARBY_BLOCKS = reg("nearby_blocks", NearbyBlocksHabitat.CODEC);
+    ResourceLocation DRAGON_BREATH = reg("dragon_breath", DragonBreathHabitat.CODEC);
 
-    static String register(String name, Codec<? extends Habitat> codec)
+    static ResourceLocation register(ResourceLocation name, Codec<? extends Habitat> codec)
     {
         REGISTRY.put(name, codec);
         return name;
+    }
+
+    private static ResourceLocation reg(String name, Codec<? extends Habitat> codec)
+    {
+        return register(DragonMountsLegacy.id(name), codec);
     }
 
     static <T extends Habitat> RecordCodecBuilder<T, Integer> withPoints(int defaultTo, Function<T, Integer> getter)
@@ -41,5 +48,5 @@ public interface Habitat
 
     int getHabitatPoints(Level level, BlockPos pos);
 
-    String type();
+    ResourceLocation type();
 }

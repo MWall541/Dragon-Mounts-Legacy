@@ -57,7 +57,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.INT.optionalFieldOf("hatch_time", DragonEgg.DEFAULT_HATCH_TIME).forGetter(DragonBreed::hatchTime),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier),
             RegistryCodecs.homogeneousList(Registry.ITEM_REGISTRY).optionalFieldOf("taming_items", Registry.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::tamingItems),
-            RegistryCodecs.homogeneousList(Registry.ITEM_REGISTRY).optionalFieldOf("breeding_items", Registry.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::breedingItems)
+            RegistryCodecs.homogeneousList(Registry.ITEM_REGISTRY).optionalFieldOf("breeding_items", Registry.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::breedingItems),
             Codec.either(Codec.INT, Codec.STRING).optionalFieldOf("reproduction_limit", Either.left(-1)).forGetter(DragonBreed::reproLimit)
     ).apply(instance, DragonBreed::new));
     public static final Codec<DragonBreed> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -117,6 +117,11 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         return "dragon_breed." + name.getNamespace() + "." + name.getPath();
     }
 
+    public ResourceLocation id(RegistryAccess reg)
+    {
+        return BreedRegistry.registry(reg).getKey(this);
+    }
+
     @Override
     public DragonBreed setRegistryName(ResourceLocation name)
     {
@@ -128,11 +133,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public ResourceLocation getRegistryName()
     {
         return BreedRegistry.REGISTRY.get().getKey(this);
-    }
-
-    public ResourceLocation id(RegistryAccess reg)
-    {
-        return BreedRegistry.registry(reg).getKey(this);
     }
 
     @Override
@@ -151,7 +151,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         public static final ResourceKey<DragonBreed> ICE = key("ice");
         public static final ResourceKey<DragonBreed> NETHER = key("nether");
         public static final ResourceKey<DragonBreed> WATER = key("water");
-//        public static final RegistryObject<DragonBreed> FIRE_BUILTIN = BreedRegistry.DEFERRED_REGISTRY.register(FIRE.getRegistryName().getPath(), () -> );
 
         private static ResourceKey<DragonBreed> key(String id)
         {

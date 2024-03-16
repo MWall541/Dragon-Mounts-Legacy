@@ -48,117 +48,6 @@ class DragonBreedProvider implements DataProvider
 {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    static final Pair<ResourceLocation, DragonBreed> AETHER = builtIn(DragonBreed.BuiltIn.AETHER,
-            0x718AA9,
-            0xE6E6E6,
-            Optional.empty(),
-            of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.45),
-            list(),
-            list(
-                    new HeightHabitat(3, false, 200)
-            ),
-            set(),
-            Optional.empty());
-
-    static final Pair<ResourceLocation, DragonBreed> END = builtIn(DragonBreed.BuiltIn.END,
-            0x161616,
-            0xff63e8,
-            Optional.of(ParticleTypes.PORTAL),
-            of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
-            list(), // teleport ability?
-            list(
-                    DragonBreathHabitat.INSTANCE
-            ),
-            set("dragonBreath"),
-            Optional.empty());
-
-    static final Pair<ResourceLocation, DragonBreed> FIRE = builtIn(DragonBreed.BuiltIn.FIRE,
-            0x912400,
-            0xff9819,
-            Optional.of(ParticleTypes.FLAME),
-            ImmutableMap.of(),
-            ImmutableList.of(Ability.simpleFactory(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
-            ImmutableList.of(
-                    new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
-                    new FluidHabitat(3, FluidTags.LAVA)),
-            ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
-            Optional.empty());
-
-    static final Pair<ResourceLocation, DragonBreed> FOREST = builtIn(DragonBreed.BuiltIn.FOREST,
-            0x054a00,
-            0x0a9600,
-            Optional.of(ParticleTypes.HAPPY_VILLAGER),
-            of(),
-            list(
-                    ability(Ability.GREEN_TOES, () -> GreenToesAbility.INSTANCE)
-            ),
-            list(
-                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS),
-                    new BiomeHabitat(2, BiomeTags.IS_JUNGLE)
-            ),
-            set(),
-            Optional.empty());
-
-    static final Pair<ResourceLocation, DragonBreed> GHOST = builtIn(DragonBreed.BuiltIn.GHOST,
-            0xc4c4c4,
-            0xc2f8ff,
-            Optional.empty(),
-            of(),
-            list(
-                    ability(Ability.REAPER_STEP, () -> ReaperStepAbility.INSTANCE)
-            ),
-            list(
-                    new PickyHabitat(list(
-                            new HeightHabitat(1, true, 0),
-                            new LightHabitat(2, true, 3)
-                    ))
-            ),
-            set("drown"),
-            Optional.of(DMLRegistry.GHOST_DRAGON_AMBIENT.get()));
-
-    static final Pair<ResourceLocation, DragonBreed> ICE = builtIn(DragonBreed.BuiltIn.ICE,
-            0xffffff,
-            0x00E1FF,
-            Optional.of(ParticleTypes.SNOWFLAKE),
-            of(),
-            list(
-                    new FrostWalkerAbility.Factory(3),
-                    ability(Ability.SNOW_STEPPER, () -> SnowStepperAbility.INSTANCE)
-            ),
-            list(
-                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)
-            ),
-            set("drown", "freeze"),
-            Optional.empty());
-
-    static final Pair<ResourceLocation, DragonBreed> NETHER = builtIn(DragonBreed.BuiltIn.NETHER,
-            0x912400,
-            0x2e0b00,
-            Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
-            of(Attributes.ARMOR, 8d),
-            list(),
-            list(
-                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS),
-                    new BiomeHabitat(3, BiomeTags.IS_NETHER)
-            ),
-            set("inFire", "onFire", "lava", "hotFloor"),
-            Optional.empty());
-
-    static final Pair<ResourceLocation, DragonBreed> WATER = builtIn(DragonBreed.BuiltIn.WATER,
-            0x0062ff,
-            0x5999ff,
-            Optional.of(ParticleTypes.DRIPPING_WATER),
-            of(),
-            list(
-                    ability(Ability.HYDRO_STEP, () -> HydroStepAbility.INSTANCE)
-            ),
-            list(
-                    new FluidHabitat(1f, FluidTags.WATER),
-                    new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)
-            ),
-            set("drown"),
-            Optional.empty());
-
     private final DataGenerator generator;
     private HashCache cache;
 
@@ -176,12 +65,6 @@ class DragonBreedProvider implements DataProvider
         for (var breed : breeds()) encode(breed.getKey(), breed.getValue(), ops);
     }
 
-    protected Pair<ResourceLocation, DragonBreed>[] breeds()
-    {
-        //noinspection unchecked
-        return new Pair[]{AETHER, END, FIRE, FOREST, GHOST, ICE, NETHER, WATER};
-    }
-
     protected void encode(ResourceLocation id, DragonBreed breed, RegistryOps<JsonElement> ops) throws IOException
     {
         var json = DragonBreed.CODEC.encodeStart(ops, breed).getOrThrow(false, DragonMountsLegacy.LOG::error);
@@ -197,6 +80,123 @@ class DragonBreedProvider implements DataProvider
         return "Dragon Breeds";
     }
 
+    protected Pair<ResourceLocation, DragonBreed>[] breeds()
+    {
+        //noinspection unchecked
+        return new Pair[]{
+        builtIn(DragonBreed.BuiltIn.AETHER,
+                0x718AA9,
+                0xE6E6E6,
+                Optional.empty(),
+                of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.45),
+                list(),
+                list(
+                        new HeightHabitat(3, false, 200)
+                ),
+                set(),
+                Optional.empty()),
+
+        builtIn(DragonBreed.BuiltIn.END,
+                0x161616,
+                0xff63e8,
+                Optional.of(ParticleTypes.PORTAL),
+                of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
+                list(), // teleport ability?
+                list(
+                        DragonBreathHabitat.INSTANCE
+                ),
+                set("dragonBreath"),
+                Optional.empty()),
+
+        builtIn(DragonBreed.BuiltIn.FIRE,
+                0x912400,
+                0xff9819,
+                Optional.of(ParticleTypes.FLAME),
+                ImmutableMap.of(),
+                ImmutableList.of(Ability.simpleFactory(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
+                ImmutableList.of(
+                        new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
+                        new FluidHabitat(3, FluidTags.LAVA)),
+                ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
+                Optional.empty()),
+
+        builtIn(DragonBreed.BuiltIn.FOREST,
+                0x054a00,
+                0x0a9600,
+                Optional.of(ParticleTypes.HAPPY_VILLAGER),
+                of(),
+                list(
+                        ability(Ability.GREEN_TOES, () -> GreenToesAbility.INSTANCE)
+                ),
+                list(
+                        new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS),
+                        new BiomeHabitat(2, BiomeTags.IS_JUNGLE)
+                ),
+                set(),
+                Optional.empty()),
+
+        builtIn(DragonBreed.BuiltIn.GHOST,
+                0xc4c4c4,
+                0xc2f8ff,
+                Optional.empty(),
+                of(),
+                list(
+                        ability(Ability.REAPER_STEP, () -> ReaperStepAbility.INSTANCE)
+                ),
+                list(
+                        new PickyHabitat(list(
+                                new HeightHabitat(1, true, 0),
+                                new LightHabitat(2, true, 3)
+                        ))
+                ),
+                set("drown"),
+                Optional.of(DMLRegistry.GHOST_DRAGON_AMBIENT.get())),
+
+        builtIn(DragonBreed.BuiltIn.ICE,
+                0xffffff,
+                0x00E1FF,
+                Optional.of(ParticleTypes.SNOWFLAKE),
+                of(),
+                list(
+                        new FrostWalkerAbility.Factory(3),
+                        ability(Ability.SNOW_STEPPER, () -> SnowStepperAbility.INSTANCE)
+                ),
+                list(
+                        new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)
+                ),
+                set("drown", "freeze"),
+                Optional.empty()),
+
+        builtIn(DragonBreed.BuiltIn.NETHER,
+                0x912400,
+                0x2e0b00,
+                Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
+                of(Attributes.ARMOR, 8d),
+                list(),
+                list(
+                        new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS),
+                        new BiomeHabitat(3, BiomeTags.IS_NETHER)
+                ),
+                set("inFire", "onFire", "lava", "hotFloor"),
+                Optional.empty()),
+
+        builtIn(DragonBreed.BuiltIn.WATER,
+                0x0062ff,
+                0x5999ff,
+                Optional.of(ParticleTypes.DRIPPING_WATER),
+                of(),
+                list(
+                        ability(Ability.HYDRO_STEP, () -> HydroStepAbility.INSTANCE)
+                ),
+                list(
+                        new FluidHabitat(1f, FluidTags.WATER),
+                        new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)
+                ),
+                set("drown"),
+                Optional.empty())
+        };
+    }
+
     public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound, Either<Integer, String> reproduction)
     {
         return new DragonBreed(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, DragonEgg.DEFAULT_HATCH_TIME, TameableDragon.BASE_SIZE_MODIFIER, Registry.ITEM.getOrCreateTag(ItemTags.FISHES), Registry.ITEM.getOrCreateTag(ItemTags.FISHES), reproduction);
@@ -204,8 +204,8 @@ class DragonBreedProvider implements DataProvider
 
     private static Pair<ResourceLocation, DragonBreed> builtIn(ResourceKey<DragonBreed> id, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound)
     {
-        Either<Integer, String> reproConfigTarget = Either.right();
-        return Pair.of(id.getRegistryName(), builtIn(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, reproConfigTarget));
+        Either<Integer, String> reproConfigTarget = Either.right("config:" + id.location().getPath());
+        return Pair.of(id.location(), builtIn(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, reproConfigTarget));
     }
 
     @SuppressWarnings("unchecked")

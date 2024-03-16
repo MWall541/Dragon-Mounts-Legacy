@@ -1,10 +1,11 @@
 {
+  "reproduction_limit": "config:end",
   "attributes": {
     "minecraft:generic.max_health": 75.0
   },
   "habitats": [
     {
-      "type": "dragon_breath"
+      "type": "dragonmounts:dragon_breath"
     }
   ],
   "immunities": [

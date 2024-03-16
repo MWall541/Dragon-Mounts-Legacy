@@ -1,11 +1,15 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
+import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.Map;
+
+import static com.github.kay9.dragonmounts.dragon.breed.DragonBreed.BuiltIn.*;
 
 public class DMLConfig
 {
@@ -39,25 +43,22 @@ public class DMLConfig
         return UPDATE_HABITATS.get();
     }
 
-    private static final Map<String, ForgeConfigSpec.DoubleValue> CHANCES;
+    private static final Map<String, ForgeConfigSpec.DoubleValue> EGG_CHANCES;
 
     public static float getEggChanceFor(String configTarget)
     {
-        var chance = CHANCES.get(configTarget);
+        var chance = EGG_CHANCES.get(configTarget);
         if (chance == null) return -1f;
         return chance.get().floatValue();
     }
 
+    private static final Map<String, ForgeConfigSpec.IntValue> REPRO_LIMITS;
+
     public static int getReproLimitFor(String configTarget)
     {
-
-    }
-
-    public static String formatEggTargetAsPath(ResourceLocation forBreed, ResourceLocation forTarget)
-    {
-        return String.format("%s_in_%s_chance",
-                forBreed.getPath(),
-                forTarget.getPath().substring(forTarget.getPath().lastIndexOf('/') + 1));
+        var limit = REPRO_LIMITS.get(configTarget.replace("config:", ""));
+        if (limit == null) return -1;
+        return limit.get();
     }
 
     static
@@ -86,26 +87,23 @@ public class DMLConfig
 
 
         configurator.comment(
-                        "THESE VALUES DO NOT TAKE EFFECT UNTIL `use_loot_tables` ABOVE IS SET TO `true` !!!",
+                        "!!! THESE VALUES DO NOT TAKE EFFECT UNTIL `use_loot_tables` ABOVE IS SET TO `true` !!!",
                         "These entries define the chance values of which a dragon egg can appear in its respective loot table.",
                         "Due to the static nature of configs in general, DML cannot modify the chances of custom breed eggs",
                         "outside the built-in defaults, so those should be configured to use minecraft's built in random chance conditions.",
                         "(It is however, possible to point custom egg chances to the built-in values via the loot condition, therefore using a config chance)")
                 .push("egg_loot_chances");
+        EGG_CHANCES = defineChanceEntries(configurator);
+        configurator.pop();
 
-        var chances = ImmutableMap.<String, ForgeConfigSpec.DoubleValue>builder();
-        for (var target : DragonEggLootMod.BUILT_IN_CHANCES)
-        {
-            var path = formatEggTargetAsPath(target.forBreed(), target.target());
-            var entry = configurator
-                    .comment(
-                            String.format("The chance that a %s egg appears in %s.", target.forBreed().getPath(), target.target().getPath()),
-                            "0 = Never Appears, 1 = Guaranteed")
-                    .defineInRange(path, target.chance(), 0, 1);
 
-            chances.put(path, entry);
-        }
-        CHANCES = chances.build();
+        configurator.comment(
+                "These entries define the reproduction (breed) limits of each dragon breed.",
+                "Due to the static nature of configs in general, DML cannot modify the reproduction limits of custom breeds",
+                "outside the mod's built in breeds. Those should be configured in datapacks to use a direct number rather",
+                "than point to an entry here (unless that's the goal.)")
+                .push("reproduction_limits");
+        REPRO_LIMITS = defineReproLimEntries(configurator);
         configurator.pop();
 
 
@@ -117,5 +115,41 @@ public class DMLConfig
     public static boolean cameraFlight()
     {
         return cameraFlight;
+    }
+
+    private static ImmutableMap<String, ForgeConfigSpec.DoubleValue> defineChanceEntries(ForgeConfigSpec.Builder configurator)
+    {
+        var chances = ImmutableMap.<String, ForgeConfigSpec.DoubleValue>builder();
+        for (var target : DragonEggLootMod.BUILT_IN_CHANCES)
+        {
+            var path = formatEggTargetAsPath(target.forBreed().location(), target.target());
+            var entry = configurator.comment(
+                            String.format("The chance that a %s egg appears in %s.", target.forBreed().location().getPath(), target.target().getPath()),
+                            "0 = Never Appears, 1 = Guaranteed")
+                    .defineInRange(path, target.chance(), 0, 1);
+
+            chances.put(path, entry);
+        }
+        return chances.build();
+    }
+
+    private static ImmutableMap<String, ForgeConfigSpec.IntValue> defineReproLimEntries(ForgeConfigSpec.Builder configurator)
+    {
+        var lims = ImmutableMap.<String, ForgeConfigSpec.IntValue>builder();
+        for (var type : new ResourceKey[]{AETHER, END, FIRE, FOREST, GHOST, ICE, NETHER, WATER})
+        {
+            var path = type.location().getPath();
+            lims.put(path, configurator.comment(
+                    "-1 = No Limit, 0 = Cannot breed, 2 = Can breed only two times")
+                    .defineInRange(path, TameableDragon.BASE_REPRO_LIMIT, -1, Integer.MAX_VALUE));
+        }
+        return lims.build();
+    }
+
+    public static String formatEggTargetAsPath(ResourceLocation forBreed, ResourceLocation forTarget)
+    {
+        return String.format("%s_in_%s_chance",
+                forBreed.getPath(),
+                forTarget.getPath().substring(forTarget.getPath().lastIndexOf('/') + 1));
     }
 }

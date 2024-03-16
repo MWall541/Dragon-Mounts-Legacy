@@ -1,4 +1,5 @@
 {
+  "reproduction_limit": "config:fire",
   "abilities": [
     {
       "type": "dragonmounts:hot_feet"
@@ -8,12 +9,12 @@
     {
       "point_multiplier": 1.0,
       "block_tag": "dragonmounts:fire_dragon_habitat_blocks",
-      "type": "nearby_blocks"
+      "type": "dragonmounts:nearby_blocks"
     },
     {
       "point_multiplier": 3.0,
       "fluid_tag": "minecraft:lava",
-      "type": "in_fluid"
+      "type": "dragonmounts:in_fluid"
     }
   ],
   "immunities": [

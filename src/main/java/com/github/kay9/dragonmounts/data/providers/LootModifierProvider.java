@@ -22,7 +22,7 @@ class LootModifierProvider extends GlobalLootModifierProvider
     protected void start()
     {
         for (var target : DragonEggLootMod.BUILT_IN_CHANCES)
-            addWithConfigChance(target.forBreed(), target.target());
+            addWithConfigChance(target.forBreed().location(), target.target());
     }
 
     protected void add(ResourceLocation breed, ResourceLocation table, float chance)

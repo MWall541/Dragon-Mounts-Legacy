@@ -9,7 +9,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.client.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
-public class Keybinds
+public class KeyMappings
 {
     public static final KeyMapping FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
     public static final KeyMapping CAMERA_CONTROLS = keymap("camera_flight", GLFW.GLFW_KEY_F6, "key.categories.movement");

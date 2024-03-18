@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonModel;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
@@ -25,9 +26,9 @@ public class ModelPropertiesProvider implements DataProvider
     @Override
     public void run(HashCache pCache) throws IOException
     {
-        save(pCache, "fire", new DragonModel.Properties(false, false, false));
-        save(pCache, "ghost", new DragonModel.Properties(true, false, true));
-        save(pCache, "water", new DragonModel.Properties(true, true, false));
+        save(pCache, DragonBreed.BuiltIn.FIRE.location().getPath(), new DragonModel.Properties(false, false, false));
+        save(pCache, DragonBreed.BuiltIn.GHOST.location().getPath(), new DragonModel.Properties(true, false, true));
+        save(pCache, DragonBreed.BuiltIn.WATER.location().getPath(), new DragonModel.Properties(true, true, false));
     }
 
     private void save(HashCache cache, String id, DragonModel.Properties instance) throws IOException

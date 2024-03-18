@@ -5,7 +5,7 @@ import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
-import com.github.kay9.dragonmounts.client.Keybinds;
+import com.github.kay9.dragonmounts.client.KeyMappings;
 import com.github.kay9.dragonmounts.client.MountControlsMessenger;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
@@ -191,7 +191,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (DATA_BREED.equals(data))
         {
             setBreed(BreedRegistry.get(entityData.get(DATA_BREED), getLevel().registryAccess()));
-            updateAgeProgress();
+            updateAgeProperties();
         }
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
@@ -231,7 +231,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public DragonBreed getBreed()
     {
-        if (breed == null)
+        if (breed == null) // initialize lazily if a breed was never specified or is being queried too late.
             setBreed(BreedRegistry.getRandom(getLevel().registryAccess(), getRandom()));
         return breed;
     }
@@ -383,7 +383,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     moveForward = moveForward > 0? moveForward : 0;
                     moveY = 0;
                     if (driver.jumping) moveY = 1;
-                    else if (Keybinds.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
+                    else if (KeyMappings.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
                     else if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
                 }
                 else if (driver.jumping && canFly()) liftOff();

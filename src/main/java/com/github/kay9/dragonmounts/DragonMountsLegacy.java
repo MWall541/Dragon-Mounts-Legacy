@@ -94,7 +94,7 @@ public class DragonMountsLegacy
 
     static void onKeyPress(int key, int action, int modifiers)
     {
-        Keybinds.handleKeyPress(key, action);
+        KeyMappings.handleKeyPress(key, action);
     }
 
     static void populateSearchTrees()

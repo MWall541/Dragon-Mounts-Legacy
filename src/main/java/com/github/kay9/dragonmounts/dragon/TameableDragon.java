@@ -52,11 +52,13 @@ import net.minecraft.world.item.SaddleItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraftforge.common.Tags;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -449,6 +451,18 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             stack.shrink(1);
             equipSaddle(getSoundSource());
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        // give the saddle back!
+        if (isTamedFor(player) && isSaddled() && stack.is(Tags.Items.SHEARS))
+        {
+            spawnAtLocation(Items.SADDLE);
+            player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
+            setSaddled(false);
+            gameEvent(GameEvent.SHEAR, player);
+            stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
 

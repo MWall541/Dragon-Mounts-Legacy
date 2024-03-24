@@ -72,7 +72,9 @@ public class DMLConfig
                 .define("allow_egg_override", true);
         REPLENISH_EGGS = configurator.comment(
                         "Should Ender Dragon Eggs replenish on the exit portal after a respawned dragon is defeated?",
-                        "Useful for multiplayer scenarios.")
+                        "Useful for multiplayer scenarios.",
+                        "NOTE: This may break with mods that add content in the end. (A big example is YUNG's better end islands)",
+                        "You should see if those mods have ways to replenish dragon eggs themselves.")
                 .define("replenish_eggs", true);
         USE_LOOT_TABLES = configurator.comment(
                         "Should dragon eggs generate in treasure chest loot tables?",

@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,6 +36,7 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 public class DMLEggBlock extends DragonEggBlock implements EntityBlock
@@ -49,6 +51,22 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState)
     {
         return new Entity(pPos, pState);
+    }
+
+    @Override
+    public void tick(BlockState pState, ServerLevel level, BlockPos pPos, Random pRand)
+    {
+        if (isFree(level.getBlockState(pPos.below())) && pPos.getY() >= level.getMinBuildHeight())
+        {
+            CompoundTag nbt = null;
+            if (level.getBlockEntity(pPos) instanceof Entity e)
+                nbt = e.saveWithoutMetadata();
+
+            var falling = FallingBlockEntity.fall(level, pPos, pState);
+            falling.blockData = nbt;
+
+            this.falling(falling);
+        }
     }
 
     @Override
@@ -81,13 +99,6 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     public static void startHatching(DragonBreed breed, Level level, BlockPos pos)
     {
         startHatching(breed, breed.hatchTime(), level, pos);
-    }
-
-    @Override
-    protected void falling(FallingBlockEntity falling)
-    {
-        if (falling.level.getBlockEntity(falling.blockPosition()) instanceof Entity e)
-            falling.blockData = e.saveWithoutMetadata();
     }
 
     public static void startHatching(DragonBreed breed, int hatchTime, Level level, BlockPos pos)

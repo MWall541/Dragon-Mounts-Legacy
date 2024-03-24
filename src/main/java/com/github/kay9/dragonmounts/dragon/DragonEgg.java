@@ -55,8 +55,6 @@ public class DragonEgg extends Entity
     public DragonBreed breed;
     public final TransitionHandler transitioner;
     private int hatchTime;
-//    private final LerpedFloat wiggleTime; todo: wiggle animations
-//    private boolean wiggling;
 
     public DragonEgg(EntityType<? extends Entity> type, Level level)
     {
@@ -65,7 +63,6 @@ public class DragonEgg extends Entity
         breed = BreedRegistry.getRandom(level.registryAccess(), level.getRandom());
         hatchTime = breed.hatchTime();
         transitioner = new TransitionHandler();
-//        wiggleTime = LerpedFloat.unit();
     }
 
     @Override
@@ -279,9 +276,7 @@ public class DragonEgg extends Entity
     {
         if (level.isClientSide)
         {
-//            if (wiggling || wiggleTime.get() > 0) return;
             level.playLocalSound(getX(), getY(), getZ(), SoundEvents.TURTLE_EGG_CRACK, SoundSource.BLOCKS, 1, 1, false);
-//            this.wiggling = true;
         }
         else level.broadcastEntityEvent(this, WIGGLE_ID);
     }

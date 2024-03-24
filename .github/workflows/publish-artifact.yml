@@ -2,9 +2,13 @@ name: Java-Gradle CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - 'mc/**'
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+      - 'mc/**'
 
 jobs:
   build:

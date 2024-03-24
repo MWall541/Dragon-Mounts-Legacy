@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts;
 
+import com.github.kay9.dragonmounts.client.MountCameraManager;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
@@ -34,7 +35,8 @@ public class ForgeModImpl
         DMLRegistry.init(bus);
         BreedRegistry.DEFERRED_REGISTRY.register(bus);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT_SPEC);
 
         setupEvents();
     }
@@ -62,7 +64,7 @@ public class ForgeModImpl
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
             bus.addListener((TickEvent.ClientTickEvent e) -> clientTick(e.phase == TickEvent.Phase.START));
-            bus.addListener((EntityViewRenderEvent.CameraSetup e) -> modifyMountCameraAngles(e.getCamera()));
+            bus.addListener((EntityViewRenderEvent.CameraSetup e) -> MountCameraManager.setMountCameraAngles(e.getCamera()));
             bus.addListener((InputEvent.KeyInputEvent e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
             bus.addListener((TagsUpdatedEvent e) -> populateSearchTrees());
 

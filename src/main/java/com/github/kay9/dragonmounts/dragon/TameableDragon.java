@@ -6,6 +6,7 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
 import com.github.kay9.dragonmounts.client.KeyMappings;
+import com.github.kay9.dragonmounts.client.MountCameraManager;
 import com.github.kay9.dragonmounts.client.MountControlsMessenger;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
@@ -386,7 +387,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     moveY = 0;
                     if (driver.jumping) moveY = 1;
                     else if (KeyMappings.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
-                    else if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
+                    else if (moveForward > 0 && DMLConfig.cameraDrivenFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
                 }
                 else if (driver.jumping && canFly()) liftOff();
 
@@ -483,7 +484,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             if (isServer())
             {
-                setRidingPlayer(player);
+                player.startRiding(this);
                 navigation.stop();
                 setTarget(null);
             }
@@ -896,18 +897,29 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return list.isEmpty()? null : list.get(0);
     }
 
-    public void setRidingPlayer(Player player)
+    @Override
+    protected void addPassenger(Entity passenger)
     {
-        player.setYRot(getYRot());
-        player.setXRot(getXRot());
-        player.startRiding(this);
+        super.addPassenger(passenger);
+
+        if (passenger instanceof Player)
+        {
+            passenger.setYRot(getYRot());
+            passenger.setXRot(getXRot());
+        }
+
+        if (!isServer() && isControlledByLocalInstance())
+        {
+            MountControlsMessenger.sendControlsMessage();
+            MountCameraManager.onDragonMount();
+        }
     }
 
     @Override
-    protected void addPassenger(Entity pPassenger)
+    protected void removePassenger(Entity passenger)
     {
-        super.addPassenger(pPassenger);
-        if (!isServer() && isControlledByLocalInstance()) MountControlsMessenger.sendControlsMessage();
+        if (isControlledByLocalInstance()) MountCameraManager.onDragonDismount();
+        super.removePassenger(passenger);
     }
 
     @Override

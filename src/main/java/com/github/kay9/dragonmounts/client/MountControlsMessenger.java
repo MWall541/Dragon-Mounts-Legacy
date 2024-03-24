@@ -23,6 +23,7 @@ public class MountControlsMessenger
         delay = 60;
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void tick()
     {
         if (delay > 0)

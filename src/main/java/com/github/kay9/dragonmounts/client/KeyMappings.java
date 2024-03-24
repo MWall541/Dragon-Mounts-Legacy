@@ -28,8 +28,8 @@ public class KeyMappings
                 && action == GLFW.GLFW_PRESS
                 && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon d)
         {
-            DMLConfig.cameraFlight = !DMLConfig.cameraFlight();
-            Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mount.dragon.camera_controls." + (DMLConfig.cameraFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
+            DMLConfig.CAMERA_DRIVEN_FLIGHT.set(!DMLConfig.cameraDrivenFlight());
+            Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mount.dragon.camera_controls." + (DMLConfig.cameraDrivenFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
         }
     }
 }

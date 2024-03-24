@@ -7,7 +7,6 @@ import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -71,25 +70,6 @@ public class DragonMountsLegacy
     static void clientTick(boolean pre)
     {
         if (!pre) MountControlsMessenger.tick();
-    }
-
-    @SuppressWarnings("ConstantConditions") // player should never be null at time of calling
-    static void modifyMountCameraAngles(Camera camera)
-    {
-        if (Minecraft.getInstance().player.getVehicle() instanceof TameableDragon)
-        {
-            var distance = 0;
-            var vertical = 0;
-            switch (Minecraft.getInstance().options.getCameraType())
-            {
-                case THIRD_PERSON_FRONT -> distance = 6;
-                case THIRD_PERSON_BACK -> {
-                    distance = 6;
-                    vertical = 4;
-                }
-            }
-            camera.move(-camera.getMaxZoom(distance), vertical, 0);
-        }
     }
 
     static void onKeyPress(int key, int action, int modifiers)

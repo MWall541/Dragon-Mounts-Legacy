@@ -5,11 +5,11 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -18,10 +18,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class ReaperStepAbility extends FootprintAbility
+public class ReaperStepAbility extends FootprintAbility implements Ability.Factory<ReaperStepAbility>
 {
     public static final ReaperStepAbility INSTANCE = new ReaperStepAbility();
-    public static final Codec<Factory<ReaperStepAbility>> CODEC = Ability.singleton(REAPER_STEP, INSTANCE);
+    public static final Codec<ReaperStepAbility> CODEC = Codec.unit(INSTANCE);
 
     public static final TagKey<Block> PLANT_DEATH_TAG = BlockTags.create(DragonMountsLegacy.id("reaper_plant_death"));
     public static final TagKey<Block> PLANT_DESTRUCTION_TAG = BlockTags.create(DragonMountsLegacy.id("reaper_plant_destruction"));
@@ -73,5 +73,17 @@ public class ReaperStepAbility extends FootprintAbility
     {
         level.destroyBlock(pos, false);
         level.setBlock(pos, state, Block.UPDATE_ALL);
+    }
+
+    @Override
+    public ReaperStepAbility create()
+    {
+        return this;
+    }
+
+    @Override
+    public ResourceLocation type()
+    {
+        return REAPER_STEP;
     }
 }

@@ -6,31 +6,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 
-import java.util.function.Supplier;
 
-
-public class FrostWalkerAbility implements Ability
+public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerAbility>
 {
-    public static final Codec<Factory> CODEC = Codec.FLOAT
-            .xmap(Factory::new, Factory::radiusMultiplier)
+    public static final Codec<FrostWalkerAbility> CODEC = Codec.FLOAT
+            .xmap(FrostWalkerAbility::new, a -> a.radiusMultiplier)
             .fieldOf("radius_multiplier")
             .codec();
 
     private final float radiusMultiplier;
 
-    public FrostWalkerAbility(float radiusMultiplier)
+    protected FrostWalkerAbility(float radiusMultiplier)
     {
         this.radiusMultiplier = radiusMultiplier;
+    }
+
+    public static FrostWalkerAbility create(float radiusMultiplier)
+    {
+        return new FrostWalkerAbility(radiusMultiplier);
     }
 
     @Override
@@ -85,18 +86,15 @@ public class FrostWalkerAbility implements Ability
         }
     }
 
-    public record Factory(float radiusMultiplier) implements Ability.Factory<FrostWalkerAbility>
+    @Override
+    public FrostWalkerAbility create()
     {
-        @Override
-        public FrostWalkerAbility create()
-        {
-            return new FrostWalkerAbility(radiusMultiplier());
-        }
+        return this;
+    }
 
-        @Override
-        public ResourceLocation type()
-        {
-            return FROST_WALKER;
-        }
+    @Override
+    public ResourceLocation type()
+    {
+        return FROST_WALKER;
     }
 }

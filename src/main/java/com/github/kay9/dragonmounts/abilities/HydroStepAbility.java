@@ -3,21 +3,16 @@ package com.github.kay9.dragonmounts.abilities;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.WeatheringCopper;
 
-public class HydroStepAbility extends FootprintAbility
+public class HydroStepAbility extends FootprintAbility implements Ability.Factory<HydroStepAbility>
 {
     public static final HydroStepAbility INSTANCE = new HydroStepAbility();
-    public static final Codec<Factory<HydroStepAbility>> CODEC = Ability.singleton(HYDRO_STEP, INSTANCE);
-
-    // moisten farmland
-    // soak sponges
-    // extinguish fire
-    // magmablock -> blackstone
-    // copper -> rust
+    public static final Codec<HydroStepAbility> CODEC = Codec.unit(INSTANCE);
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
@@ -25,6 +20,12 @@ public class HydroStepAbility extends FootprintAbility
         var level = dragon.getLevel();
         var groundPos = pos.below();
         var steppingOn = level.getBlockState(groundPos);
+
+        // moisten farmland
+        // soak sponges
+        // extinguish fire
+        // magmablock -> blackstone
+        // copper -> rust
 
         if (steppingOn.is(Blocks.FARMLAND))
         {
@@ -62,5 +63,17 @@ public class HydroStepAbility extends FootprintAbility
     protected float getFootprintChance(TameableDragon dragon)
     {
         return 1f; // guaranteed
+    }
+
+    @Override
+    public HydroStepAbility create()
+    {
+        return this;
+    }
+
+    @Override
+    public ResourceLocation type()
+    {
+        return HYDRO_STEP;
     }
 }

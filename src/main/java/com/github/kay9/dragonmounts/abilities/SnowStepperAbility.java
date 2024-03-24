@@ -4,13 +4,14 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 
-public class SnowStepperAbility extends FootprintAbility
+public class SnowStepperAbility extends FootprintAbility implements Ability.Factory<SnowStepperAbility>
 {
     public static final SnowStepperAbility INSTANCE = new SnowStepperAbility();
-    public static final Codec<Factory<SnowStepperAbility>> CODEC = Ability.singleton(SNOW_STEPPER, INSTANCE);
+    public static final Codec<SnowStepperAbility> CODEC = Codec.unit(INSTANCE);
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
@@ -31,5 +32,17 @@ public class SnowStepperAbility extends FootprintAbility
     {
         var pos = dragon.blockPosition();
         return dragon.getLevel().getBiome(pos).value().coldEnoughToSnow(pos)? 0.5f : 0;
+    }
+
+    @Override
+    public SnowStepperAbility create()
+    {
+        return this;
+    }
+
+    @Override
+    public ResourceLocation type()
+    {
+        return SNOW_STEPPER;
     }
 }

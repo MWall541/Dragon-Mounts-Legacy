@@ -1,25 +1,24 @@
 package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.function.Supplier;
-
-public class GreenToesAbility extends FootprintAbility
+public class GreenToesAbility extends FootprintAbility implements Ability.Factory<GreenToesAbility>
 {
     public static final GreenToesAbility INSTANCE = new GreenToesAbility();
-    public static final Codec<Factory<GreenToesAbility>> CODEC = Ability.singleton(GREEN_TOES, INSTANCE);
+    public static final Codec<GreenToesAbility> CODEC = Codec.unit(INSTANCE);
     private static final int GRASS_LIGHT_THRESHOLD = 4;
+
+    protected GreenToesAbility() {}
 
     // grow mushrooms and plants
     @Override
@@ -60,5 +59,17 @@ public class GreenToesAbility extends FootprintAbility
                     dragon.getRandom().nextInt(4) + 2,
                     0.5, 0.5, 0.5, 1);
         }
+    }
+
+    @Override
+    public GreenToesAbility create()
+    {
+        return this;
+    }
+
+    @Override
+    public ResourceLocation type()
+    {
+        return GREEN_TOES;
     }
 }

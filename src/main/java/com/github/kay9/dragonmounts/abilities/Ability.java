@@ -65,13 +65,42 @@ public interface Ability
 
     default void onMove(TameableDragon dragon) {}
 
+    /**
+     * The Ability Factory is responsible for creating the instances of an ability.
+     * If an ability is meant to be breed specific and needs no per-entity data, this interface can be implemented
+     * directly by the ability class, and return itself in {@code Factory#create}. This effectively removes the need for
+     * a new factory type instance that just returns a new 'effective singleton', which is unnecessary for memory.
+     * Most abilities in DML are simplistic in nature and follow this approach. {@code FrostWalkerAbility} is a good
+     * example.
+     * <br><br>
+     * It is crucially important that if you are extending a class already implementing {@code Factory} that
+     * you override {@code Factory#create} and {@code Factory#type}. <br>
+     * If the parent ability class is a breed specific type, and your type is an entity specific, {@code Factory#create} and
+     * {@code Factory#type} do not matter since your codec SHOULD NOT USE THEM! You MUST create a new factory type for per-entity
+     * implementations, or use {@code Ability#simpleFactory}
+     */
     interface Factory<T extends Ability>
     {
+        /**
+         *
+         * @return an ability instance of type T
+         */
         T create();
 
         ResourceLocation type();
     }
 
+    /**
+     * While this is here, I don't necessarily recommend using it because the type has to be created to serialize
+     * its values, but it's not exactly a deal-breaker at data-generation. Just... impractical. <br>
+     * Example usage:
+     * <pre>
+     * {@code Codec<Factory<MyAbility>> CODEC = Codec.FLOAT
+     *  .xmap(myFloat -> Ability.simpleFactory(() -> new MyAbility(myfloat)), myFactory -> myFactory.create().myFloat)
+     *  .fieldOf("my_float")
+     *  .codec();}
+     * </pre>
+     */
     static <T extends Ability> Factory<T> simpleFactory(ResourceLocation id, Supplier<T> factory)
     {
         return new Factory<T>()
@@ -88,10 +117,5 @@ public interface Ability
                 return id;
             }
         };
-    }
-
-    static <T extends Ability> Codec<Factory<T>> singleton(ResourceLocation id, T instance)
-    {
-        return Codec.unit(simpleFactory(id, () -> instance));
     }
 }

@@ -9,7 +9,6 @@ import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.habitats.*;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,7 +39,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static com.google.common.collect.ImmutableMap.of;
 
@@ -112,8 +110,10 @@ class DragonBreedProvider implements DataProvider
                 0x912400,
                 0xff9819,
                 Optional.of(ParticleTypes.FLAME),
-                ImmutableMap.of(),
-                ImmutableList.of(Ability.simpleFactory(Ability.HOT_FEET, () -> HotFeetAbility.INSTANCE)),
+                of(),
+                list(
+                        HotFeetAbility.INSTANCE
+                ),
                 ImmutableList.of(
                         new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
                         new FluidHabitat(3, FluidTags.LAVA)),
@@ -126,7 +126,7 @@ class DragonBreedProvider implements DataProvider
                 Optional.of(ParticleTypes.HAPPY_VILLAGER),
                 of(),
                 list(
-                        ability(Ability.GREEN_TOES, () -> GreenToesAbility.INSTANCE)
+                        GreenToesAbility.INSTANCE
                 ),
                 list(
                         new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS),
@@ -141,7 +141,7 @@ class DragonBreedProvider implements DataProvider
                 Optional.empty(),
                 of(),
                 list(
-                        ability(Ability.REAPER_STEP, () -> ReaperStepAbility.INSTANCE)
+                        ReaperStepAbility.INSTANCE
                 ),
                 list(
                         new PickyHabitat(list(
@@ -158,8 +158,8 @@ class DragonBreedProvider implements DataProvider
                 Optional.of(ParticleTypes.SNOWFLAKE),
                 of(),
                 list(
-                        new FrostWalkerAbility.Factory(3),
-                        ability(Ability.SNOW_STEPPER, () -> SnowStepperAbility.INSTANCE)
+                        FrostWalkerAbility.create(3),
+                        SnowStepperAbility.INSTANCE
                 ),
                 list(
                         new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)
@@ -186,7 +186,7 @@ class DragonBreedProvider implements DataProvider
                 Optional.of(ParticleTypes.DRIPPING_WATER),
                 of(),
                 list(
-                        ability(Ability.HYDRO_STEP, () -> HydroStepAbility.INSTANCE)
+                        HydroStepAbility.INSTANCE
                 ),
                 list(
                         new FluidHabitat(1f, FluidTags.WATER),
@@ -218,10 +218,5 @@ class DragonBreedProvider implements DataProvider
     protected static <T> ImmutableSet<T> set(T... objs)
     {
         return ImmutableSet.copyOf(objs);
-    }
-
-    protected static Ability.Factory<Ability> ability(ResourceLocation id, Supplier<Ability> fact)
-    {
-        return Ability.simpleFactory(id, fact);
     }
 }

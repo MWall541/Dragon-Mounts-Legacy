@@ -5,17 +5,20 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class GreenToesAbility extends FootprintAbility
+public class GreenToesAbility extends FootprintAbility implements Ability.Factory<GreenToesAbility>
 {
     public static final GreenToesAbility INSTANCE = new GreenToesAbility();
     public static final Codec<GreenToesAbility> CODEC = Codec.unit(INSTANCE);
     private static final int GRASS_LIGHT_THRESHOLD = 4;
+
+    protected GreenToesAbility() {}
 
     // grow mushrooms and plants
     @Override
@@ -59,8 +62,14 @@ public class GreenToesAbility extends FootprintAbility
     }
 
     @Override
-    public String type()
+    public GreenToesAbility create()
     {
-        return Ability.GREEN_TOES;
+        return this;
+    }
+
+    @Override
+    public ResourceLocation type()
+    {
+        return GREEN_TOES;
     }
 }

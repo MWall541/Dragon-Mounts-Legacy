@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:small_flowers",
+    "minecraft:red_mushroom",
+    "minecraft:brown_mushroom"
+  ],
+  "remove": [
+    "minecraft:wither_rose"
+  ]
+}

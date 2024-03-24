@@ -1,14 +1,14 @@
 {
-  "type": "dragonmounts:dragon_egg_loot",
-  "breed": "dragonmounts:forest",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/jungle_temple"
     },
     {
-      "chance": 0.3,
-      "condition": "minecraft:random_chance"
+      "condition": "dragonmounts:random_chance_by_config",
+      "config_chance_target": "forest_in_jungle_temple_chance"
     }
-  ]
+  ],
+  "egg_breed": "dragonmounts:forest",
+  "type": "dragonmounts:dragon_egg_loot"
 }

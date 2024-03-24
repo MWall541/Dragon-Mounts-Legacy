@@ -23,6 +23,7 @@ public class MountControlsMessenger
         delay = 60;
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void tick()
     {
         if (delay > 0)
@@ -39,7 +40,7 @@ public class MountControlsMessenger
             if (delay == 0)
                 player.displayClientMessage(Component.translatable("mount.dragon.vertical_controls",
                         Minecraft.getInstance().options.keyJump.getTranslatedKeyMessage(),
-                        Keybinds.FLIGHT_DESCENT_KEY.getTranslatedKeyMessage()), true);
+                        KeyMappings.FLIGHT_DESCENT_KEY.getTranslatedKeyMessage()), true);
         }
     }
 }

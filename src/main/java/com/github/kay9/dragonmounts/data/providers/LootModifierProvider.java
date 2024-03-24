@@ -1,15 +1,14 @@
 package com.github.kay9.dragonmounts.data.providers;
 
+import com.github.kay9.dragonmounts.DMLConfig;
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraftforge.common.data.GlobalLootModifierProvider;
 import net.minecraftforge.common.loot.LootTableIdCondition;
-
-import static com.github.kay9.dragonmounts.data.providers.DragonBreedProvider.*;
 
 class LootModifierProvider extends GlobalLootModifierProvider
 {
@@ -21,25 +20,29 @@ class LootModifierProvider extends GlobalLootModifierProvider
     @Override
     protected void start()
     {
-        add(AETHER.location(), BuiltInLootTables.SIMPLE_DUNGEON, 0.2f);
-        add(FIRE.location(), BuiltInLootTables.DESERT_PYRAMID, 0.085f);
-        add(FOREST.location(), BuiltInLootTables.JUNGLE_TEMPLE, 0.3f);
-        add(GHOST.location(), BuiltInLootTables.WOODLAND_MANSION, 0.2f);
-        add(GHOST.location(), BuiltInLootTables.ABANDONED_MINESHAFT, 0.075f);
-        add(ICE.location(), BuiltInLootTables.IGLOO_CHEST, 0.2f);
-        add(NETHER.location(), BuiltInLootTables.BASTION_TREASURE, 0.35f);
-        add(WATER.location(), BuiltInLootTables.BURIED_TREASURE, 0.175f);
+        for (var target : DragonEggLootMod.BUILT_IN_CHANCES)
+            addWithConfigChance(target.forBreed().location(), target.target());
     }
 
     protected void add(ResourceLocation breed, ResourceLocation table, float chance)
     {
-        var path = breed.getNamespace() + "/" + breed.getPath() + "/" + table.getPath();
-
-        var conditions = new LootItemCondition[] {
+        var conditions = new LootItemCondition[]{
                 LootTableIdCondition.builder(table).build(),
                 LootItemRandomChanceCondition.randomChance(chance).build(),
         };
 
+        var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());
+        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed));
+    }
+
+    private void addWithConfigChance(ResourceLocation breed, ResourceLocation table)
+    {
+        var conditions = new LootItemCondition[]{
+                LootTableIdCondition.builder(table).build(),
+                new RandomChanceByConfig(DMLConfig.formatEggTargetAsPath(breed, table)) // Automatically formats the given inputs to point the chance values to the corresponding config entry
+        };
+
+        var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());
         super.add(path, new DragonEggLootMod(conditions, breed));
     }
 }

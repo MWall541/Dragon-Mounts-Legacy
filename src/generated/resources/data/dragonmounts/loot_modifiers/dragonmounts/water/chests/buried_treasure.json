@@ -1,14 +1,14 @@
 {
-  "type": "dragonmounts:dragon_egg_loot",
-  "breed": "dragonmounts:water",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/buried_treasure"
     },
     {
-      "chance": 0.175,
-      "condition": "minecraft:random_chance"
+      "condition": "dragonmounts:random_chance_by_config",
+      "config_chance_target": "water_in_buried_treasure_chance"
     }
-  ]
+  ],
+  "egg_breed": "dragonmounts:water",
+  "type": "dragonmounts:dragon_egg_loot"
 }

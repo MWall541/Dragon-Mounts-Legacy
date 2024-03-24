@@ -1,22 +1,28 @@
 {
+  "reproduction_limit": "config:ghost",
   "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
+  "abilities": [
+    {
+      "type": "dragonmounts:reaper_step"
+    }
+  ],
   "habitats": [
     {
-      "type": "picky",
       "required_habitats": [
         {
-          "type": "world_height",
+          "points": 1,
           "below": true,
           "height": 0,
-          "points": 1
+          "type": "dragonmounts:world_height"
         },
         {
-          "type": "light",
+          "points": 2,
           "below": true,
           "light": 3,
-          "points": 2
+          "type": "dragonmounts:light"
         }
-      ]
+      ],
+      "type": "dragonmounts:picky"
     }
   ],
   "immunities": [

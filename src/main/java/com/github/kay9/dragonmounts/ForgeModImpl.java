@@ -1,8 +1,12 @@
 package com.github.kay9.dragonmounts;
 
+import com.github.kay9.dragonmounts.client.MountCameraManager;
+import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -30,9 +34,8 @@ public class ForgeModImpl
 
         DMLRegistry.init(bus);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
-//        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT_SPEC);
 
         setupEvents();
     }
@@ -56,11 +59,12 @@ public class ForgeModImpl
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
         modBus.addListener((DataPackRegistryEvent.NewRegistry e) -> hookRegistry(e::dataPackRegistry));
+        modBus.addGenericListener(GlobalLootModifierSerializer.class, (RegistryEvent.Register<GlobalLootModifierSerializer<?>> e) -> DMLRegistry.registerLootConditions());
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
             bus.addListener((TickEvent.ClientTickEvent e) -> clientTick(e.phase == TickEvent.Phase.START));
-            bus.addListener((ViewportEvent.ComputeCameraAngles e) -> modifyMountCameraAngles(e.getCamera()));
+            bus.addListener((ViewportEvent.ComputeCameraAngles e) -> MountCameraManager.setMountCameraAngles(e.getCamera()));
             bus.addListener((InputEvent.Key e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
 
             modBus.addListener((ModelEvent.RegisterGeometryLoaders e) -> registerEggModelLoader(e::register));

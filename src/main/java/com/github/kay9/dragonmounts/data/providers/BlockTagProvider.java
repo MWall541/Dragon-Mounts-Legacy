@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
+import com.github.kay9.dragonmounts.abilities.ReaperStepAbility;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
@@ -53,5 +54,18 @@ class BlockTagProvider extends BlockTagsProvider
 
         tag(HotFeetAbility.BURNABLES_TAG)
                 .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.REPLACEABLE);
+
+        tag(ReaperStepAbility.PLANT_DEATH_TAG)
+                .addTags(BlockTags.TALL_FLOWERS)
+                .add(Blocks.TALL_GRASS, Blocks.GRASS);
+
+        tag(ReaperStepAbility.PLANT_DESTRUCTION_TAG)
+                .addTags(BlockTags.SMALL_FLOWERS)
+                .add(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM)
+                .remove(Blocks.WITHER_ROSE);
+
+        tag(ReaperStepAbility.REAPER_TRANSFORM)
+                .addTags(BlockTags.SAND, BlockTags.DIRT)
+                .add(Blocks.GRASS_BLOCK);
     }
 }

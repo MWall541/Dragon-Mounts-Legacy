@@ -2,6 +2,9 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonModel;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
@@ -22,9 +25,9 @@ public class ModelPropertiesProvider implements DataProvider
     public CompletableFuture<?> run(CachedOutput pOutput)
     {
         return CompletableFuture.allOf(
-                save(pOutput, "fire", new DragonModel.Properties(false, false, false)),
-                save(pOutput, "ghost", new DragonModel.Properties(true, false, true)),
-                save(pOutput, "water", new DragonModel.Properties(true, true, false)));
+                save(pOutput, DragonBreed.BuiltIn.FIRE.location().getPath(), new DragonModel.Properties(false, false, false)),
+                save(pOutput, DragonBreed.BuiltIn.GHOST.location().getPath(), new DragonModel.Properties(true, false, true)),
+                save(pOutput, DragonBreed.BuiltIn.WATER.location().getPath(), new DragonModel.Properties(true, true, false)));
     }
 
     private CompletableFuture<?> save(CachedOutput cache, String id, DragonModel.Properties instance)

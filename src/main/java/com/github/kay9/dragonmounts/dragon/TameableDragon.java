@@ -3,8 +3,10 @@ package com.github.kay9.dragonmounts.dragon;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
-import com.github.kay9.dragonmounts.client.Keybinds;
+import com.github.kay9.dragonmounts.client.KeyMappings;
+import com.github.kay9.dragonmounts.client.MountCameraManager;
 import com.github.kay9.dragonmounts.client.MountControlsMessenger;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
@@ -53,16 +55,20 @@ import net.minecraft.world.item.SaddleItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.common.Tags;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -109,6 +115,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     // server/client delegates
     private final DragonAnimator animator;
+    private final List<Ability> abilities = new ArrayList<>();
     private DragonBreed breed;
     private int reproCount;
     private float ageProgress = 1; // default to adult
@@ -224,15 +231,20 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             if (breed != null) breed.close(this);
             this.breed = dragonBreed;
             breed.initialize(this);
-            getEntityData().set(DATA_BREED, breed.id(level().registryAccess()).toString());
+            getEntityData().set(DATA_BREED, breed.id(getLevel().registryAccess()).toString());
         }
     }
 
     public DragonBreed getBreed()
     {
         if (breed == null) // initialize lazily if a breed was never specified or is being queried too late.
-            setBreed(BreedRegistry.getRandom(level().registryAccess(), getRandom()));
+            setBreed(BreedRegistry.getRandom(getLevel().registryAccess(), getRandom()));
         return breed;
+    }
+
+    public List<Ability> getAbilities()
+    {
+        return abilities;
     }
 
     /**
@@ -343,7 +355,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         updateAgeProgress();
-        for (var ability : getBreed().abilities()) ability.tick(this);
+        for (var ability : getAbilities()) ability.tick(this);
     }
 
     @Override
@@ -449,6 +461,18 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
 
+        // give the saddle back!
+        if (isTamedFor(player) && isSaddled() && stack.is(Tags.Items.SHEARS))
+        {
+            spawnAtLocation(Items.SADDLE);
+            player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
+            setSaddled(false);
+            gameEvent(GameEvent.SHEAR, player);
+            stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+
         // sit!
         if (isTamedFor(player) && (player.isSecondaryUseActive() || stack.is(Items.BONE))) // "bone sitting" for legacy reasons
         {
@@ -466,7 +490,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             if (isServer())
             {
-                setRidingPlayer(player);
+                player.startRiding(this);
                 navigation.stop();
                 setTarget(null);
             }
@@ -768,20 +792,21 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public boolean canMate(Animal mate)
     {
         if (mate == this) return false; // No. Just... no.
-        else if (!(mate instanceof TameableDragon)) return false;
-        else if (!canReproduce()) return false;
+        if (!(mate instanceof TameableDragon dragonMate)) return false;
+        if (!canReproduce()) return false;
 
-        TameableDragon dragonMate = (TameableDragon) mate;
+        if (!dragonMate.canReproduce()) return false;
 
-        if (!dragonMate.isTame()) return false;
-        else if (!dragonMate.canReproduce()) return false;
-        else return isInLove() && dragonMate.isInLove();
+        return isInLove() && mate.isInLove();
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canReproduce()
     {
-        return isTame() && reproCount < DMLConfig.reproLimit();
+        if (!isTame()) return false;
+
+        var limit = getBreed().getReproductionLimit();
+        return reproCount < limit || limit == -1;
     }
 
     @Override
@@ -873,18 +898,29 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return getFirstPassenger() instanceof LivingEntity driver && isOwnedBy(driver)? driver : null;
     }
 
-    public void setRidingPlayer(Player player)
+    @Override
+    protected void addPassenger(Entity passenger)
     {
-        player.setYRot(getYRot());
-        player.setXRot(getXRot());
-        player.startRiding(this);
+        super.addPassenger(passenger);
+
+        if (passenger instanceof Player)
+        {
+            passenger.setYRot(getYRot());
+            passenger.setXRot(getXRot());
+        }
+
+        if (!isServer() && isControlledByLocalInstance())
+        {
+            MountControlsMessenger.sendControlsMessage();
+            MountCameraManager.onDragonMount();
+        }
     }
 
     @Override
-    protected void addPassenger(Entity pPassenger)
+    protected void removePassenger(Entity passenger)
     {
-        super.addPassenger(pPassenger);
-        if (!isServer() && isControlledByLocalInstance()) MountControlsMessenger.sendControlsMessage();
+        if (isControlledByLocalInstance()) MountCameraManager.onDragonDismount();
+        super.removePassenger(passenger);
     }
 
     @Override
@@ -1068,7 +1104,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected void onChangedBlock(BlockPos pos)
     {
         super.onChangedBlock(pos);
-        for (var ability : getBreed().abilities()) ability.onMove(this);
+        for (var ability : getAbilities()) ability.onMove(this);
     }
 
     @Override

@@ -1,14 +1,14 @@
 {
-  "type": "dragonmounts:dragon_egg_loot",
-  "breed": "dragonmounts:aether",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/simple_dungeon"
     },
     {
-      "chance": 0.2,
-      "condition": "minecraft:random_chance"
+      "condition": "dragonmounts:random_chance_by_config",
+      "config_chance_target": "aether_in_simple_dungeon_chance"
     }
-  ]
+  ],
+  "egg_breed": "dragonmounts:aether",
+  "type": "dragonmounts:dragon_egg_loot"
 }

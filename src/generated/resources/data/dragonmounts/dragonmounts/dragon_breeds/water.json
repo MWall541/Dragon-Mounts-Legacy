@@ -1,21 +1,27 @@
 {
-  "habitats": [
+  "reproduction_limit": "config:water",
+  "abilities": [
     {
-      "type": "in_fluid",
-      "fluid_tag": "minecraft:water",
-      "point_multiplier": 1.0
-    },
-    {
-      "type": "nearby_blocks",
-      "block_tag": "dragonmounts:water_dragon_habitat_blocks"
+      "type": "dragonmounts:hydro_step"
     }
   ],
-  "hatch_particles": {
-    "type": "minecraft:dripping_water"
-  },
+  "habitats": [
+    {
+      "point_multiplier": 1.0,
+      "fluid_tag": "minecraft:water",
+      "type": "dragonmounts:in_fluid"
+    },
+    {
+      "block_tag": "dragonmounts:water_dragon_habitat_blocks",
+      "type": "dragonmounts:nearby_blocks"
+    }
+  ],
   "immunities": [
     "drown"
   ],
   "primary_color": "62ff",
-  "secondary_color": "5999ff"
+  "secondary_color": "5999ff",
+  "hatch_particles": {
+    "type": "minecraft:dripping_water"
+  }
 }

@@ -30,7 +30,7 @@ public class ReaperStepAbility extends FootprintAbility implements Ability.Facto
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
-        var level = dragon.getLevel();
+        var level = dragon.level();
         var steppingOn = level.getBlockState(pos);
         if (steppingOn.is(PLANT_DEATH_TAG))
         {

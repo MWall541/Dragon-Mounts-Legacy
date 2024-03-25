@@ -1,12 +1,9 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.MountCameraManager;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -59,7 +56,6 @@ public class ForgeModImpl
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
         modBus.addListener((DataPackRegistryEvent.NewRegistry e) -> hookRegistry(e::dataPackRegistry));
-        modBus.addGenericListener(GlobalLootModifierSerializer.class, (RegistryEvent.Register<GlobalLootModifierSerializer<?>> e) -> DMLRegistry.registerLootConditions());
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {

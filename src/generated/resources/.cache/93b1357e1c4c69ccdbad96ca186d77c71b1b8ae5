@@ -1,7 +1,10 @@
-// 1.20.1	2023-07-23T03:49:35.4916292	Tags for minecraft:block mod id dragonmounts
+// 1.20.1	2024-03-24T20:15:26.498212599	Tags for minecraft:block mod id dragonmounts
 4ef8e409b5180a94fdb0ff052b94214e533c9bd2 data/dragonmounts/tags/blocks/fire_dragon_habitat_blocks.json
 b07f550717543f4109ec2ccd99a783d4af9abb89 data/dragonmounts/tags/blocks/forest_dragon_habitat_blocks.json
 c944581901f9b2decf47a1bbe0b93b720c260fa7 data/dragonmounts/tags/blocks/hot_feet_burnables.json
 41297dc5d6cb4f38f3432511574a09cf7562b002 data/dragonmounts/tags/blocks/ice_dragon_habitat_blocks.json
 c31361b6a894b18d2cfa61f07ef0ddc0a51d6a3b data/dragonmounts/tags/blocks/nether_dragon_habitat_blocks.json
+0feceb627e28a3a182edc202ddd7e6aef8c23d74 data/dragonmounts/tags/blocks/reaper_plant_death.json
+da12777cc8140c5ce6a738777bad32fccd8f6048 data/dragonmounts/tags/blocks/reaper_plant_destruction.json
+ff22ba9824374b4e9051491299ad94880fcb1703 data/dragonmounts/tags/blocks/reaper_transform.json
 d2608214a9a5f0937ea0364e49ba75cf9912f152 data/dragonmounts/tags/blocks/water_dragon_habitat_blocks.json

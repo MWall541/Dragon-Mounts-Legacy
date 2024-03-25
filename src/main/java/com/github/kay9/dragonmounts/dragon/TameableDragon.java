@@ -61,8 +61,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.network.NetworkHooks;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -231,14 +231,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             if (breed != null) breed.close(this);
             this.breed = dragonBreed;
             breed.initialize(this);
-            getEntityData().set(DATA_BREED, breed.id(getLevel().registryAccess()).toString());
+            getEntityData().set(DATA_BREED, breed.id(level().registryAccess()).toString());
         }
     }
 
     public DragonBreed getBreed()
     {
         if (breed == null) // initialize lazily if a breed was never specified or is being queried too late.
-            setBreed(BreedRegistry.getRandom(getLevel().registryAccess(), getRandom()));
+            setBreed(BreedRegistry.getRandom(level().registryAccess(), getRandom()));
         return breed;
     }
 
@@ -390,8 +390,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             moveForward = moveForward > 0? moveForward : 0;
             moveY = 0;
             if (driver.jumping) moveY = 1;
-            else if (Keybinds.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
-            else if (moveForward > 0 && DMLConfig.cameraFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
+            else if (KeyMappings.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
+            else if (moveForward > 0 && DMLConfig.cameraDrivenFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
         }
 
         return new Vec3(moveSideways, moveY, moveForward);
@@ -470,7 +470,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             gameEvent(GameEvent.SHEAR, player);
             stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
 
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.sidedSuccess(level().isClientSide);
         }
 
         // sit!

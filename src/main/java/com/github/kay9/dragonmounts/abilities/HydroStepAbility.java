@@ -17,7 +17,7 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
-        var level = dragon.getLevel();
+        var level = dragon.level();
         var groundPos = pos.below();
         var steppingOn = level.getBlockState(groundPos);
 
@@ -45,7 +45,7 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
             return;
         }
 
-        var steppingOnName = steppingOn.getBlock().getRegistryName();
+        var steppingOnName = steppingOn.getBlock().builtInRegistryHolder().key().location();
         if (steppingOnName.getNamespace().equals("minecraft") && steppingOnName.getPath().contains("copper")) // yeah fuck that copper complex this game's got going on
         {
             WeatheringCopper.getNext(steppingOn.getBlock()).ifPresent(b -> level.setBlockAndUpdate(groundPos, b.withPropertiesOf(steppingOn)));

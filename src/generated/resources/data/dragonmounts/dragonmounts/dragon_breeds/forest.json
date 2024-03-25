@@ -1,5 +1,4 @@
 {
-  "reproduction_limit": "config:forest",
   "abilities": [
     {
       "type": "dragonmounts:green_toes"
@@ -7,17 +6,18 @@
   ],
   "habitats": [
     {
-      "block_tag": "dragonmounts:forest_dragon_habitat_blocks",
-      "type": "dragonmounts:nearby_blocks"
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:forest_dragon_habitat_blocks"
     },
     {
-      "biome_tag": "minecraft:is_jungle",
-      "type": "dragonmounts:biome"
+      "type": "dragonmounts:biome",
+      "biome_tag": "minecraft:is_jungle"
     }
   ],
-  "primary_color": "54a00",
-  "secondary_color": "a9600",
   "hatch_particles": {
     "type": "minecraft:happy_villager"
-  }
+  },
+  "primary_color": "54a00",
+  "reproduction_limit": "config:forest",
+  "secondary_color": "a9600"
 }

@@ -22,9 +22,9 @@ public abstract class FootprintAbility implements Ability
             if (dragon.getRandom().nextFloat() > chance) continue;
 
             // get footprint position
-            double bx = dragon.getX() + (i % 2 * 2 - 1) * 0.25f;
-            double by = dragon.getY() + 0.5;
-            double bz = dragon.getZ() + (i / 2f % 2 * 2 - 1) * 0.25f;
+            int bx = (int) (dragon.getX() + (i % 2 * 2 - 1) * 0.25f);
+            int by = (int) (dragon.getY() + 0.5);
+            int bz = (int) (dragon.getZ() + (i / 2f % 2 * 2 - 1) * 0.25f);
             var pos = new BlockPos(bx, by, bz);
 
             placeFootprint(dragon, pos);

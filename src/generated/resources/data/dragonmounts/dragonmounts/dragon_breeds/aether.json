@@ -1,14 +1,14 @@
 {
-  "reproduction_limit": "config:aether",
   "attributes": {
     "minecraft:generic.flying_speed": 0.76125
   },
   "habitats": [
     {
-      "height": 200,
-      "type": "dragonmounts:world_height"
+      "type": "dragonmounts:world_height",
+      "height": 200
     }
   ],
   "primary_color": "718aa9",
+  "reproduction_limit": "config:aether",
   "secondary_color": "e6e6e6"
 }

@@ -8,7 +8,6 @@ import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import com.mojang.serialization.Codec;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
@@ -124,6 +123,6 @@ public class DragonMountsLegacy
 
     static void registerKeyBindings(Consumer<KeyMapping> registrar)
     {
-        Keybinds.registerKeybinds(registrar);
+        KeyMappings.registerKeybinds(registrar);
     }
 }

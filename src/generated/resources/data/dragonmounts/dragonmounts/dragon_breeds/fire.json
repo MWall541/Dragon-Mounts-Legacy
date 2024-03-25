@@ -1,5 +1,4 @@
 {
-  "reproduction_limit": "config:fire",
   "abilities": [
     {
       "type": "dragonmounts:hot_feet"
@@ -7,16 +6,19 @@
   ],
   "habitats": [
     {
-      "point_multiplier": 1.0,
+      "type": "dragonmounts:nearby_blocks",
       "block_tag": "dragonmounts:fire_dragon_habitat_blocks",
-      "type": "dragonmounts:nearby_blocks"
+      "point_multiplier": 1.0
     },
     {
-      "point_multiplier": 3.0,
+      "type": "dragonmounts:in_fluid",
       "fluid_tag": "minecraft:lava",
-      "type": "dragonmounts:in_fluid"
+      "point_multiplier": 3.0
     }
   ],
+  "hatch_particles": {
+    "type": "minecraft:flame"
+  },
   "immunities": [
     "onFire",
     "inFire",
@@ -24,8 +26,6 @@
     "hotFloor"
   ],
   "primary_color": "912400",
-  "secondary_color": "ff9819",
-  "hatch_particles": {
-    "type": "minecraft:flame"
-  }
+  "reproduction_limit": "config:fire",
+  "secondary_color": "ff9819"
 }

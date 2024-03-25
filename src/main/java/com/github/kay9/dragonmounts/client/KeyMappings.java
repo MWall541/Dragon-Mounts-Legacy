@@ -8,6 +8,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.function.Consumer;
+
 public class KeyMappings
 {
     public static final KeyMapping FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");

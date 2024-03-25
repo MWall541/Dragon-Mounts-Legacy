@@ -1,5 +1,4 @@
 {
-  "reproduction_limit": "config:end",
   "attributes": {
     "minecraft:generic.max_health": 75.0
   },
@@ -8,12 +7,13 @@
       "type": "dragonmounts:dragon_breath"
     }
   ],
+  "hatch_particles": {
+    "type": "minecraft:portal"
+  },
   "immunities": [
     "dragonBreath"
   ],
   "primary_color": "161616",
-  "secondary_color": "ff63e8",
-  "hatch_particles": {
-    "type": "minecraft:portal"
-  }
+  "reproduction_limit": "config:end",
+  "secondary_color": "ff63e8"
 }

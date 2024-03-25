@@ -7,8 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.FrostedIceBlock;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.util.BlockSnapshot;
@@ -56,18 +55,18 @@ public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerA
             return; // only juveniles and older can frost walk
 
         // taken from and modified of FrostWalkerEnchantment#onEntityMoved
-        var radius = Math.max(radiusMultiplier * dragon.getScale(), 1) + 3f;
+        var radius = (int) (Math.max(radiusMultiplier * dragon.getScale(), 1) + 3);
         var pos = dragon.blockPosition();
 
-        for (BlockPos carat : BlockPos.betweenClosed(pos.offset((-radius), -2.0D, (-radius)), pos.offset(radius, -1.0D, radius)))
+        for (BlockPos carat : BlockPos.betweenClosed(pos.offset((-radius), -2, (-radius)), pos.offset(radius, -1, radius)))
         {
             if (!carat.closerToCenterThan(dragon.position(), radius))
                 continue; // circle
 
             var currentState = level.getBlockState(carat);
 
-            if (currentState.getMaterial() != Material.WATER || currentState.getValue(LiquidBlock.LEVEL) != 0)
-                continue; // only full water blocks
+            if (currentState != FrostedIceBlock.meltsInto())
+                continue;
             if (ForgeEventFactory.onBlockPlace(dragon, BlockSnapshot.create(level.dimension(), level, carat), Direction.UP))
                 continue;
 

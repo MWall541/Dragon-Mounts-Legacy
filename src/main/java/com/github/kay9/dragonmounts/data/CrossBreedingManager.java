@@ -20,14 +20,14 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CrossBreedManager extends SimpleJsonResourceReloadListener
+public class CrossBreedingManager extends SimpleJsonResourceReloadListener
 {
-    public static final CrossBreedManager INSTANCE = new CrossBreedManager();
-    private static final String PATH = "dragonmounts/cross_breeds"; // data/[pack_name]/dragonmounts/cross_breeds/whatever.json
+    public static final CrossBreedingManager INSTANCE = new CrossBreedingManager();
+    private static final String PATH = "dragonmounts/cross_breeding"; // data/[pack_name]/dragonmounts/cross_breeds/whatever.json
 
     private final Map<Couple, ResourceKey<DragonBreed>> crosses = new HashMap<>();
 
-    private CrossBreedManager()
+    private CrossBreedingManager()
     {
         super(new GsonBuilder().create(), PATH);
     }
@@ -42,7 +42,7 @@ public class CrossBreedManager extends SimpleJsonResourceReloadListener
             var id = entry.getKey();
             var json = entry.getValue();
             var cross = CrossBreedResult.CODEC.parse(JsonOps.INSTANCE, json)
-                    .getOrThrow(false, Util.prefix("Unable to parse Cross Breed result for: " + id, DragonMountsLegacy.LOG::error));
+                    .getOrThrow(false, Util.prefix("Unable to parse Cross Breeding result for: " + id, DragonMountsLegacy.LOG::error));
             crosses.put(new Couple(cross.parent1(), cross.parent2()), cross.child());
         }
     }

@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.MountCameraManager;
-import com.github.kay9.dragonmounts.data.CrossBreedManager;
+import com.github.kay9.dragonmounts.data.CrossBreedingManager;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
@@ -59,7 +59,7 @@ public class ForgeModImpl
         var bus = MinecraftForge.EVENT_BUS;
 
         bus.addListener((PlayerInteractEvent.RightClickBlock e) -> e.setCanceled(overrideVanillaDragonEgg(e.getWorld(), e.getPos(), e.getPlayer())));
-        bus.addListener((AddReloadListenerEvent e) -> e.addListener(CrossBreedManager.INSTANCE));
+        bus.addListener((AddReloadListenerEvent e) -> e.addListener(CrossBreedingManager.INSTANCE));
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
         modBus.addGenericListener(GlobalLootModifierSerializer.class, (RegistryEvent.Register<GlobalLootModifierSerializer<?>> e) -> DMLRegistry.registerLootConditions());

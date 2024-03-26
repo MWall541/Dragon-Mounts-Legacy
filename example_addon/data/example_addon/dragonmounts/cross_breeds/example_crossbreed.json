@@ -1,0 +1,5 @@
+{
+  "parent1": "example_addon:example_breed",
+  "parent2": "dragonmounts:fire",
+  "child": "dragonmounts:ghost"
+}

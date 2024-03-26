@@ -30,8 +30,8 @@ import java.util.function.Supplier;
  *  <br>
  *  Same ability type, different constants, instance-based variables.
  *  <br>
- *  Other abilities that don't require the second two options are instead created as singletons and memoized.
- *  Other situations vary. Bottom line: Create factories based on needs!
+ *  If the ability DOES NOT require per-entity data, it may be better to off to implement {@link Factory} directly and
+ *  return itself.
  */
 public interface Ability
 {
@@ -68,16 +68,16 @@ public interface Ability
     /**
      * The Ability Factory is responsible for creating the instances of an ability.
      * If an ability is meant to be breed specific and needs no per-entity data, this interface can be implemented
-     * directly by the ability class, and return itself in {@code Factory#create}. This effectively removes the need for
+     * directly by the ability class, and return itself in {@link Factory#create}. This effectively removes the need for
      * a new factory type instance that just returns a new 'effective singleton', which is unnecessary for memory.
-     * Most abilities in DML are simplistic in nature and follow this approach. {@code FrostWalkerAbility} is a good
+     * Most abilities in DML are simplistic in nature and follow this approach. {@link FrostWalkerAbility} is a good
      * example.
      * <br><br>
-     * It is crucially important that if you are extending a class already implementing {@code Factory} that
-     * you override {@code Factory#create} and {@code Factory#type}. <br>
-     * If the parent ability class is a breed specific type, and your type is an entity specific, {@code Factory#create} and
-     * {@code Factory#type} do not matter since your codec SHOULD NOT USE THEM! You MUST create a new factory type for per-entity
-     * implementations, or use {@code Ability#simpleFactory}
+     * It is crucially important that if you are extending a class already implementing {@link Factory} that
+     * you override {@link Factory#create} and {@link Factory#type}. <br>
+     * If the parent ability class is a breed specific type, and your type is an entity specific, {@link Factory#create} and
+     * {@link Factory#type} do not matter since your codec SHOULD NOT USE THEM! You MUST create a new factory type for per-entity
+     * implementations, or use {@link Ability#simpleFactory}
      */
     interface Factory<T extends Ability>
     {

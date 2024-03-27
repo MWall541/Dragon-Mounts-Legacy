@@ -8,6 +8,7 @@ import com.github.kay9.dragonmounts.client.DragonAnimator;
 import com.github.kay9.dragonmounts.client.KeyMappings;
 import com.github.kay9.dragonmounts.client.MountCameraManager;
 import com.github.kay9.dragonmounts.client.MountControlsMessenger;
+import com.github.kay9.dragonmounts.data.CrossBreedingManager;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonFollowOwnerGoal;
@@ -820,7 +821,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         // pick a breed to inherit from, and place hatching.
         var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
-        var offSpringBreed = getRandom().nextBoolean()? getBreed() : mate.getBreed();
+        var offSpringBreed = CrossBreedManager.INSTANCE.getCrossBreed(getBreed(), mate.getBreed());
+        if (offSpringBreed == null) offSpringBreed = getRandom().nextBoolean()? getBreed() : mate.getBreed();
         var egg = HatchableEggBlock.place(level, blockPosition(), state, offSpringBreed);
 
         // mix the custom names in case both parents have one

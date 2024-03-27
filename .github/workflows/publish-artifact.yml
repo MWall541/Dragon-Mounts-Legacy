@@ -39,6 +39,7 @@ jobs:
         MOD_ID=$(awk -F '=' '/mod_id[^_]/ { print $2;}' gradle.properties | tr -d " \t\r")
         GAME_VERSION=$(awk -F '=' '/game_version[^_]/ { print $2; }' gradle.properties | tr -d " \t\r")
         echo "artifact_path=build/libs/${MOD_ID}-${GAME_VERSION}-artifact.jar" >> "$GITHUB_OUTPUT"
+
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:

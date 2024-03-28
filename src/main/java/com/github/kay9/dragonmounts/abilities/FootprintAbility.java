@@ -9,7 +9,6 @@ public abstract class FootprintAbility implements Ability
     @Override
     public void onMove(TameableDragon dragon)
     {
-        if (dragon.level().isClientSide()) return;
         if (dragon.getAgeProgress() < 0.5 || !dragon.onGround()) return;
         if (!ForgeEventFactory.getMobGriefingEvent(dragon.level(), dragon)) return;
 

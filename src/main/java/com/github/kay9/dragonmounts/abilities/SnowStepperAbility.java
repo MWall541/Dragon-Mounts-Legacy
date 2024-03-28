@@ -16,11 +16,12 @@ public class SnowStepperAbility extends FootprintAbility implements Ability.Fact
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
+        var level = dragon.level();
         var state = Blocks.SNOW.defaultBlockState();
-        if (dragon.level().getBlockState(pos).isAir() && state.canSurvive(dragon.level(), pos))
+        if (level.getBlockState(pos).isAir() && state.canSurvive(level, pos))
         {
-            dragon.level().setBlockAndUpdate(pos, state);
-            ((ServerLevel) dragon.level()).sendParticles(ParticleTypes.SNOWFLAKE,
+            level.setBlockAndUpdate(pos, state);
+            ((ServerLevel) level).sendParticles(ParticleTypes.SNOWFLAKE,
                     pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5,
                     dragon.getRandom().nextInt(6) + 2,
                     0.5, 0.5, 0.5, 0);

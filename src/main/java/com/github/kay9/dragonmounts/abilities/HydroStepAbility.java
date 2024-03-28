@@ -3,7 +3,9 @@ package com.github.kay9.dragonmounts.abilities;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
@@ -21,6 +23,8 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
         var groundPos = pos.below();
         var steppingOn = level.getBlockState(groundPos);
 
+        ((ServerLevel) level).sendParticles(ParticleTypes.FALLING_WATER, pos.getX(), pos.getY(), pos.getZ(), 10, 0.25, 0, 0.25, 0);
+
         // moisten farmland
         // soak sponges
         // extinguish fire
@@ -29,13 +33,13 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
 
         if (steppingOn.is(Blocks.FARMLAND))
         {
-            level.setBlock(groundPos, steppingOn.setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE), FarmBlock.UPDATE_CLIENTS);
+            level.setBlockAndUpdate(groundPos, steppingOn.setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
             return;
         }
 
         if (steppingOn.is(Blocks.SPONGE))
         {
-            level.setBlockAndUpdate(groundPos, Blocks.WET_SPONGE.defaultBlockState()); // places new block, have to update all?
+            level.setBlockAndUpdate(groundPos, Blocks.WET_SPONGE.defaultBlockState());
             return;
         }
 

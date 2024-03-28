@@ -63,6 +63,9 @@ public interface Ability
 
     default void tick(TameableDragon dragon) {}
 
+    /**
+     * Only called on the server
+     */
     default void onMove(TameableDragon dragon) {}
 
     /**

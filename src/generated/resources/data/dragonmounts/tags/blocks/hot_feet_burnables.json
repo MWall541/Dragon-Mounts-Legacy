@@ -2,6 +2,18 @@
   "values": [
     "#minecraft:flowers",
     "#minecraft:saplings",
-    "#minecraft:replaceable"
+    "#minecraft:crops",
+    "minecraft:grass",
+    "minecraft:tall_grass",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dead_bush",
+    "minecraft:pitcher_plant",
+    "minecraft:big_dripleaf",
+    "minecraft:small_dripleaf",
+    "minecraft:big_dripleaf_stem",
+    "minecraft:sugar_cane",
+    "minecraft:fern",
+    "minecraft:large_fern",
+    "minecraft:pitcher_plant"
   ]
 }

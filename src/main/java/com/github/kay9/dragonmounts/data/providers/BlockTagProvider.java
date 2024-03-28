@@ -52,16 +52,21 @@ class BlockTagProvider extends BlockTagsProvider
                 .add(Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.KELP, Blocks.KELP_PLANT, Blocks.PRISMARINE,
                         Blocks.SEA_LANTERN, Blocks.SEA_PICKLE);
 
+
         tag(HotFeetAbility.BURNABLES_TAG)
-                .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.REPLACEABLE);
+                .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.CROPS)
+                .add(Blocks.GRASS, Blocks.TALL_GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.DEAD_BUSH, Blocks.PITCHER_PLANT,
+                        Blocks.BIG_DRIPLEAF, Blocks.SMALL_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.SUGAR_CANE,
+                        Blocks.FERN, Blocks.LARGE_FERN, Blocks.PITCHER_PLANT);
 
         tag(ReaperStepAbility.PLANT_DEATH_TAG)
-                .addTags(BlockTags.TALL_FLOWERS)
-                .add(Blocks.TALL_GRASS, Blocks.GRASS);
+                .addTags(BlockTags.TALL_FLOWERS, BlockTags.CROPS, BlockTags.SAPLINGS)
+                .add(Blocks.TALL_GRASS, Blocks.GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.SUGAR_CANE, Blocks.BIG_DRIPLEAF_STEM,
+                Blocks.BIG_DRIPLEAF, Blocks.FERN, Blocks.LARGE_FERN, Blocks.PITCHER_PLANT);
 
         tag(ReaperStepAbility.PLANT_DESTRUCTION_TAG)
                 .addTags(BlockTags.SMALL_FLOWERS)
-                .add(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM)
+                .add(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM, Blocks.SMALL_DRIPLEAF)
                 .remove(Blocks.WITHER_ROSE);
 
         tag(ReaperStepAbility.REAPER_TRANSFORM)

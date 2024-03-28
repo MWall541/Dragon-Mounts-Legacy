@@ -1,10 +1,10 @@
-// 1.20.1	2024-03-27T21:56:54.7223112	Tags for minecraft:block mod id dragonmounts
+// 1.20.1	2024-03-27T23:46:07.4094065	Tags for minecraft:block mod id dragonmounts
 4ef8e409b5180a94fdb0ff052b94214e533c9bd2 data/dragonmounts/tags/blocks/fire_dragon_habitat_blocks.json
 b07f550717543f4109ec2ccd99a783d4af9abb89 data/dragonmounts/tags/blocks/forest_dragon_habitat_blocks.json
 c081468fc1e443c252fafc76c46fb9d4f3a398fd data/dragonmounts/tags/blocks/hot_feet_burnables.json
 41297dc5d6cb4f38f3432511574a09cf7562b002 data/dragonmounts/tags/blocks/ice_dragon_habitat_blocks.json
 c31361b6a894b18d2cfa61f07ef0ddc0a51d6a3b data/dragonmounts/tags/blocks/nether_dragon_habitat_blocks.json
 c3bc5d0dcaa862503272e2f65b806d0b574b67b1 data/dragonmounts/tags/blocks/reaper_plant_death.json
-1343a8b8ac2f6110af0442bc4833ed268c1beadc data/dragonmounts/tags/blocks/reaper_plant_destruction.json
+22d2a6dc9ecf65c5181bd3e09c44d9c2e587652d data/dragonmounts/tags/blocks/reaper_plant_destruction.json
 ff22ba9824374b4e9051491299ad94880fcb1703 data/dragonmounts/tags/blocks/reaper_transform.json
 d2608214a9a5f0937ea0364e49ba75cf9912f152 data/dragonmounts/tags/blocks/water_dragon_habitat_blocks.json

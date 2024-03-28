@@ -9,7 +9,6 @@ public abstract class FootprintAbility implements Ability
     @Override
     public void onMove(TameableDragon dragon)
     {
-        if (dragon.getLevel().isClientSide()) return;
         if (!dragon.isAdult() || !dragon.isOnGround()) return;
         if (!ForgeEventFactory.getMobGriefingEvent(dragon.getLevel(), dragon)) return;
 
@@ -21,13 +20,9 @@ public abstract class FootprintAbility implements Ability
             // place only if randomly selected
             if (dragon.getRandom().nextFloat() > chance) continue;
 
-            // get footprint position
-//            double bx = dragon.getX() + (i % 2 * 2 - 1) * 0.25f;
-//            double by = dragon.getY() + 0.5;
-//            double bz = dragon.getZ() + (i / 2f % 2 * 2 - 1) * 0.25f;
-            double bx = dragon.getX() + (i % 2 * 2 - 1) * 0.25f;
-            double by = dragon.getY() + 0.5;
-            double bz = dragon.getZ() + (i / 2f % 2 * 2 - 1) * 0.25f;
+            double bx = dragon.getX() + (i % 2 * 2 - 1) * dragon.getScale();
+            double by = dragon.getY();
+            double bz = dragon.getZ() + (i / 2f % 2 * 2 - 1) * dragon.getScale();
             var pos = new BlockPos(bx, by, bz);
 
             placeFootprint(dragon, pos);

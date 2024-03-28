@@ -24,7 +24,7 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
-        var level = dragon.level;
+        var level = dragon.getLevel();
         var groundPos = pos.below();
         var steppingOn = level.getBlockState(groundPos);
 

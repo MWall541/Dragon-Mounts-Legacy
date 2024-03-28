@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.*;
+import com.github.kay9.dragonmounts.data.CrossBreedingManager;
 import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
@@ -17,6 +18,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -37,6 +39,18 @@ import org.apache.logging.log4j.util.TriConsumer;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+/**
+ * Dragon Mounts Legacy
+ * <br>
+ * Main mod information like the ID and logger is found here.
+ * Events that pertain to the game are also present here.
+ * Everything in the mod is a network with this at the core of it all.
+ * Load events register our custom content into the game,
+ * Game events are the way the mod interacts with the game's behavior.
+ * Event methods can be triggered by:
+ *  - Mod loader event dispatchers ({@link ForgeModImpl})
+ *  - Mixins that inject callbacks to here
+ */
 public class DragonMountsLegacy
 {
     public static final String MOD_ID = "dragonmounts";
@@ -48,53 +62,8 @@ public class DragonMountsLegacy
     }
 
     // ========================
-    //          Events
+    //       Load Events
     // ========================
-
-    static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
-    {
-        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
-        {
-            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonBreed.BuiltIn.END);
-            if (end.isPresent())
-            {
-                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
-                else
-                {
-                    var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
-                    HatchableEggBlock.place((ServerLevel) level, pos, state, end.get());
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static void registerEntityAttributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> registrar)
-    {
-        registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
-    }
-
-    static void hookRegistry(TriConsumer<ResourceKey<Registry<DragonBreed>>, Codec<DragonBreed>, Codec<DragonBreed>> registrar)
-    {
-        registrar.accept(BreedRegistry.REGISTRY_KEY, DragonBreed.CODEC, DragonBreed.NETWORK_CODEC);
-    }
-
-    static void clientTick(boolean pre)
-    {
-        if (!pre) MountControlsMessenger.tick();
-    }
-
-    static void registerCreativeTabItems(ResourceKey<CreativeModeTab> tab, Consumer<ItemStack> registrar)
-    {
-        if (tab == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(registrar);
-        if (tab == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(registrar);
-    }
-
-    static void onKeyPress(int key, int action, int modifiers)
-    {
-        KeyMappings.handleKeyPress(key, action);
-    }
 
     static void registerRenderers()
     {
@@ -124,5 +93,59 @@ public class DragonMountsLegacy
     static void registerKeyBindings(Consumer<KeyMapping> registrar)
     {
         KeyMappings.registerKeybinds(registrar);
+    }
+
+    static void registerReloadListeners(Consumer<PreparableReloadListener> registrar)
+    {
+        registrar.accept(CrossBreedingManager.INSTANCE);
+    }
+
+    static void registerDatapacks(TriConsumer<ResourceKey<Registry<DragonBreed>>, Codec<DragonBreed>, Codec<DragonBreed>> registrar)
+    {
+        registrar.accept(BreedRegistry.REGISTRY_KEY, DragonBreed.CODEC, DragonBreed.NETWORK_CODEC);
+    }
+
+    static void registerCreativeTabItems(ResourceKey<CreativeModeTab> tab, Consumer<ItemStack> registrar)
+    {
+        if (tab == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(registrar);
+        if (tab == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(registrar);
+    }
+
+    static void registerEntityAttributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> registrar)
+    {
+        registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
+    }
+
+    // ========================
+    //       Game Events
+    // ========================
+
+    static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
+    {
+        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
+        {
+            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonBreed.BuiltIn.END);
+            if (end.isPresent())
+            {
+                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
+                else
+                {
+                    var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
+                    HatchableEggBlock.place((ServerLevel) level, pos, state, end.get());
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void clientTick(boolean head)
+    {
+        if (!head) MountControlsMessenger.tick();
+    }
+
+    static void onKeyPress(int key, int action, int modifiers)
+    {
+        KeyMappings.handleKeyPress(key, action);
     }
 }

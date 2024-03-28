@@ -1,7 +1,6 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.MountCameraManager;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -55,10 +54,10 @@ public class ForgeModImpl
         var bus = MinecraftForge.EVENT_BUS;
 
         bus.addListener((PlayerInteractEvent.RightClickBlock e) -> e.setCanceled(overrideVanillaDragonEgg(e.getLevel(), e.getPos(), e.getEntity())));
-        bus.addListener((AddReloadListenerEvent e) -> e.addListener(CrossBreedingManager.INSTANCE));
+        bus.addListener((AddReloadListenerEvent e) -> registerReloadListeners(e::addListener));
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
-        modBus.addListener((DataPackRegistryEvent.NewRegistry e) -> hookRegistry(e::dataPackRegistry));
+        modBus.addListener((DataPackRegistryEvent.NewRegistry e) -> registerDatapacks(e::dataPackRegistry));
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
@@ -67,7 +66,7 @@ public class ForgeModImpl
             bus.addListener((InputEvent.Key e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
 
             modBus.addListener((ModelEvent.RegisterGeometryLoaders e) -> registerEggModelLoader(e::register));
-            modBus.addListener((BuildCreativeModeTabContentsEvent e) -> DragonMountsLegacy.registerCreativeTabItems(e.getTabKey(), e::accept));
+            modBus.addListener((BuildCreativeModeTabContentsEvent e) -> registerCreativeTabItems(e.getTabKey(), e::accept));
             modBus.addListener((EntityRenderersEvent.RegisterRenderers e) -> registerRenderers());
             modBus.addListener((RegisterColorHandlersEvent.Item e) -> registerItemColors(e.getItemColors()));
             modBus.addListener((FMLConstructModEvent e) -> e.enqueueWork(DragonMountsLegacy::registerReloadListenersEarly));

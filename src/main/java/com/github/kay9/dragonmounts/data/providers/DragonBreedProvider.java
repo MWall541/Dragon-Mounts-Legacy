@@ -54,7 +54,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x718AA9,
                             0xE6E6E6,
                             Optional.empty(),
-                            of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.45),
+                            of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.225f),
                             list(),
                             list(
                                     new HeightHabitat(3, false, 200)

@@ -87,8 +87,8 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable
 {
     // base attributes
-    public static final double BASE_SPEED_GROUND = 0.3;
-    public static final double BASE_SPEED_FLYING = 0.525;
+    public static final double BASE_SPEED_GROUND = 0.3; // actual speed varies from ground friction
+    public static final double BASE_SPEED_FLYING = 0.32;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
     public static final double BASE_FOLLOW_RANGE = 16;
@@ -170,9 +170,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         goalSelector.addGoal(3, new MeleeAttackGoal(this, 1, true));
 //        goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
-        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1.1, 10f, 3.5f, 32f));
+        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1f, 10f, 3.5f, 32f));
         goalSelector.addGoal(5, new DragonBreedGoal(this));
-        goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1));
+        goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.85f));
         goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
@@ -367,7 +367,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             if (isControlledByLocalInstance())
             {
                 // Move relative to yaw - handled in the move controller or by driver
-                moveRelative(getRiddenSpeed(null), vec3);
+                moveRelative(getSpeed(), vec3);
                 move(MoverType.SELF, getDeltaMovement());
                 if (getDeltaMovement().lengthSqr() < 0.1) // we're not actually going anywhere, bob up and down.
                     setDeltaMovement(getDeltaMovement().add(0, Math.sin(tickCount / 4f) * 0.03, 0));
@@ -389,13 +389,20 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (isFlying() && isControlledByLocalInstance())
         {
             moveForward = moveForward > 0? moveForward : 0;
-            moveY = 0;
             if (driver.jumping) moveY = 1;
             else if (KeyMappings.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
             else if (moveForward > 0 && DMLConfig.cameraDrivenFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
         }
 
-        return new Vec3(moveSideways, moveY, moveForward);
+        // mimic dogshit implementation of AI movement vectors
+        // the way this works is that it will mimic how setSpeed in Mob works:
+        // it sets the normal speed variable,
+        // and then sets the walk forward variable to the same value.
+        // so if speed is 0.3, walk forward will also be 0.3 instead of 1.0.
+        // so when moveRelative calculates movespeed, (walkforward * speed) we get 0.15.
+        // so I guess we should do it to.
+        var speed = getRiddenSpeed(driver);
+        return new Vec3(moveSideways * speed, moveY * speed, moveForward * speed);
     }
 
     @Override
@@ -420,7 +427,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected float getRiddenSpeed(Player driver)
     {
-        return (float) getAttributeValue(isFlying()? FLYING_SPEED : MOVEMENT_SPEED) * 0.225f;
+        return (float) getAttributeValue(isFlying()? FLYING_SPEED : MOVEMENT_SPEED);
     }
 
     @Override
@@ -821,7 +828,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         // pick a breed to inherit from, and place hatching.
         var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
-        var offSpringBreed = CrossBreedManager.INSTANCE.getCrossBreed(getBreed(), mate.getBreed());
+        var offSpringBreed = CrossBreedingManager.INSTANCE.getCrossBreed(getBreed(), mate.getBreed(), level.registryAccess());
         if (offSpringBreed == null) offSpringBreed = getRandom().nextBoolean()? getBreed() : mate.getBreed();
         var egg = HatchableEggBlock.place(level, blockPosition(), state, offSpringBreed);
 

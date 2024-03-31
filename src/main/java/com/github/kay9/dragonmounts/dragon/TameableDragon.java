@@ -110,9 +110,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private static final String NBT_REPRO_COUNT = "ReproCount";
 
     // other constants
-    public static final int AGE_UPDATE_INTERVAL = 100;
+    public static final int AGE_UPDATE_INTERVAL = 100; // every 5 seconds
     public static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"); // just a random uuid I took online
-    public static final int GROUND_CLEARENCE_THRESHOLD = 3;
+    public static final int GROUND_CLEARENCE_THRESHOLD = 3; // height in blocks (multiplied by scale of dragon)
 
     // server/client delegates
     private final DragonAnimator animator;
@@ -217,11 +217,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void readAdditionalSaveData(CompoundTag compound)
     {
-        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), level().registryAccess())); // high priority...
+        // read and set breed first before reading everything else so things can override correctly,
+        // e.g. attributes.
+        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().registryAccess()));
         super.readAdditionalSaveData(compound);
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
 
+        // set sync age data after we read it in AgeableMob
         entityData.set(DATA_AGE, getAge());
     }
 
@@ -238,7 +241,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public DragonBreed getBreed()
     {
-        if (breed == null) // initialize lazily if a breed was never specified or is being queried too late.
+        if (breed == null) // initialize lazily if a breed was never specified or is being queried too early.
             setBreed(BreedRegistry.getRandom(level().registryAccess(), getRandom()));
         return breed;
     }
@@ -329,14 +332,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         if (isServer())
         {
-            if (age < 0 && tickCount % AGE_UPDATE_INTERVAL == 0) entityData.set(DATA_AGE, age);
+            // periodically sync age data back to client
+            if (!isAdult() && tickCount % AGE_UPDATE_INTERVAL == 0) entityData.set(DATA_AGE, age);
         }
         else
         {
             // update animations on the client
             animator.tick();
 
-            // because age isn't incremented on client, do it ourselves...
+            // because vanilla age does not increment on client...
             int age = getAge();
             if (age < 0) setAge(++age);
             else if (age > 0) setAge(--age);
@@ -1042,13 +1046,21 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         setMaxUpStep(Math.max(2 * getAgeProgress(), 1));
 
-        var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", getScale(), AttributeModifier.Operation.ADDITION);
+        // health does not update on modifier application, so have to store the health frac first
+        var healthFrac = getHealth() / getMaxHealth();
+
+        // negate modifier value since the operation is as follows: base_value += modifier * base_value
+        double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
+        var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", modValue, AttributeModifier.Operation.MULTIPLY_BASE);
         for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code
         {
             AttributeInstance instance = getAttribute(attribute);
             instance.removeModifier(mod);
             instance.addTransientModifier(mod);
         }
+
+        // restore health fraction
+        setHealth(healthFrac * getMaxHealth());
     }
 
     public boolean isHatchling()

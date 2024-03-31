@@ -219,7 +219,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         // read and set breed first before reading everything else so things can override correctly,
         // e.g. attributes.
-        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().registryAccess()));
+        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), level().registryAccess()));
         super.readAdditionalSaveData(compound);
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);

@@ -334,6 +334,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void tick()
     {
+        if (breed == null) // if we don't have a breed at this point, we should assume we aren't getting one, so assign a random one.
+            setBreed(BreedRegistry.getRandom(getLevel().registryAccess(), getRandom()));
+
         super.tick();
 
         if (isServer())

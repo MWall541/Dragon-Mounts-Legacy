@@ -10,16 +10,21 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.Random;
 
 @SuppressWarnings("DataFlowIssue")
@@ -84,6 +89,23 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         if (tag == null || tag.contains(DATA_ITEM_NAME))
             return new TranslatableComponent(tag.getString(DATA_ITEM_NAME));
         return super.getName(stack);
+    }
+
+    @Override
+    public Optional<Mob> spawnOffspringFromSpawnEgg(Player pPlayer, Mob pMob, EntityType<? extends Mob> pEntityType, ServerLevel pServerLevel, Vec3 pPos, ItemStack pStack)
+    {
+        var entityTag = pStack.getTagElement(EntityType.ENTITY_TAG);
+        if (entityTag != null)
+        {
+            var breedID = entityTag.getString(TameableDragon.NBT_BREED);
+            if (!breedID.isEmpty())
+            {
+                if (((TameableDragon) pMob).getBreed() != BreedRegistry.get(breedID, pServerLevel.registryAccess()))
+                    return Optional.empty();
+            }
+        }
+
+        return super.spawnOffspringFromSpawnEgg(pPlayer, pMob, pEntityType, pServerLevel, pPos, pStack);
     }
 
     public static int getColor(ItemStack stack, int tintIndex)

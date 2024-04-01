@@ -65,10 +65,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.*;
 
@@ -236,11 +233,23 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
     }
 
+    /**
+     * Since a breed type cannot be passed into the constructor (due to the dynamic nature of breeds)
+     * and sometimes a breed type cannot be deserialized in time, there's always the possibility of
+     * a nullable breed.
+     */
+    @Nullable
     public DragonBreed getBreed()
     {
-        if (breed == null) // initialize lazily if a breed was never specified or is being queried too early.
-            setBreed(BreedRegistry.getRandom(getLevel().registryAccess(), getRandom()));
         return breed;
+    }
+
+    /**
+     * For ease of use when we aren't guaranteed on the breed
+     */
+    public Optional<DragonBreed> getBreedOptionally()
+    {
+        return Optional.ofNullable(breed);
     }
 
     public List<Ability> getAbilities()
@@ -422,6 +431,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions") // I bet the breed exists at this point...
     public InteractionResult mobInteract(Player player, InteractionHand hand)
     {
         var stack = player.getItemInHand(hand);
@@ -538,7 +548,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected SoundEvent getAmbientSound()
     {
-        return getBreed().ambientSound().orElse(DMLRegistry.DRAGON_AMBIENT_SOUND.get());
+        return getBreedOptionally().flatMap(DragonBreed::ambientSound).orElse(DMLRegistry.DRAGON_AMBIENT_SOUND.get());
     }
 
     @Nullable
@@ -625,13 +635,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public ItemStack getPickedResult(HitResult target)
     {
+        if (getBreed() == null) return ItemStack.EMPTY;
         return DragonSpawnEgg.create(getBreed(), getLevel().registryAccess());
     }
 
     @Override
     protected Component getTypeName()
     {
-        return new TranslatableComponent(getBreed().getTranslationKey(getLevel().registryAccess()));
+        if (getBreed() != null)
+            return new TranslatableComponent(getBreed().getTranslationKey(getLevel().registryAccess()));
+
+        return super.getTypeName();
     }
 
     public boolean isFoodItem(ItemStack stack)
@@ -642,6 +656,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     // the "food" that enables breeding mode
     @Override
+    @SuppressWarnings("ConstantConditions") // I bet the breed exists at this point...
     public boolean isFood(ItemStack stack)
     {
         return getBreed().breedingItems().contains(stack.getItem().builtInRegistryHolder());
@@ -691,14 +706,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * <p>
      * 0.33 is the value representing the size for baby dragons.
      * 1.0 is the value representing the size for adult dragons.
-     * We are essentially rough lerping from baby size to adult size, using ageProgress
-     * as an input.
+     * We are essentially scaling linearly from baby size to adult size, base on ageProgress
      * This value can be manipulated using the breed's size modifier
      */
     @Override
     public float getScale()
     {
-        return (0.33f + (0.67f * getAgeProgress())) * getBreed().sizeModifier();
+        var mod = getBreed() == null? 1f : getBreed().sizeModifier();
+        return (0.33f + (0.67f * getAgeProgress())) * mod;
     }
 
     /**
@@ -798,13 +813,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean canReproduce()
     {
-        if (!isTame()) return false;
+        if (!isTame() || getBreed() == null) return false;
 
         var limit = getBreed().getReproductionLimit();
         return reproCount < limit || limit == -1;
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions") // breed nullability is checked in canReproduce
     public void spawnChildFromBreeding(ServerLevel level, Animal animal)
     {
         if (!(animal instanceof TameableDragon mate))
@@ -816,9 +832,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         DragonEgg egg = DMLRegistry.DRAGON_EGG.get().create(level);
 
         // pick a breed to inherit from
-        var crossBreed = CrossBreedingManager.INSTANCE.getCrossBreed(breed, mate.getBreed(), level.registryAccess());
+        var crossBreed = CrossBreedingManager.INSTANCE.getCrossBreed(getBreed(), mate.getBreed(), level.registryAccess());
         if (crossBreed == null) // no cross-breeds present, pick a parent's
-            crossBreed = getRandom().nextBoolean()? breed : mate.getBreed();
+            crossBreed = getRandom().nextBoolean()? getBreed() : mate.getBreed();
+
         egg.setEggBreed(crossBreed);
 
         // mix the custom names in case both parents have one
@@ -872,7 +889,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob)
     {
         var offspring = DMLRegistry.DRAGON.get().create(level);
-        offspring.setBreed(getBreed());
+        if (getBreed() != null) offspring.setBreed(getBreed());
         return offspring;
     }
 

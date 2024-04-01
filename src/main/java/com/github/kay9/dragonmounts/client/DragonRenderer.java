@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -50,12 +51,19 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     }
 
     @Override
+    public boolean shouldRender(TameableDragon dragon, Frustum pCamera, double pCamX, double pCamY, double pCamZ)
+    {
+        return dragon.getBreed() != null && super.shouldRender(dragon, pCamera, pCamX, pCamY, pCamZ);
+    }
+
+    @Override
     public void render(TameableDragon dragon, float pEntityYaw, float pPartialTicks, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pPackedLight)
     {
         this.model = getModel(dragon);
         super.render(dragon, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
     }
 
+    @SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
     public DragonModel getModel(TameableDragon dragon)
     {
         return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.registryAccess()), defaultModel);
@@ -70,6 +78,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
     public ResourceLocation getTextureLocation(TameableDragon dragon)
     {
         return getTextureForLayer(dragon.getBreed(), LAYER_BODY);

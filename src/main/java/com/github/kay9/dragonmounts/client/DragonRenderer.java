@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
 public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 {
     public static final ModelLayerLocation MODEL_LOCATION = new ModelLayerLocation(DragonMountsLegacy.id("dragon"), "main");
@@ -63,7 +64,6 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         super.render(dragon, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
     }
 
-    @SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
     public DragonModel getModel(TameableDragon dragon)
     {
         return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.registryAccess()), defaultModel);
@@ -78,7 +78,6 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     }
 
     @Override
-    @SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
     public ResourceLocation getTextureLocation(TameableDragon dragon)
     {
         return getTextureForLayer(dragon.getBreed(), LAYER_BODY);

@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
 import com.github.kay9.dragonmounts.DMLConfig;
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
@@ -27,7 +28,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
@@ -77,9 +78,9 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public void initialize(TameableDragon dragon)
     {
         applyAttributes(dragon);
-        for (Ability.Factory<Ability> factory : abilityTypes())
+        for (var factory : abilityTypes())
         {
-            Ability instance = factory.create();
+            var instance = factory.create();
             dragon.getAbilities().add(instance);
             instance.initialize(dragon);
         }
@@ -87,22 +88,9 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 
     public void close(TameableDragon dragon)
     {
-        dragon.getAttributes().assignValues(new AttributeMap(TameableDragon.createAttributes().build())); // restore default attributes
+        cleanAttributes(dragon);
         for (Ability ability : dragon.getAbilities()) ability.close(dragon);
         dragon.getAbilities().clear();
-    }
-
-    private void applyAttributes(TameableDragon dragon)
-    {
-        float healthPercentile = dragon.getHealth() / dragon.getMaxHealth();
-
-        attributes().forEach((att, value) ->
-        {
-            AttributeInstance inst = dragon.getAttribute(att);
-            if (inst != null) inst.setBaseValue(value);
-        });
-
-        dragon.setHealth(dragon.getMaxHealth() * healthPercentile); // in case we have less than max health
     }
 
     public int getReproductionLimit()
@@ -118,6 +106,37 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public static String getTranslationKey(String resourceLocation)
     {
         return "dragon_breed." + resourceLocation.replace(':', '.');
+    }
+
+    private void applyAttributes(TameableDragon dragon)
+    {
+        float healthPercentile = dragon.getHealth() / dragon.getMaxHealth(); // in case max health is changed
+
+        attributes().forEach((att, value) ->
+        {
+            AttributeInstance inst = dragon.getAttribute(att);
+            if (inst != null) inst.setBaseValue(value);
+        });
+
+        dragon.setHealth(dragon.getMaxHealth() * healthPercentile);
+    }
+
+    private void cleanAttributes(TameableDragon dragon)
+    {
+        float healthPercentile = dragon.getHealth() / dragon.getMaxHealth(); // in case max health is changed
+        var defaults = DefaultAttributes.getSupplier(DMLRegistry.DRAGON.get());
+
+        attributes().forEach((att, value) ->
+        {
+            var instance = dragon.getAttribute(att);
+            if (instance != null)
+            {
+                instance.removeModifiers();
+                instance.setBaseValue(defaults.getBaseValue(att));
+            }
+        });
+
+        dragon.setHealth(dragon.getMaxHealth() * healthPercentile);
     }
 
     public static final class BuiltIn

@@ -207,7 +207,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putString(NBT_BREED, getBreed().id(level().registryAccess()).toString());
+        if (getBreed() != null) // breed is not read by the time the packet is being sent...
+            compound.putString(NBT_BREED, getBreed().id(level().registryAccess()).toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
     }
@@ -986,10 +987,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         if (getBreed() != null) return getBreed().immunities().contains(src.typeHolder());
 
-//        if (src == damageSources().dragonBreath()
-//                || src == damageSources().cactus())
-//            return true;
-
         return super.isInvulnerableTo(src);
     }
 
@@ -1046,7 +1043,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void updateAgeProgress()
     {
         // no reason to recalculate this value several times per tick/frame...
-        float growth = -getBreed().growthTime();
+        float growth = -BASE_GROWTH_TIME;
+        if (getBreed() != null) growth = -getBreed().growthTime();
         float min = Math.min(getAge(), 0);
         ageProgress = 1 - (min / growth);
     }
@@ -1111,7 +1109,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void setBaby(boolean baby)
     {
-        setAge(baby? -getBreed().growthTime() : 0);
+        var growth = -BASE_GROWTH_TIME;
+        if (getBreed() != null) growth = -getBreed().growthTime();
+        setAge(baby? growth : 0);
         entityData.set(DATA_AGE, age);
     }
 

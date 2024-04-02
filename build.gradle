@@ -59,13 +59,6 @@ minecraft {
             args '--username', 'Dev2'
         }
 
-        testClient {
-            //noinspection GroovyAssignabilityCheck
-            parent runs.client
-            source sourceSets.main
-            source sourceSets.test
-        }
-
         server {
             arg "nogui"
         }

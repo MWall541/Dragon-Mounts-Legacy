@@ -1,7 +1,6 @@
 plugins {
     id 'idea'
-    id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'org.spongepowered.mixin' version '0.7.+'
 }
@@ -23,43 +22,26 @@ minecraft {
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
-        client {
+        configureEach {
             workingDirectory project.file('run')
-            arg "-mixin.config=dragonmounts.mixins.json"
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            property 'forge.logging.console.level', 'debug'
+            arg "-mixin.config=${mod_id}.mixins.json"
         }
 
-        second_client {
+        client {}
+
+        client2 {
+            //noinspection GroovyAssignabilityCheck
             parent runs.client
             args '--username', 'Dev2'
         }
 
         server {
-            workingDirectory project.file('run')
-            arg "-mixin.config=${mod_id}.mixins.json"
             arg "nogui"
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
         }
 
         data {
-            workingDirectory project.file('run')
             args '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                "${mod_id}" {
-                    sources sourceSets.main
-                }
-            }
         }
     }
 }
@@ -76,19 +58,21 @@ dependencies {
     annotationProcessor "org.spongepowered:mixin:${mixin_processor_version}:processor"
 }
 
-def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta']
-def replaceProperties = [
-        minecraft_version: game_version, minecraft_version_range: game_version_range,
-        forge_version: forge_version, forge_version_range: forge_version_range,
-        loader_version_range: loader_version_range,
-        mod_id: mod_id, mod_name: mod_name, mod_version: mod_version,
-]
-
 processResources {
+    var replaceProperties = [
+            minecraft_version: game_version,
+            minecraft_version_range: game_version_range,
+            forge_version: forge_version,
+            forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_version: mod_version,
+            game_pack_format: game_pack_format
+    ]
     inputs.properties replaceProperties
-    replaceProperties.put 'project', project
 
-    filesMatching(resourceTargets) {
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties
     }
 }
@@ -114,24 +98,12 @@ jar {
         ])
     }
 
-    exclude('com/github/kay9/dragonmounts/data/providers/**')
+    finalizedBy 'reobfJar'
+
+    exclude('com/github/kay9/dragonmounts/data/providers/**') // data providers aren't necessary in release builds
+    exclude('.cache') // data-gen cache is not necessary in release builds
 }
 
-// Example configuration to allow publishing using the maven-publish plugin
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-// publish.dependsOn('reobfJar')
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }

@@ -20,10 +20,13 @@
     "type": "minecraft:flame"
   },
   "immunities": [
-    "onFire",
-    "inFire",
-    "lava",
-    "hotFloor"
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:lava",
+    "minecraft:hot_floor",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
   ],
   "primary_color": "912400",
   "reproduction_limit": "config:fire",

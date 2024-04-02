@@ -18,8 +18,11 @@
     "type": "minecraft:snowflake"
   },
   "immunities": [
-    "drown",
-    "freeze"
+    "minecraft:drown",
+    "minecraft:freeze",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
   ],
   "primary_color": "ffffff",
   "reproduction_limit": "config:ice",

@@ -25,7 +25,10 @@
     }
   ],
   "immunities": [
-    "drown"
+    "minecraft:drown",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
   ],
   "primary_color": "c4c4c4",
   "reproduction_limit": "config:ghost",

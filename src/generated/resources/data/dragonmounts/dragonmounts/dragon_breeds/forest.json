@@ -17,6 +17,11 @@
   "hatch_particles": {
     "type": "minecraft:happy_villager"
   },
+  "immunities": [
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
   "primary_color": "54a00",
   "reproduction_limit": "config:forest",
   "secondary_color": "a9600"

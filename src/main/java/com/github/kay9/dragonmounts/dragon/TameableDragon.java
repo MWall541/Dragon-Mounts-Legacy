@@ -57,6 +57,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -766,6 +767,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected ResourceLocation getDefaultLootTable()
     {
+        if (getBreed() == null) return BuiltInLootTables.EMPTY;
         return getBreed().deathLoot();
     }
 
@@ -982,11 +984,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         Entity srcEnt = src.getEntity();
         if (srcEnt != null && (srcEnt == this || hasPassenger(srcEnt))) return true;
 
-        if (src == damageSources().dragonBreath() // inherited from it anyway
-                || src == damageSources().cactus()) // assume cactus needles don't hurt thick scaled lizards
-            return true;
+        if (getBreed() != null) return getBreed().immunities().contains(src.typeHolder());
 
-        return getBreed().immunities().contains(src.getMsgId()) || super.isInvulnerableTo(src);
+//        if (src == damageSources().dragonBreath()
+//                || src == damageSources().cactus())
+//            return true;
+
+        return super.isInvulnerableTo(src);
     }
 
     /**
@@ -1132,13 +1136,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean canBreatheUnderwater()
     {
-        return getBreed().immunities().contains("drown");
+        if (getBreed() == null) return super.canBreatheUnderwater();
+        return getBreed().immunities().contains(damageSources().drown().typeHolder());
     }
 
     @Override
     public boolean fireImmune()
     {
-        return super.fireImmune() || getBreed().immunities().contains("onFire");
+        if (super.fireImmune()) return true;
+        if (getBreed() == null) return false;
+        return getBreed().immunities().contains(damageSources().onFire().typeHolder());
     }
 
     @Override

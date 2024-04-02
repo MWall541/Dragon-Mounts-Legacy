@@ -8,6 +8,11 @@
       "height": 200
     }
   ],
+  "immunities": [
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
   "primary_color": "718aa9",
   "reproduction_limit": "config:aether",
   "secondary_color": "e6e6e6"

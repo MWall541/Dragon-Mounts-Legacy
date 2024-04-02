@@ -11,7 +11,9 @@
     "type": "minecraft:portal"
   },
   "immunities": [
-    "dragonBreath"
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
   ],
   "primary_color": "161616",
   "reproduction_limit": "config:end",

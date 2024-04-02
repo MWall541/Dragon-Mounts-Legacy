@@ -19,7 +19,10 @@
     "type": "minecraft:dripping_water"
   },
   "immunities": [
-    "drown"
+    "minecraft:drown",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
   ],
   "primary_color": "62ff",
   "reproduction_limit": "config:water",

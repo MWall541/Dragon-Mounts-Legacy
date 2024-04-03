@@ -207,10 +207,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        if (getBreed() != null) // breed is not read by the time the packet is being sent...
-            compound.putString(NBT_BREED, getBreed().id(level().registryAccess()).toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
+
+        if (getBreed() != null) // breed is not read by the time the packet is being sent...
+        {
+            compound.putString(NBT_BREED, getBreed().id(level().registryAccess()).toString());
+            for (var ability : getAbilities()) ability.write(this, compound);
+        }
     }
 
     @Override
@@ -222,6 +226,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         super.readAdditionalSaveData(compound);
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
+
+        for (var ability : getAbilities()) ability.read(this, compound);
 
         // set sync age data after we read it in AgeableMob
         entityData.set(DATA_AGE, getAge());

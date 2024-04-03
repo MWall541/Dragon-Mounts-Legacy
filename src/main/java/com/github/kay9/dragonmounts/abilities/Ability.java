@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.abilities;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -61,6 +62,10 @@ public interface Ability
 
     default void close(TameableDragon dragon) {}
 
+    default void write(TameableDragon dragon, CompoundTag nbt) {}
+
+    default void read(TameableDragon dragon, CompoundTag nbt) {}
+
     default void tick(TameableDragon dragon) {}
 
     /**
@@ -106,7 +111,7 @@ public interface Ability
      */
     static <T extends Ability> Factory<T> simpleFactory(ResourceLocation id, Supplier<T> factory)
     {
-        return new Factory<T>()
+        return new Factory<>()
         {
             @Override
             public T create()

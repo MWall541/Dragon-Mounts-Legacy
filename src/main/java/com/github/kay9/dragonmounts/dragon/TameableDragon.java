@@ -415,7 +415,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             moveForward = moveForward > 0? moveForward : 0;
             if (driver.jumping) moveY = 1;
             else if (KeyMappings.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
-            else if (moveForward > 0 && DMLConfig.cameraDrivenFlight()) moveY = -driver.getXRot() * (Math.PI / 180);
+            else if (moveForward > 0 && DMLConfig.cameraDrivenFlight()) moveY = -driver.getXRot() / 90; // normalize from -1 to 1
         }
 
         // mimic dogshit implementation of AI movement vectors

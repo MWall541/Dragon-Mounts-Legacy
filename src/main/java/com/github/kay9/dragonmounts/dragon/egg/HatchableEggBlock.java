@@ -35,7 +35,10 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DragonEggBlock;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -118,7 +121,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player)
     {
-        var breed = level.getBlockEntity(pos) instanceof HatchableEggBlockEntity e?
+        var breed = level.getBlockEntity(pos) instanceof HatchableEggBlockEntity e && e.hasBreed()?
                 e.getBreed() :
                 BreedRegistry.getRandom(player.level().registryAccess(), player.getRandom());
         return Item.create(breed, player.level().registryAccess());
@@ -136,12 +139,6 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     private static <F extends BlockEntityTicker<HatchableEggBlockEntity>, T> T cast(F from)
     {
         return (T) from;
-    }
-
-    @Override
-    public RenderShape getRenderShape(BlockState pState)
-    {
-        return RenderShape.MODEL;
     }
 
     @Override
@@ -163,6 +160,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     public void attack(BlockState state, Level level, BlockPos at, Player pPlayer)
     {
         if (level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
+                && e.hasBreed()
                 && e.getBreed().id(level.registryAccess()).getPath().equals("end")
                 && !state.getValue(HATCHING))
             teleport(state, level, at); // retain original dragon egg teleport behavior
@@ -173,6 +171,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     {
         if (!player.getAbilities().instabuild
                 && level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
+                && e.hasBreed()
                 && e.getBreed().id(level.registryAccess()).getPath().equals("end")
                 && !state.getValue(HATCHING))
             return false; // retain original dragon egg teleport behavior; DON'T destroy!
@@ -239,7 +238,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     @Override // will only tick when HATCHING, according to isRandomlyTicking
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random)
     {
-        if (!(level.getBlockEntity(pos) instanceof HatchableEggBlockEntity data)) return;
+        if (!(level.getBlockEntity(pos) instanceof HatchableEggBlockEntity data) || !data.hasBreed()) return;
         int hatchStage = state.getValue(HATCH_STAGE);
         var finalStage = hatchStage == 3;
 
@@ -265,7 +264,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     @Override
     public void animateTick(BlockState pState, Level pLevel, BlockPos pPos, RandomSource random)
     {
-        if (pState.getValue(HATCHING) && pLevel.getBlockEntity(pPos) instanceof HatchableEggBlockEntity e)
+        if (pState.getValue(HATCHING) && pLevel.getBlockEntity(pPos) instanceof HatchableEggBlockEntity e && e.hasBreed())
             for (int i = 0; i < random.nextIntBetweenInclusive(4, 7); i++)
                 addHatchingParticles(e.getBreed(), pLevel, pPos, random);
     }
@@ -275,7 +274,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         level.playSound(null, pos, SoundEvents.TURTLE_EGG_CRACK, SoundSource.BLOCKS, 0.85f, 0.95f + level.getRandom().nextFloat() * 0.2f);
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings("ConstantConditions") // creation of dragon is never null
     private void hatch(ServerLevel level, BlockPos pos)
     {
         var data = (HatchableEggBlockEntity) level.getBlockEntity(pos);
@@ -381,7 +380,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         @Override
         public @Nullable ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt)
         {
-            ensureExistingBreedType(stack, BlockItem.BLOCK_ENTITY_TAG); // extremely hacky to be doing it here... but there doesn't seem to be any other options.
+            ensureExistingBreedType(stack); // extremely hacky to be doing it here... but there doesn't seem to be any other options.
             return super.initCapabilities(stack, nbt);
         }
 
@@ -421,12 +420,12 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
             return result;
         }
 
-        private static void ensureExistingBreedType(ItemStack stack, String subTag)
+        private static void ensureExistingBreedType(ItemStack stack)
         {
             if (ServerLifecycleHooks.getCurrentServer() == null) return;
 
             if (!stack.hasTag()) stack.setTag(new CompoundTag());
-            var blockEntityData = stack.getOrCreateTagElement(subTag);
+            var blockEntityData = stack.getOrCreateTagElement(BlockItem.BLOCK_ENTITY_TAG);
             var breed = blockEntityData.getString(NBT_BREED);
             var reg = BreedRegistry.registry(ServerLifecycleHooks.getCurrentServer().registryAccess());
 

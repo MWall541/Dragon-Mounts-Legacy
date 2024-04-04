@@ -222,8 +222,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         // read and set breed first before reading everything else so things can override correctly,
         // e.g. attributes.
-        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), level().registryAccess()));
+        var breed = BreedRegistry.get(compound.getString(NBT_BREED), level().registryAccess());
+        if (breed != null) setBreed(breed);
+
         super.readAdditionalSaveData(compound);
+
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
 
@@ -345,7 +348,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void tick()
     {
-        if (breed == null) // if we don't have a breed at this point, we should assume we aren't getting one, so assign a random one.
+        if (isServer() && breed == null) // if we don't have a breed at this point, we should assume we aren't getting one, so assign a random one.
             setBreed(BreedRegistry.getRandom(level().registryAccess(), getRandom()));
 
         super.tick();

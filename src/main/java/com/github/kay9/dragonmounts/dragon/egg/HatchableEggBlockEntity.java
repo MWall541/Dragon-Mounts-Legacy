@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-@SuppressWarnings("ConstantConditions")
 public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 {
     public static final int MIN_HABITAT_POINTS = 2;
@@ -38,11 +37,12 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions") // level exists if we have a breed
     protected void saveAdditional(CompoundTag tag)
     {
         super.saveAdditional(tag);
 
-        if (getBreed() != null)
+        if (hasBreed())
             tag.putString(HatchableEggBlock.NBT_BREED, getBreed().id(getLevel().registryAccess()).toString());
 
         if (getCustomName() != null)
@@ -56,7 +56,11 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         }
     }
 
+    /*
+     * sometimes, this is called before the BE is given a Level to work with.
+     */
     @Override
+    @SuppressWarnings("ConstantConditions") // level exists at memoize
     public void load(CompoundTag pTag)
     {
         super.load(pTag);
@@ -69,7 +73,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         var transitioner = pTag.getCompound(TransitionHandler.NBT_TRANSITIONER);
         if (!transitioner.isEmpty()) getTransition().load(transitioner);
 
-        if (getLevel() != null && getLevel().isClientSide()) // level is nullable
+        if (getLevel() != null && getLevel().isClientSide()) // client needs to be aware of new changes
             getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
     }
 
@@ -88,6 +92,14 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
+    /**
+     * This should be guarded with {@link HatchableEggBlockEntity#hasBreed()}!!
+     * There is no way proper way to resolve a random breed in the mess that is
+     * BlockEntity's...
+     * <br>
+     * When this is called, and breed.get() is null, a random breed is assigned instead.
+     */
+    @SuppressWarnings("ConstantConditions") // level exists at memoize
     public DragonBreed getBreed()
     {
         var current = breed.get();
@@ -95,6 +107,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         {
             var newBreed = BreedRegistry.getRandom(getLevel().registryAccess(), getLevel().getRandom());
             setBreed(() -> newBreed);
+            getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
             return newBreed;
         }
 
@@ -106,6 +119,11 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         this.breed = breed;
     }
 
+    public boolean hasBreed()
+    {
+        return breed.get() != null;
+    }
+
     @Override
     public Component getCustomName()
     {
@@ -113,6 +131,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     }
 
     @Override
+    @SuppressWarnings("ConstantConditions") // level exists at this point
     public Component getName()
     {
         return customName != null? customName :
@@ -130,11 +149,14 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         return transitioner;
     }
 
+    @SuppressWarnings({"ConstantConditions", "unused"}) // level exists at this point
     public void tick(Level pLevel, BlockPos pPos, BlockState pState)
     {
+        if (!pLevel.isClientSide() && !hasBreed()) getBreed(); // at this point we may not receive one; resolve a random one.
         getTransition().tick(getLevel().getRandom());
     }
 
+    @SuppressWarnings("ConstantConditions") // level exists at this point
     public void updateHabitat()
     {
         DragonBreed winner = null;
@@ -156,24 +178,26 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         }
     }
 
-    public boolean isModelReady()
-    {
-        return getLevel() != null && getBreed() != null;
-    }
-
+    @SuppressWarnings("ConstantConditions") // level exists at this point
     public class TransitionHandler
     {
         private static final String NBT_TRANSITIONER = "TransitionerTag";
         private static final String NBT_TRANSITION_BREED = "TransitionBreed";
         private static final String NBT_TRANSITION_TIME = "TransitionTime";
 
-        public Supplier<DragonBreed> transitioningBreed;
+        public Supplier<DragonBreed> transitioningBreed = () -> null;
         public int transitionTime;
 
         public void tick(RandomSource random)
         {
             if (isRunning())
             {
+                if (transitioningBreed.get() == null) // invalid breed id, etc.
+                {
+                    transitionTime = 0;
+                    return;
+                }
+
                 if (--transitionTime == 0)
                 {
                     setBreed(transitioningBreed);

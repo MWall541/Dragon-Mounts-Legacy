@@ -6,20 +6,22 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import org.jetbrains.annotations.Nullable;
 
 public class BreedRegistry
 {
     public static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
 
+    @Nullable
     public static DragonBreed get(String byString, RegistryAccess reg)
     {
         return get(new ResourceLocation(byString), reg);
     }
 
+    @Nullable
     public static DragonBreed get(ResourceLocation byId, RegistryAccess reg)
     {
-        var breed = registry(reg).get(byId);
-        return breed != null? breed : getRandom(reg, RandomSource.create());
+        return registry(reg).get(byId);
     }
 
     public static DragonBreed getRandom(RegistryAccess reg, RandomSource random)

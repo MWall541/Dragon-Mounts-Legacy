@@ -99,19 +99,10 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
      * <br>
      * When this is called, and breed.get() is null, a random breed is assigned instead.
      */
-    @SuppressWarnings("ConstantConditions") // level exists at memoize
+    @Nullable
     public DragonBreed getBreed()
     {
-        var current = breed.get();
-        if (current == null) // init lazily
-        {
-            var newBreed = BreedRegistry.getRandom(getLevel().registryAccess(), getLevel().getRandom());
-            setBreed(() -> newBreed);
-            getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
-            return newBreed;
-        }
-
-        return current;
+        return breed.get();
     }
 
     public void setBreed(Supplier<DragonBreed> breed)
@@ -149,10 +140,16 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         return transitioner;
     }
 
-    @SuppressWarnings({"ConstantConditions", "unused"}) // level exists at this point
+    @SuppressWarnings({"ConstantConditions", "unused"}) // guarded
     public void tick(Level pLevel, BlockPos pPos, BlockState pState)
     {
-        if (!pLevel.isClientSide() && !hasBreed()) getBreed(); // at this point we may not receive one; resolve a random one.
+        if (!pLevel.isClientSide() && !hasBreed()) // at this point we may not receive a breed; resolve a random one.
+        {
+            var newBreed = BreedRegistry.getRandom(getLevel().registryAccess(), getLevel().getRandom());
+            setBreed(() -> newBreed);
+            getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
+        }
+
         getTransition().tick(getLevel().getRandom());
     }
 

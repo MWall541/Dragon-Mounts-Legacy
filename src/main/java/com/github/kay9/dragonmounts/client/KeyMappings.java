@@ -12,8 +12,9 @@ import java.util.function.Consumer;
 
 public class KeyMappings
 {
-    public static final KeyMapping FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
-    public static final KeyMapping CAMERA_CONTROLS = keymap("camera_flight", GLFW.GLFW_KEY_F6, "key.categories.movement");
+    public static final KeyMapping FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, KeyMapping.CATEGORY_MOVEMENT);
+    public static final KeyMapping CAMERA_CONTROLS = keymap("camera_flight", GLFW.GLFW_KEY_F6, KeyMapping.CATEGORY_MOVEMENT);
+    public static final KeyMapping MOUNT_ABILITY = keymap("mount_ability", GLFW.GLFW_KEY_F, KeyMapping.CATEGORY_GAMEPLAY);
 
     @SuppressWarnings({"ConstantConditions"})
     private static KeyMapping keymap(String name, int defaultMapping, String category)

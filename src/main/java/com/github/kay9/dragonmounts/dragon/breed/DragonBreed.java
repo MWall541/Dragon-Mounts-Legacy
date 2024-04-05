@@ -110,7 +110,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 
     private void applyAttributes(TameableDragon dragon)
     {
-        float healthPercentile = dragon.getHealth() / dragon.getMaxHealth(); // in case max health is changed
+        float healthFrac = dragon.getHealthFraction(); // in case max health is changed
 
         attributes().forEach((att, value) ->
         {
@@ -118,12 +118,12 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             if (inst != null) inst.setBaseValue(value);
         });
 
-        dragon.setHealth(dragon.getMaxHealth() * healthPercentile);
+        dragon.setHealth(dragon.getMaxHealth() * healthFrac);
     }
 
     private void cleanAttributes(TameableDragon dragon)
     {
-        float healthPercentile = dragon.getHealth() / dragon.getMaxHealth(); // in case max health is changed
+        float healthFrac = dragon.getHealthFraction(); // in case max health is changed
         var defaults = DefaultAttributes.getSupplier(DMLRegistry.DRAGON.get());
 
         attributes().forEach((att, value) ->
@@ -136,7 +136,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             }
         });
 
-        dragon.setHealth(dragon.getMaxHealth() * healthPercentile);
+        dragon.setHealth(dragon.getMaxHealth() * healthFrac);
     }
 
     public static final class BuiltIn

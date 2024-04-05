@@ -413,7 +413,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         double moveY = move.y;
         double moveForward = Math.min(Math.abs(driver.zza) + Math.abs(driver.xxa), 1);
 
-        if (isFlying() && isControlledByLocalInstance())
+        if (isFlying() && hasLocalDriver())
         {
             moveForward = moveForward > 0? moveForward : 0;
             if (driver.jumping) moveY = 1;
@@ -480,7 +480,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // heal
-        if (getHealthRelative() < 1 && isFoodItem(stack))
+        if (getHealthFraction() < 1 && isFoodItem(stack))
         {
             //noinspection ConstantConditions
             heal(stack.getItem().getFoodProperties(stack, this).getNutrition());
@@ -954,7 +954,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             passenger.setXRot(getXRot());
         }
 
-        if (!isServer() && isControlledByLocalInstance())
+        if (hasLocalDriver())
         {
             MountControlsMessenger.sendControlsMessage();
             MountCameraManager.onDragonMount();
@@ -964,7 +964,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected void removePassenger(Entity passenger)
     {
-        if (isControlledByLocalInstance()) MountCameraManager.onDragonDismount();
+        if (hasLocalDriver()) MountCameraManager.onDragonDismount();
         super.removePassenger(passenger);
     }
 
@@ -1004,9 +1004,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      *
      * @return health normalized between 0 and 1
      */
-    public double getHealthRelative()
+    public float getHealthFraction()
     {
-        return getHealth() / (double) getMaxHealth();
+        return getHealth() / getMaxHealth();
     }
 
     public int getMaxDeathTime()
@@ -1078,7 +1078,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         setMaxUpStep(Math.max(2 * getAgeProgress(), 1));
 
         // health does not update on modifier application, so have to store the health frac first
-        var healthFrac = getHealth() / getMaxHealth();
+        var healthFrac = getHealthFraction();
 
         // negate modifier value since the operation is as follows: base_value += modifier * base_value
         double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
@@ -1190,5 +1190,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public Packet<ClientGamePacketListener> getAddEntityPacket()
     {
         return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    public boolean hasLocalDriver()
+    {
+        return getControllingPassenger() instanceof Player p && p.isLocalPlayer();
     }
 }

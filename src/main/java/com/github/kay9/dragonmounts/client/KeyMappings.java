@@ -26,6 +26,7 @@ public class KeyMappings
     {
         registrar.accept(FLIGHT_DESCENT_KEY);
         registrar.accept(CAMERA_CONTROLS);
+        registrar.accept(MOUNT_ABILITY);
     }
 
     public static void handleKeyPress(int key, int action)

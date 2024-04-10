@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.client;
 
+import com.github.kay9.dragonmounts.abilities.weapons.MouthWeaponAbility;
 import com.github.kay9.dragonmounts.accessors.ModelPartAccess;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.util.CircularBuffer;
@@ -16,7 +17,7 @@ import net.minecraft.util.Mth;
 public class DragonAnimator
 {
     // constants
-    private static final int JAW_OPENING_TIME_FOR_ATTACK = 5;
+    private static final float JAW_SPEED = 1f / MouthWeaponAbility.MOUTH_OPEN_TIME_FOR_ATTACK;
 
     private final TameableDragon dragon;
 
@@ -249,6 +250,8 @@ public class DragonAnimator
         sitVal += dragon.isInSittingPose()? 0.1f : -0.1f;
         sitVal *= 0.95f;
         sitTimer.set(sitVal);
+
+        jawTimer.add(openJaw? JAW_SPEED : -JAW_SPEED);
 
         // TODO: find better attack animation method
 //        int ticksSinceLastAttack = dragon.getTicksSince

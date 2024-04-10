@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.MountCameraManager;
+import com.github.kay9.dragonmounts.network.ControlAbilityPacket;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,9 +16,12 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DataPackRegistryEvent;
+
+import java.util.Optional;
 
 import static com.github.kay9.dragonmounts.DragonMountsLegacy.*;
 
@@ -40,12 +44,15 @@ public class ForgeModImpl
 
     static
     {
-        var PROTOCOL_VERSION = "1.O";
+        var PROTOCOL_VERSION = "1.1";
         NETWORK = NetworkRegistry.ChannelBuilder.named(DragonMountsLegacy.id("network"))
                 .clientAcceptedVersions(PROTOCOL_VERSION::equals)
                 .serverAcceptedVersions(PROTOCOL_VERSION::equals)
                 .networkProtocolVersion(() -> PROTOCOL_VERSION)
                 .simpleChannel();
+
+        int id = 0;
+        NETWORK.registerMessage(id++, ControlAbilityPacket.class, ControlAbilityPacket::encode, ControlAbilityPacket::new, ControlAbilityPacket::process, Optional.of(NetworkDirection.PLAY_TO_SERVER));
     }
 
     private static void setupEvents()

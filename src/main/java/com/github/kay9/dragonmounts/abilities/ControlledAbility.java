@@ -2,15 +2,14 @@ package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.client.KeyMappings;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.network.EnableControlledAbilityPacket;
+import com.github.kay9.dragonmounts.network.ControlAbilityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 
 public abstract class ControlledAbility implements Ability
 {
-    // Synced entity data for when AI uses the ability and client needs to be aware of it.
-    public static final EntityDataAccessor<Boolean> ENABLED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
+    // Synced entity data for when AI enables the ability and client needs to be aware of it.
+    public static final EntityDataAccessor<Boolean> ENABLED = TameableDragon.createOutsideData(EntityDataSerializers.BOOLEAN);
 
     @Override
     public void initialize(TameableDragon dragon)
@@ -27,14 +26,15 @@ public abstract class ControlledAbility implements Ability
             var keyDown = KeyMappings.MOUNT_ABILITY.isDown();
             if (keyDown != isEnabled(dragon))
             {
-                setEnabled(dragon, keyDown);
-                EnableControlledAbilityPacket.send(keyDown);
+                enable(dragon, keyDown);
+                ControlAbilityPacket.send(dragon.getUUID(), dragon.getAbilities().indexOf(this), keyDown);
             }
         }
 
-        var shouldEnable = isDriverEnabled(dragon) || isAiEnabled(dragon);
+        // forcibly set each tick to disallow rogue ability usage
+        var shouldEnable = shouldEnable(dragon);
         if (shouldEnable != isEnabled(dragon))
-            setEnabled(dragon, shouldEnable);
+            enable(dragon, shouldEnable);
     }
 
     public boolean isEnabled(TameableDragon dragon)
@@ -42,18 +42,28 @@ public abstract class ControlledAbility implements Ability
         return dragon.getEntityData().get(ENABLED);
     }
 
-    public void setEnabled(TameableDragon dragon, boolean enabled)
+    public void enable(TameableDragon dragon, boolean enabled)
     {
         dragon.getEntityData().set(ENABLED, enabled);
+
+        if (enabled) onEnabled(dragon);
+        else onDisabled(dragon);
     }
 
-    protected boolean isDriverEnabled(TameableDragon dragon)
+    protected boolean shouldEnable(TameableDragon dragon)
     {
+        return enabledByDriver(dragon) || enabledBySelf(dragon);
+    }
+
+    protected boolean enabledByDriver(TameableDragon dragon)
+    {
+        // already being enabled is a requirement since the keybind/packet handles it.
         return dragon.hasControllingPassenger() && isEnabled(dragon);
     }
 
-    protected boolean isAiEnabled(TameableDragon dragon)
-    {
-        return false;
-    }
+    protected abstract boolean enabledBySelf(TameableDragon dragon);
+
+    public void onEnabled(TameableDragon dragon) {}
+
+    public void onDisabled(TameableDragon dragon) {}
 }

@@ -23,6 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
@@ -1195,5 +1196,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public boolean hasLocalDriver()
     {
         return getControllingPassenger() instanceof Player p && p.isLocalPlayer();
+    }
+
+    public static <T> EntityDataAccessor<T> createOutsideData(EntityDataSerializer<T> serializer)
+    {
+        return SynchedEntityData.defineId(TameableDragon.class, serializer);
     }
 }

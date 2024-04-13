@@ -26,7 +26,7 @@ public abstract class ControlledAbility implements Ability
             var keyDown = KeyMappings.MOUNT_ABILITY.isDown();
             if (keyDown != isEnabled(dragon))
             {
-                enable(dragon, keyDown);
+                setEnabled(dragon, keyDown);
                 ControlAbilityPacket.send(dragon.getUUID(), dragon.getAbilities().indexOf(this), keyDown);
             }
         }
@@ -34,7 +34,7 @@ public abstract class ControlledAbility implements Ability
         // forcibly set each tick to disallow rogue ability usage
         var shouldEnable = shouldEnable(dragon);
         if (shouldEnable != isEnabled(dragon))
-            enable(dragon, shouldEnable);
+            setEnabled(dragon, shouldEnable);
     }
 
     public boolean isEnabled(TameableDragon dragon)
@@ -42,7 +42,7 @@ public abstract class ControlledAbility implements Ability
         return dragon.getEntityData().get(ENABLED);
     }
 
-    public void enable(TameableDragon dragon, boolean enabled)
+    public void setEnabled(TameableDragon dragon, boolean enabled)
     {
         dragon.getEntityData().set(ENABLED, enabled);
 

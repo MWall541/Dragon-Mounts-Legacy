@@ -14,6 +14,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -56,6 +58,8 @@ public class DMLRegistry
     public static final RegistryObject<Codec<DragonEggLootMod>> EGG_LOOT_MODIFIER = register("dragon_egg_loot", Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, () -> DragonEggLootMod.CODEC);
 
     public static final RegistryObject<LootItemConditionType> RANDOM_CHANCE_CONFIG_CONDITION = register("random_chance_by_config", Registries.LOOT_CONDITION_TYPE, () -> new LootItemConditionType(new RandomChanceByConfig.Serializer()));
+
+    public static final RegistryObject<Attribute> RANGED_DAMAGE = register("dragon.ranged.damage", Registries.ATTRIBUTE,  () -> new RangedAttribute("attribute.name.dragon.ranged_damage", 2, 0, 2048));
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {

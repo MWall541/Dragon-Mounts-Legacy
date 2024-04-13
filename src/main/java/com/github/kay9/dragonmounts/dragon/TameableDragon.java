@@ -89,6 +89,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final double BASE_SPEED_GROUND = 0.3; // actual speed varies from ground friction
     public static final double BASE_SPEED_FLYING = 0.32;
     public static final double BASE_DAMAGE = 8;
+    public static final float BASE_PROJECTILE_DAMAGE = 8;
     public static final double BASE_HEALTH = 60;
     public static final double BASE_FOLLOW_RANGE = 16;
     public static final int BASE_KB_RESISTANCE = 1;
@@ -158,6 +159,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 .add(FOLLOW_RANGE, BASE_FOLLOW_RANGE)
                 .add(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
                 .add(ATTACK_DAMAGE, BASE_DAMAGE)
+                .add(DMLRegistry.RANGED_DAMAGE.get(), BASE_PROJECTILE_DAMAGE)
                 .add(FLYING_SPEED, BASE_SPEED_FLYING);
     }
 

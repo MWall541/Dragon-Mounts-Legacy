@@ -12,19 +12,46 @@ public abstract class MouthWeaponAbility extends ControlledAbility
     @Override
     public void tick(TameableDragon dragon)
     {
+        if (!canFireWeapon(dragon)) return;
+
         super.tick(dragon);
 
         if (isEnabled(dragon))
         {
+            if (isWeaponPrimed(dragon)) tickWeapon(dragon);
+
             usageTime++;
         }
     }
 
     @Override
-    public void enable(TameableDragon dragon, boolean enabled)
+    public void setEnabled(TameableDragon dragon, boolean enabled)
     {
-        super.enable(dragon, enabled);
+        super.setEnabled(dragon, enabled);
 
         if (!dragon.isServer()) dragon.getAnimator().setOpenJaw(enabled);
     }
+
+    @Override
+    public void onDisabled(TameableDragon dragon)
+    {
+        usageTime = 0;
+    }
+
+    public int getUsageTime()
+    {
+        return usageTime;
+    }
+
+    public boolean isWeaponPrimed(TameableDragon dragon)
+    {
+        return usageTime >= MOUTH_OPEN_TIME_FOR_ATTACK;
+    }
+
+    public boolean canFireWeapon(TameableDragon dragon)
+    {
+        return !dragon.isHatchling();
+    }
+
+    public abstract void tickWeapon(TameableDragon dragon);
 }

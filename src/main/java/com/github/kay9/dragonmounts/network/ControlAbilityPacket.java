@@ -49,7 +49,7 @@ public record ControlAbilityPacket(UUID dragonId, int abilityId, boolean enablin
                 return;
             }
 
-            controlled.enable(dragon, enabling());
+            controlled.setEnabled(dragon, enabling());
         });
         ctx.get().setPacketHandled(true);
     }

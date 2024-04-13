@@ -31,6 +31,6 @@ class LootModifierProvider extends GlobalLootModifierProvider
         };
 
         var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());
-        super.add(path, new DragonEggLootMod(conditions, breed));
+        super.add(path, new DragonEggLootMod(conditions, breed, false));
     }
 }

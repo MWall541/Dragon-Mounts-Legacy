@@ -1,6 +1,7 @@
 {
   "type": "dragonmounts:dragon_egg_loot",
   "egg_breed": "example_addon:example_breed",
+  "replace_first": false,
   "conditions": [
     {
       "condition": "forge:loot_table_id",

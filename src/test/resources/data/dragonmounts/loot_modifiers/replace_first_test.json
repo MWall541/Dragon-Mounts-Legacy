@@ -1,0 +1,11 @@
+{
+  "type": "dragonmounts:dragon_egg_loot",
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:archaeology/desert_well"
+    }
+  ],
+  "egg_breed": "dragonmounts:aether",
+  "replace_first": true
+}

@@ -14,6 +14,18 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+sourceSets {
+    // include generated resources
+    main.resources { srcDir 'src/generated/resources' }
+
+    // include example addon
+    exampleAddon {
+        resources {
+            srcDir "example_addon"
+        }
+    }
+}
+
 minecraft {
     mappings channel: 'parchment', version: "${mappings_version}"
 
@@ -25,6 +37,18 @@ minecraft {
         configureEach {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+
+            mods {
+                // required if including example below
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+
+                // include example addon as individual mod
+                example_addon {
+                    source sourceSets.exampleAddon
+                }
+            }
         }
 
         client {}
@@ -51,9 +75,6 @@ minecraft {
         }
     }
 }
-
-// include generated resources
-sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {}
 

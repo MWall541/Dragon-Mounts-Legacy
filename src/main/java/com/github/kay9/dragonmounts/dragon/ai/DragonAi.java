@@ -2,9 +2,9 @@ package com.github.kay9.dragonmounts.dragon.ai;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -17,9 +17,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.schedule.Activity;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
+import net.minecraftforge.common.ForgeHooks;
 
 import java.util.Optional;
 
@@ -27,8 +25,10 @@ public class DragonAi
 {
     private static final UniformInt RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
     private static final long RETALIATE_DURATION = 200L;
+    private static final float STROLL_SPEED_FACTOR = 0.85f;
+
     protected static final ImmutableList<? extends SensorType<? extends Sensor<? super TameableDragon>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS);
-    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.AVOID_TARGET, DMLRegistry.SITTING.get());
+    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.AVOID_TARGET, DMLRegistry.SIT_MEMORY.get());
 
     public static Brain.Provider<TameableDragon> brainProvider()
     {
@@ -66,20 +66,18 @@ public class DragonAi
                 new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0f),
                 new TeleportToOwnerIfFarEnough(),
                 new SetWalkTargetToOwnerIfFarEnough(1.0f),
-                new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0f), UniformInt.of(30, 60)),
-                new StartAttacking<>(DragonAi::canAttackRandomly, DragonAi::findNearestValidAttackTarget),
+                SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10f, UniformInt.of(30, 60)), // todo was never a fan of looking exclusively at players. Should dragons look at everything?
+                StartAttacking.create(DragonAi::canAttackRandomly, DragonAi::findNearestValidAttackTarget),
                 getIdleMovementBehaviors()));
     }
 
     private static void initFightActivity(Brain<TameableDragon> brain)
     {
         brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(
-                new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0F),
-                new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
-                new RunIf<>(TameableDragon::isAdult, new MeleeAttack(40)),
-                new RunIf<>(TameableDragon::isJuvenile, new MeleeAttack(15)),
-                new StopAttackingIfTargetInvalid<>(),
-                new EraseMemoryIf<>(DragonAi::wantsToStopFighting, MemoryModuleType.ATTACK_TARGET)
+                StopAttackingIfTargetInvalid.create(),
+                SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.0F),
+                MeleeAttack.create(40),
+                EraseMemoryIf.create(DragonAi::wantsToStopFighting, MemoryModuleType.ATTACK_TARGET)
         ), MemoryModuleType.ATTACK_TARGET);
     }
 
@@ -87,24 +85,24 @@ public class DragonAi
     {
         brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(
                 SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.5f, 16, false),
-                new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0F), UniformInt.of(30, 60)),
-                getIdleMovementBehaviors(),
-                new EraseMemoryIf<>(DragonAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
+                SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10.0F, UniformInt.of(30, 60)),
+                getIdleMovementBehaviors(), // todo is this necessary?
+                EraseMemoryIf.create(DragonAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
         ), MemoryModuleType.AVOID_TARGET);
     }
 
     private static void initSitActivity(Brain<TameableDragon> brain)
     {
-        brain.addActivityAndRemoveMemoryWhenStopped(DMLRegistry.SIT.get(), 10, ImmutableList.of(
-                new RunSometimes<>(new SetEntityLookTarget(EntityType.PLAYER, 10.0F), UniformInt.of(30, 60))
-        ), DMLRegistry.SITTING.get());
+        brain.addActivityAndRemoveMemoryWhenStopped(DMLRegistry.SIT_ACTIVITY.get(), 0, ImmutableList.of(
+                SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10.0F, UniformInt.of(30, 60))
+        ), DMLRegistry.SIT_MEMORY.get());
     }
 
     private static RunOne<TameableDragon> getIdleMovementBehaviors()
     {
         return new RunOne<>(ImmutableList.of(
-                Pair.of(new RandomStroll(1.0f), 2),
-                Pair.of(new SetWalkTargetFromLookTarget(1.0f, 3), 2),
+                Pair.of(RandomStroll.stroll(STROLL_SPEED_FACTOR), 2),
+                Pair.of(SetWalkTargetFromLookTarget.create(STROLL_SPEED_FACTOR, 3), 2),
                 Pair.of(new DoNothing(30, 60), 1)));
     }
 
@@ -113,15 +111,17 @@ public class DragonAi
         dragon.getBrain().setActiveActivityToFirstValid(ImmutableList.of(
                 Activity.FIGHT,
                 Activity.AVOID,
-                DMLRegistry.SIT.get(),
+                DMLRegistry.SIT_ACTIVITY.get(),
                 Activity.IDLE));
     }
 
     private static boolean wantsToStopFighting(TameableDragon dragon)
     {
         // If we trigger breeding or the target becomes an ally, stop attacking.
-        return dragon.getBrain().hasMemoryValue(MemoryModuleType.BREED_TARGET)
-                || dragon.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(target -> dragon.wantsToAttack(target, dragon.getOwner())).isEmpty();
+        return BehaviorUtils.isBreeding(dragon) || dragon.getBrain()
+                .getMemory(MemoryModuleType.ATTACK_TARGET).filter(target -> dragon.wantsToAttack(target, dragon.getOwner()))
+                .isEmpty();
+
     }
 
     public static void wasHurtBy(TameableDragon dragon, LivingEntity attacker)
@@ -157,7 +157,7 @@ public class DragonAi
             brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
             brain.eraseMemory(MemoryModuleType.BREED_TARGET);
             brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, RETALIATE_DURATION);
-            net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(dragon, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
+            ForgeHooks.onLivingChangeTarget(dragon, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
         }
     }
 
@@ -175,7 +175,7 @@ public class DragonAi
         Brain<TameableDragon> brain = dragon.getBrain();
         brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
         brain.eraseMemory(MemoryModuleType.WALK_TARGET);
-        brain.setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, target, RETREAT_DURATION.sample(dragon.level.random));
+        brain.setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, target, RETREAT_DURATION.sample(dragon.level().getRandom()));
     }
 
     private static boolean wantsToStopFleeing(TameableDragon dragon)

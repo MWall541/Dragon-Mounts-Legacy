@@ -12,7 +12,7 @@ public class SitWhenOrderedTo extends Behavior<TamableAnimal>
 {
     public SitWhenOrderedTo()
     {
-        super(ImmutableMap.of(DMLRegistry.SITTING.get(), MemoryStatus.REGISTERED));
+        super(ImmutableMap.of(DMLRegistry.SIT_MEMORY.get(), MemoryStatus.REGISTERED));
     }
 
     @Override
@@ -29,7 +29,7 @@ public class SitWhenOrderedTo extends Behavior<TamableAnimal>
         animal.getBrain().eraseMemory(MemoryModuleType.BREED_TARGET);
         animal.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         animal.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
-        animal.getBrain().setMemory(DMLRegistry.SITTING.get(), true);
+        animal.getBrain().setMemory(DMLRegistry.SIT_MEMORY.get(), true);
         animal.setInSittingPose(true);
     }
 
@@ -52,6 +52,6 @@ public class SitWhenOrderedTo extends Behavior<TamableAnimal>
     protected void stop(ServerLevel level, TamableAnimal animal, long gameTime)
     {
         animal.setInSittingPose(false);
-        animal.getBrain().eraseMemory(DMLRegistry.SITTING.get());
+        animal.getBrain().eraseMemory(DMLRegistry.SIT_MEMORY.get());
     }
 }

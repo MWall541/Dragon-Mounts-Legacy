@@ -172,20 +172,21 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Brain<TameableDragon> getBrain()
     {
-        return (Brain<TameableDragon>)super.getBrain();
+        return (Brain<TameableDragon>) super.getBrain();
     }
 
     @Override
     protected void customServerAiStep()
     {
-        this.level.getProfiler().push("dragonBrain");
-        this.getBrain().tick((ServerLevel)this.level, this);
-        this.level.getProfiler().pop();
-        this.level.getProfiler().push("dragonActivityUpdate");
+        level().getProfiler().push("dragonBrain");
+        this.getBrain().tick((ServerLevel) level(), this);
+        level().getProfiler().pop();
+        level().getProfiler().push("dragonActivityUpdate");
         DragonAi.updateActivity(this);
-        this.level.getProfiler().pop();
+        level().getProfiler().pop();
         super.customServerAiStep();
     }
 
@@ -194,7 +195,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super.defineSynchedData();
 
-        entityData.define(DATA_BREED,"");
+        entityData.define(DATA_BREED, "");
         entityData.define(DATA_SADDLED, false);
         entityData.define(DATA_AGE, 0); // default to adult stage
     }
@@ -353,7 +354,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         flyingNavigation.stop();
         groundNavigation.stop();
-        navigation = flying ?
+        navigation = flying?
                 flyingNavigation :
                 groundNavigation;
     }
@@ -431,7 +432,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             moveForward = moveForward > 0? moveForward : 0;
             if (driver.jumping) moveY = 1;
             else if (KeyMappings.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
-            else if (moveForward > 0 && DMLConfig.cameraDrivenFlight()) moveY = -driver.getXRot() / 90; // normalize from -1 to 1
+            else if (moveForward > 0 && DMLConfig.cameraDrivenFlight())
+                moveY = -driver.getXRot() / 90; // normalize from -1 to 1
         }
 
         // mimic dogshit implementation of AI movement vectors
@@ -560,7 +562,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return !this.isFlying()
                 && this.canFly()
                 && !this.isLeashed()
-                && level.noCollision(this, this.getBoundingBox().move(0, getJumpPower(), 0));
+                && level().noCollision(this, this.getBoundingBox().move(0, getJumpPower(), 0));
     }
 
     @Override
@@ -845,7 +847,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         boolean flag = super.hurt(src, amount);
 
-        if (this.level.isClientSide)
+        if (level().isClientSide())
         {
             return false;
         }
@@ -861,15 +863,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean canFallInLove()
     {
-        var limit = getBreed().getReproductionLimit();
+        var limit = getBreed() != null? getBreed().getReproductionLimit() : -1;
         var withinLimit = reproCount < limit || limit == -1;
-        return super.canFallInLove() && isAdult() && withinLimit
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean canReproduce()
-    {
-        return isTame() && reproCount < DMLConfig.reproLimit();
+        return super.canFallInLove() && isAdult() && withinLimit;
     }
 
     @Override
@@ -1120,7 +1116,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // negate modifier value since the operation is as follows: base_value += modifier * base_value
         double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
         var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", modValue, AttributeModifier.Operation.MULTIPLY_BASE);
-        for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code
+        for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE,}) // avoid duped code
         {
             AttributeInstance instance = getAttribute(attribute);
             instance.removeModifier(mod);

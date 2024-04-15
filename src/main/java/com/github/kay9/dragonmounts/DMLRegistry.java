@@ -60,8 +60,8 @@ public class DMLRegistry
 
     public static final RegistryObject<LootItemConditionType> RANDOM_CHANCE_CONFIG_CONDITION = register("random_chance_by_config", Registries.LOOT_CONDITION_TYPE, () -> new LootItemConditionType(new RandomChanceByConfig.Serializer()));
 
-    public static final RegistryObject<MemoryModuleType<Boolean>> SITTING = memory("is_sitting");
-    public static final RegistryObject<Activity> SIT = activity("sit");
+    public static final RegistryObject<MemoryModuleType<Boolean>> SIT_MEMORY = memory("is_sitting");
+    public static final RegistryObject<Activity> SIT_ACTIVITY = activity("sit");
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {

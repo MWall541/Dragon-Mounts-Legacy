@@ -23,6 +23,7 @@ public class DragonEggLootMod extends LootModifier
 {
     public static final Codec<DragonEggLootMod> CODEC = RecordCodecBuilder.create(i -> codecStart(i)
             .and(ResourceLocation.CODEC.fieldOf("egg_breed").forGetter(m -> m.id))
+            .and(Codec.BOOL.optionalFieldOf("replace_first", false).forGetter(m -> m.replaceFirst))
             .apply(i, DragonEggLootMod::new));
 
     public record Target(ResourceKey<DragonBreed> forBreed, ResourceLocation target, double chance) {}
@@ -38,11 +39,13 @@ public class DragonEggLootMod extends LootModifier
     };
 
     private final ResourceLocation id;
+    private final boolean replaceFirst;
 
-    public DragonEggLootMod(LootItemCondition[] conditions, ResourceLocation breed)
+    public DragonEggLootMod(LootItemCondition[] conditions, ResourceLocation breed, boolean replaceFirst)
     {
         super(conditions);
         this.id = breed;
+        this.replaceFirst = replaceFirst;
     }
 
     @Override
@@ -51,9 +54,15 @@ public class DragonEggLootMod extends LootModifier
         var reg = context.getLevel().registryAccess();
         var breed = BreedRegistry.registry(reg).get(id);
         if (breed != null)
-            generatedLoot.add(HatchableEggBlock.Item.create(breed, reg));
+        {
+            var egg = HatchableEggBlock.Item.create(breed, reg);
+
+            if (replaceFirst) generatedLoot.set(0, egg);
+            else generatedLoot.add(egg);
+        }
         else
             DragonMountsLegacy.LOG.error("Attempted to add a dragon egg to loot with unknown breed id: \"{}\"", id);
+
         return generatedLoot;
     }
 

@@ -17,6 +17,8 @@ import net.minecraft.client.renderer.RenderType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 /**
  * Generic model for all winged tetrapod dragons.

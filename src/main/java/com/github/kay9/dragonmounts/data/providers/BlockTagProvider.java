@@ -2,13 +2,17 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.BlockTagsProvider;
+import com.github.kay9.dragonmounts.abilities.ReaperStepAbility;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
+
+import java.util.concurrent.CompletableFuture;
 
 class BlockTagProvider extends BlockTagsProvider
 {
@@ -18,14 +22,14 @@ class BlockTagProvider extends BlockTagsProvider
     static final TagKey<Block> NETHER_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("nether_dragon_habitat_blocks"));
     static final TagKey<Block> WATER_DRAGON_HABITAT_BLOCKS = BlockTags.create(DragonMountsLegacy.id("water_dragon_habitat_blocks"));
 
-    BlockTagProvider(DataGenerator pGenerator, String modid, ExistingFileHelper existingFileHelper)
+    BlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, String modid, ExistingFileHelper existingFileHelper)
     {
-        super(pGenerator, modid, existingFileHelper);
+        super(output, lookup, modid, existingFileHelper);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void addTags()
+    protected void addTags(HolderLookup.Provider pProvider)
     {
         tag(FIRE_DRAGON_HABITAT_BLOCKS)
                 .add(Blocks.FIRE, Blocks.LAVA, Blocks.MAGMA_BLOCK, Blocks.CAMPFIRE);
@@ -48,7 +52,25 @@ class BlockTagProvider extends BlockTagsProvider
                 .add(Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.KELP, Blocks.KELP_PLANT, Blocks.PRISMARINE,
                         Blocks.SEA_LANTERN, Blocks.SEA_PICKLE);
 
+
         tag(HotFeetAbility.BURNABLES_TAG)
-                .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.REPLACEABLE_PLANTS);
+                .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.CROPS)
+                .add(Blocks.GRASS, Blocks.TALL_GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.DEAD_BUSH, Blocks.PITCHER_PLANT,
+                        Blocks.BIG_DRIPLEAF, Blocks.SMALL_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.SUGAR_CANE,
+                        Blocks.FERN, Blocks.LARGE_FERN, Blocks.PITCHER_PLANT);
+
+        tag(ReaperStepAbility.PLANT_DEATH_TAG)
+                .addTags(BlockTags.TALL_FLOWERS, BlockTags.CROPS, BlockTags.SAPLINGS)
+                .add(Blocks.TALL_GRASS, Blocks.GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.SUGAR_CANE, Blocks.BIG_DRIPLEAF_STEM,
+                Blocks.BIG_DRIPLEAF, Blocks.FERN, Blocks.LARGE_FERN, Blocks.PITCHER_PLANT);
+
+        tag(ReaperStepAbility.PLANT_DESTRUCTION_TAG)
+                .addTags(BlockTags.SMALL_FLOWERS)
+                .add(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM, Blocks.SMALL_DRIPLEAF)
+                .remove(Blocks.WITHER_ROSE);
+
+        tag(ReaperStepAbility.REAPER_TRANSFORM)
+                .addTags(BlockTags.SAND, BlockTags.DIRT)
+                .add(Blocks.GRASS_BLOCK);
     }
 }

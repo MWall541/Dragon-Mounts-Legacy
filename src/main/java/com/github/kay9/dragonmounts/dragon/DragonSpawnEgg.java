@@ -4,19 +4,26 @@ import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.server.ServerLifecycleHooks;
+import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("DataFlowIssue")
+import java.util.Optional;
+import java.util.function.Consumer;
+
 public class DragonSpawnEgg extends ForgeSpawnEggItem
 {
     private static final String DATA_TAG = "ItemData";
@@ -26,18 +33,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
 
     public DragonSpawnEgg()
     {
-        super(DMLRegistry.DRAGON, 0, 0, new Item.Properties().tab(CreativeModeTab.TAB_MISC));
-    }
-
-    @Override
-    public void fillItemCategory(CreativeModeTab pCategory, NonNullList<ItemStack> pItems)
-    {
-        if (FMLLoader.getDist().isClient() && allowdedIn(pCategory) && Minecraft.getInstance().level != null)
-        {
-            var reg = Minecraft.getInstance().level.registryAccess();
-            for (DragonBreed breed : BreedRegistry.registry(reg))
-                pItems.add(create(breed, reg));
-        }
+        super(DMLRegistry.DRAGON, 0, 0, new Item.Properties());
     }
 
     public static ItemStack create(DragonBreed breed, RegistryAccess reg)
@@ -63,33 +59,75 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         return stack;
     }
 
-    @SuppressWarnings("DataFlowIssue")
+    public static void populateTab(Consumer<ItemStack> registrar)
+    {
+        if (Minecraft.getInstance().level != null)
+        {
+            var reg = Minecraft.getInstance().level.registryAccess();
+            for (DragonBreed breed : BreedRegistry.registry(reg))
+                registrar.accept(create(breed, reg));
+        }
+    }
+
+    @Override
+    public @Nullable ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt)
+    {
+        preconditionSpawnEgg(stack); // extremely hacky to be doing it here... but there doesn't seem to be any other options.
+        return super.initCapabilities(stack, nbt);
+    }
+
     @Override
     public Component getName(ItemStack stack)
     {
         var tag = stack.getTagElement(DATA_TAG);
-        if (tag == null || tag.contains(DATA_ITEM_NAME))
-            return new TranslatableComponent(tag.getString(DATA_ITEM_NAME));
+        if (tag != null && tag.contains(DATA_ITEM_NAME))
+            return Component.translatable(tag.getString(DATA_ITEM_NAME));
+
         return super.getName(stack);
+    }
+
+    @Override
+    public Optional<Mob> spawnOffspringFromSpawnEgg(Player pPlayer, Mob pMob, EntityType<? extends Mob> pEntityType, ServerLevel pServerLevel, Vec3 pPos, ItemStack pStack)
+    {
+        var entityTag = pStack.getTagElement(EntityType.ENTITY_TAG);
+        if (entityTag != null)
+        {
+            var breedID = entityTag.getString(TameableDragon.NBT_BREED);
+            if (!breedID.isEmpty())
+            {
+                if (((TameableDragon) pMob).getBreed() != BreedRegistry.get(breedID, pServerLevel.registryAccess()))
+                    return Optional.empty();
+            }
+        }
+
+        return super.spawnOffspringFromSpawnEgg(pPlayer, pMob, pEntityType, pServerLevel, pPos, pStack);
     }
 
     public static int getColor(ItemStack stack, int tintIndex)
     {
-        int prim;
-        int sec;
         var tag = stack.getTagElement(DATA_TAG);
         if (tag != null)
-        {
-            prim = tag.getInt(DATA_PRIM_COLOR);
-            sec = tag.getInt(DATA_SEC_COLOR);
-        }
-        else
-        {
-            var fire = BreedRegistry.getFallback(Minecraft.getInstance().level.registryAccess());
-            prim = fire.primaryColor();
-            sec = fire.secondaryColor();
-        }
+            return tintIndex == 0? tag.getInt(DATA_PRIM_COLOR) : tag.getInt(DATA_SEC_COLOR);
+        return 0xffffff;
+    }
 
-        return tintIndex == 0? prim : sec;
+    @SuppressWarnings("ConstantConditions")
+    private static void preconditionSpawnEgg(ItemStack stack)
+    {
+        if (ServerLifecycleHooks.getCurrentServer() == null) return;
+
+        var root = stack.getOrCreateTag();
+        var blockEntityData = stack.getOrCreateTagElement(EntityType.ENTITY_TAG);
+        var breedId = blockEntityData.getString(TameableDragon.NBT_BREED);
+        var regAcc = ServerLifecycleHooks.getCurrentServer().registryAccess();
+        var reg = BreedRegistry.registry(regAcc);
+
+        if (breedId.isEmpty() || !reg.containsKey(new ResourceLocation(breedId))) // this item doesn't contain a breed yet?
+        {
+            // assign one ourselves then.
+            var breed = reg.getRandom(RandomSource.create()).orElseThrow();
+            var updated = create(breed.get(), regAcc);
+            root.merge(updated.getTag());
+        }
     }
 }

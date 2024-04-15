@@ -3,7 +3,8 @@ package com.github.kay9.dragonmounts.habitats;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -12,7 +13,7 @@ public record NearbyBlocksHabitat(float multiplier, TagKey<Block> tag) implement
 {
     public static final Codec<NearbyBlocksHabitat> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Habitat.withMultiplier(0.5f, NearbyBlocksHabitat::multiplier),
-            TagKey.codec(Registry.BLOCK_REGISTRY).fieldOf("block_tag").forGetter(NearbyBlocksHabitat::tag)
+            TagKey.codec(Registries.BLOCK).fieldOf("block_tag").forGetter(NearbyBlocksHabitat::tag)
     ).apply(instance, NearbyBlocksHabitat::new));
 
     @Override
@@ -24,7 +25,7 @@ public record NearbyBlocksHabitat(float multiplier, TagKey<Block> tag) implement
     }
 
     @Override
-    public String type()
+    public ResourceLocation type()
     {
         return Habitat.NEARBY_BLOCKS;
     }

@@ -1,25 +1,30 @@
 {
-  "immunities": [
-    "drown",
-    "freeze"
-  ],
   "abilities": [
     {
-      "type": "frost_walker"
+      "type": "dragonmounts:frost_walker",
+      "radius_multiplier": 3.0
     },
     {
-      "type": "snow_stepper"
+      "type": "dragonmounts:snow_stepper"
     }
   ],
   "habitats": [
     {
-      "block_tag": "dragonmounts:ice_dragon_habitat_blocks",
-      "type": "nearby_blocks"
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:ice_dragon_habitat_blocks"
     }
   ],
-  "primary_color": "ffffff",
-  "secondary_color": "e1ff",
   "hatch_particles": {
     "type": "minecraft:snowflake"
-  }
+  },
+  "immunities": [
+    "minecraft:drown",
+    "minecraft:freeze",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "ffffff",
+  "reproduction_limit": "config:ice",
+  "secondary_color": "e1ff"
 }

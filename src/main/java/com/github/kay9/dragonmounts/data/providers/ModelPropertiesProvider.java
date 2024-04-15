@@ -2,19 +2,18 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonModel;
+import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class ModelPropertiesProvider implements DataProvider
 {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
     private final DataGenerator gen;
 
     public ModelPropertiesProvider(DataGenerator gen)
@@ -23,18 +22,19 @@ public class ModelPropertiesProvider implements DataProvider
     }
 
     @Override
-    public void run(HashCache pCache) throws IOException
+    public CompletableFuture<?> run(CachedOutput pOutput)
     {
-        save(pCache, "fire", new DragonModel.Properties(false, false, false));
-        save(pCache, "ghost", new DragonModel.Properties(true, false, true));
-        save(pCache, "water", new DragonModel.Properties(true, true, false));
+        return CompletableFuture.allOf(
+                save(pOutput, DragonBreed.BuiltIn.FIRE.location().getPath(), new DragonModel.Properties(false, false, false)),
+                save(pOutput, DragonBreed.BuiltIn.GHOST.location().getPath(), new DragonModel.Properties(true, false, true)),
+                save(pOutput, DragonBreed.BuiltIn.WATER.location().getPath(), new DragonModel.Properties(true, true, false)));
     }
 
-    private void save(HashCache cache, String id, DragonModel.Properties instance) throws IOException
+    private CompletableFuture<?> save(CachedOutput cache, String id, DragonModel.Properties instance)
     {
         var jsonObj = DragonModel.Properties.CODEC.encodeStart(JsonOps.INSTANCE, instance).getOrThrow(false, err -> {});
-        var path = gen.getOutputFolder().resolve("assets/" + DragonMountsLegacy.MOD_ID + "/models/entity/dragon/breed/properties/" + id + ".json");
-        DataProvider.save(GSON, cache, jsonObj, path);
+        var path = gen.getPackOutput().getOutputFolder().resolve("assets/" + DragonMountsLegacy.MOD_ID + "/models/entity/dragon/breed/properties/" + id + ".json");
+        return DataProvider.saveStable(cache, jsonObj, path);
     }
 
     @Override

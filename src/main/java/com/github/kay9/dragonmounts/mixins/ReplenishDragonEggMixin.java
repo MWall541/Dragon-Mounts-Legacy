@@ -11,11 +11,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class ReplenishDragonEggMixin
 {
     /**
-     * Return the invert of whats wanted due to the target inverting the returned value.
+     * Purpose: To implement a way to replenish dragon eggs after death of the ender dragon
+     * <br>
+     * This mixin redirects the 'if' statement in setDragonKilled that tests if the ender dragon was previously killed
+     * essentially, instead of {@code if (!previouslyKilled) {...}},
+     * we do {@code if (!dragonmounts_replenishDragonEgg) {...}}
      */
     @Redirect(method = "setDragonKilled(Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/dimension/end/EndDragonFight;previouslyKilled:Z", opcode = Opcodes.GETFIELD))
     private boolean dragonmounts_replenishDragonEgg(EndDragonFight instance)
     {
-        return !(!instance.hasPreviouslyKilledDragon() || DMLConfig.replenishEggs());
+        return !(!instance.hasPreviouslyKilledDragon() || DMLConfig.replenishEggs()); // return the inverse of what we want because the target check inverts the result... yeah.
     }
 }

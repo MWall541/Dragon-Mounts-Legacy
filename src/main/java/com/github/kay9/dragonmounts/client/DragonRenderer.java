@@ -8,12 +8,13 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
 public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 {
     public static final ModelLayerLocation MODEL_LOCATION = new ModelLayerLocation(DragonMountsLegacy.id("dragon"), "main");
@@ -47,6 +49,12 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         addLayer(GLOW_LAYER);
         addLayer(SADDLE_LAYER);
         addLayer(DEATH_LAYER);
+    }
+
+    @Override
+    public boolean shouldRender(TameableDragon dragon, Frustum pCamera, double pCamX, double pCamY, double pCamZ)
+    {
+        return dragon.getBreed() != null && super.shouldRender(dragon, pCamera, pCamX, pCamY, pCamZ);
     }
 
     @Override
@@ -91,7 +99,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         ps.scale(scale, scale, scale);
         ps.translate(animator.getModelOffsetX(), animator.getModelOffsetY(), animator.getModelOffsetZ());
         ps.translate(0, 1.5, 0.5); // change rotation point
-        ps.mulPose(Vector3f.XP.rotationDegrees(animator.getModelPitch(partials))); // rotate near the saddle so we can support the player
+        ps.mulPose(Axis.XP.rotationDegrees(animator.getModelPitch(partials))); // rotate near the saddle so we can support the player
         ps.translate(0, -1.5, -0.5); // restore rotation point
     }
 
@@ -170,6 +178,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
             return GLOW_FUNC.apply(texture);
         }
 
+        @SuppressWarnings("DataFlowIssue")
         private CustomRenderTypes()
         {
             // dummy

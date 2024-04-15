@@ -1,30 +1,36 @@
 {
-  "immunities": [
-    "drown"
-  ],
-  "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
-  "model_properties": {
-    "thin_legs": true
-  },
-  "habitats": [
+  "abilities": [
     {
-      "required_habitats": [
-        {
-          "points": 1,
-          "below": true,
-          "height": 0,
-          "type": "world_height"
-        },
-        {
-          "points": 2,
-          "below": true,
-          "light": 3,
-          "type": "light"
-        }
-      ],
-      "type": "picky"
+      "type": "dragonmounts:reaper_step"
     }
   ],
+  "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
+  "habitats": [
+    {
+      "type": "dragonmounts:picky",
+      "required_habitats": [
+        {
+          "type": "dragonmounts:world_height",
+          "below": true,
+          "height": 0,
+          "points": 1
+        },
+        {
+          "type": "dragonmounts:light",
+          "below": true,
+          "light": 3,
+          "points": 2
+        }
+      ]
+    }
+  ],
+  "immunities": [
+    "minecraft:drown",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
   "primary_color": "c4c4c4",
+  "reproduction_limit": "config:ghost",
   "secondary_color": "c2f8ff"
 }

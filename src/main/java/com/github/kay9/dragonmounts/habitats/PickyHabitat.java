@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.habitats;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public record PickyHabitat(List<Habitat> habitats) implements Habitat
     }
 
     @Override
-    public String type()
+    public ResourceLocation type()
     {
         return Habitat.PICKY;
     }

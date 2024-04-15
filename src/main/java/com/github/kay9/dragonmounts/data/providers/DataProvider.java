@@ -1,28 +1,25 @@
 package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 @Mod.EventBusSubscriber(modid = DragonMountsLegacy.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DataProvider
 {
     @SubscribeEvent
-    public static void gather(GatherDataEvent event)
+    public static void gather(GatherDataEvent evt)
     {
-        var gen = event.getGenerator();
-        var fileHelper = event.getExistingFileHelper();
+        var gen = evt.getGenerator();
+        var output = evt.getGenerator().getPackOutput();
+        var lookup = evt.getLookupProvider();
+        var fileHelper = evt.getExistingFileHelper();
 
-        if (event.includeServer())
-        {
-            gen.addProvider(new BlockTagProvider(gen, DragonMountsLegacy.MOD_ID, fileHelper));
-            gen.addProvider(new LootModifierProvider(gen, DragonMountsLegacy.MOD_ID));
-            gen.addProvider(new DragonBreedProvider(gen));
-        }
-        if (event.includeClient())
-        {
-            gen.addProvider(new ModelPropertiesProvider(gen));
-        }
+        gen.addProvider(evt.includeServer(), new BlockTagProvider(output, lookup, DragonMountsLegacy.MOD_ID, fileHelper));
+        gen.addProvider(evt.includeServer(), new LootModifierProvider(output, DragonMountsLegacy.MOD_ID));
+        gen.addProvider(evt.includeServer(), new DragonBreedProvider(output, lookup));
+
+        gen.addProvider(evt.includeClient(), new ModelPropertiesProvider(gen));
     }
 }

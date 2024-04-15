@@ -1,0 +1,16 @@
+{
+  "values": [
+    "#minecraft:tall_flowers",
+    "#minecraft:crops",
+    "#minecraft:saplings",
+    "minecraft:tall_grass",
+    "minecraft:grass",
+    "minecraft:sweet_berry_bush",
+    "minecraft:sugar_cane",
+    "minecraft:big_dripleaf_stem",
+    "minecraft:big_dripleaf",
+    "minecraft:fern",
+    "minecraft:large_fern",
+    "minecraft:pitcher_plant"
+  ]
+}

@@ -20,7 +20,12 @@
   "item.dragonmounts.spawn_egg.dragonmounts.water": "Water Dragon Spawn Egg",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
-  "block.dragonmounts.dragon_egg.change_breeds": "Creative mode: Interacting with a dragon will change it's breed to this egg's breed.",
+  "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
+  "block.dragonmounts.dragon_egg.desc2": "Changes Breed Type",
+  "block.dragonmounts.dragon_egg.hatch_stage.0": "It looks like this Egg will take a long time to hatch.",
+  "block.dragonmounts.dragon_egg.hatch_stage.1": "What will hatch from this? It doesn't seem close to hatching.",
+  "block.dragonmounts.dragon_egg.hatch_stage.2": "It appears to move occasionally. It may be close to hatching.",
+  "block.dragonmounts.dragon_egg.hatch_stage.3": "Sounds can be heard coming from inside! It will hatch soon!",
 
   "block.dragonmounts.dragon_egg.dragonmounts.aether": "Aether Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.fire": "Fire Dragon Egg",

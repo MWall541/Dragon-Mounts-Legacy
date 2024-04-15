@@ -1,11 +1,11 @@
 package com.github.kay9.dragonmounts;
 
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
+import com.github.kay9.dragonmounts.client.MountCameraManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TagsUpdatedEvent;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -17,6 +17,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.registries.DataPackRegistryEvent;
 
 import static com.github.kay9.dragonmounts.DragonMountsLegacy.*;
 
@@ -30,11 +31,9 @@ public class ForgeModImpl
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
 
         DMLRegistry.init(bus);
-        BreedRegistry.DEFERRED_REGISTRY.register(bus);
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, DMLConfig.SERVER);
-//        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, DMLConfig.COMMON_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, DMLConfig.CLIENT_SPEC);
 
         setupEvents();
     }
@@ -54,21 +53,24 @@ public class ForgeModImpl
         var modBus = FMLJavaModLoadingContext.get().getModEventBus();
         var bus = MinecraftForge.EVENT_BUS;
 
-        bus.addListener((PlayerInteractEvent.RightClickBlock e) -> e.setCanceled(overrideVanillaDragonEgg(e.getWorld(), e.getPos(), e.getPlayer())));
+        bus.addListener((PlayerInteractEvent.RightClickBlock e) -> e.setCanceled(overrideVanillaDragonEgg(e.getLevel(), e.getPos(), e.getEntity())));
+        bus.addListener((AddReloadListenerEvent e) -> registerReloadListeners(e::addListener));
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
+        modBus.addListener((DataPackRegistryEvent.NewRegistry e) -> registerDatapacks(e::dataPackRegistry));
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
             bus.addListener((TickEvent.ClientTickEvent e) -> clientTick(e.phase == TickEvent.Phase.START));
-            bus.addListener((EntityViewRenderEvent.CameraSetup e) -> modifyMountCameraAngles(e.getCamera()));
-            bus.addListener((InputEvent.KeyInputEvent e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
-            bus.addListener((TagsUpdatedEvent e) -> populateSearchTrees());
+            bus.addListener((ViewportEvent.ComputeCameraAngles e) -> MountCameraManager.setMountCameraAngles(e.getCamera()));
+            bus.addListener((InputEvent.Key e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
 
+            modBus.addListener((ModelEvent.RegisterGeometryLoaders e) -> registerEggModelLoader(e::register));
+            modBus.addListener((BuildCreativeModeTabContentsEvent e) -> registerCreativeTabItems(e.getTabKey(), e::accept));
             modBus.addListener((EntityRenderersEvent.RegisterRenderers e) -> registerRenderers());
-            modBus.addListener((ModelRegistryEvent e) -> defineBlockModels(ForgeModelBakery::addSpecialModel));
-            modBus.addListener((ColorHandlerEvent.Item e) -> registerItemColors(e.getItemColors()));
+            modBus.addListener((RegisterColorHandlersEvent.Item e) -> registerItemColors(e.getItemColors()));
             modBus.addListener((FMLConstructModEvent e) -> e.enqueueWork(DragonMountsLegacy::registerReloadListenersEarly));
+            modBus.addListener((RegisterKeyMappingsEvent e) -> registerKeyBindings(e::register));
         }
     }
 }

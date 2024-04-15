@@ -1,14 +1,14 @@
 {
+  "type": "dragonmounts:dragon_egg_loot",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
       "loot_table_id": "minecraft:chests/desert_pyramid"
     },
     {
-      "condition": "minecraft:random_chance",
-      "chance": 0.085
+      "condition": "dragonmounts:random_chance_by_config",
+      "config_chance_target": "fire_in_desert_pyramid_chance"
     }
   ],
-  "breed": "dragonmounts:fire",
-  "type": "dragonmounts:dragon_egg_loot"
+  "egg_breed": "dragonmounts:fire"
 }

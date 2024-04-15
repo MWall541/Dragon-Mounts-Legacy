@@ -5,13 +5,14 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 
-public class HotFeetAbility extends FootprintAbility
+public class HotFeetAbility extends FootprintAbility implements Ability.Factory<HotFeetAbility>
 {
     public static final HotFeetAbility INSTANCE = new HotFeetAbility();
     public static final Codec<HotFeetAbility> CODEC = Codec.unit(INSTANCE);
@@ -21,7 +22,7 @@ public class HotFeetAbility extends FootprintAbility
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
-        var level = dragon.getLevel();
+        var level = dragon.level();
         var steppingOn = level.getBlockState(pos);
         if (steppingOn.is(BURNABLES_TAG))
         {
@@ -32,8 +33,14 @@ public class HotFeetAbility extends FootprintAbility
     }
 
     @Override
-    public String type()
+    public HotFeetAbility create()
     {
-        return Ability.HOT_FEET;
+        return this;
+    }
+
+    @Override
+    public ResourceLocation type()
+    {
+        return HOT_FEET;
     }
 }

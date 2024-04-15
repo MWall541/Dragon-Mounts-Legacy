@@ -15,6 +15,7 @@ import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
+import com.github.kay9.dragonmounts.util.DMLUtil;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -384,7 +385,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // update nearGround state when moving for flight and animation logic
-        nearGround = onGround() || !level().noCollision(this, new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getZ()));
+        nearGround = onGround() || !DMLUtil.noVerticalCollision(level(), getX(), getZ(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getY());
 
         // update flying state based on the distance to the ground
         boolean flying = shouldFly();
@@ -553,20 +554,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void liftOff()
     {
-        if (canFly()) jumpFromGround();
-    }
-
-    public boolean canLiftOff()
-    {
-        // Should liftOff call this instead of canFly so all checks are consistent?
-        return !this.isFlying()
-                && this.canFly()
-                && !this.isLeashed()
-                && level().noCollision(this, this.getBoundingBox().move(0, getJumpPower(), 0));
+        jumpFromGround();
     }
 
     @Override
-    protected float getJumpPower()
+    public float getJumpPower()
     {
         // stronger jumps for easier lift-offs
         return super.getJumpPower() * (canFly()? 3 : 1);

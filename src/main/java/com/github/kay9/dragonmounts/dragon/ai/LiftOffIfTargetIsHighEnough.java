@@ -6,9 +6,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.ai.memory.WalkTarget;
-
-import java.util.Optional;
 
 // Is this temporary until writing a custom move behavior?
 public class LiftOffIfTargetIsHighEnough extends Behavior<TameableDragon>
@@ -30,10 +27,16 @@ public class LiftOffIfTargetIsHighEnough extends Behavior<TameableDragon>
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, TameableDragon dragon)
     {
-        Optional<WalkTarget> walkTarget = dragon.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
-        double verticalDistance = walkTarget.get().getTarget().currentPosition().y - dragon.getY();
-        return dragon.canLiftOff()
-                && verticalDistance >= this.heightNeeded;
+        double targetHeight = dragon.getBrain()
+                .getMemory(MemoryModuleType.WALK_TARGET)
+                .orElseThrow()
+                .getTarget()
+                .currentPosition()
+                .y();
+        double verticalDistance = targetHeight - dragon.getY();
+        return !dragon.isFlying()
+                && verticalDistance >= heightNeeded
+                && DragonMoveController.canLiftOff(dragon);
     }
 
     @Override

@@ -1,12 +1,16 @@
 package com.github.kay9.dragonmounts.dragon.ai;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.util.DMLUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.phys.AABB;
 
 public class DragonMoveController extends MoveControl
 {
+    private static final float LIFT_OFF_HEIGHT = 5;
+
     private final TameableDragon dragon;
 
     public DragonMoveController(TameableDragon dragon)
@@ -18,19 +22,30 @@ public class DragonMoveController extends MoveControl
     @Override
     public void tick()
     {
-        // original movement behavior if the entity isn't flying
+        double yDif = getWantedY() - mob.getY();
+
         if (!dragon.isFlying())
         {
-            super.tick();
-            return;
+            var liftOffScale = LIFT_OFF_HEIGHT * dragon.getScale();
+            if (yDif > liftOffScale
+                    && DMLUtil.noVerticalCollision(dragon.level(), getWantedX(), getWantedZ(), getWantedY(), getWantedY() - liftOffScale)
+                    && canLiftOff(dragon))
+            {
+                dragon.liftOff();
+            }
+            else
+            {
+                // ground movement behavior if we don't want to fly
+                super.tick();
+                return;
+            }
         }
 
         if (operation == MoveControl.Operation.MOVE_TO)
         {
             operation = MoveControl.Operation.WAIT;
-            double xDif = wantedX - mob.getX();
-            double yDif = wantedY - mob.getY();
-            double zDif = wantedZ - mob.getZ();
+            double xDif = getWantedX() - mob.getX();
+            double zDif = getWantedZ() - mob.getZ();
             double sq = xDif * xDif + yDif * yDif + zDif * zDif;
             if (sq < (double) 2.5000003E-7F)
             {
@@ -53,5 +68,12 @@ public class DragonMoveController extends MoveControl
             mob.setYya(0);
             mob.setZza(0);
         }
+    }
+
+    public static boolean canLiftOff(TameableDragon dragon)
+    {
+        return dragon.canFly()
+                && !dragon.isLeashed()
+                && dragon.level().noCollision(dragon, dragon.getBoundingBox().move(0, dragon.getJumpPower(), 0));
     }
 }

@@ -18,6 +18,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 
 import java.util.Optional;
 
@@ -55,8 +56,8 @@ public class DragonAi
                 new SitWhenOrderedTo(),
                 new FightWithOwner(),
                 new LookAtTargetSink(45, 90),
-                new LiftOffIfTargetIsHighEnough(),
-                new LiftOffIfStuck(),
+//                new LiftOffIfTargetIsHighEnough(),
+//                new LiftOffIfStuck(),
                 new MoveToTargetSink()));
     }
 
@@ -121,21 +122,16 @@ public class DragonAi
         return BehaviorUtils.isBreeding(dragon) || dragon.getBrain()
                 .getMemory(MemoryModuleType.ATTACK_TARGET).filter(target -> dragon.wantsToAttack(target, dragon.getOwner()))
                 .isEmpty();
-
     }
 
     public static void wasHurtBy(TameableDragon dragon, LivingEntity attacker)
     {
         Brain<TameableDragon> brain = dragon.getBrain();
         brain.eraseMemory(MemoryModuleType.BREED_TARGET);
-        if (dragon.isBaby()) // Should juveniles have their own behavior?
-        {
+        if (dragon.isHatchling())
             retreatFromNearestTarget(dragon, attacker);
-        }
         else
-        {
             maybeRetaliate(dragon, attacker);
-        }
     }
 
     private static void maybeRetaliate(TameableDragon dragon, LivingEntity attacker)
@@ -152,12 +148,12 @@ public class DragonAi
     private static void setAttackTarget(TameableDragon dragon, LivingEntity target)
     {
         Brain<TameableDragon> brain = dragon.getBrain();
-        net.minecraftforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.minecraftforge.common.ForgeHooks.onLivingChangeTarget(dragon, target, net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
-        if(!changeTargetEvent.isCanceled()) {
+        LivingChangeTargetEvent changeTargetEvent = ForgeHooks.onLivingChangeTarget(dragon, target, LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
+        if (!changeTargetEvent.isCanceled())
+        {
             brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
             brain.eraseMemory(MemoryModuleType.BREED_TARGET);
-            brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, RETALIATE_DURATION);
-            ForgeHooks.onLivingChangeTarget(dragon, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
+            brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, changeTargetEvent.getNewTarget(), RETALIATE_DURATION);
         }
     }
 

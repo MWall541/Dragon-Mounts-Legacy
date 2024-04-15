@@ -7,6 +7,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraftforge.common.ForgeHooks;
 
 public class FightWithOwner extends Behavior<TamableAnimal>
 {
@@ -54,7 +55,7 @@ public class FightWithOwner extends Behavior<TamableAnimal>
         if(!changeTargetEvent.isCanceled()) {
             animal.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, changeTargetEvent.getNewTarget(), this.attackDuration);
             animal.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-            net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(animal, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
+            ForgeHooks.onLivingChangeTarget(animal, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
         }
     }
 }

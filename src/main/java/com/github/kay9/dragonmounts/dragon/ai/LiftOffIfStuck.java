@@ -27,8 +27,11 @@ public class LiftOffIfStuck extends Behavior<TameableDragon>
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, TameableDragon dragon)
     {
-        return dragon.canLiftOff()
-                && dragon.getBrain().getMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE).filter(cantReachSince -> level.getGameTime() - cantReachSince >= this.timeStuckToLiftOff).isPresent();
+        return DragonMoveController.canLiftOff(dragon)
+                && dragon.getBrain()
+                .getMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE)
+                .filter(cantReachSince -> level.getGameTime() - cantReachSince >= timeStuckToLiftOff)
+                .isPresent();
     }
 
     @Override

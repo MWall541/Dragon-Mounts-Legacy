@@ -19,6 +19,7 @@ public class DragonMoveController extends MoveControl
         this.dragon = dragon;
     }
 
+    // todo: dragon body rotates too quickly, rotation speed hardcoded in super
     @Override
     public void tick()
     {

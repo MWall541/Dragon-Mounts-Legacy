@@ -1,6 +1,7 @@
-package com.github.kay9.dragonmounts.dragon.ai;
+package com.github.kay9.dragonmounts.dragon.ai.behaviors;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;

@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.dragon.ai;
+package com.github.kay9.dragonmounts.dragon.ai.behaviors;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.google.common.collect.ImmutableMap;

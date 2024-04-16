@@ -2,6 +2,10 @@ package com.github.kay9.dragonmounts.dragon.ai;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.ai.behaviors.FightWithOwner;
+import com.github.kay9.dragonmounts.dragon.ai.behaviors.SetWalkTargetToOwnerIfFarEnough;
+import com.github.kay9.dragonmounts.dragon.ai.behaviors.SitWhenOrderedTo;
+import com.github.kay9.dragonmounts.dragon.ai.behaviors.TeleportToOwnerIfFarEnough;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;

@@ -43,6 +43,9 @@ public class FlightPathNavigation extends PathNavigation
         return new PathFinder(nodeEvaluator, pMaxVisitedNodes);
     }
 
+    /**
+     * This is used to check if we're stuck
+     */
     @Override
     protected Vec3 getTempMobPos()
     {
@@ -55,18 +58,27 @@ public class FlightPathNavigation extends PathNavigation
         return true;
     }
 
+    /**
+     * Sanitize the final Y value that gets passed to the move controller
+     */
     @Override
     protected double getGroundY(Vec3 pVec)
     {
         return dragon.canFly()? pVec.y() : WalkNodeEvaluator.getFloorLevel(level, BlockPos.containing(pVec));
     }
 
+    /**
+     * If we have (or should have) a direct line of sight to our goal
+     */
     @Override
     protected boolean canMoveDirectly(Vec3 from, Vec3 to)
     {
         return dragon.isFlying() && isClearForMovementBetween(dragon, from, to, true);
     }
 
+    /**
+     * Is a stable spot to path find to
+     */
     @Override
     public boolean isStableDestination(BlockPos pPos)
     {
@@ -75,8 +87,12 @@ public class FlightPathNavigation extends PathNavigation
 
     private class NodeEvaluator extends WalkNodeEvaluator
     {
+        // used to cache collisions for fast lookup
         private final Object2BooleanMap<AABB> collisionCache = new Object2BooleanOpenHashMap<>();
 
+        /**
+         * The first node that starts the path
+         */
         @Override
         public Node getStart()
         {
@@ -85,6 +101,9 @@ public class FlightPathNavigation extends PathNavigation
                     super.getStart();
         }
 
+        /**
+         * Generate a Node (target) for each desired BlockPos we want to path to.
+         */
         @Override
         public Target getGoal(double pX, double pY, double pZ)
         {
@@ -92,6 +111,9 @@ public class FlightPathNavigation extends PathNavigation
             return getTargetFromNode(getNode(Mth.floor(pX), y, Mth.floor(pZ)));
         }
 
+        /**
+         * Find an acceptable node for this area context.
+         */
         @Nullable
         protected Node findAcceptedNode(int pX, int pY, int pZ, int pVerticalDeltaLimit, double nodeFloor, Direction pDirection, BlockPathTypes pPathType)
         {
@@ -154,6 +176,7 @@ public class FlightPathNavigation extends PathNavigation
                         }
                     }
 
+                    // this whole block is ignored if we can physically fly.
                     if (!dragon.canFly() && pathTypeAtPos == BlockPathTypes.OPEN)
                     {
                         int j = 0;
@@ -167,10 +190,11 @@ public class FlightPathNavigation extends PathNavigation
                                 return getBlockedNode(pX, i, pZ);
                             }
 
-//                            if (j++ >= mob.getMaxFallDistance())
-//                            {
-//                                return getBlockedNode(pX, pY, pZ);
-//                            }
+                            // dragons who are unable to fly can take fall damage
+                            if (j++ >= mob.getMaxFallDistance())
+                            {
+                                return getBlockedNode(pX, pY, pZ);
+                            }
 
                             pathTypeAtPos = getCachedBlockType(mob, pX, pY, pZ);
                             malusAtPos = mob.getPathfindingMalus(pathTypeAtPos);
@@ -187,6 +211,7 @@ public class FlightPathNavigation extends PathNavigation
                         }
                     }
 
+                    // partial collision.. is doors..? close the node then ig.
                     if (doesBlockHavePartialCollision(pathTypeAtPos) && node == null)
                     {
                         node = getNode(pX, pY, pZ);
@@ -201,6 +226,9 @@ public class FlightPathNavigation extends PathNavigation
             }
         }
 
+        /**
+         * Get the node for this location and make it the maximum priority
+         */
         private Node getNodeAndUpdateCostToMax(int pX, int pY, int pZ, BlockPathTypes pType, float pCostMalus)
         {
             Node node = getNode(pX, pY, pZ);
@@ -238,6 +266,10 @@ public class FlightPathNavigation extends PathNavigation
             return collisionCache.computeIfAbsent(atBox, $ -> !level.noCollision(mob, atBox));
         }
 
+        /**
+         * Get the node at the position and block it.
+         * Does that mean the node is unusable? unsure.
+         */
         private Node getBlockedNode(int pX, int pY, int pZ)
         {
             Node node = getNode(pX, pY, pZ);
@@ -246,31 +278,29 @@ public class FlightPathNavigation extends PathNavigation
             return node;
         }
 
+        /**
+         * Generate nodes for valid neighboring areas.
+         */
         @Override
         public int getNeighbors(Node[] pOutputArray, Node pNode)
         {
             int i = super.getNeighbors(pOutputArray, pNode);
-            BlockPathTypes blockpathtypes = getCachedBlockType(mob, pNode.x, pNode.y + 1, pNode.z);
-            BlockPathTypes blockpathtypes1 = getCachedBlockType(mob, pNode.x, pNode.y, pNode.z);
-            int j;
-            if (mob.getPathfindingMalus(blockpathtypes) >= 0.0F && blockpathtypes1 != BlockPathTypes.STICKY_HONEY)
-            {
+            BlockPathTypes pathTypeAbove = getCachedBlockType(mob, pNode.x, pNode.y + 1, pNode.z);
+            BlockPathTypes pathType = getCachedBlockType(mob, pNode.x, pNode.y, pNode.z);
+
+            int j = 0;
+            if (mob.getPathfindingMalus(pathTypeAbove) >= 0.0F && pathType != BlockPathTypes.STICKY_HONEY)
                 j = Mth.floor(Math.max(1.0F, mob.getStepHeight()));
-            }
-            else
-            {
-                j = 0;
-            }
 
             double d0 = getFloorLevel(new BlockPos(pNode.x, pNode.y, pNode.z));
-            Node node = findAcceptedNode(pNode.x, pNode.y + 1, pNode.z, Math.max(0, j - 1), d0, Direction.UP, blockpathtypes1);
-            Node node1 = findAcceptedNode(pNode.x, pNode.y - 1, pNode.z, j, d0, Direction.DOWN, blockpathtypes1);
+            Node node = findAcceptedNode(pNode.x, pNode.y + 1, pNode.z, Math.max(0, j - 1), d0, Direction.UP, pathType);
+            Node node1 = findAcceptedNode(pNode.x, pNode.y - 1, pNode.z, j, d0, Direction.DOWN, pathType);
             if (isVerticalNeighborValid(node, pNode))
             {
                 pOutputArray[i++] = node;
             }
 
-            if (isVerticalNeighborValid(node1, pNode) && blockpathtypes1 != BlockPathTypes.TRAPDOOR)
+            if (isVerticalNeighborValid(node1, pNode) && pathType != BlockPathTypes.TRAPDOOR)
             {
                 pOutputArray[i++] = node1;
             }

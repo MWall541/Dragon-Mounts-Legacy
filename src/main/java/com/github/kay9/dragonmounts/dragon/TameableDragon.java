@@ -426,7 +426,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // it sets the normal speed variable,
         // and then sets the walk forward variable to the same value.
         // so if speed is 0.3, walk forward will also be 0.3 instead of 1.0.
-        // so when moveRelative calculates movespeed, (walkforward * speed) we get 0.15.
+        // so when moveRelative calculates movespeed, (walkforward * speed) we get 0.09.
         // so I guess we should do it to.
         var speed = getRiddenSpeed(driver);
         return new Vec3(moveSideways * speed, moveY * speed, moveForward * speed);

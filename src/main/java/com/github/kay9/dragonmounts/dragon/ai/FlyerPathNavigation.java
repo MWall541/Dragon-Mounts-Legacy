@@ -75,13 +75,12 @@ public class FlyerPathNavigation extends PathNavigation
     @Override
     protected void followThePath()
     {
-        // if an open path type was chosen, we should assume it's only accessible by flight, so liftOff
         var nextNode = getPath().getNextNode();
 
         if (dragon.isFlying())
         {
-            // reduce midair circling by allowing "close enough" clauses
-            float maxDistDifference = mob.getBbWidth() * 2f;
+            // reduce midair circling by allowing "close enough" clauses and advancing to next node
+            float maxDistDifference = mob.getBbWidth() * 2.5f;
             Vec3i moveTo = nextNode.asBlockPos();
             float xDif = (float) Math.abs(mob.getX() - moveTo.getX());
             float yDif = (float) Math.abs(mob.getY() - moveTo.getY());
@@ -95,16 +94,16 @@ public class FlyerPathNavigation extends PathNavigation
                 return; // we can't risk super trying to advance again.
             }
         }
-        // if an open path type was chosen, we should assume it's only accessible by flight, so liftOff
-        else if (nextNode.type == BlockPathTypes.OPEN && canLiftOff(dragon))
+        // lift off if the open node is higher up. Lower bounds the dragon takes care of it's own flight...
+        else if (nextNode.type == BlockPathTypes.OPEN && nextNode.y > dragon.getY() && canLiftOff(dragon))
             dragon.liftOff();
 
         super.followThePath();
     }
 
-    public void setCanOpenDoors(boolean can)
+    public void setCanPassDoors(boolean can)
     {
-        nodeEvaluator.setCanOpenDoors(can);
+        nodeEvaluator.setCanPassDoors(can);
     }
 
     public static boolean canLiftOff(TameableDragon dragon)
@@ -125,7 +124,7 @@ public class FlyerPathNavigation extends PathNavigation
         @Override
         public Node getStart()
         {
-            return dragon.isFlying()?
+            return dragon.isFlying() || (dragon.isInWater() && isAmphibious())?
                     getStartNode(new BlockPos(Mth.floor(mob.getBoundingBox().minX), Mth.floor(mob.getBoundingBox().minY + 0.5), Mth.floor(mob.getBoundingBox().minZ))) :
                     super.getStart();
         }
@@ -142,153 +141,148 @@ public class FlyerPathNavigation extends PathNavigation
         @Override
         public Target getGoal(double pX, double pY, double pZ)
         {
-            int y = Mth.floor(dragon.canFly()? (pY + 0.5) : pY);
+            int y = Mth.floor(dragon.canFly() || isAmphibious()? (pY + 0.5) : pY);
             return getTargetFromNode(getNode(Mth.floor(pX), y, Mth.floor(pZ)));
         }
 
         /**
          * Find an acceptable node for this area context.
-         * Copy pasted from super findAcceptedNode, with modification.
-         * super tries it's best to avoid OPEN path types, while we want to use them since
+         * Copied and pasted from super findAcceptedNode, with modification.
+         * super tries its best to avoid OPEN path types, while we want to use them since
          * we can fly.
+         * This is for FINDING POSSIBLE NODES. Meaning nodes that can LEAD US TO FLY OR SWIM.
+         * Meaning: don't do any isFlying checks to do logic. We aren't validating nodes based on our current state,
+         * we validate them based on a state that COULD BE true. Hence, FINDING an acceptable node.
          */
         @Nullable
-        protected Node findAcceptedNode(int pX, int pY, int pZ, int pVerticalDeltaLimit, double nodeFloor, Direction pDirection, BlockPathTypes pPathType)
+        protected Node findAcceptedNode(int nX, int nY, int nZ, int stepHeightDelta, double originNodeFloor, Direction pDirection, BlockPathTypes pPathType)
         {
             Node node = null;
             BlockPos.MutableBlockPos checkCarat = new BlockPos.MutableBlockPos();
+            BlockPathTypes pathTypeAtPos = getCachedBlockType(mob, nX, nY, nZ);
+            float malusAtPos = mob.getPathfindingMalus(pathTypeAtPos); // lower the malus here, the more it's preferred by the mob. Negative values however means they are not traversable at all.
 
-            double currentFloor = getFloorLevel(checkCarat.set(pX, pY, pZ));
-            if (currentFloor - nodeFloor > Math.max(1.125, mob.maxUpStep()))
+            // if the pos is traversable at all...
+            if (malusAtPos >= 0.0F)
             {
-                return null;
+                // get the node here and set the cost to malusAtPos, if it's greater than the one it had.
+                node = getNodeAndSetCost(nX, nY, nZ, pathTypeAtPos, malusAtPos);
             }
-            else
+
+            // if the pos is fence or closed door, and it has a traversable cost, and can get to the current node without collisions, block it. Since we can't move through fences or closed doors.
+            if (doesBlockHavePartialCollision(pPathType) && node != null && node.costMalus >= 0.0F && !canReachWithoutCollision(node))
             {
-                BlockPathTypes pathTypeAtPos = getCachedBlockType(mob, pX, pY, pZ);
-                float malusAtPos = mob.getPathfindingMalus(pathTypeAtPos); // lower the malus here, the more it's preferred by the mob. Negative values however means they are not traversable at all.
+                node = null;
+            }
 
-                // if the pos is traversable at all...
-                if (malusAtPos >= 0.0F)
+            // if the type at the pos is not desirable...
+            if (pathTypeAtPos != BlockPathTypes.WALKABLE && (!isAmphibious() || pathTypeAtPos != BlockPathTypes.WATER) && (!dragon.canFly() || pathTypeAtPos != BlockPathTypes.OPEN))
+            {
+                // if we don't have a traversable node and the pos above the origin node is open, and the pathType at the pos isn't blocked...
+                if ((node == null || node.costMalus < 0.0F) && stepHeightDelta > 0 && (pathTypeAtPos != BlockPathTypes.FENCE || canWalkOverFences()) && pathTypeAtPos != BlockPathTypes.UNPASSABLE_RAIL && pathTypeAtPos != BlockPathTypes.TRAPDOOR && pathTypeAtPos != BlockPathTypes.POWDER_SNOW)
                 {
-                    // get the node here and set the cost to malusAtPos, if it's greater than the one it had.
-                    node = getNodeAndSetCost(pX, pY, pZ, pathTypeAtPos, malusAtPos);
-                }
-
-                // if the pos is fence or closed door, and it has a traversable cost, and can get to the current node without collisions, block it. Since we can't move through fences or closed doors.
-                if (doesBlockHavePartialCollision(pPathType) && node != null && node.costMalus >= 0.0F && !canReachWithoutCollision(node))
-                {
-                    node = null;
-                }
-
-                // if the type at the pos is not desirable...
-                if (pathTypeAtPos != BlockPathTypes.WALKABLE && (!isAmphibious() || pathTypeAtPos != BlockPathTypes.WATER) && (!dragon.canFly() || pathTypeAtPos != BlockPathTypes.OPEN))
-                {
-                    // if we don't have a traversable node and the pos above the origin node is open, and the pathType at the pos isn't blockable...
-                    if ((node == null || node.costMalus < 0.0F) && pVerticalDeltaLimit > 0 && (pathTypeAtPos != BlockPathTypes.FENCE || canWalkOverFences()) && pathTypeAtPos != BlockPathTypes.UNPASSABLE_RAIL && pathTypeAtPos != BlockPathTypes.TRAPDOOR && pathTypeAtPos != BlockPathTypes.POWDER_SNOW)
+                    // recursive; get the node above nY.
+                    node = findAcceptedNode(nX, nY + 1, nZ, stepHeightDelta - 1, originNodeFloor, pDirection, pPathType);
+                    // if its walkable, and we're small
+                    if (node != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && mob.getBbWidth() < 1.0F)
                     {
-                        // recursive; get the node above pY.
-                        node = findAcceptedNode(pX, pY + 1, pZ, pVerticalDeltaLimit - 1, nodeFloor, pDirection, pPathType);
-                        // if its walkable, and we're small
-                        if (node != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && mob.getBbWidth() < 1.0F)
+                        // if the mob's size can't fit in the selected node position, block it. Obviously we can't go there.
+                        double halfMobWidth = mob.getBbWidth() * 0.5;
+                        double xMinusDirStep = (double) (nX - pDirection.getStepX()) + 0.5D;
+                        double zMinusDirStep = (double) (nZ - pDirection.getStepZ()) + 0.5D;
+                        AABB aabb = new AABB(
+                                xMinusDirStep - halfMobWidth,
+                                getFloorLevel(checkCarat.set(xMinusDirStep, (nY + 1), zMinusDirStep)) + 0.001D,
+                                zMinusDirStep - halfMobWidth,
+                                xMinusDirStep + halfMobWidth,
+                                (double) mob.getBbHeight() + getFloorLevel(checkCarat.set(node.x, node.y, (double) node.z)) - 0.002D,
+                                zMinusDirStep + halfMobWidth);
+                        if (hasCollisions(aabb))
                         {
-                            // if the mob's size can't fit in the selected node position, block it. Obviously we can't go there.
-                            double halfMobWidth = mob.getBbWidth() * 0.5;
-                            double xMinusDirStep = (double) (pX - pDirection.getStepX()) + 0.5D;
-                            double zMinusDirStep = (double) (pZ - pDirection.getStepZ()) + 0.5D;
-                            AABB aabb = new AABB(
-                                    xMinusDirStep - halfMobWidth,
-                                    getFloorLevel(checkCarat.set(xMinusDirStep, (double) (pY + 1), zMinusDirStep)) + 0.001D,
-                                    zMinusDirStep - halfMobWidth,
-                                    xMinusDirStep + halfMobWidth,
-                                    (double) mob.getBbHeight() + getFloorLevel(checkCarat.set((double) node.x, (double) node.y, (double) node.z)) - 0.002D,
-                                    zMinusDirStep + halfMobWidth);
-                            if (hasCollisions(aabb))
-                            {
-                                node = null;
-                            }
+                            node = null;
                         }
                     }
+                }
 
-                    if (!isAmphibious() && pathTypeAtPos == BlockPathTypes.WATER && !canFloat())
+                if (!isAmphibious() && pathTypeAtPos == BlockPathTypes.WATER && !canFloat())
+                {
+                    if (getCachedBlockType(mob, nX, nY - 1, nZ) != BlockPathTypes.WATER)
                     {
-                        if (getCachedBlockType(mob, pX, pY - 1, pZ) != BlockPathTypes.WATER)
+                        return node;
+                    }
+
+                    while (nY > mob.level().getMinBuildHeight())
+                    {
+                        --nY;
+                        pathTypeAtPos = getCachedBlockType(mob, nX, nY, nZ);
+                        if (pathTypeAtPos != BlockPathTypes.WATER)
                         {
                             return node;
                         }
 
-                        while (pY > mob.level().getMinBuildHeight())
-                        {
-                            --pY;
-                            pathTypeAtPos = getCachedBlockType(mob, pX, pY, pZ);
-                            if (pathTypeAtPos != BlockPathTypes.WATER)
-                            {
-                                return node;
-                            }
-
-                            node = getNodeAndSetCost(pX, pY, pZ, pathTypeAtPos, mob.getPathfindingMalus(pathTypeAtPos));
-                        }
+                        node = getNodeAndSetCost(nX, nY, nZ, pathTypeAtPos, mob.getPathfindingMalus(pathTypeAtPos));
                     }
-
-                    if (dragon.canFly() && pathTypeAtPos == BlockPathTypes.OPEN)
-                    {
-                        int j = 0;
-                        int i = pY;
-
-                        while (pathTypeAtPos == BlockPathTypes.OPEN)
-                        {
-                            --pY;
-                            if (pY < mob.level().getMinBuildHeight())
-                            {
-                                return getBlockedNode(pX, i, pZ);
-                            }
-
-                            // dragons who are unable to fly can take fall damage
-                            if (j++ >= mob.getMaxFallDistance())
-                            {
-                                return getBlockedNode(pX, pY, pZ);
-                            }
-
-                            // get the new path type at the lower y cords now.
-                            pathTypeAtPos = getCachedBlockType(mob, pX, pY, pZ);
-                            // update the malus here to.
-                            malusAtPos = mob.getPathfindingMalus(pathTypeAtPos);
-                            // we found something other than air, let's use that instead.
-                            if (pathTypeAtPos != BlockPathTypes.OPEN && malusAtPos >= 0.0F)
-                            {
-                                node = getNodeAndSetCost(pX, pY, pZ, pathTypeAtPos, malusAtPos);
-                                break;
-                            }
-
-                            // we can't traverse here at all.
-                            if (malusAtPos < 0.0F)
-                            {
-                                return getBlockedNode(pX, pY, pZ);
-                            }
-                        }
-                    }
-
-                    // if we don't have a node and there's a door or fence here, get the node there and block it.
-                    if (doesBlockHavePartialCollision(pathTypeAtPos) && node == null)
-                    {
-                        node = getNode(pX, pY, pZ);
-                        node.closed = true;
-                        node.type = pathTypeAtPos;
-                        node.costMalus = pathTypeAtPos.getMalus();
-                    }
-
                 }
 
-                // prefer to stay on WALKABLE for easier ground paths...
-                if (node != null && pathTypeAtPos == BlockPathTypes.OPEN)
-                    node.costMalus++;
+                // this block is for cliff control and how we handle them.
+                // can we walk off the cliff safely?
+                if (!dragon.canFly() && pathTypeAtPos == BlockPathTypes.OPEN)
+                {
+                    int heightChecked = 0;
+                    int originalY = nY;
 
-                return node;
+                    while (pathTypeAtPos == BlockPathTypes.OPEN)
+                    {
+                        --nY;
+                        if (nY < mob.level().getMinBuildHeight())
+                        {
+                            return getBlockedNode(nX, originalY, nZ);
+                        }
+
+                        // dragons who are unable to fly can take fall damage
+                        if (heightChecked++ >= mob.getMaxFallDistance())
+                        {
+                            return getBlockedNode(nX, nY, nZ);
+                        }
+
+                        // get the new path type at the lower y cords now.
+                        pathTypeAtPos = getCachedBlockType(mob, nX, nY, nZ);
+                        // update the malus here to.
+                        malusAtPos = mob.getPathfindingMalus(pathTypeAtPos);
+
+                        // if the cliff is lower than our ground clearance OR we found something other than open, use the node there.
+                        if (pathTypeAtPos != BlockPathTypes.OPEN && malusAtPos >= 0.0F)
+                        {
+                            node = getNodeAndSetCost(nX, nY, nZ, pathTypeAtPos, malusAtPos);
+                            break;
+                        }
+
+                        // we can't traverse here at all.
+                        if (malusAtPos < 0.0F)
+                            return getBlockedNode(nX, nY, nZ);
+                    }
+                }
+
+                // if we don't have a node and there's a door or fence here, get the node there and block it.
+                if (doesBlockHavePartialCollision(pathTypeAtPos) && node == null)
+                {
+                    node = getNode(nX, nY, nZ);
+                    node.closed = true;
+                    node.type = pathTypeAtPos;
+                    node.costMalus = pathTypeAtPos.getMalus();
+                }
+
             }
+
+            // prefer to stay out of the air for easier ground paths...
+            if (node != null && pathTypeAtPos == BlockPathTypes.OPEN)
+                node.costMalus++;
+
+            return node;
         }
 
         /**
-         * Get the node for this location and make it the maximum priority
+         * Get the node for this location and make set its priority
          */
         private Node getNodeAndSetCost(int pX, int pY, int pZ, BlockPathTypes pType, float pCostMalus)
         {
@@ -313,7 +307,7 @@ public class FlyerPathNavigation extends PathNavigation
             for (int j = 1; j <= i; ++j)
             {
                 aabb = aabb.move(vec3);
-                if (this.hasCollisions(aabb))
+                if (hasCollisions(aabb))
                 {
                     return false;
                 }
@@ -381,7 +375,9 @@ public class FlyerPathNavigation extends PathNavigation
 
         private boolean isVerticalNeighborValid(Node neighbor, Node pNode)
         {
-            return isNeighborValid(neighbor, pNode) && neighbor.type == BlockPathTypes.OPEN;
+            return isNeighborValid(neighbor, pNode) &&
+                    ((dragon.canFly() && pNode.type == BlockPathTypes.OPEN) ||
+                            (isAmphibious() && neighbor.type == BlockPathTypes.WATER));
         }
     }
 }

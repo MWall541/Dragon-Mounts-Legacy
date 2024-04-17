@@ -370,7 +370,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // update nearGround state when moving for flight and animation logic
-        nearGround = onGround() || !level().noCollision(new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getZ()));
+        nearGround = onGround() || !level().noCollision(new AABB(getX(), getY(), getZ(), getX(), getY() - getFlightGroundClearance(), getZ()));
 
         // update flying state based on the distance to the ground
         boolean flying = shouldFly();
@@ -1083,7 +1083,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         refreshDimensions();
 
         setMaxUpStep(Math.max(2 * getAgeProgress(), 1));
-        ((FlyerPathNavigation) getNavigation()).setCanOpenDoors(getBbWidth() < 0.1875); // can pass doors if small enough. 0.1875 = 16/3 (full block divided by door width. In entity dimensions, 1 is 16 in block dimensions.)
+        ((FlyerPathNavigation) getNavigation()).setCanPassDoors(getBbWidth() < 0.1875); // can pass doors if small enough. 0.1875 = 16/3 (full block divided by door width. In entity dimensions, 1 is 16 in block dimensions.)
 
         // health does not update on modifier application, so have to store the health frac first
         var healthFrac = getHealthFraction();
@@ -1209,5 +1209,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public boolean hasLocalDriver()
     {
         return getControllingPassenger() instanceof Player p && p.isLocalPlayer();
+    }
+
+    public float getFlightGroundClearance()
+    {
+        return GROUND_CLEARENCE_THRESHOLD * getScale();
     }
 }

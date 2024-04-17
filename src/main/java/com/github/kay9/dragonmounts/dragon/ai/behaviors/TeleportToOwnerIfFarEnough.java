@@ -16,11 +16,13 @@ import net.minecraft.world.phys.AABB;
 
 public class TeleportToOwnerIfFarEnough extends Behavior<TameableDragon>
 {
+    // todo: we can't use constants here, custom dragons can have larger or smaller scales.
+
     private static final int MIN_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
     private static final int MAX_HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
     private static final int MIN_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 0;
     private static final int MAX_VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 1;
-    private static final int TELEPORT_DISTANCE = 32;
+    private static final int TELEPORT_DISTANCE = 96; // todo: different ground/in-air distances?
     private final int teleportDistanceSqr;
     private TameableDragon dragon;
     private ServerLevel level;

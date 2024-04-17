@@ -12,11 +12,10 @@ import com.github.kay9.dragonmounts.data.CrossBreedingManager;
 import com.github.kay9.dragonmounts.dragon.ai.DragonAi;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
-import com.github.kay9.dragonmounts.dragon.ai.FlightPathNavigation;
+import com.github.kay9.dragonmounts.dragon.ai.FlyerPathNavigation;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
-import com.github.kay9.dragonmounts.util.DMLUtil;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -43,8 +42,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
@@ -58,6 +55,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -142,7 +140,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected PathNavigation createNavigation(Level pLevel)
     {
-        return new FlightPathNavigation(this, pLevel);
+        return new FlyerPathNavigation(this, pLevel);
     }
 
     public static AttributeSupplier.Builder createAttributes()
@@ -372,7 +370,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // update nearGround state when moving for flight and animation logic
-        nearGround = onGround() || !DMLUtil.noVerticalCollision(level(), getX(), getZ(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getY());
+        nearGround = onGround() || !level().noCollision(new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getScale()), getZ()));
 
         // update flying state based on the distance to the ground
         boolean flying = shouldFly();
@@ -1085,6 +1083,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         refreshDimensions();
 
         setMaxUpStep(Math.max(2 * getAgeProgress(), 1));
+        ((FlyerPathNavigation) getNavigation()).setCanOpenDoors(getBbWidth() < 0.1875); // can pass doors if small enough. 0.1875 = 16/3 (full block divided by door width. In entity dimensions, 1 is 16 in block dimensions.)
 
         // health does not update on modifier application, so have to store the health frac first
         var healthFrac = getHealthFraction();
@@ -1193,6 +1192,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public Vec3 getLightProbePosition(float p_20309_)
     {
         return new Vec3(getX(), getY() + getBbHeight(), getZ());
+    }
+
+    @Override
+    public int getMaxFallDistance()
+    {
+        return canFly()? level().getHeight() : super.getMaxFallDistance();
     }
 
     @Override

@@ -1,11 +1,9 @@
 package com.github.kay9.dragonmounts.dragon.ai;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.util.DMLUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
-import net.minecraft.world.phys.AABB;
 
 public class DragonMoveController extends MoveControl
 {
@@ -21,61 +19,50 @@ public class DragonMoveController extends MoveControl
     @Override
     public void tick()
     {
-        double yDif = getWantedY() - mob.getY();
 
         if (!dragon.isFlying())
         {
-            // better not done here, should be in the navigator.
-//            if (yDif > dragon.getStepHeight() && canLiftOff(dragon))
-//            {
-//                dragon.liftOff();
-//            }
-//            else
-//            {
-                // ground movement behavior if we don't want to fly
-                super.tick();
-                return;
-//            }
+            super.tick();
+            return;
         }
 
         if (operation == MoveControl.Operation.MOVE_TO)
         {
             operation = MoveControl.Operation.WAIT;
-            double xDif = getWantedX() - mob.getX();
-            double zDif = getWantedZ() - mob.getZ();
-            double sq = xDif * xDif + yDif * yDif + zDif * zDif;
-            if (sq < (double) 2.5000003E-7F)
-            {
-                mob.setYya(0.0F);
-                mob.setZza(0.0F);
-                return;
-            }
+            float xDif = (float) (getWantedX() - mob.getX());
+            float yDif = (float) (getWantedY() - mob.getY());
+            float zDif = (float) (getWantedZ() - mob.getZ());
 
+            float xzDistance = Mth.sqrt(xDif * xDif + zDif * zDif);
             float speed = (float) (speedModifier * mob.getAttributeValue(Attributes.FLYING_SPEED));
-            double distSq = Math.sqrt(xDif * xDif + zDif * zDif);
-            mob.setSpeed(speed);
-            if (Math.abs(yDif) > (double) 1.0E-5F || Math.abs(distSq) > (double) 1.0E-5F)
-            {
-                // using a normalized difference in pos and wantedY is essential to prevent awkward up/down bobbing in the air.
-                // speed attributes are tuned using max values of 0..1  (-1 is just down, so that works.)
-                float moveVertical = Mth.clamp((float) yDif, -1f, 1f);
-                mob.setYya(moveVertical * speed);
-            }
 
-            float yaw = (float) (Mth.atan2(zDif, xDif) * (double) (180F / (float) Math.PI)) - 90.0F;
-            mob.setYRot(rotlerp(mob.getYRot(), yaw, 6));
+            // only travel forward if reasonably far enough. Helps reduce weird strafing and circling in midair.
+            if (xzDistance > mob.getBbWidth() * 0.5)
+            {
+                mob.setSpeed(Math.min(xzDistance, 1f) * speed);
+
+                float yaw = (float) (Mth.atan2(zDif, xDif) * (double) (180F / (float) Math.PI)) - 90.0F;
+                mob.setYRot(rotlerp(mob.getYRot(), yaw, 6));
+            }
+            else
+                mob.setSpeed(0);
+
+            // only travel up/down if necessary. Helps reduce awkward up/down bobbing.
+            if (Math.abs(yDif) > 0.0001)
+            {
+                // this is required because for some fucking reason setSpeed also sets zza, and yya needs a speed to move with.
+                float forwardOld = mob.zza;
+                mob.setSpeed(speed);
+                mob.zza = forwardOld;
+
+                // god this is so unintuitive
+                mob.setYya(speed * Mth.clamp(yDif, -1f, 1f));
+            }
         }
         else
         {
             mob.setYya(0);
             mob.setZza(0);
         }
-    }
-
-    public static boolean canLiftOff(TameableDragon dragon)
-    {
-        return dragon.canFly()
-                && !dragon.isLeashed()
-                && dragon.level().noCollision(dragon, dragon.getBoundingBox().move(0, dragon.getJumpPower(), 0));
     }
 }

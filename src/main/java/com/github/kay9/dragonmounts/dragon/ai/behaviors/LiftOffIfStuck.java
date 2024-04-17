@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.dragon.ai.behaviors;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
+import com.github.kay9.dragonmounts.dragon.ai.FlyerPathNavigation;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -28,7 +28,7 @@ public class LiftOffIfStuck extends Behavior<TameableDragon>
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, TameableDragon dragon)
     {
-        return DragonMoveController.canLiftOff(dragon)
+        return FlyerPathNavigation.canLiftOff(dragon)
                 && dragon.getBrain()
                 .getMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE)
                 .filter(cantReachSince -> level.getGameTime() - cantReachSince >= timeStuckToLiftOff)

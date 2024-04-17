@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.dragon.ai.behaviors;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.ai.DragonMoveController;
+import com.github.kay9.dragonmounts.dragon.ai.FlyerPathNavigation;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -37,7 +37,7 @@ public class LiftOffIfTargetIsHighEnough extends Behavior<TameableDragon>
         double verticalDistance = targetHeight - dragon.getY();
         return !dragon.isFlying()
                 && verticalDistance >= heightNeeded
-                && DragonMoveController.canLiftOff(dragon);
+                && FlyerPathNavigation.canLiftOff(dragon);
     }
 
     @Override

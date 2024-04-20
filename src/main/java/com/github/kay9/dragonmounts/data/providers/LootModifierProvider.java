@@ -33,7 +33,7 @@ class LootModifierProvider extends GlobalLootModifierProvider
         };
 
         var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());
-        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed));
+        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed, false));
     }
 
     private void addWithConfigChance(ResourceLocation breed, ResourceLocation table)
@@ -44,6 +44,6 @@ class LootModifierProvider extends GlobalLootModifierProvider
         };
 
         var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());
-        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed));
+        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed, false));
     }
 }

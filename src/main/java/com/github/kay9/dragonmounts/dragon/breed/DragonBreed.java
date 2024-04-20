@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts.dragon.breed;
 
 import com.github.kay9.dragonmounts.DMLConfig;
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
@@ -25,7 +26,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -72,15 +73,15 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 
     public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Optional<SoundEvent> ambientSound, int growthTime, int hatchTime, float sizeModifier)
     {
-        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, Map.of(), List.of(), List.of(), ImmutableSet.of(), ambientSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, DMLUtil.EMPTY_ITEM_HOLDER_SET, DMLUtil.EMPTY_ITEM_HOLDER_SET, Either.left(0));
+        return new DragonBreed(primaryColor, secondaryColor, hatchParticles, Map.of(), List.of(), List.of(), ImmutableSet.of(), ambientSound, BuiltInLootTables.EMPTY, growthTime, hatchTime, sizeModifier, HolderSet.direct(), HolderSet.direct(), Either.left(0));
     }
 
     public void initialize(TameableDragon dragon)
     {
         applyAttributes(dragon);
-        for (Ability.Factory<Ability> factory : abilityTypes())
+        for (var factory : abilityTypes())
         {
-            Ability instance = factory.create();
+            var instance = factory.create();
             dragon.getAbilities().add(instance);
             instance.initialize(dragon);
         }
@@ -88,22 +89,9 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 
     public void close(TameableDragon dragon)
     {
-        dragon.getAttributes().assignValues(new AttributeMap(TameableDragon.createAttributes().build())); // restore default attributes
+        cleanAttributes(dragon);
         for (Ability ability : dragon.getAbilities()) ability.close(dragon);
         dragon.getAbilities().clear();
-    }
-
-    private void applyAttributes(TameableDragon dragon)
-    {
-        float healthPercentile = dragon.getHealth() / dragon.getMaxHealth();
-
-        attributes().forEach((att, value) ->
-        {
-            AttributeInstance inst = dragon.getAttribute(att);
-            if (inst != null) inst.setBaseValue(value);
-        });
-
-        dragon.setHealth(dragon.getMaxHealth() * healthPercentile); // in case we have less than max health
     }
 
     public int getReproductionLimit()
@@ -139,6 +127,37 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public Class<DragonBreed> getRegistryType()
     {
         return DragonBreed.class;
+    }
+
+    private void applyAttributes(TameableDragon dragon)
+    {
+        float healthFrac = dragon.getHealthFraction(); // in case max health is changed
+
+        attributes().forEach((att, value) ->
+        {
+            AttributeInstance inst = dragon.getAttribute(att);
+            if (inst != null) inst.setBaseValue(value);
+        });
+
+        dragon.setHealth(dragon.getMaxHealth() * healthFrac);
+    }
+
+    private void cleanAttributes(TameableDragon dragon)
+    {
+        float healthFrac = dragon.getHealthFraction(); // in case max health is changed
+        var defaults = DefaultAttributes.getSupplier(DMLRegistry.DRAGON.get());
+
+        attributes().forEach((att, value) ->
+        {
+            var instance = dragon.getAttribute(att);
+            if (instance != null)
+            {
+                instance.removeModifiers();
+                instance.setBaseValue(defaults.getBaseValue(att));
+            }
+        });
+
+        dragon.setHealth(dragon.getMaxHealth() * healthFrac);
     }
 
     public static final class BuiltIn

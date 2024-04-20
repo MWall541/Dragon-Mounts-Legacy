@@ -55,6 +55,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -203,9 +204,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putString(NBT_BREED, breed.id(getLevel().registryAccess()).toString());
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
+
+        if (getBreed() != null) // breed is not read by the time the packet is being sent...
+        {
+            compound.putString(NBT_BREED, getBreed().id(getLevel().registryAccess()).toString());
+            for (var ability : getAbilities()) ability.write(this, compound);
+        }
     }
 
     @Override
@@ -213,10 +219,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         // read and set breed first before reading everything else so things can override correctly,
         // e.g. attributes.
-        setBreed(BreedRegistry.get(compound.getString(NBT_BREED), getLevel().registryAccess()));
+        var breed = BreedRegistry.get(compound.getString(NBT_BREED), getLevel().registryAccess());
+        if (breed != null) setBreed(breed);
+
         super.readAdditionalSaveData(compound);
+
         setSaddled(compound.getBoolean(NBT_SADDLED));
         this.reproCount = compound.getInt(NBT_REPRO_COUNT);
+
+        for (var ability : getAbilities()) ability.read(this, compound);
 
         // set sync age data after we read it in AgeableMob
         entityData.set(DATA_AGE, getAge());
@@ -456,7 +467,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // heal
-        if (getHealthRelative() < 1 && isFoodItem(stack))
+        if (getHealthFraction() < 1 && isFoodItem(stack))
         {
             //noinspection ConstantConditions
             heal(stack.getItem().getFoodProperties(stack, this).getNutrition());
@@ -749,7 +760,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected ResourceLocation getDefaultLootTable()
     {
-        return breed.deathLoot();
+        if (getBreed() == null) return BuiltInLootTables.EMPTY;
+        return getBreed().deathLoot();
     }
 
     @Override
@@ -936,7 +948,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             passenger.setXRot(getXRot());
         }
 
-        if (!isServer() && isControlledByLocalInstance())
+        if (hasLocalDriver())
         {
             MountControlsMessenger.sendControlsMessage();
             MountCameraManager.onDragonMount();
@@ -946,7 +958,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected void removePassenger(Entity passenger)
     {
-        if (isControlledByLocalInstance()) MountCameraManager.onDragonDismount();
+        if (hasLocalDriver()) MountCameraManager.onDragonDismount();
         super.removePassenger(passenger);
     }
 
@@ -978,10 +990,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         Entity srcEnt = src.getEntity();
         if (srcEnt != null && (srcEnt == this || hasPassenger(srcEnt))) return true;
 
-        if (src == DamageSource.DRAGON_BREATH // inherited from it anyway
-                || src == DamageSource.CACTUS) // assume cactus needles don't hurt thick scaled lizards
-            return true;
-
         return breed.immunities().contains(src.getMsgId()) || super.isInvulnerableTo(src);
     }
 
@@ -990,9 +998,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      *
      * @return health normalized between 0 and 1
      */
-    public double getHealthRelative()
+    public float getHealthFraction()
     {
-        return getHealth() / (double) getMaxHealth();
+        return getHealth() / getMaxHealth();
     }
 
     public int getMaxDeathTime()
@@ -1038,7 +1046,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void updateAgeProgress()
     {
         // no reason to recalculate this value several times per tick/frame...
-        float growth = -breed.growthTime();
+        float growth = -BASE_GROWTH_TIME;
+        if (getBreed() != null) growth = -getBreed().growthTime();
         float min = Math.min(getAge(), 0);
         ageProgress = 1 - (min / growth);
     }
@@ -1063,7 +1072,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         maxUpStep = Math.max(2 * getAgeProgress(), 1);
 
         // health does not update on modifier application, so have to store the health frac first
-        var healthFrac = getHealth() / getMaxHealth();
+        var healthFrac = getHealthFraction();
 
         // negate modifier value since the operation is as follows: base_value += modifier * base_value
         double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
@@ -1103,7 +1112,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void setBaby(boolean baby)
     {
-        setAge(baby? -breed.growthTime() : 0);
+        var growth = -BASE_GROWTH_TIME;
+        if (getBreed() != null) growth = -getBreed().growthTime();
+        setAge(baby? growth : 0);
         entityData.set(DATA_AGE, age);
     }
 
@@ -1128,13 +1139,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean canBreatheUnderwater()
     {
-        return breed.immunities().contains("drown");
+        if (getBreed() == null) return super.canBreatheUnderwater();
+        return getBreed().immunities().contains(DamageSource.DROWN.getMsgId());
     }
 
     @Override
     public boolean fireImmune()
     {
-        return super.fireImmune() || breed.immunities().contains("onFire");
+        if (super.fireImmune()) return true;
+        if (getBreed() == null) return false;
+        return getBreed().immunities().contains(DamageSource.ON_FIRE.getMsgId());
     }
 
     @Override
@@ -1164,5 +1178,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public Vec3 getLightProbePosition(float p_20309_)
     {
         return new Vec3(getX(), getY() + getBbHeight(), getZ());
+    }
+
+    public boolean hasLocalDriver()
+    {
+        return getControllingPassenger() instanceof Player p && p.isLocalPlayer();
     }
 }

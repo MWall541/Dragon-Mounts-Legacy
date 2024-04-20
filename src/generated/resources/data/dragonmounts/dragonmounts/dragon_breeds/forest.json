@@ -15,6 +15,11 @@
       "type": "dragonmounts:biome"
     }
   ],
+  "immunities": [
+    "cactus",
+    "sweetBerryBush",
+    "dragonBreath"
+  ],
   "primary_color": "54a00",
   "secondary_color": "a9600",
   "hatch_particles": {

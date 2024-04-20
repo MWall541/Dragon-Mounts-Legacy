@@ -27,22 +27,14 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+#    - name: Setup Gradle
+#      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
     - name: Build with Gradle
-      run: ./gradlew build -Pmod_version=0-${GITHUB_SHA::7}-artifact
-
-    - name: Get Artifact Name
-      id: get_artifact_name
-      run: |
-        MOD_ID=$(awk -F '=' '/mod_id[^_]/ { print $2;}' gradle.properties | tr -d " \t\r")
-        GAME_VERSION=$(awk -F '=' '/game_version[^_]/ { print $2; }' gradle.properties | tr -d " \t\r")
-        echo "artifact_path=build/libs/${MOD_ID}-${GAME_VERSION}-0-${GITHUB_SHA::7}-artifact.jar" >> "$GITHUB_OUTPUT"
+      run: ./gradlew build -Pmod_version=${{ github.run_id }}-artifact
 
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: forge-build
-        path: ${{ steps.get_artifact_name.outputs.artifact_path }}
-      
+        path: build/libs/

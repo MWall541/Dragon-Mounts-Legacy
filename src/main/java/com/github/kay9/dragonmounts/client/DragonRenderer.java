@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
 public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 {
     public static final ModelLayerLocation MODEL_LOCATION = new ModelLayerLocation(DragonMountsLegacy.id("dragon"), "main");

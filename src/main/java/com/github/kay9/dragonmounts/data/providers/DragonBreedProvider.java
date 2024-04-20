@@ -30,6 +30,7 @@ import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -91,7 +92,7 @@ class DragonBreedProvider implements DataProvider
                 list(
                         new HeightHabitat(3, false, 200)
                 ),
-                set(),
+                immunities(),
                 Optional.empty()),
 
         builtIn(DragonBreed.BuiltIn.END,
@@ -103,7 +104,7 @@ class DragonBreedProvider implements DataProvider
                 list(
                         DragonBreathHabitat.INSTANCE
                 ),
-                set("dragonBreath"),
+                immunities(),
                 Optional.empty()),
 
         builtIn(DragonBreed.BuiltIn.FIRE,
@@ -117,7 +118,7 @@ class DragonBreedProvider implements DataProvider
                 ImmutableList.of(
                         new NearbyBlocksHabitat(1, BlockTags.create(DragonMountsLegacy.id("fire_dragon_habitat_blocks"))),
                         new FluidHabitat(3, FluidTags.LAVA)),
-                ImmutableSet.of("onFire", "inFire", "lava", "hotFloor"),
+                immunities("onFire", "inFire", "lava", "hotFloor"),
                 Optional.empty()),
 
         builtIn(DragonBreed.BuiltIn.FOREST,
@@ -132,7 +133,7 @@ class DragonBreedProvider implements DataProvider
                         new NearbyBlocksHabitat(0.5f, BlockTagProvider.FOREST_DRAGON_HABITAT_BLOCKS),
                         new BiomeHabitat(2, BiomeTags.IS_JUNGLE)
                 ),
-                set(),
+                immunities(),
                 Optional.empty()),
 
         builtIn(DragonBreed.BuiltIn.GHOST,
@@ -149,7 +150,7 @@ class DragonBreedProvider implements DataProvider
                                 new LightHabitat(2, true, 3)
                         ))
                 ),
-                set("drown"),
+                immunities("drown"),
                 Optional.of(DMLRegistry.GHOST_DRAGON_AMBIENT.get())),
 
         builtIn(DragonBreed.BuiltIn.ICE,
@@ -164,7 +165,7 @@ class DragonBreedProvider implements DataProvider
                 list(
                         new NearbyBlocksHabitat(0.5f, BlockTagProvider.ICE_DRAGON_HABITAT_BLOCKS)
                 ),
-                set("drown", "freeze"),
+                immunities("drown", "freeze"),
                 Optional.empty()),
 
         builtIn(DragonBreed.BuiltIn.NETHER,
@@ -177,7 +178,7 @@ class DragonBreedProvider implements DataProvider
                         new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS),
                         new BiomeHabitat(3, BiomeTags.IS_NETHER)
                 ),
-                set("inFire", "onFire", "lava", "hotFloor"),
+                immunities("inFire", "onFire", "lava", "hotFloor"),
                 Optional.empty()),
 
         builtIn(DragonBreed.BuiltIn.WATER,
@@ -192,7 +193,7 @@ class DragonBreedProvider implements DataProvider
                         new FluidHabitat(1f, FluidTags.WATER),
                         new NearbyBlocksHabitat(0.5f, BlockTagProvider.WATER_DRAGON_HABITAT_BLOCKS)
                 ),
-                set("drown"),
+                immunities("drown"),
                 Optional.empty())
         };
     }
@@ -214,9 +215,13 @@ class DragonBreedProvider implements DataProvider
         return (ImmutableList<T>) ImmutableList.copyOf(objs);
     }
 
-    @SafeVarargs
-    protected static <T> ImmutableSet<T> set(T... objs)
+    protected static ImmutableSet<String> immunities(String... objs)
     {
-        return ImmutableSet.copyOf(objs);
+        return ImmutableSet.<String>builder()
+                .add(objs)
+                .add(DamageSource.CACTUS.getMsgId())
+                .add(DamageSource.SWEET_BERRY_BUSH.getMsgId())
+                .add(DamageSource.DRAGON_BREATH.getMsgId())
+                .build();
     }
 }

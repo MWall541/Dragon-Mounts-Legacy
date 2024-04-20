@@ -86,8 +86,9 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     public Component getName(ItemStack stack)
     {
         var tag = stack.getTagElement(DATA_TAG);
-        if (tag == null || tag.contains(DATA_ITEM_NAME))
+        if (tag != null && tag.contains(DATA_ITEM_NAME))
             return new TranslatableComponent(tag.getString(DATA_ITEM_NAME));
+
         return super.getName(stack);
     }
 

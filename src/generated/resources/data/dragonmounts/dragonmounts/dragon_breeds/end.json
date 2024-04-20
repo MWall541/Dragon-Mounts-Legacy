@@ -9,6 +9,8 @@
     }
   ],
   "immunities": [
+    "cactus",
+    "sweetBerryBush",
     "dragonBreath"
   ],
   "primary_color": "161616",

@@ -278,7 +278,7 @@ public class DragonAnimator
         model.neck.setPos(0, 14, -8);
         model.neck.setRotation(0, 0, 0);
 
-        float health = (float) dragon.getHealthRelative();
+        float health = dragon.getHealthFraction();
         float neckSize;
 
         for (int i = 0; i < model.neckProxy.length; i++)

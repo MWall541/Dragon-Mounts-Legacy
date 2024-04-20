@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 import java.util.function.Supplier;
@@ -20,15 +21,16 @@ public class BreedRegistry
             .disableSaving()
             .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC));
 
+    @Nullable
     public static DragonBreed get(String byString, RegistryAccess reg)
     {
         return get(new ResourceLocation(byString), reg);
     }
 
+    @Nullable
     public static DragonBreed get(ResourceLocation byId, RegistryAccess reg)
     {
-        var breed = registry(reg).get(byId);
-        return breed != null? breed : getRandom(reg, new Random());
+        return registry(reg).get(byId);
     }
 
     public static DragonBreed getRandom(RegistryAccess reg, Random random)

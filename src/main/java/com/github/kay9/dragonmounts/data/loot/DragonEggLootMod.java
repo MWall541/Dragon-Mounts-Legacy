@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.data.loot;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
+import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.google.gson.JsonObject;
@@ -24,22 +25,24 @@ public class DragonEggLootMod extends LootModifier
 {
     public record Target(ResourceKey<DragonBreed> forBreed, ResourceLocation target, double chance) {}
     public static Target[] BUILT_IN_CHANCES = new Target[]{
-            new Target(AETHER, BuiltInLootTables.SIMPLE_DUNGEON, 0.2),
-            new Target(FIRE, BuiltInLootTables.DESERT_PYRAMID, 0.085),
+            new Target(AETHER, BuiltInLootTables.SIMPLE_DUNGEON, 0.15),
+            new Target(FIRE, BuiltInLootTables.DESERT_PYRAMID, 0.075),
             new Target(FOREST, BuiltInLootTables.JUNGLE_TEMPLE, 0.3),
             new Target(GHOST, BuiltInLootTables.WOODLAND_MANSION, 0.2),
-            new Target(GHOST, BuiltInLootTables.ABANDONED_MINESHAFT, 0.075),
+            new Target(GHOST, BuiltInLootTables.ABANDONED_MINESHAFT, 0.095),
             new Target(ICE, BuiltInLootTables.IGLOO_CHEST, 0.2),
             new Target(NETHER, BuiltInLootTables.BASTION_TREASURE, 0.35),
             new Target(WATER, BuiltInLootTables.BURIED_TREASURE, 0.175)
     };
 
     private final ResourceLocation id;
+    private final boolean replaceFirst;
 
-    public DragonEggLootMod(LootItemCondition[] conditions, ResourceLocation breed)
+    public DragonEggLootMod(LootItemCondition[] conditions, ResourceLocation breed, boolean replaceFirst)
     {
         super(conditions);
         this.id = breed;
+        this.replaceFirst = replaceFirst;
     }
 
     @NotNull
@@ -49,7 +52,12 @@ public class DragonEggLootMod extends LootModifier
         var reg = context.getLevel().registryAccess();
         var breed = BreedRegistry.registry(reg).get(id);
         if (breed != null)
-            generatedLoot.add(DMLEggBlock.Item.create(breed, reg, breed.hatchTime()));
+        {
+            var egg = DMLEggBlock.Item.create(breed, reg, DragonEgg.DEFAULT_HATCH_TIME);
+
+            if (replaceFirst) generatedLoot.set(0, egg);
+            else generatedLoot.add(egg);
+        }
         else
             DragonMountsLegacy.LOG.error("Attempted to add a dragon egg to loot with unknown breed id: \"{}\"", id);
 
@@ -61,8 +69,12 @@ public class DragonEggLootMod extends LootModifier
         @Override
         public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
         {
-            var in = GsonHelper.getAsString(object, "egg_breed");
-            return new DragonEggLootMod(conditions, new ResourceLocation(in));
+            var eggBreed = GsonHelper.getAsString(object, "egg_breed");
+            var replaceFirst = false;
+            if (object.has("replace_first"))
+                replaceFirst = GsonHelper.getAsBoolean(object, "replace_first");
+
+            return new DragonEggLootMod(conditions, new ResourceLocation(eggBreed), replaceFirst);
         }
 
         @Override
@@ -70,6 +82,8 @@ public class DragonEggLootMod extends LootModifier
         {
             var json = makeConditions(instance.conditions);
             json.addProperty("egg_breed", instance.id.toString());
+            if (instance.replaceFirst)
+                json.addProperty("replace_first", true);
             return json;
         }
     }

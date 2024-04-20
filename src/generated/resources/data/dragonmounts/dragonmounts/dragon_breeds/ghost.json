@@ -26,7 +26,10 @@
     }
   ],
   "immunities": [
-    "drown"
+    "drown",
+    "cactus",
+    "sweetBerryBush",
+    "dragonBreath"
   ],
   "primary_color": "c4c4c4",
   "secondary_color": "c2f8ff"

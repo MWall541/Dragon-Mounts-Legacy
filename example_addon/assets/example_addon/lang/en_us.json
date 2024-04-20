@@ -1,5 +1,9 @@
 {
   "dragon_breed.example_addon.example_breed": "Example Dragon",
 
+  "item.dragonmounts.spawn_egg.example_addon.example_breed": "Example Dragon Spawn Egg",
+
+  "block.dragonmounts.dragon_egg.example_addon.example_breed": "Example Dragon Egg",
+
   "subtitles.entity.dragon.ambient.example": "Dragon speaks"
 }

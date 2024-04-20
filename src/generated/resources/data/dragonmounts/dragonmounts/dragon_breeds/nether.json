@@ -18,7 +18,10 @@
     "inFire",
     "onFire",
     "lava",
-    "hotFloor"
+    "hotFloor",
+    "cactus",
+    "sweetBerryBush",
+    "dragonBreath"
   ],
   "primary_color": "912400",
   "secondary_color": "2e0b00",

@@ -9,6 +9,11 @@
       "type": "dragonmounts:world_height"
     }
   ],
+  "immunities": [
+    "cactus",
+    "sweetBerryBush",
+    "dragonBreath"
+  ],
   "primary_color": "718aa9",
   "secondary_color": "e6e6e6"
 }

@@ -38,12 +38,12 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mollis lacinia magn
 [[dependencies.example_addon]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.2,1.19)"
+    versionRange="[1.18.2]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.example_addon]]
     modId="dragonmounts"
     mandatory=true
-    versionRange="[1.1,)"
+    versionRange="[1.2,)"
     ordering="NONE"
     side="BOTH"

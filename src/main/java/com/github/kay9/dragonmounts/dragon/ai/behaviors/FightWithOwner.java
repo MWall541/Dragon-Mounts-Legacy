@@ -7,10 +7,13 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraftforge.common.ForgeHooks;
+
+import java.util.Map;
 
 public class FightWithOwner extends Behavior<TamableAnimal>
 {
+    private static final Map<MemoryModuleType<?>, MemoryStatus> REQUIRED_MEMORIES = ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED);
+
     // How long until having to check for a target again.
     private static final long ATTACK_DURATION = 200L;
     // How long to allow aggro on owner's attacker. Really only relevant if the dragon can't attack the moment the owner is attacked (like sitting).
@@ -27,7 +30,7 @@ public class FightWithOwner extends Behavior<TamableAnimal>
 
     public FightWithOwner(long attackDuration, int ticksToRememberAttacker)
     {
-        super(ImmutableMap.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED));
+        super(REQUIRED_MEMORIES);
         this.attackDuration = attackDuration;
         this.ticksToRememberAttacker = ticksToRememberAttacker;
     }
@@ -50,12 +53,9 @@ public class FightWithOwner extends Behavior<TamableAnimal>
     }
 
     @Override
-    protected void start(ServerLevel level, TamableAnimal animal, long gameTime) {
-        net.minecraftforge.event.entity.living.LivingChangeTargetEvent changeTargetEvent = net.minecraftforge.common.ForgeHooks.onLivingChangeTarget(animal, this.attackTarget, net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
-        if(!changeTargetEvent.isCanceled()) {
-            animal.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, changeTargetEvent.getNewTarget(), this.attackDuration);
-            animal.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-            ForgeHooks.onLivingChangeTarget(animal, changeTargetEvent.getNewTarget(), net.minecraftforge.event.entity.living.LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET); // TODO: Remove in 1.20
-        }
+    protected void start(ServerLevel level, TamableAnimal animal, long gameTime)
+    {
+        animal.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, attackTarget, this.attackDuration);
+        animal.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
     }
 }

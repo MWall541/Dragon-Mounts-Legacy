@@ -3,16 +3,16 @@ package com.github.kay9.dragonmounts.dragon.ai.behaviors;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
 public class SitWhenOrderedTo extends Behavior<TamableAnimal>
 {
     public SitWhenOrderedTo()
     {
-        super(ImmutableMap.of(DMLRegistry.SIT_MEMORY.get(), MemoryStatus.REGISTERED));
+        super(ImmutableMap.of(DMLRegistry.SIT_MEMORY.get(), MemoryStatus.VALUE_PRESENT));
     }
 
     @Override
@@ -20,16 +20,14 @@ public class SitWhenOrderedTo extends Behavior<TamableAnimal>
     {
         return animal.isTame()
                 && animal.isOrderedToSit()
-                && !animal.isInWaterOrBubble();
+                && animal.onGround();
     }
 
     @Override
     protected void start(ServerLevel level, TamableAnimal animal, long gameTime)
     {
-        animal.getBrain().eraseMemory(MemoryModuleType.BREED_TARGET);
-        animal.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
-        animal.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
-        animal.getBrain().setMemory(DMLRegistry.SIT_MEMORY.get(), true);
+        animal.getBrain().clearMemories();
+        animal.getBrain().setMemory(DMLRegistry.SIT_MEMORY.get(), Unit.INSTANCE);
         animal.setInSittingPose(true);
     }
 
@@ -38,7 +36,7 @@ public class SitWhenOrderedTo extends Behavior<TamableAnimal>
     {
         // Don't call super here because it just returns false.
         return animal.isOrderedToSit()
-                && !animal.isInWaterOrBubble();
+                && animal.onGround();
     }
 
     @Override
@@ -52,6 +50,5 @@ public class SitWhenOrderedTo extends Behavior<TamableAnimal>
     protected void stop(ServerLevel level, TamableAnimal animal, long gameTime)
     {
         animal.setInSittingPose(false);
-        animal.getBrain().eraseMemory(DMLRegistry.SIT_MEMORY.get());
     }
 }

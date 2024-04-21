@@ -80,7 +80,7 @@ public class FlyerPathNavigation extends PathNavigation
         if (dragon.isFlying())
         {
             // reduce midair circling by allowing "close enough" clauses and advancing to next node
-            float maxDistDifference = mob.getBbWidth() * 2.5f;
+            float maxDistDifference = mob.getBbWidth() * 3f;
             Vec3i moveTo = nextNode.asBlockPos();
             float xDif = (float) Math.abs(mob.getX() - moveTo.getX());
             float yDif = (float) Math.abs(mob.getY() - moveTo.getY());
@@ -120,6 +120,7 @@ public class FlyerPathNavigation extends PathNavigation
 
         /**
          * The first node that starts the path
+         * todo source of the ground movement stuttering
          */
         @Override
         public Node getStart()
@@ -155,7 +156,7 @@ public class FlyerPathNavigation extends PathNavigation
          * we validate them based on a state that COULD BE true. Hence, FINDING an acceptable node.
          */
         @Nullable
-        protected Node findAcceptedNode(int nX, int nY, int nZ, int stepHeightDelta, double originNodeFloor, Direction pDirection, BlockPathTypes pPathType)
+        protected Node findAcceptedNode(int nX, int nY, int nZ, int stepHeightDelta, double originNodeFloor, Direction nDir, BlockPathTypes originPathType)
         {
             Node node = null;
             BlockPos.MutableBlockPos checkCarat = new BlockPos.MutableBlockPos();
@@ -170,7 +171,7 @@ public class FlyerPathNavigation extends PathNavigation
             }
 
             // if the pos is fence or closed door, and it has a traversable cost, and can get to the current node without collisions, block it. Since we can't move through fences or closed doors.
-            if (doesBlockHavePartialCollision(pPathType) && node != null && node.costMalus >= 0.0F && !canReachWithoutCollision(node))
+            if (doesBlockHavePartialCollision(originPathType) && node != null && node.costMalus >= 0.0F && !canReachWithoutCollision(node))
             {
                 node = null;
             }
@@ -182,14 +183,14 @@ public class FlyerPathNavigation extends PathNavigation
                 if ((node == null || node.costMalus < 0.0F) && stepHeightDelta > 0 && (pathTypeAtPos != BlockPathTypes.FENCE || canWalkOverFences()) && pathTypeAtPos != BlockPathTypes.UNPASSABLE_RAIL && pathTypeAtPos != BlockPathTypes.TRAPDOOR && pathTypeAtPos != BlockPathTypes.POWDER_SNOW)
                 {
                     // recursive; get the node above nY.
-                    node = findAcceptedNode(nX, nY + 1, nZ, stepHeightDelta - 1, originNodeFloor, pDirection, pPathType);
+                    node = findAcceptedNode(nX, nY + 1, nZ, stepHeightDelta - 1, originNodeFloor, nDir, originPathType);
                     // if its walkable, and we're small
                     if (node != null && (node.type == BlockPathTypes.OPEN || node.type == BlockPathTypes.WALKABLE) && mob.getBbWidth() < 1.0F)
                     {
                         // if the mob's size can't fit in the selected node position, block it. Obviously we can't go there.
                         double halfMobWidth = mob.getBbWidth() * 0.5;
-                        double xMinusDirStep = (double) (nX - pDirection.getStepX()) + 0.5D;
-                        double zMinusDirStep = (double) (nZ - pDirection.getStepZ()) + 0.5D;
+                        double xMinusDirStep = (double) (nX - nDir.getStepX()) + 0.5D;
+                        double zMinusDirStep = (double) (nZ - nDir.getStepZ()) + 0.5D;
                         AABB aabb = new AABB(
                                 xMinusDirStep - halfMobWidth,
                                 getFloorLevel(checkCarat.set(xMinusDirStep, (nY + 1), zMinusDirStep)) + 0.001D,
@@ -376,7 +377,7 @@ public class FlyerPathNavigation extends PathNavigation
         private boolean isVerticalNeighborValid(Node neighbor, Node pNode)
         {
             return isNeighborValid(neighbor, pNode) &&
-                    ((dragon.canFly() && pNode.type == BlockPathTypes.OPEN) ||
+                    ((dragon.canFly() && neighbor.type == BlockPathTypes.OPEN) ||
                             (isAmphibious() && neighbor.type == BlockPathTypes.WATER));
         }
     }

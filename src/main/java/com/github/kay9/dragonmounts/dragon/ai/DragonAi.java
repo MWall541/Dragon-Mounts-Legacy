@@ -6,6 +6,7 @@ import com.github.kay9.dragonmounts.dragon.ai.behaviors.FightWithOwner;
 import com.github.kay9.dragonmounts.dragon.ai.behaviors.SetWalkTargetToOwnerIfFarEnough;
 import com.github.kay9.dragonmounts.dragon.ai.behaviors.SitWhenOrderedTo;
 import com.github.kay9.dragonmounts.dragon.ai.behaviors.TeleportToOwnerIfFarEnough;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
@@ -15,16 +16,22 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.*;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
+import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class DragonAi
 {
@@ -32,12 +39,35 @@ public class DragonAi
     private static final long RETALIATE_DURATION = 200L;
     private static final float STROLL_SPEED_FACTOR = 0.85f;
 
-    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super TameableDragon>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS);
-    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.NEAREST_VISIBLE_ADULT, MemoryModuleType.AVOID_TARGET, DMLRegistry.SIT_MEMORY.get());
+    // init lists lazily to allow our custom types to register
+    private static final ImmutableList<SensorType<? extends Sensor<? super TameableDragon>>> SENSOR_TYPES = ImmutableList.of(
+            SensorType.NEAREST_LIVING_ENTITIES,
+            SensorType.NEAREST_PLAYERS);
+    private static final Supplier<ImmutableList<MemoryModuleType<?>>> MEMORY_TYPES = Suppliers.memoize(() -> ImmutableList.of(
+            MemoryModuleType.BREED_TARGET,
+            MemoryModuleType.NEAREST_LIVING_ENTITIES,
+            MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
+            MemoryModuleType.NEAREST_VISIBLE_PLAYER,
+            MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER,
+            MemoryModuleType.LOOK_TARGET,
+            MemoryModuleType.WALK_TARGET,
+            MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+            MemoryModuleType.PATH,
+            MemoryModuleType.ATTACK_TARGET,
+            MemoryModuleType.ATTACK_COOLING_DOWN,
+            MemoryModuleType.NEAREST_VISIBLE_ADULT,
+            MemoryModuleType.AVOID_TARGET,
+            DMLRegistry.SIT_MEMORY.get())); // prefer this be set in TamableAnimal rather than a ticking sensor...
+    private static final Supplier<ImmutableList<Activity>> ACTIVITIES_IN_ORDER = Suppliers.memoize(() -> ImmutableList.of(
+            DMLRegistry.SIT_ACTIVITY.get(), // insertion order matters here for activity updates!
+            Activity.AVOID,
+            Activity.FIGHT,
+            Activity.IDLE
+    ));
 
     public static Brain.Provider<TameableDragon> brainProvider()
     {
-        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+        return Brain.provider(MEMORY_TYPES.get(), SENSOR_TYPES);
     }
 
     public static Brain<?> makeBrain(Brain<TameableDragon> brain)
@@ -60,8 +90,6 @@ public class DragonAi
                 new SitWhenOrderedTo(),
                 new FightWithOwner(),
                 new LookAtTargetSink(45, 90),
-//                new LiftOffIfTargetIsHighEnough(),
-//                new LiftOffIfStuck(),
                 new MoveToTargetSink()));
     }
 
@@ -71,8 +99,8 @@ public class DragonAi
                 new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0f),
                 new TeleportToOwnerIfFarEnough(),
                 new SetWalkTargetToOwnerIfFarEnough(1.0f),
-                SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10f, UniformInt.of(30, 60)), // todo was never a fan of looking exclusively at players. Should dragons look at everything?
-                StartAttacking.create(DragonAi::canAttackRandomly, DragonAi::findNearestValidAttackTarget),
+                SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10f, UniformInt.of(30, 60)),
+                StartAttacking.create(DragonAi::shouldHunt, DragonAi::findNearestValidAttackTarget),
                 getIdleMovementBehaviors()));
     }
 
@@ -91,7 +119,7 @@ public class DragonAi
         brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(
                 SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.5f, 16, false),
                 SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10.0F, UniformInt.of(30, 60)),
-                getIdleMovementBehaviors(), // todo is this necessary?
+                getIdleMovementBehaviors(), // walk around randomly if our avoid target is far away enough. todo avoidTarget should just clear.. no?
                 EraseMemoryIf.create(DragonAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
         ), MemoryModuleType.AVOID_TARGET);
     }
@@ -99,8 +127,14 @@ public class DragonAi
     private static void initSitActivity(Brain<TameableDragon> brain)
     {
         brain.addActivityAndRemoveMemoryWhenStopped(DMLRegistry.SIT_ACTIVITY.get(), 0, ImmutableList.of(
-                SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10.0F, UniformInt.of(30, 60))
+                setWalkTargetToSafety(1.05f),
+                SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10f, UniformInt.of(30, 60))
         ), DMLRegistry.SIT_MEMORY.get());
+    }
+
+    public static void updateActivities(TameableDragon dragon)
+    {
+        dragon.getBrain().setActiveActivityToFirstValid(ACTIVITIES_IN_ORDER.get());
     }
 
     private static RunOne<TameableDragon> getIdleMovementBehaviors()
@@ -109,15 +143,6 @@ public class DragonAi
                 Pair.of(RandomStroll.stroll(STROLL_SPEED_FACTOR), 2),
                 Pair.of(SetWalkTargetFromLookTarget.create(STROLL_SPEED_FACTOR, 3), 2),
                 Pair.of(new DoNothing(30, 60), 1)));
-    }
-
-    public static void updateActivity(TameableDragon dragon)
-    {
-        dragon.getBrain().setActiveActivityToFirstValid(ImmutableList.of(
-                Activity.FIGHT,
-                Activity.AVOID,
-                DMLRegistry.SIT_ACTIVITY.get(),
-                Activity.IDLE));
     }
 
     private static boolean wantsToStopFighting(TameableDragon dragon)
@@ -190,8 +215,36 @@ public class DragonAi
                 .findClosest(e -> e instanceof Animal && !(e instanceof TameableDragon) && Sensor.isEntityAttackable(dragon, e));
     }
 
-    private static boolean canAttackRandomly(TameableDragon dragon)
+    private static boolean shouldHunt(TameableDragon dragon)
     {
-        return dragon.isAdult() && !dragon.isTame();
+        return !dragon.isHatchling() && !dragon.isTame();
+    }
+
+    /**
+     * Creates a OneShot that will attempt to find a good landing spot if we're not already on one.
+     */
+    private static OneShot<TameableDragon> setWalkTargetToSafety(float speedMod)
+    {
+        return BehaviorBuilder.create(instance -> instance.group(instance.absent(MemoryModuleType.WALK_TARGET))
+                .apply(instance, walkTarget -> (level, entity, gameTime) -> {
+                    if (entity.onGround()) return false;
+
+                    Vec3 potentialSpot;
+                    if (entity.isFlying())
+                    {
+                        // get a spot lower than us
+                        var view = entity.getViewVector(0);
+                        potentialSpot = AirAndWaterRandomPos.getPos(entity, 20, 0, -10, view.x, view.z, Math.PI / 2);
+                    }
+                    else // probably swimming, try to find the shore
+                        potentialSpot = LandRandomPos.getPos(entity, 20, 7);
+
+                    if (potentialSpot != null)
+                        walkTarget.set(new WalkTarget(potentialSpot, speedMod, 0));
+                    else
+                        walkTarget.erase();
+
+                    return true;
+                }));
     }
 }

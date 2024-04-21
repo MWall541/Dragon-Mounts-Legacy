@@ -32,6 +32,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -176,12 +177,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected void customServerAiStep()
     {
-        level().getProfiler().push("dragonBrain");
-        this.getBrain().tick((ServerLevel) level(), this);
-        level().getProfiler().pop();
-        level().getProfiler().push("dragonActivityUpdate");
-        DragonAi.updateActivity(this);
-        level().getProfiler().pop();
+        if (!hasControllingPassenger()) // ai doesn't run while driver operates
+        {
+            // update activities first since sitting is most important
+            level().getProfiler().push("dragonActivityUpdate");
+            DragonAi.updateActivities(this);
+            level().getProfiler().popPush("dragonBrain");
+            this.getBrain().tick((ServerLevel) level(), this);
+            level().getProfiler().pop();
+        }
+
         super.customServerAiStep();
     }
 
@@ -319,7 +324,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public boolean shouldFly()
     {
-        if (isFlying()) return !onGround(); // more natural landings
+        if (isFlying()) return !onGround() && !isInWaterOrBubble(); // more natural landings
         return canFly() && !isInWater() && !isNearGround();
     }
 
@@ -929,9 +934,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean wantsToAttack(LivingEntity target, LivingEntity owner)
+    public boolean wantsToAttack(LivingEntity target, @Nullable LivingEntity owner)
     {
-        return !(target instanceof TamableAnimal tameable) || !Objects.equals(tameable.getOwner(), owner);
+        return !(target instanceof OwnableEntity tamable) || !Objects.equals(tamable.getOwner(), owner);
     }
 
     @Override
@@ -1004,6 +1009,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (getBreed() != null) return getBreed().immunities().contains(src.typeHolder());
 
         return super.isInvulnerableTo(src);
+    }
+
+    @Override
+    public void setOrderedToSit(boolean orderedToSit)
+    {
+        super.setOrderedToSit(orderedToSit); // inner field is used for serialization
+        if (orderedToSit)
+            getBrain().setMemory(DMLRegistry.SIT_MEMORY.get(), Unit.INSTANCE);
+        else
+            getBrain().eraseMemory(DMLRegistry.SIT_MEMORY.get());
     }
 
     /**

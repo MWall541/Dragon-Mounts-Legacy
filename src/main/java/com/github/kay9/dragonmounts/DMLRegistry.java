@@ -11,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -25,6 +26,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.registries.RegistryObject;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -60,8 +62,8 @@ public class DMLRegistry
 
     public static final RegistryObject<LootItemConditionType> RANDOM_CHANCE_CONFIG_CONDITION = register("random_chance_by_config", Registries.LOOT_CONDITION_TYPE, () -> new LootItemConditionType(new RandomChanceByConfig.Serializer()));
 
-    public static final RegistryObject<MemoryModuleType<Boolean>> SIT_MEMORY = memory("is_sitting");
-    public static final RegistryObject<Activity> SIT_ACTIVITY = activity("sit");
+    public static final RegistryObject<MemoryModuleType<Unit>> SIT_MEMORY = brainMemory("is_sitting", Codec.unit(Unit.INSTANCE)); // must be serialized since TamableAnimal does not use getters/setters
+    public static final RegistryObject<Activity> SIT_ACTIVITY = brainActivity("sit");
 
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {
@@ -73,14 +75,14 @@ public class DMLRegistry
         return register(name, Registries.SOUND_EVENT, () -> SoundEvent.createVariableRangeEvent(DragonMountsLegacy.id(name)));
     }
 
-    private static <T> RegistryObject<MemoryModuleType<T>> memory(String name)
+    private static <T> RegistryObject<MemoryModuleType<T>> brainMemory(String name, @Nullable Codec<T> serializeCodec)
     {
-        return register(name, Keys.MEMORY_MODULE_TYPES, () -> new MemoryModuleType<>(Optional.empty()));
+        return register(name, Registries.MEMORY_MODULE_TYPE, () -> new MemoryModuleType<>(Optional.ofNullable(serializeCodec)));
     }
 
-    private static RegistryObject<Activity> activity(String name)
+    private static RegistryObject<Activity> brainActivity(String name)
     {
-        return register(name, Keys.ACTIVITIES, () -> new Activity(name));
+        return register(name, Registries.ACTIVITY, () -> new Activity(name));
     }
 
     @SuppressWarnings("unchecked")

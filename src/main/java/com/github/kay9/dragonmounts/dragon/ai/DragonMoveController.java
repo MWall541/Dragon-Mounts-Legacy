@@ -55,15 +55,20 @@ public class DragonMoveController extends MoveControl
                     mob.setSpeed(0);
 
                 // only travel up/down if necessary. Helps reduce awkward up/down bobbing.
-                if (Math.abs(yDif) > 0.0001)
+                var yDist = Math.abs(yDif);
+                if (yDist > 0.0001)
                 {
                     // this is required because for some fucking reason setSpeed also sets zza, and yya needs a speed to move with.
                     float forwardOld = mob.zza;
                     mob.setSpeed(speed);
                     mob.zza = forwardOld;
 
+                    // decelerate vertical movement as we approach our wanted to reduce awkward up/down bobbing
+                    var moveY = Mth.clamp(yDist / 10f, 0.01f, 1f);
+                    if (yDif < 0) moveY = -moveY;
+
                     // god this is so unintuitive
-                    mob.setYya(speed * Mth.clamp(yDif, -1f, 1f));
+                    mob.setYya(speed * moveY);
                 }
             }
         }

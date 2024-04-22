@@ -10,6 +10,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -40,9 +41,10 @@ public class DragonAi
     private static final float STROLL_SPEED_FACTOR = 0.85f;
 
     // init lists lazily to allow our custom types to register
-    private static final ImmutableList<SensorType<? extends Sensor<? super TameableDragon>>> SENSOR_TYPES = ImmutableList.of(
+    private static final Supplier<ImmutableList<SensorType<? extends Sensor<? super TameableDragon>>>> SENSOR_TYPES = Suppliers.memoize(() -> ImmutableList.of(
             SensorType.NEAREST_LIVING_ENTITIES,
-            SensorType.NEAREST_PLAYERS);
+            SensorType.NEAREST_PLAYERS,
+            DMLRegistry.SAFE_LANDING_SENSOR.get()));
     private static final Supplier<ImmutableList<MemoryModuleType<?>>> MEMORY_TYPES = Suppliers.memoize(() -> ImmutableList.of(
             MemoryModuleType.BREED_TARGET,
             MemoryModuleType.NEAREST_LIVING_ENTITIES,
@@ -57,7 +59,8 @@ public class DragonAi
             MemoryModuleType.ATTACK_COOLING_DOWN,
             MemoryModuleType.NEAREST_VISIBLE_ADULT,
             MemoryModuleType.AVOID_TARGET,
-            DMLRegistry.SIT_MEMORY.get())); // prefer this be set in TamableAnimal rather than a ticking sensor...
+            DMLRegistry.SIT_MEMORY.get(), // prefer this be set in TamableAnimal rather than a ticking sensor...
+            DMLRegistry.SAFE_LANDING_MEMORY.get()));
     private static final Supplier<ImmutableList<Activity>> ACTIVITIES_IN_ORDER = Suppliers.memoize(() -> ImmutableList.of(
             DMLRegistry.SIT_ACTIVITY.get(), // insertion order matters here for activity updates!
             Activity.AVOID,
@@ -67,7 +70,7 @@ public class DragonAi
 
     public static Brain.Provider<TameableDragon> brainProvider()
     {
-        return Brain.provider(MEMORY_TYPES.get(), SENSOR_TYPES);
+        return Brain.provider(MEMORY_TYPES.get(), SENSOR_TYPES.get());
     }
 
     public static Brain<?> makeBrain(Brain<TameableDragon> brain)
@@ -225,19 +228,28 @@ public class DragonAi
      */
     private static OneShot<TameableDragon> setWalkTargetToSafety(float speedMod)
     {
-        return BehaviorBuilder.create(instance -> instance.group(instance.absent(MemoryModuleType.WALK_TARGET))
-                .apply(instance, walkTarget -> (level, entity, gameTime) -> {
+        return BehaviorBuilder.create(instance -> instance.group(instance.absent(MemoryModuleType.WALK_TARGET), instance.registered(DMLRegistry.SAFE_LANDING_MEMORY.get()))
+                .apply(instance, (walkTarget, safeLanding) -> (level, entity, gameTime) -> {
                     if (entity.onGround()) return false;
 
-                    Vec3 potentialSpot;
-                    if (entity.isFlying())
+                    Vec3 potentialSpot = null;
+
+                    var safeSpot = instance.tryGet(safeLanding);
+                    if (safeSpot.isPresent())
+                    {
+                        potentialSpot = Vec3.atBottomCenterOf(safeSpot.get());
+                    }
+                    else if (entity.isFlying()) // sensor couldn't find a safe spot, so run around randomly.
                     {
                         // get a spot lower than us
                         var view = entity.getViewVector(0);
                         potentialSpot = AirAndWaterRandomPos.getPos(entity, 20, 0, -10, view.x, view.z, Math.PI / 2);
                     }
-                    else // probably swimming, try to find the shore
+
+                    if (potentialSpot == null) // swimming, blocked, etc, try again.
+                    {
                         potentialSpot = LandRandomPos.getPos(entity, 20, 7);
+                    }
 
                     if (potentialSpot != null)
                         walkTarget.set(new WalkTarget(potentialSpot, speedMod, 0));

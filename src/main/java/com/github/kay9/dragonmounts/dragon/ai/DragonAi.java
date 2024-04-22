@@ -2,19 +2,16 @@ package com.github.kay9.dragonmounts.dragon.ai;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.ai.behaviors.FightWithOwner;
-import com.github.kay9.dragonmounts.dragon.ai.behaviors.SetWalkTargetToOwnerIfFarEnough;
 import com.github.kay9.dragonmounts.dragon.ai.behaviors.SitWhenOrderedTo;
-import com.github.kay9.dragonmounts.dragon.ai.behaviors.TeleportToOwnerIfFarEnough;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
@@ -24,13 +21,13 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -91,7 +88,7 @@ public class DragonAi
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
                 new Swim(0.8f),
                 new SitWhenOrderedTo(),
-                new FightWithOwner(),
+                StartAttacking.create(entity -> Optional.ofNullable(getOwnerRetaliationTarget(entity, 100))), // fight with owner
                 new LookAtTargetSink(45, 90),
                 new MoveToTargetSink()));
     }
@@ -100,10 +97,10 @@ public class DragonAi
     {
         brain.addActivity(Activity.IDLE, 10, ImmutableList.of(
                 new AnimalMakeLove(DMLRegistry.DRAGON.get(), 1.0f),
-                new TeleportToOwnerIfFarEnough(),
-                new SetWalkTargetToOwnerIfFarEnough(1.0f),
+                teleportToOwnerIfTooFar(80),
+                setWalkTargetToOwnerIfTooFar(1.05f, 4, 10),
                 SetEntityLookTargetSometimes.create(EntityType.PLAYER, 10f, UniformInt.of(30, 60)),
-                StartAttacking.create(DragonAi::shouldHunt, DragonAi::findNearestValidAttackTarget),
+                StartAttacking.create(DragonAi::shouldHunt, DragonAi::findNearestHuntableTarget),
                 getIdleMovementBehaviors()));
     }
 
@@ -158,18 +155,16 @@ public class DragonAi
 
     public static void wasHurtBy(TameableDragon dragon, LivingEntity attacker)
     {
-        Brain<TameableDragon> brain = dragon.getBrain();
-        brain.eraseMemory(MemoryModuleType.BREED_TARGET);
-        if (dragon.isHatchling())
-            retreatFromNearestTarget(dragon, attacker);
-        else
-            maybeRetaliate(dragon, attacker);
+        dragon.getBrain().eraseMemory(MemoryModuleType.BREED_TARGET);
+
+        if (dragon.isHatchling()) retreatFromNearestTarget(dragon, attacker);
+        else                      maybeRetaliate(dragon, attacker);
     }
 
     private static void maybeRetaliate(TameableDragon dragon, LivingEntity attacker)
     {
         if (!dragon.getBrain().isActive(Activity.AVOID)
-                && !BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(dragon, attacker, 4.0D)
+                && !BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(dragon, attacker, 4)
                 && Sensor.isEntityAttackable(dragon, attacker)
                 && dragon.wantsToAttack(attacker, dragon.getOwner()))
         {
@@ -180,13 +175,9 @@ public class DragonAi
     private static void setAttackTarget(TameableDragon dragon, LivingEntity target)
     {
         Brain<TameableDragon> brain = dragon.getBrain();
-        LivingChangeTargetEvent changeTargetEvent = ForgeHooks.onLivingChangeTarget(dragon, target, LivingChangeTargetEvent.LivingTargetType.BEHAVIOR_TARGET);
-        if (!changeTargetEvent.isCanceled())
-        {
-            brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-            brain.eraseMemory(MemoryModuleType.BREED_TARGET);
-            brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, changeTargetEvent.getNewTarget(), RETALIATE_DURATION);
-        }
+        brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+        brain.eraseMemory(MemoryModuleType.BREED_TARGET);
+        brain.setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, target, RETALIATE_DURATION);
     }
 
     private static void retreatFromNearestTarget(TameableDragon dragon, LivingEntity target)
@@ -211,11 +202,30 @@ public class DragonAi
         return dragon.isAdult();
     }
 
-    private static Optional<? extends LivingEntity> findNearestValidAttackTarget(TameableDragon dragon)
+    @Nullable
+    private static LivingEntity getOwnerRetaliationTarget(TamableAnimal owned, int ticksToRememberAttacker)
+    {
+        if (!owned.isTame() || owned.isOrderedToSit()) return null;
+
+        var owner = owned.getOwner();
+        if (owner == null) return null;
+
+        var target = owner.getLastHurtMob();
+        if (target == null && owner.tickCount - owner.getLastHurtMobTimestamp() < ticksToRememberAttacker)
+            target = owner.getLastAttacker();
+
+        if (target == null || !owned.canAttack(target) || !owned.wantsToAttack(target, owner)) return null;
+
+        return target;
+    }
+
+    private static Optional<? extends LivingEntity> findNearestHuntableTarget(TameableDragon dragon)
     {
         return dragon.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
                 .orElse(NearestVisibleLivingEntities.empty())
-                .findClosest(e -> e instanceof Animal && !(e instanceof TameableDragon) && Sensor.isEntityAttackable(dragon, e));
+                .findClosest(e -> e instanceof Animal
+                        && Sensor.isEntityAttackable(dragon, e)
+                        && ((e.getBbWidth() + e.getBbHeight()) / 2) < 2); // don't target too large of a creature.
     }
 
     private static boolean shouldHunt(TameableDragon dragon)
@@ -229,7 +239,8 @@ public class DragonAi
     private static OneShot<TameableDragon> setWalkTargetToSafety(float speedMod)
     {
         return BehaviorBuilder.create(instance -> instance.group(instance.absent(MemoryModuleType.WALK_TARGET), instance.registered(DMLRegistry.SAFE_LANDING_MEMORY.get()))
-                .apply(instance, (walkTarget, safeLanding) -> (level, entity, gameTime) -> {
+                .apply(instance, (walkTarget, safeLanding) -> (level, entity, gameTime) ->
+                {
                     if (entity.onGround()) return false;
 
                     Vec3 potentialSpot = null;
@@ -246,7 +257,7 @@ public class DragonAi
                         potentialSpot = AirAndWaterRandomPos.getPos(entity, 20, 0, -10, view.x, view.z, Math.PI / 2);
                     }
 
-                    if (potentialSpot == null) // swimming, blocked, etc, try again.
+                    if (potentialSpot == null) // swimming, blocked, etc., try again.
                     {
                         potentialSpot = LandRandomPos.getPos(entity, 20, 7);
                     }
@@ -255,6 +266,74 @@ public class DragonAi
                         walkTarget.set(new WalkTarget(potentialSpot, speedMod, 0));
                     else
                         walkTarget.erase();
+
+                    return true;
+                }));
+    }
+
+    private static OneShot<TameableDragon> setWalkTargetToOwnerIfTooFar(float speedMod, int stopDistance, int startDistance)
+    {
+        var startDistSq = startDistance * startDistance;
+
+        return BehaviorBuilder.create(instance -> instance.group(instance.registered(MemoryModuleType.WALK_TARGET), instance.registered(MemoryModuleType.LOOK_TARGET), instance.absent(MemoryModuleType.BREED_TARGET))
+                .apply(instance, (walkMemory, lookMemory, breedMemory) -> (level, entity, gameTime) ->
+                {
+                    var owner = entity.getOwner();
+                    if (owner == null || entity.distanceToSqr(owner) < startDistSq * entity.getScale())
+                        return false;
+
+                    var walkTarget = instance.tryGet(walkMemory);
+                    if (walkTarget.isEmpty() || !(walkTarget.get().getTarget() instanceof EntityTracker e) || e.getEntity() != owner)
+                        walkMemory.set(new WalkTarget(owner, speedMod, (int) (stopDistance * entity.getScale())));
+
+                    var lookTarget = instance.tryGet(lookMemory);
+                    if (lookTarget.isEmpty() || !(lookTarget.get() instanceof EntityTracker e) || e.getEntity() != owner)
+                        lookMemory.set(new EntityTracker(owner, true)); // todo does this tracker ever invalidate?
+
+                    return true;
+                }));
+    }
+
+    private static OneShot<TameableDragon> teleportToOwnerIfTooFar(int distanceThreshold)
+    {
+        final int HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 3;
+        final int VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING = 2;
+
+        var distThresholdSq = distanceThreshold * distanceThreshold;
+
+        return BehaviorBuilder.create(instance -> instance.group(instance.absent(MemoryModuleType.BREED_TARGET), instance.registered(MemoryModuleType.WALK_TARGET))
+                .apply(instance, (breedMemory, walkMemory) -> (level, entity, gameTime) ->
+                {
+                    var owner = entity.getOwner();
+                    if (owner == null
+                            || entity.isOrderedToSit()
+                            || entity.isLeashed()
+                            || entity.distanceToSqr(owner) < distThresholdSq)
+                        return false;
+
+                    var ownerPos = owner.blockPosition();
+                    var horizontalOffset = (int) (HORIZONTAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING * entity.getScale());
+                    var verticalOffset = (int) (VERTICAL_DISTANCE_FROM_PLAYER_WHEN_TELEPORTING * entity.getScale());
+
+                    for (BlockPos tpTarget : BlockPos.randomBetweenClosed(entity.getRandom(), 10,
+                            ownerPos.getX() - horizontalOffset,
+                            ownerPos.getY() - verticalOffset,
+                            ownerPos.getZ() - horizontalOffset,
+                            ownerPos.getX() + horizontalOffset,
+                            ownerPos.getY() + verticalOffset,
+                            ownerPos.getZ() + horizontalOffset))
+                    {
+                        tpTarget = LandRandomPos.movePosUpOutOfSolid(entity, tpTarget); // also checks for liquid
+                        if (tpTarget == null
+                                || GoalUtils.isNotStable(entity.getNavigation(), tpTarget) // FlyingPathNavigator will check if we can fly here
+                                || !level.noCollision(entity.getBoundingBox().move(tpTarget.subtract(entity.blockPosition())))) // we could be too fat to fit here!
+                            continue;
+
+                        walkMemory.erase();
+                        entity.getNavigation().stop();
+                        entity.moveTo(tpTarget.getX() + 0.5, tpTarget.getY(), tpTarget.getZ() + 0.5);
+                        break;
+                    }
 
                     return true;
                 }));

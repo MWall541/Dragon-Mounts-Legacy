@@ -38,7 +38,11 @@ public class SafeLandingSensor extends Sensor<PathfinderMob>
     @Override
     protected void doTick(ServerLevel level, PathfinderMob entity)
     {
-        if (entity.onGround() || !entity.getBrain().isActive(DMLRegistry.SIT_ACTIVITY.get())) return;
+        if (entity.onGround() || !entity.getBrain().isActive(DMLRegistry.SIT_ACTIVITY.get()))
+        {
+            entity.getBrain().eraseMemory(DMLRegistry.SAFE_LANDING_MEMORY.get());
+            return;
+        }
 
         // search ourselves instead of using heap polluting helper methods
         for (BlockPos pos : BlockPos.withinManhattan(entity.blockPosition(), 30, 30, 30))

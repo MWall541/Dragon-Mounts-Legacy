@@ -4,16 +4,24 @@ import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
 import com.github.kay9.dragonmounts.data.loot.conditions.RandomChanceByConfig;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.ai.sensors.SafeLandingSensor;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlockEntity;
 import com.mojang.serialization.Codec;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -23,8 +31,10 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryManager;
 import net.minecraftforge.registries.RegistryObject;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static net.minecraftforge.registries.ForgeRegistries.Keys;
@@ -57,6 +67,11 @@ public class DMLRegistry
 
     public static final RegistryObject<LootItemConditionType> RANDOM_CHANCE_CONFIG_CONDITION = register("random_chance_by_config", Registries.LOOT_CONDITION_TYPE, () -> new LootItemConditionType(new RandomChanceByConfig.Serializer()));
 
+    public static final RegistryObject<Activity> SIT_ACTIVITY = brainActivity("sit");
+    public static final RegistryObject<MemoryModuleType<Unit>> SIT_MEMORY = brainMemory("is_sitting", Codec.unit(Unit.INSTANCE)); // must be serialized since TamableAnimal does not use getters/setters
+    public static final RegistryObject<MemoryModuleType<BlockPos>> SAFE_LANDING_MEMORY = brainMemory("safe_landing", null);
+    public static final RegistryObject<SensorType<SafeLandingSensor>> SAFE_LANDING_SENSOR = brainSensor("safe_landing", SafeLandingSensor::new);
+
     private static <T extends Entity> RegistryObject<EntityType<T>> entity(String name, EntityType.Builder<T> builder)
     {
         return register(name, Registries.ENTITY_TYPE, () -> builder.build(DragonMountsLegacy.MOD_ID + ":" + name));
@@ -65,6 +80,21 @@ public class DMLRegistry
     private static RegistryObject<SoundEvent> sound(String name)
     {
         return register(name, Registries.SOUND_EVENT, () -> SoundEvent.createVariableRangeEvent(DragonMountsLegacy.id(name)));
+    }
+
+    private static <T> RegistryObject<MemoryModuleType<T>> brainMemory(String name, @Nullable Codec<T> serializeCodec)
+    {
+        return register(name, Registries.MEMORY_MODULE_TYPE, () -> new MemoryModuleType<>(Optional.ofNullable(serializeCodec)));
+    }
+
+    private static RegistryObject<Activity> brainActivity(String name)
+    {
+        return register(name, Registries.ACTIVITY, () -> new Activity(name));
+    }
+
+    private static <E extends LivingEntity, T extends Sensor<E>> RegistryObject<SensorType<T>> brainSensor(String name, Supplier<T> factory)
+    {
+        return register(name, Registries.SENSOR_TYPE, () -> new SensorType<>(factory));
     }
 
     @SuppressWarnings("unchecked")

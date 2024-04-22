@@ -15,43 +15,62 @@ public class DragonMoveController extends MoveControl
         this.dragon = dragon;
     }
 
+    // todo: dragon body rotates too quickly, rotation speed hardcoded in super
     @Override
     public void tick()
     {
-        // original movement behavior if the entity isn't flying
         if (!dragon.isFlying())
         {
             super.tick();
             return;
         }
 
-        if (operation == MoveControl.Operation.MOVE_TO)
+        switch (operation)
         {
-            operation = MoveControl.Operation.WAIT;
-            double xDif = wantedX - mob.getX();
-            double yDif = wantedY - mob.getY();
-            double zDif = wantedZ - mob.getZ();
-            double sq = xDif * xDif + yDif * yDif + zDif * zDif;
-            if (sq < (double) 2.5000003E-7F)
+            case WAIT ->
             {
-                mob.setYya(0.0F);
-                mob.setZza(0.0F);
-                return;
+                dragon.setZza(0);
+                dragon.setYya(0);
             }
+            case JUMPING -> operation = Operation.WAIT; // happens sometimes when not flying, so just run it back.
+            case MOVE_TO ->
+            {
+                operation = MoveControl.Operation.WAIT;
+                float xDif = (float) (getWantedX() - mob.getX());
+                float yDif = (float) (getWantedY() - mob.getY());
+                float zDif = (float) (getWantedZ() - mob.getZ());
 
-            float speed = (float) (speedModifier * mob.getAttributeValue(Attributes.FLYING_SPEED));
-            double distSq = Math.sqrt(xDif * xDif + zDif * zDif);
-            mob.setSpeed(speed);
-            if (Math.abs(yDif) > (double) 1.0E-5F || Math.abs(distSq) > (double) 1.0E-5F)
-                mob.setYya((float) yDif * speed);
+                float xzDistance = Mth.sqrt(xDif * xDif + zDif * zDif);
+                float speed = (float) (speedModifier * mob.getAttributeValue(Attributes.FLYING_SPEED));
 
-            float yaw = (float) (Mth.atan2(zDif, xDif) * (double) (180F / (float) Math.PI)) - 90.0F;
-            mob.setYRot(rotlerp(mob.getYRot(), yaw, 6));
-        }
-        else
-        {
-            mob.setYya(0);
-            mob.setZza(0);
+                // only travel forward if reasonably far enough. Helps reduce weird strafing and circling in midair.
+                if (xzDistance > mob.getBbWidth() * 0.5)
+                {
+                    mob.setSpeed(Math.min(xzDistance, 1f) * speed);
+
+                    float yaw = (float) (Mth.atan2(zDif, xDif) * (double) (180F / (float) Math.PI)) - 90.0F;
+                    mob.setYRot(rotlerp(mob.getYRot(), yaw, 6));
+                }
+                else
+                    mob.setSpeed(0);
+
+                // only travel up/down if necessary. Helps reduce awkward up/down bobbing.
+                var yDist = Math.abs(yDif);
+                if (yDist > 0.0001)
+                {
+                    // this is required because for some fucking reason setSpeed also sets zza, and yya needs a speed to move with.
+                    float forwardOld = mob.zza;
+                    mob.setSpeed(speed);
+                    mob.zza = forwardOld;
+
+                    // decelerate vertical movement as we approach our wanted to reduce awkward up/down bobbing
+                    var moveY = Mth.clamp(yDist / 10f, 0.01f, 1f);
+                    if (yDif < 0) moveY = -moveY;
+
+                    // god this is so unintuitive
+                    mob.setYya(speed * moveY);
+                }
+            }
         }
     }
 }

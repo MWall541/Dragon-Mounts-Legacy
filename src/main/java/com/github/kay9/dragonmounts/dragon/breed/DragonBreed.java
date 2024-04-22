@@ -30,6 +30,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 import java.util.List;
@@ -83,6 +84,13 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             var instance = factory.create();
             dragon.getAbilities().add(instance);
             instance.initialize(dragon);
+        }
+
+        if (dragon.fireImmune())
+        {
+            dragon.setPathfindingMalus(BlockPathTypes.LAVA, 8f);
+            dragon.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0f);
+            dragon.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 0f);
         }
     }
 

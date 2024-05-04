@@ -1,4 +1,5 @@
 {
+  "type": "dragonmounts:dragon_egg_loot",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
@@ -9,6 +10,5 @@
       "config_chance_target": "ice_in_igloo_chest_chance"
     }
   ],
-  "egg_breed": "dragonmounts:ice",
-  "type": "dragonmounts:dragon_egg_loot"
+  "egg_breed": "dragonmounts:ice"
 }

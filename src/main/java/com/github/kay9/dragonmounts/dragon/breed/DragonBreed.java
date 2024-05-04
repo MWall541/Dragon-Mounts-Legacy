@@ -29,7 +29,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
                           ImmutableSet<String> immunities, Optional<SoundEvent> ambientSound,
                           ResourceLocation deathLoot, int growthTime, int hatchTime, float sizeModifier,
                           HolderSet<Item> tamingItems, HolderSet<Item> breedingItems, Either<Integer, String> reproLimit)
-    implements IForgeRegistryEntry<DragonBreed>
 {
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             DMLUtil.HEX_CODEC.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
@@ -108,25 +106,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public ResourceLocation id(RegistryAccess reg)
     {
         return BreedRegistry.registry(reg).getKey(this);
-    }
-
-    @Override
-    public DragonBreed setRegistryName(ResourceLocation name)
-    {
-        return this;
-    }
-
-    @org.jetbrains.annotations.Nullable
-    @Override
-    public ResourceLocation getRegistryName()
-    {
-        return BreedRegistry.REGISTRY.get().getKey(this);
-    }
-
-    @Override
-    public Class<DragonBreed> getRegistryType()
-    {
-        return DragonBreed.class;
     }
 
     private void applyAttributes(TameableDragon dragon)

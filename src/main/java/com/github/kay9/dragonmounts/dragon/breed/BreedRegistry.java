@@ -5,19 +5,19 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Random;
 import java.util.function.Supplier;
 
 public class BreedRegistry
 {
     public static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
     public static final DeferredRegister<DragonBreed> DEFERRED_REGISTRY = DeferredRegister.create(REGISTRY_KEY, DragonMountsLegacy.MOD_ID);
-    public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(DragonBreed.class, () -> new RegistryBuilder<DragonBreed>()
+    public static final Supplier<IForgeRegistry<DragonBreed>> REGISTRY = DEFERRED_REGISTRY.makeRegistry(() -> new RegistryBuilder<DragonBreed>()
             .disableSaving()
             .dataPackRegistry(DragonBreed.CODEC, DragonBreed.NETWORK_CODEC));
 
@@ -33,7 +33,7 @@ public class BreedRegistry
         return registry(reg).get(byId);
     }
 
-    public static DragonBreed getRandom(RegistryAccess reg, Random random)
+    public static DragonBreed getRandom(RegistryAccess reg, RandomSource random)
     {
         return registry(reg).getRandom(random).orElseThrow().value();
     }

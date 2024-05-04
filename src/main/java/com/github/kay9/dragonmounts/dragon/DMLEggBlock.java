@@ -11,12 +11,12 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,12 +31,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 
 public class DMLEggBlock extends DragonEggBlock implements EntityBlock
@@ -54,7 +53,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
     }
 
     @Override
-    public void tick(BlockState pState, ServerLevel level, BlockPos pPos, Random pRand)
+    public void tick(BlockState pState, ServerLevel level, BlockPos pPos, RandomSource pRandom)
     {
         if (isFree(level.getBlockState(pPos.below())) && pPos.getY() >= level.getMinBuildHeight())
         {
@@ -128,14 +127,14 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         {
             var tag = stack.getTag();
             if (tag == null || tag.contains(DATA_ITEM_NAME))
-                return new TranslatableComponent(tag.getString(DATA_ITEM_NAME));
+                return Component.translatable(tag.getString(DATA_ITEM_NAME));
             return super.getName(stack);
         }
 
         @Override
         public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items)
         {
-            if (FMLLoader.getDist().isClient() && allowdedIn(tab) && Minecraft.getInstance().level != null)
+            if (FMLLoader.getDist().isClient() && allowedIn(tab) && Minecraft.getInstance().level != null)
             {
                 var reg = Minecraft.getInstance().level.registryAccess();
                 for (DragonBreed breed : BreedRegistry.registry(reg))
@@ -151,11 +150,11 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             var tag = stack.getTagElement("BlockEntityTag");
             int time;
             if (tag != null && (time = tag.getInt(DragonEgg.NBT_HATCH_TIME)) != 0)
-                tooltips.add(new TranslatableComponent(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
+                tooltips.add(Component.translatable(getDescriptionId() + ".remaining_time", time / 20).withStyle(ChatFormatting.GRAY));
 
             var player = Minecraft.getInstance().player;
             if (player != null && player.getAbilities().instabuild)
-                tooltips.add(new TranslatableComponent(getDescriptionId() + ".change_breeds")
+                tooltips.add(Component.translatable(getDescriptionId() + ".change_breeds")
                         .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC, ChatFormatting.UNDERLINE));
         }
 
@@ -175,7 +174,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         }
 
         @Override
-        public void initializeClient(Consumer<IItemRenderProperties> consumer)
+        public void initializeClient(Consumer<IClientItemExtensions> consumer)
         {
             consumer.accept(DragonEggRenderer.INSTANCE);
         }

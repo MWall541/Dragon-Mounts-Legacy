@@ -10,8 +10,6 @@ import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.habitats.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
@@ -19,9 +17,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -45,10 +43,8 @@ import static com.google.common.collect.ImmutableMap.of;
 
 class DragonBreedProvider implements DataProvider
 {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
     private final DataGenerator generator;
-    private HashCache cache;
+    private CachedOutput cache;
 
     DragonBreedProvider(DataGenerator generator)
     {
@@ -56,7 +52,7 @@ class DragonBreedProvider implements DataProvider
     }
 
     @Override
-    public void run(HashCache cache) throws IOException
+    public void run(CachedOutput cache) throws IOException
     {
         this.cache = cache;
         var ops = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.builtinCopy());
@@ -70,7 +66,7 @@ class DragonBreedProvider implements DataProvider
         var regKey = BreedRegistry.REGISTRY.get().getRegistryKey().location();
         var path = String.join("/", "data", id.getNamespace(), regKey.getNamespace(), regKey.getPath(), id.getPath() + ".json");
 
-        DataProvider.save(GSON, cache, json, generator.getOutputFolder().resolve(path));
+        DataProvider.saveStable(cache, json, generator.getOutputFolder().resolve(path));
     }
 
     @Override

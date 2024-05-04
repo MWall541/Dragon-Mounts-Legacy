@@ -22,7 +22,7 @@ public class RandomChanceByConfig implements LootItemCondition
     @Override
     public LootItemConditionType getType()
     {
-        return DMLRegistry.RANDOM_CHANCE_CONFIG_CONDITION;
+        return DMLRegistry.RANDOM_CHANCE_CONFIG_CONDITION.get();
     }
 
     @Override

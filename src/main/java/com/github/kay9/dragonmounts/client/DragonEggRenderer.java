@@ -8,20 +8,21 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemRenderProperties;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implements BlockEntityRenderer<DMLEggBlock.Entity>, IItemRenderProperties
+public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implements BlockEntityRenderer<DMLEggBlock.Entity>, IClientItemExtensions
 {
     public static final DragonEggRenderer INSTANCE = new DragonEggRenderer();
     public static final Map<ResourceLocation, ResourceLocation> MODEL_CACHE = new HashMap<>(8);
@@ -52,7 +53,7 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
     }
 
     @Override
-    public BlockEntityWithoutLevelRenderer getItemStackRenderer()
+    public BlockEntityWithoutLevelRenderer getCustomRenderer()
     {
         return this;
     }
@@ -62,7 +63,7 @@ public class DragonEggRenderer extends BlockEntityWithoutLevelRenderer implement
         ps.pushPose();
         if (offset) ps.translate(-0.5D, 0.0D, -0.5D);
         var model = Minecraft.getInstance().getModelManager().getModel(MODEL_CACHE.get(breed));
-        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, null, model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
+        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(ps.last(), consumer, null, model, 1, 1, 1, light, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
         ps.popPose();
     }
 

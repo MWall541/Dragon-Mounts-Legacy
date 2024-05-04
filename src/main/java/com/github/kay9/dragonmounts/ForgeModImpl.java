@@ -1,16 +1,11 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.MountCameraManager;
-import com.github.kay9.dragonmounts.data.CrossBreedingManager;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.model.ForgeModelBakery;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -58,23 +53,22 @@ public class ForgeModImpl
         var modBus = FMLJavaModLoadingContext.get().getModEventBus();
         var bus = MinecraftForge.EVENT_BUS;
 
-        bus.addListener((PlayerInteractEvent.RightClickBlock e) -> e.setCanceled(overrideVanillaDragonEgg(e.getWorld(), e.getPos(), e.getPlayer())));
-        bus.addListener((AddReloadListenerEvent e) -> e.addListener(CrossBreedingManager.INSTANCE));
+        bus.addListener((PlayerInteractEvent.RightClickBlock e) -> e.setCanceled(overrideVanillaDragonEgg(e.getLevel(), e.getPos(), e.getEntity())));
+        bus.addListener((AddReloadListenerEvent e) -> registerReloadListeners(e::addListener));
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
-        modBus.addGenericListener(GlobalLootModifierSerializer.class, (RegistryEvent.Register<GlobalLootModifierSerializer<?>> e) -> DMLRegistry.registerLootConditions());
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {
             bus.addListener((TickEvent.ClientTickEvent e) -> clientTick(e.phase == TickEvent.Phase.START));
-            bus.addListener((EntityViewRenderEvent.CameraSetup e) -> MountCameraManager.setMountCameraAngles(e.getCamera()));
-            bus.addListener((InputEvent.KeyInputEvent e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
-            bus.addListener((TagsUpdatedEvent e) -> populateSearchTrees());
+            bus.addListener((ViewportEvent.ComputeCameraAngles e) -> MountCameraManager.setMountCameraAngles(e.getCamera()));
+            bus.addListener((InputEvent.Key e) -> onKeyPress(e.getKey(), e.getAction(), e.getModifiers()));
 
             modBus.addListener((EntityRenderersEvent.RegisterRenderers e) -> registerRenderers());
-            modBus.addListener((ModelRegistryEvent e) -> defineBlockModels(ForgeModelBakery::addSpecialModel));
-            modBus.addListener((ColorHandlerEvent.Item e) -> registerItemColors(e.getItemColors()));
+            modBus.addListener((ModelEvent.RegisterAdditional e) -> defineBlockModels(e::register));
+            modBus.addListener((RegisterColorHandlersEvent.Item e) -> registerItemColors(e.getItemColors()));
             modBus.addListener((FMLConstructModEvent e) -> e.enqueueWork(DragonMountsLegacy::registerReloadListenersEarly));
+            modBus.addListener((RegisterKeyMappingsEvent e) -> registerKeyBindings(e::register));
         }
     }
 }

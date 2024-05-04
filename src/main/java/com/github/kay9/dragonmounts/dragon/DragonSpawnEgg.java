@@ -8,9 +8,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
@@ -25,7 +25,6 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.Random;
 
 @SuppressWarnings("DataFlowIssue")
 public class DragonSpawnEgg extends ForgeSpawnEggItem
@@ -43,7 +42,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     @Override
     public void fillItemCategory(CreativeModeTab pCategory, NonNullList<ItemStack> pItems)
     {
-        if (FMLLoader.getDist().isClient() && allowdedIn(pCategory) && Minecraft.getInstance().level != null)
+        if (FMLLoader.getDist().isClient() && allowedIn(pCategory) && Minecraft.getInstance().level != null)
         {
             var reg = Minecraft.getInstance().level.registryAccess();
             for (DragonBreed breed : BreedRegistry.registry(reg))
@@ -87,7 +86,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         var tag = stack.getTagElement(DATA_TAG);
         if (tag != null && tag.contains(DATA_ITEM_NAME))
-            return new TranslatableComponent(tag.getString(DATA_ITEM_NAME));
+            return Component.translatable(tag.getString(DATA_ITEM_NAME));
 
         return super.getName(stack);
     }
@@ -131,7 +130,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         if (breedId.isEmpty() || !reg.containsKey(new ResourceLocation(breedId))) // this item doesn't contain a breed yet?
         {
             // assign one ourselves then.
-            var breed = reg.getRandom(new Random()).orElseThrow();
+            var breed = reg.getRandom(RandomSource.create()).orElseThrow();
             var updated = create(breed.value(), regAcc);
             root.merge(updated.getTag());
         }

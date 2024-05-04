@@ -1,28 +1,27 @@
 {
-  "reproduction_limit": "config:ghost",
-  "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
   "abilities": [
     {
       "type": "dragonmounts:reaper_step"
     }
   ],
+  "ambient_sound": "dragonmounts:entity.dragon.ambient.ghost",
   "habitats": [
     {
+      "type": "dragonmounts:picky",
       "required_habitats": [
         {
-          "points": 1,
+          "type": "dragonmounts:world_height",
           "below": true,
           "height": 0,
-          "type": "dragonmounts:world_height"
+          "points": 1
         },
         {
-          "points": 2,
+          "type": "dragonmounts:light",
           "below": true,
           "light": 3,
-          "type": "dragonmounts:light"
+          "points": 2
         }
-      ],
-      "type": "dragonmounts:picky"
+      ]
     }
   ],
   "immunities": [
@@ -32,5 +31,6 @@
     "dragonBreath"
   ],
   "primary_color": "c4c4c4",
+  "reproduction_limit": "config:ghost",
   "secondary_color": "c2f8ff"
 }

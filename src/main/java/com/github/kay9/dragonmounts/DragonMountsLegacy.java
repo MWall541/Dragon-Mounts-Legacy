@@ -1,28 +1,27 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.*;
+import com.github.kay9.dragonmounts.data.CrossBreedingManager;
 import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
 import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -43,56 +42,8 @@ public class DragonMountsLegacy
     }
 
     // ========================
-    //          Events
+    //       Load Events
     // ========================
-
-    static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
-    {
-        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
-        {
-            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonBreed.BuiltIn.END);
-            if (end.isPresent())
-            {
-                level.removeBlock(pos, false);
-                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
-                DMLEggBlock.startHatching(end.get(), level, pos);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static void registerEntityAttributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> registrar)
-    {
-        registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
-    }
-
-    static void clientTick(boolean pre)
-    {
-        if (!pre) MountControlsMessenger.tick();
-    }
-
-    static void onKeyPress(int key, int action, int modifiers)
-    {
-        KeyMappings.handleKeyPress(key, action);
-    }
-
-    static void populateSearchTrees()
-    {
-        var tree = Minecraft.getInstance().getSearchTree(SearchRegistry.CREATIVE_NAMES);
-        var oldContents = tree.search(DragonMountsLegacy.MOD_ID + ":");
-        NonNullList<ItemStack> newContents = NonNullList.create();
-        DMLRegistry.EGG_BLOCK_ITEM.get().fillItemCategory(CreativeModeTab.TAB_SEARCH, newContents);
-        DMLRegistry.SPAWN_EGG.get().fillItemCategory(CreativeModeTab.TAB_SEARCH, newContents);
-        newItems: // this is a sanity check if resources are reloaded
-        for (var newItem : newContents)
-        {
-            for (var oldItem : oldContents)
-                if (ItemStack.matches(newItem, oldItem)) continue newItems;
-            tree.add(newItem);
-        }
-        tree.refresh();
-    }
 
     static void registerRenderers()
     {
@@ -109,7 +60,7 @@ public class DragonMountsLegacy
         var dir = "models/block/dragon_eggs";
         var length = "models/".length();
         var suffixLength = ".json".length();
-        for (var rl : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.endsWith(".json")))
+        for (var rl : Minecraft.getInstance().getResourceManager().listResources(dir, f -> f.getPath().endsWith(".json")).keySet())
         {
             var path = rl.getPath();
             path = path.substring(length, path.length() - suffixLength);
@@ -133,5 +84,49 @@ public class DragonMountsLegacy
         {
             ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE); // Dragon Model Properties need to be reloaded before Entity Models are!
         }
+    }
+
+    static void registerKeyBindings(Consumer<KeyMapping> registrar)
+    {
+        KeyMappings.registerKeybinds(registrar);
+    }
+
+    static void registerReloadListeners(Consumer<PreparableReloadListener> registrar)
+    {
+        registrar.accept(CrossBreedingManager.INSTANCE);
+    }
+
+    static void registerEntityAttributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> registrar)
+    {
+        registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
+    }
+
+    // ========================
+    //       Game Events
+    // ========================
+
+    static boolean overrideVanillaDragonEgg(Level level, BlockPos pos, Player player)
+    {
+        if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
+        {
+            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonBreed.BuiltIn.END);
+            if (end.isPresent())
+            {
+                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
+                else DMLEggBlock.startHatching(end.get(), level, pos);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void clientTick(boolean head)
+    {
+        if (!head) MountControlsMessenger.tick();
+    }
+
+    static void onKeyPress(int key, int action, int modifiers)
+    {
+        KeyMappings.handleKeyPress(key, action);
     }
 }

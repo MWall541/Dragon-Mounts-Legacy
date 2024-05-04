@@ -18,8 +18,6 @@ import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -389,7 +387,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         boolean isFlying = isFlying();
         float speed = (float) getAttributeValue(isFlying? FLYING_SPEED : MOVEMENT_SPEED) * 0.225f;
 
-        if (canBeControlledByRider()) // Were being controlled; override ai movement
+        if (hasControllingPassenger()) // Were being controlled; override ai movement
         {
             LivingEntity driver = (LivingEntity) getControllingPassenger();
             double moveSideways = vec3.x;
@@ -657,7 +655,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected Component getTypeName()
     {
         if (getBreed() != null)
-            return new TranslatableComponent(getBreed().getTranslationKey(getLevel().registryAccess()));
+            return Component.translatable(getBreed().getTranslationKey(getLevel().registryAccess()));
 
         return super.getTypeName();
     }
@@ -889,7 +887,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 babyName = getRandom().nextBoolean()? p1Name + p2Name : p2Name + p1Name;
             }
 
-            egg.setCustomName(new TextComponent(babyName));
+            egg.setCustomName(Component.literal(babyName));
         }
 
         // increase reproduction counter
@@ -917,13 +915,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public boolean canAttack(LivingEntity target)
     {
-        return !isHatchling() && !canBeControlledByRider() && super.canAttack(target);
-    }
-
-    @Override
-    public boolean canBeControlledByRider()
-    {
-        return getControllingPassenger() instanceof LivingEntity driver && isOwnedBy(driver);
+        return !isHatchling() && !hasControllingPassenger() && super.canAttack(target);
     }
 
     /**
@@ -933,8 +925,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public Entity getControllingPassenger()
     {
-        List<Entity> list = getPassengers();
-        return list.isEmpty()? null : list.get(0);
+        return getFirstPassenger() instanceof LivingEntity driver && isOwnedBy(driver)? driver : null;
     }
 
     @Override
@@ -1077,7 +1068,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // negate modifier value since the operation is as follows: base_value += modifier * base_value
         double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
         var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", modValue, AttributeModifier.Operation.MULTIPLY_BASE);
-        for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code
+        for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE,}) // avoid duped code
         {
             AttributeInstance instance = getAttribute(attribute);
             instance.removeModifier(mod);

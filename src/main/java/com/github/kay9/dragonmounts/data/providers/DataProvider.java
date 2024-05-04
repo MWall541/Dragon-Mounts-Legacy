@@ -1,9 +1,9 @@
 package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 @Mod.EventBusSubscriber(modid = DragonMountsLegacy.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DataProvider
@@ -14,15 +14,10 @@ public class DataProvider
         var gen = event.getGenerator();
         var fileHelper = event.getExistingFileHelper();
 
-        if (event.includeServer())
-        {
-            gen.addProvider(new BlockTagProvider(gen, DragonMountsLegacy.MOD_ID, fileHelper));
-            gen.addProvider(new LootModifierProvider(gen, DragonMountsLegacy.MOD_ID));
-            gen.addProvider(new DragonBreedProvider(gen));
-        }
-        if (event.includeClient())
-        {
-            gen.addProvider(new ModelPropertiesProvider(gen));
-        }
+        gen.addProvider(event.includeServer(), new BlockTagProvider(gen, DragonMountsLegacy.MOD_ID, fileHelper));
+        gen.addProvider(event.includeServer(), new LootModifierProvider(gen, DragonMountsLegacy.MOD_ID));
+        gen.addProvider(event.includeServer(), new DragonBreedProvider(gen));
+
+        gen.addProvider(event.includeClient(), new ModelPropertiesProvider(gen));
     }
 }

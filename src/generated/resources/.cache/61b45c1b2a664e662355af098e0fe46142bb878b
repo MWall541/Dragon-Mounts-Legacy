@@ -1,0 +1,10 @@
+// 1.19.2	2024-05-04T13:21:56.4822573	Global Loot Modifiers : dragonmounts
+9db0a1d1399942791641f193af4c4015b896f0c4 data/dragonmounts/loot_modifiers/dragonmounts/aether/chests/simple_dungeon.json
+842092289f27244a03f79ffbbf3ae45a0ca6d8ad data/dragonmounts/loot_modifiers/dragonmounts/fire/chests/desert_pyramid.json
+49c6e5e4af4cf14896f7d4fddb76aaa5fd421a1f data/dragonmounts/loot_modifiers/dragonmounts/forest/chests/jungle_temple.json
+69e0a5928bc14d00722a57cfae637564ac9174a7 data/dragonmounts/loot_modifiers/dragonmounts/ghost/chests/abandoned_mineshaft.json
+1cf8e2bf637d65032653c74aedac7737cf54490f data/dragonmounts/loot_modifiers/dragonmounts/ghost/chests/woodland_mansion.json
+5e961f72347887ca7af37eccaf3ba24b59e17c49 data/dragonmounts/loot_modifiers/dragonmounts/ice/chests/igloo_chest.json
+6bdd65bbc1b1fe768735b71221ab50225c2bf797 data/dragonmounts/loot_modifiers/dragonmounts/nether/chests/bastion_treasure.json
+8ca22e3a903a78b5a7c8a11a8773fb306bf581fb data/dragonmounts/loot_modifiers/dragonmounts/water/chests/buried_treasure.json
+7276bec72c2baaeed283a0e7ffdb2d5d1b0828f5 data/forge/loot_modifiers/global_loot_modifiers.json

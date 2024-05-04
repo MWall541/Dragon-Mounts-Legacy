@@ -5,9 +5,10 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.ClientRegistry;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.function.Consumer;
 
 public class KeyMappings
 {
@@ -17,9 +18,13 @@ public class KeyMappings
     @SuppressWarnings({"ConstantConditions"})
     private static KeyMapping keymap(String name, int defaultMapping, String category)
     {
-        var keymap = new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
-        ClientRegistry.registerKeyBinding(keymap);
-        return keymap;
+        return new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, category);
+    }
+
+    public static void registerKeybinds(Consumer<KeyMapping> registrar)
+    {
+        registrar.accept(FLIGHT_DESCENT_KEY);
+        registrar.accept(CAMERA_CONTROLS);
     }
 
     public static void handleKeyPress(int key, int action)
@@ -29,7 +34,7 @@ public class KeyMappings
                 && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon d)
         {
             DMLConfig.CAMERA_DRIVEN_FLIGHT.set(!DMLConfig.cameraDrivenFlight());
-            Minecraft.getInstance().player.displayClientMessage(new TranslatableComponent("mount.dragon.camera_controls." + (DMLConfig.cameraDrivenFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("mount.dragon.camera_controls." + (DMLConfig.cameraDrivenFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
         }
     }
 }

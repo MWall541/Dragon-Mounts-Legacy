@@ -1,7 +1,6 @@
 package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DMLConfig;
-import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
 import com.github.kay9.dragonmounts.data.loot.conditions.RandomChanceByConfig;
 import net.minecraft.data.DataGenerator;
@@ -33,7 +32,7 @@ class LootModifierProvider extends GlobalLootModifierProvider
         };
 
         var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());
-        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed, false));
+        super.add(path, new DragonEggLootMod(conditions, breed, false));
     }
 
     private void addWithConfigChance(ResourceLocation breed, ResourceLocation table)
@@ -44,6 +43,6 @@ class LootModifierProvider extends GlobalLootModifierProvider
         };
 
         var path = String.join("/", breed.getNamespace(), breed.getPath(), table.getPath());
-        super.add(path, DMLRegistry.EGG_LOOT_MODIFIER.get(), new DragonEggLootMod(conditions, breed, false));
+        super.add(path, new DragonEggLootMod(conditions, breed, false));
     }
 }

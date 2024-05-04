@@ -5,24 +5,28 @@ import com.github.kay9.dragonmounts.dragon.DMLEggBlock;
 import com.github.kay9.dragonmounts.dragon.DragonEgg;
 import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
+import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.common.loot.LootModifier;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 import static com.github.kay9.dragonmounts.dragon.breed.DragonBreed.BuiltIn.*;
 
 public class DragonEggLootMod extends LootModifier
 {
+    public static final Codec<DragonEggLootMod> CODEC = RecordCodecBuilder.create(i -> codecStart(i)
+            .and(ResourceLocation.CODEC.fieldOf("egg_breed").forGetter(m -> m.id))
+            .and(Codec.BOOL.optionalFieldOf("replace_first", false).forGetter(m -> m.replaceFirst))
+            .apply(i, DragonEggLootMod::new));
+
     public record Target(ResourceKey<DragonBreed> forBreed, ResourceLocation target, double chance) {}
     public static Target[] BUILT_IN_CHANCES = new Target[]{
             new Target(AETHER, BuiltInLootTables.SIMPLE_DUNGEON, 0.15),
@@ -45,9 +49,8 @@ public class DragonEggLootMod extends LootModifier
         this.replaceFirst = replaceFirst;
     }
 
-    @NotNull
     @Override
-    protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context)
+    protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
     {
         var reg = context.getLevel().registryAccess();
         var breed = BreedRegistry.registry(reg).get(id);
@@ -64,27 +67,9 @@ public class DragonEggLootMod extends LootModifier
         return generatedLoot;
     }
 
-    public static class Serializer extends GlobalLootModifierSerializer<DragonEggLootMod>
+    @Override
+    public Codec<? extends IGlobalLootModifier> codec()
     {
-        @Override
-        public DragonEggLootMod read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions)
-        {
-            var eggBreed = GsonHelper.getAsString(object, "egg_breed");
-            var replaceFirst = false;
-            if (object.has("replace_first"))
-                replaceFirst = GsonHelper.getAsBoolean(object, "replace_first");
-
-            return new DragonEggLootMod(conditions, new ResourceLocation(eggBreed), replaceFirst);
-        }
-
-        @Override
-        public JsonObject write(DragonEggLootMod instance)
-        {
-            var json = makeConditions(instance.conditions);
-            json.addProperty("egg_breed", instance.id.toString());
-            if (instance.replaceFirst)
-                json.addProperty("replace_first", true);
-            return json;
-        }
+        return CODEC;
     }
 }

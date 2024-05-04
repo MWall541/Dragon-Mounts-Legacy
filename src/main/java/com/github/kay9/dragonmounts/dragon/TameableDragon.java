@@ -1077,21 +1077,25 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         setMaxUpStep(Math.max(2 * getAgeProgress(), 1));
 
-        // health does not update on modifier application, so have to store the health frac first
-        var healthFrac = getHealthFraction();
-
-        // negate modifier value since the operation is as follows: base_value += modifier * base_value
-        double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
-        var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", modValue, AttributeModifier.Operation.MULTIPLY_BASE);
-        for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code
+        // update attributes and health only on the server
+        if (isServer())
         {
-            AttributeInstance instance = getAttribute(attribute);
-            instance.removeModifier(mod);
-            instance.addTransientModifier(mod);
-        }
+            // health does not update on modifier application, so have to store the health frac first
+            var healthFrac = getHealthFraction();
 
-        // restore health fraction
-        setHealth(healthFrac * getMaxHealth());
+            // negate modifier value since the operation is as follows: base_value += modifier * base_value
+            double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
+            var mod = new AttributeModifier(SCALE_MODIFIER_UUID, "Dragon size modifier", modValue, AttributeModifier.Operation.MULTIPLY_BASE);
+            for (var attribute : new Attribute[]{MAX_HEALTH, ATTACK_DAMAGE, }) // avoid duped code
+            {
+                AttributeInstance instance = getAttribute(attribute);
+                instance.removeModifier(mod);
+                instance.addTransientModifier(mod);
+            }
+
+            // restore health fraction
+            setHealth(healthFrac * getMaxHealth());
+        }
     }
 
     public boolean isHatchling()

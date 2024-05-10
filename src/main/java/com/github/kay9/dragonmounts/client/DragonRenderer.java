@@ -26,10 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@SuppressWarnings("ConstantConditions") // dragon will not render if the breed doesn't exist (shouldRender)
 public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 {
     public static final ModelLayerLocation MODEL_LOCATION = new ModelLayerLocation(DragonMountsLegacy.id("dragon"), "main");
+    private static final ResourceLocation[] DEFAULT_TEXTURES = computeTextureCacheFor(DragonBreed.BuiltIn.END.location());
     private static final ResourceLocation DISSOLVE_TEXTURE = DragonMountsLegacy.id("textures/entity/dragon/dissolve.png");
     private static final int LAYER_BODY = 0;
     private static final int LAYER_GLOW = 1;
@@ -64,9 +64,16 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         super.render(dragon, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
     }
 
-    public DragonModel getModel(TameableDragon dragon)
+    @SuppressWarnings("ConstantConditions")
+    private DragonModel getModel(TameableDragon dragon)
     {
-        return modelCache.getOrDefault(dragon.getBreed().id(Minecraft.getInstance().level.registryAccess()), defaultModel);
+        var breed = dragon.getBreed();
+        if (breed == null) return defaultModel;
+
+        var selected = modelCache.get(breed.id(Minecraft.getInstance().level.registryAccess()));
+        if (selected == null) return defaultModel;
+
+        return selected;
     }
 
     // During death, do not use the standard rendering and let the death layer handle it. Hacky, but better than mixins.
@@ -83,11 +90,13 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         return getTextureForLayer(dragon.getBreed(), LAYER_BODY);
     }
 
-    public ResourceLocation getTextureForLayer(DragonBreed breed, int layer)
+    @SuppressWarnings("ConstantConditions")
+    public ResourceLocation getTextureForLayer(@Nullable DragonBreed breed, int layer)
     {
+        if (breed == null) return DEFAULT_TEXTURES[layer];
+
         // we need to compute texture locations now rather than earlier due to the fact that breeds don't exist then.
-        //noinspection DataFlowIssue
-        return textureCache.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::getTexturesFor)[layer];
+        return textureCache.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::computeTextureCacheFor)[layer];
     }
 
     @Override
@@ -118,13 +127,13 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         return builder.build();
     }
 
-    private static ResourceLocation[] getTexturesFor(ResourceLocation id)
+    private static ResourceLocation[] computeTextureCacheFor(ResourceLocation breedId)
     {
         final String[] TEXTURES = {"body", "glow", "saddle"}; // 0, 1, 2
 
-        ResourceLocation[] cache = new ResourceLocation[3];
+        ResourceLocation[] cache = new ResourceLocation[TEXTURES.length];
         for (int i = 0; i < TEXTURES.length; i++)
-            cache[i] = new ResourceLocation(id.getNamespace(), "textures/entity/dragon/" + id.getPath() + "/" + TEXTURES[i] + ".png");
+            cache[i] = new ResourceLocation(breedId.getNamespace(), "textures/entity/dragon/" + breedId.getPath() + "/" + TEXTURES[i] + ".png");
         return cache;
     }
 

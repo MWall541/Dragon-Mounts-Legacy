@@ -357,6 +357,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         {
             // periodically sync age data back to client
             if (!isAdult() && tickCount % AGE_UPDATE_INTERVAL == 0) entityData.set(DATA_AGE, age);
+
+            // heal randomly
+            if (isAlive() && getRandom().nextFloat() < 0.001) heal(1f);
         }
         else
         {

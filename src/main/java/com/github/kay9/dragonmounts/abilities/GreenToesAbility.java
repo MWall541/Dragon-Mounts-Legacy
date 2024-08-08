@@ -1,12 +1,11 @@
 package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
@@ -17,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class GreenToesAbility extends FootprintAbility implements Ability.Factory<GreenToesAbility>
 {
     public static final GreenToesAbility INSTANCE = new GreenToesAbility();
-    public static final Codec<GreenToesAbility> CODEC = Codec.unit(INSTANCE);
+    public static final MapCodec<GreenToesAbility> CODEC = MapCodec.unit(INSTANCE);
 
     protected GreenToesAbility() {}
 
@@ -81,7 +80,7 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
         {
             i++;
             var state = level.getBlockState(caret);
-            if (!(state.getBlock() instanceof BonemealableBlock b) || !b.isValidBonemealTarget(level, caret, state, level.isClientSide()))
+            if (!(state.getBlock() instanceof BonemealableBlock b) || !b.isValidBonemealTarget(level, caret, state))
                 continue;
 
             if (b.isBonemealSuccess(level, dragon.getRandom(), caret, state))

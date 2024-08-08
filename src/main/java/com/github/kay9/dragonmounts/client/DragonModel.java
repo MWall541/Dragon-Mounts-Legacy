@@ -17,8 +17,6 @@ import net.minecraft.client.renderer.RenderType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 /**
  * Generic model for all winged tetrapod dragons.
@@ -334,7 +332,7 @@ public class DragonModel extends EntityModel<TameableDragon>
     @Override
     public void prepareMobModel(TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pPartialTick)
     {
-        size = Math.min(dragon.getScale(), 1);
+        size = Math.min(dragon.getAgeScale(), 1);
         dragon.getAnimator().setPartialTicks(pPartialTick);
     }
 
@@ -343,44 +341,44 @@ public class DragonModel extends EntityModel<TameableDragon>
     {
         DragonAnimator animator = dragon.getAnimator();
         animator.setLook(pNetHeadYaw, pHeadPitch);
-        animator.setMovement(pLimbSwing, pLimbSwingAmount * dragon.getScale());
+        animator.setMovement(pLimbSwing, pLimbSwingAmount * dragon.getAgeScale());
         dragon.getAnimator().animate(this);
     }
 
     @Override
-    public void renderToBuffer(PoseStack ps, VertexConsumer vertices, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
+    public void renderToBuffer(PoseStack ps, VertexConsumer vertices, int pPackedLight, int pPackedOverlay, int pColor)
     {
-        body.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-        renderHead(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+        body.render(ps, vertices, pPackedLight, pPackedOverlay, pColor);
+        renderHead(ps, vertices, pPackedLight, pPackedOverlay, pColor);
         for (ModelPartProxy proxy : neckProxy)
-            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pColor);
         for (ModelPartProxy proxy : tailProxy)
-            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-        renderWings(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-        renderLegs(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pColor);
+        renderWings(ps, vertices, pPackedLight, pPackedOverlay, pColor);
+        renderLegs(ps, vertices, pPackedLight, pPackedOverlay, pColor);
     }
 
-    protected void renderHead(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
+    protected void renderHead(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, int pColor)
     {
         float headScale = 1.4f / (size + 0.4f);
         //noinspection DataFlowIssue
         ((ModelPartAccess) (Object) head).setRenderScale(headScale, headScale, headScale);
-        head.render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+        head.render(ps, vertices, packedLight, packedOverlay, pColor);
     }
 
-    public void renderWings(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
+    public void renderWings(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, int pColor)
     {
         ps.pushPose();
         ps.scale(1.1f, 1.1f, 1.1f);
-        wingArms[0].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
-        wingArms[1].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+        wingArms[0].render(ps, vertices, packedLight, packedOverlay, pColor);
+        wingArms[1].render(ps, vertices, packedLight, packedOverlay, pColor);
         ps.popPose();
     }
 
-    protected void renderLegs(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
+    protected void renderLegs(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, int pColor)
     {
         for (ModelPart[] leg : legs)
-            leg[0].render(ps, vertices, packedLight, packedOverlay, pRed, pGreen, pBlue, pAlpha);
+            leg[0].render(ps, vertices, packedLight, packedOverlay, pColor);
     }
 
     private static CubeListBuilder centerMirroredBox(CubeListBuilder builder, boolean mirror, float pOriginX, float pOriginY, float pOriginZ, float pDimensionX, float pDimensionY, float pDimensionZ)

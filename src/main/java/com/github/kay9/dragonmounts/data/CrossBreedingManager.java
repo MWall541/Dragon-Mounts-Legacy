@@ -1,15 +1,13 @@
 package com.github.kay9.dragonmounts.data;
 
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.Util;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -42,28 +40,25 @@ public class CrossBreedingManager extends SimpleJsonResourceReloadListener
             var id = entry.getKey();
             var json = entry.getValue();
             var cross = CrossBreedResult.CODEC.parse(JsonOps.INSTANCE, json)
-                    .getOrThrow(false, Util.prefix("Unable to parse Cross Breeding result for: " + id, DragonMountsLegacy.LOG::error));
+                    .getOrThrow(s -> new IllegalStateException("Unable to parse Cross Breeding result for: " + id + ", " + s));
             crosses.put(new Couple(cross.parent1(), cross.parent2()), cross.child());
         }
     }
 
     @Nullable
-    public DragonBreed getCrossBreed(DragonBreed parent, DragonBreed mate, RegistryAccess ra)
+    public Holder.Reference<DragonBreed> getCrossBreed(Holder.Reference<DragonBreed> parent, Holder.Reference<DragonBreed> mate, HolderLookup.Provider ra)
     {
-        var reg = BreedRegistry.registry(ra);
-        var parentKey = reg.getResourceKey(parent).orElseThrow();
-        var mateKey = reg.getResourceKey(mate).orElseThrow();
-        var result = crosses.get(new Couple(parentKey, mateKey));
+        ResourceKey<DragonBreed> result = crosses.get(new Couple(parent.key(), mate.key()));
 
-        return result == null? null : reg.get(result);
+        return result == null? null : DragonBreed.get(result, ra);
     }
 
     public record CrossBreedResult(ResourceKey<DragonBreed> parent1, ResourceKey<DragonBreed> parent2, ResourceKey<DragonBreed> child)
     {
         public static final Codec<CrossBreedResult> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceKey.codec(BreedRegistry.REGISTRY_KEY).fieldOf("parent1").forGetter(CrossBreedResult::parent1),
-            ResourceKey.codec(BreedRegistry.REGISTRY_KEY).fieldOf("parent2").forGetter(CrossBreedResult::parent2),
-            ResourceKey.codec(BreedRegistry.REGISTRY_KEY).fieldOf("child").forGetter(CrossBreedResult::child)
+            ResourceKey.codec(DragonBreed.REGISTRY_KEY).fieldOf("parent1").forGetter(CrossBreedResult::parent1),
+            ResourceKey.codec(DragonBreed.REGISTRY_KEY).fieldOf("parent2").forGetter(CrossBreedResult::parent2),
+            ResourceKey.codec(DragonBreed.REGISTRY_KEY).fieldOf("child").forGetter(CrossBreedResult::child)
         ).apply(instance, CrossBreedResult::new));
     }
 

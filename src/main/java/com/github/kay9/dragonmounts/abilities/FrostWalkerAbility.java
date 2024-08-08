@@ -2,13 +2,14 @@ package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FrostedIceBlock;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -16,10 +17,9 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerAbility>
 {
-    public static final Codec<FrostWalkerAbility> CODEC = Codec.FLOAT
+    public static final MapCodec<FrostWalkerAbility> CODEC = Codec.FLOAT
             .xmap(FrostWalkerAbility::new, a -> a.radiusMultiplier)
-            .fieldOf("radius_multiplier")
-            .codec();
+            .fieldOf("radius_multiplier");
 
     private final float radiusMultiplier;
 
@@ -36,13 +36,13 @@ public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerA
     @Override
     public void initialize(TameableDragon dragon)
     {
-        dragon.setPathfindingMalus(BlockPathTypes.WATER, 0);
+        dragon.setPathfindingMalus(PathType.WATER, 0);
     }
 
     @Override
     public void close(TameableDragon dragon)
     {
-        dragon.setPathfindingMalus(BlockPathTypes.WATER, BlockPathTypes.WATER.getMalus());
+        dragon.setPathfindingMalus(PathType.WATER, PathType.WATER.getMalus());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerA
             return; // only juveniles and older can frost walk
 
         // taken from and modified of FrostWalkerEnchantment#onEntityMoved
-        var radius = (int) (Math.max(radiusMultiplier * dragon.getScale(), 1) + 3);
+        var radius = (int) (Math.max(radiusMultiplier * dragon.getAgeScale(), 1) + 3);
         var pos = dragon.blockPosition();
 
         for (BlockPos carat : BlockPos.betweenClosed(pos.offset((-radius), -2, (-radius)), pos.offset(radius, -1, radius)))

@@ -1,12 +1,11 @@
 package com.github.kay9.dragonmounts.data.model;
 
-import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonModel;
 import com.github.kay9.dragonmounts.client.DragonRenderer;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.Util;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -38,7 +37,7 @@ public class DragonModelPropertiesListener extends SimpleJsonResourceReloadListe
         for (var entry : map.entrySet())
         {
             var breedId = entry.getKey();
-            var properties = DragonModel.Properties.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Util.prefix("Unable to parse Dragon Breed Properties: " + breedId, DragonMountsLegacy.LOG::error));
+            var properties = DragonModel.Properties.CODEC.parse(JsonOps.INSTANCE, entry.getValue()).getOrThrow(JsonParseException::new);
             var modelLoc = new ModelLayerLocation(DragonRenderer.MODEL_LOCATION.getModel(), breedId.toString());
             ForgeHooksClient.registerLayerDefinition(modelLoc, () -> DragonModel.createBodyLayer(properties));
             definitions.put(entry.getKey(), modelLoc);

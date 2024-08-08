@@ -114,9 +114,9 @@ public class ModelPartProxy
         for (ModelPartProxy child : children) child.apply();
     }
 
-    public void render(PoseStack ps, VertexConsumer vertices, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)
+    public void render(PoseStack ps, VertexConsumer vertices, int packedLightIn, int packedOverlayIn, int color)
     {
         apply();
-        part.render(ps, vertices, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        part.render(ps, vertices, packedLightIn, packedOverlayIn, color);
     }
 }

@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.habitats;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -12,7 +12,7 @@ public enum DragonBreathHabitat implements Habitat
 {
     INSTANCE;
 
-    public static final Codec<DragonBreathHabitat> CODEC = Codec.unit(INSTANCE);
+    public static final MapCodec<DragonBreathHabitat> CODEC = MapCodec.unit(INSTANCE);
 
     @Override
     public int getHabitatPoints(Level level, BlockPos pos)

@@ -2,7 +2,7 @@ package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class ReaperStepAbility extends FootprintAbility implements Ability.Factory<ReaperStepAbility>
 {
     public static final ReaperStepAbility INSTANCE = new ReaperStepAbility();
-    public static final Codec<ReaperStepAbility> CODEC = Codec.unit(INSTANCE);
+    public static final MapCodec<ReaperStepAbility> CODEC = MapCodec.unit(INSTANCE);
 
     public static final TagKey<Block> PLANT_DEATH_TAG = BlockTags.create(DragonMountsLegacy.id("reaper_plant_death"));
     public static final TagKey<Block> PLANT_DESTRUCTION_TAG = BlockTags.create(DragonMountsLegacy.id("reaper_plant_destruction"));

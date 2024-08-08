@@ -2,9 +2,8 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonModel;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.github.kay9.dragonmounts.dragon.DragonBreed;
+import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
@@ -32,7 +31,7 @@ public class ModelPropertiesProvider implements DataProvider
 
     private CompletableFuture<?> save(CachedOutput cache, String id, DragonModel.Properties instance)
     {
-        var jsonObj = DragonModel.Properties.CODEC.encodeStart(JsonOps.INSTANCE, instance).getOrThrow(false, err -> {});
+        var jsonObj = DragonModel.Properties.CODEC.encodeStart(JsonOps.INSTANCE, instance).getOrThrow(JsonParseException::new);
         var path = gen.getPackOutput().getOutputFolder().resolve("assets/" + DragonMountsLegacy.MOD_ID + "/models/entity/dragon/breed/properties/" + id + ".json");
         return DataProvider.saveStable(cache, jsonObj, path);
     }

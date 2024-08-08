@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 public class SnowStepperAbility extends FootprintAbility implements Ability.Factory<SnowStepperAbility>
 {
     public static final SnowStepperAbility INSTANCE = new SnowStepperAbility();
-    public static final Codec<SnowStepperAbility> CODEC = Codec.unit(INSTANCE);
+    public static final MapCodec<SnowStepperAbility> CODEC = MapCodec.unit(INSTANCE);
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)

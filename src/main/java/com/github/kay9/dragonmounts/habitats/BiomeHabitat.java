@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.habitats;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.biome.Biome;
 
 public record BiomeHabitat(int points, TagKey<Biome> biomeTag) implements Habitat
 {
-    public static final Codec<BiomeHabitat> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final MapCodec<BiomeHabitat> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Habitat.withPoints(2, BiomeHabitat::points),
             TagKey.codec(Registries.BIOME).fieldOf("biome_tag").forGetter(BiomeHabitat::biomeTag)
     ).apply(instance, BiomeHabitat::new));

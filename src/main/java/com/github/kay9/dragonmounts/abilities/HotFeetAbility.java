@@ -2,7 +2,7 @@ package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Block;
 public class HotFeetAbility extends FootprintAbility implements Ability.Factory<HotFeetAbility>
 {
     public static final HotFeetAbility INSTANCE = new HotFeetAbility();
-    public static final Codec<HotFeetAbility> CODEC = Codec.unit(INSTANCE);
+    public static final MapCodec<HotFeetAbility> CODEC = MapCodec.unit(INSTANCE);
 
     public static final TagKey<Block> BURNABLES_TAG = BlockTags.create(DragonMountsLegacy.id("hot_feet_burnables"));
 

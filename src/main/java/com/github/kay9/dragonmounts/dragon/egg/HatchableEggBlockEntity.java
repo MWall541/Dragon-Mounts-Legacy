@@ -1,11 +1,14 @@
 package com.github.kay9.dragonmounts.dragon.egg;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
+import com.github.kay9.dragonmounts.dragon.DragonBreed;
+import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.habitats.Habitat;
-import com.google.common.base.Suppliers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -19,34 +22,36 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Supplier;
+import java.util.Comparator;
 
 public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 {
+    public static final String NBT_BREED = TameableDragon.NBT_BREED;
+    public static final String NBT_NAME = "CustomName";
+
     public static final int MIN_HABITAT_POINTS = 2;
     public static final int BREED_TRANSITION_TIME = 200;
 
     private final TransitionHandler transitioner = new TransitionHandler();
 
-    private Supplier<DragonBreed> breed = () -> null;
-    private Component customName;
+    private Holder.Reference<DragonBreed> breed;
+    private Component customName; // necessary since breeding/commands can change this
 
     public HatchableEggBlockEntity(BlockPos pPos, BlockState pBlockState)
     {
         super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pPos, pBlockState);
     }
 
+    // for saving to world
     @Override
-    @SuppressWarnings("ConstantConditions") // level exists if we have a breed
-    protected void saveAdditional(CompoundTag tag)
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider lookup)
     {
-        super.saveAdditional(tag);
+        super.saveAdditional(tag, lookup);
 
-        if (hasBreed())
-            tag.putString(HatchableEggBlock.NBT_BREED, getBreed().id(getLevel().registryAccess()).toString());
+        tag.putString(NBT_BREED, breed.getRegisteredName());
 
-        if (getCustomName() != null)
-            tag.putString(HatchableEggBlock.NBT_NAME, Component.Serializer.toJson(customName));
+        if (customName != null)
+            tag.putString(NBT_NAME, Component.Serializer.toJson(customName, lookup));
 
         if (getTransition().isRunning())
         {
@@ -56,32 +61,54 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         }
     }
 
-    /*
-     * sometimes, this is called before the BE is given a Level to work with.
-     */
+    // for loading from world
     @Override
-    @SuppressWarnings("ConstantConditions") // level exists at memoize
-    public void load(CompoundTag pTag)
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider lookup)
     {
-        super.load(pTag);
+        super.loadAdditional(tag, lookup);
 
-        setBreed(Suppliers.memoize(() -> BreedRegistry.get(pTag.getString(HatchableEggBlock.NBT_BREED), getLevel().registryAccess())));
+        Holder.Reference<DragonBreed> parsedBreed = DragonBreed.parse(tag.getString(NBT_BREED), lookup);
+        if (parsedBreed != null)
+            setBreed(parsedBreed);
 
-        var name = pTag.getString(HatchableEggBlock.NBT_NAME);
-        if (!name.isBlank()) setCustomName(Component.Serializer.fromJson(name));
+        if (tag.contains(NBT_NAME, 8))
+            setCustomName(parseCustomNameSafe(tag.getString("CustomName"), lookup));
 
-        var transitioner = pTag.getCompound(TransitionHandler.NBT_TRANSITIONER);
-        if (!transitioner.isEmpty()) getTransition().load(transitioner);
+        var transitioner = tag.getCompound(TransitionHandler.NBT_TRANSITIONER);
+        if (!transitioner.isEmpty())
+            getTransition().load(transitioner, lookup);
 
-        if (getLevel() != null && getLevel().isClientSide()) // client needs to be aware of new changes
-            getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
+        // todo is this needed at component syncing?
+//        if (getLevel() != null && getLevel().isClientSide()) // client needs to be aware of new changes
+//            getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
+    }
+
+    // for destroying block to item
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components)
+    {
+        super.collectImplicitComponents(components);
+
+        components.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), getBreedHolder().key());
+        components.set(DataComponents.CUSTOM_NAME, getCustomName());
+    }
+
+    // for placing block from item
+    @Override
+    protected void applyImplicitComponents(DataComponentInput components)
+    {
+        super.applyImplicitComponents(components);
+
+        // todo: is a level passed here yet?
+        setBreed(DragonBreed.get(components.get(DMLRegistry.DRAGON_BREED_COMPONENT.get()), getLevel().registryAccess()));
+        setCustomName(components.get(DataComponents.CUSTOM_NAME));
     }
 
     @Override
-    public CompoundTag getUpdateTag()
+    public CompoundTag getUpdateTag(HolderLookup.Provider lookup)
     {
-        var tag = super.getUpdateTag();
-        saveAdditional(tag);
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, lookup);
         return tag;
     }
 
@@ -92,47 +119,47 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    /**
-     * This should be guarded with {@link HatchableEggBlockEntity#hasBreed()}!!
-     * There is no way proper way to resolve a random breed in the mess that is
-     * BlockEntity's...
-     * <br>
-     * When this is called, and breed.get() is null, a random breed is assigned instead.
-     */
-    @Nullable
     public DragonBreed getBreed()
     {
         return breed.get();
     }
 
-    public void setBreed(Supplier<DragonBreed> breed)
+    public Holder.Reference<DragonBreed> getBreedHolder()
+    {
+        return breed;
+    }
+
+    public void setBreed(Holder.Reference<DragonBreed> breed)
     {
         this.breed = breed;
     }
 
     public boolean hasBreed()
     {
-        return breed.get() != null;
-    }
-
-    @Override
-    public Component getCustomName()
-    {
-        return customName;
-    }
-
-    @Override
-    @SuppressWarnings("ConstantConditions") // level exists at this point
-    public Component getName()
-    {
-        return customName != null? customName :
-                Component.translatable(DMLRegistry.EGG_BLOCK_ITEM.get().getDescriptionId(),
-                        Component.translatable(DragonBreed.getTranslationKey(getBreed().id(getLevel().registryAccess()).toString())));
+        return breed != null;
     }
 
     public void setCustomName(Component name)
     {
         this.customName = name;
+    }
+
+    @Override
+    @Nullable
+    public Component getCustomName()
+    {
+        return components().get(DataComponents.CUSTOM_NAME);
+    }
+
+    @Override
+    @Nullable
+    public Component getName()
+    {
+        Component customName = getCustomName();
+        if (customName != null) return customName;
+
+        return Component.translatable(DMLRegistry.EGG_BLOCK_ITEM.get().getDescriptionId(),
+                Component.translatable(DragonBreed.getTranslationKey(getBreedHolder().key().location().toString())));
     }
 
     public TransitionHandler getTransition()
@@ -143,10 +170,13 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     @SuppressWarnings({"ConstantConditions", "unused"}) // guarded
     public void tick(Level pLevel, BlockPos pPos, BlockState pState)
     {
-        if (!pLevel.isClientSide() && !hasBreed()) // at this point we may not receive a breed; resolve a random one.
+        // if this passes, we may not receive a breed; resolve a random one.
+        // could be caused by /setblock, or other natural means.
+        if (!pLevel.isClientSide() && !hasBreed())
         {
-            var newBreed = BreedRegistry.getRandom(getLevel().registryAccess(), getLevel().getRandom());
-            setBreed(() -> newBreed);
+            DragonBreed.registry(pLevel.registryAccess())
+                    .getRandom(pLevel.getRandom())
+                    .ifPresent(this::setBreed);
             getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
         }
 
@@ -156,23 +186,22 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     @SuppressWarnings("ConstantConditions") // level exists at this point
     public void updateHabitat()
     {
-        DragonBreed winner = null;
-        int prevPoints = 0;
-        for (var breed : BreedRegistry.registry(getLevel().registryAccess()))
-        {
-            int points = 0;
-            for (Habitat habitat : breed.habitats()) points += habitat.getHabitatPoints(level, getBlockPos());
-            if (points > MIN_HABITAT_POINTS && points > prevPoints)
-            {
-                winner = breed;
-                prevPoints = points;
-            }
-        }
-        if (winner != null && winner != getBreed())
-        {
-            getTransition().begin(winner);
-            getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
-        }
+        DragonBreed.registry(getLevel().registryAccess())
+                .holders()
+                .max(Comparator.comparingInt(breed -> // compare habitat environment by point value
+                {
+                    int points = 0;
+                    for (Habitat habitat : breed.get().habitats())
+                        points += habitat.getHabitatPoints(getLevel(), getBlockPos());
+
+                    return points < MIN_HABITAT_POINTS? 0 : points; // habitats have MINIMUM requirements
+                }))
+                .filter(breed -> breed != getBreedHolder()) // don't update again if environment hasn't changed.
+                .ifPresent(breed ->
+                {
+                    getTransition().begin(breed);
+                    getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE); // needed for clients to receive changes
+                });
     }
 
     @SuppressWarnings("ConstantConditions") // level exists at this point
@@ -182,7 +211,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         private static final String NBT_TRANSITION_BREED = "TransitionBreed";
         private static final String NBT_TRANSITION_TIME = "TransitionTime";
 
-        public Supplier<DragonBreed> transitioningBreed = () -> null;
+        public Holder.Reference<DragonBreed> transitioningBreed;
         public int transitionTime;
 
         public void tick(RandomSource random)
@@ -217,15 +246,15 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
             }
         }
 
-        public void startFrom(Supplier<DragonBreed> transitioningBreed, int transitionTime)
+        public void startFrom(Holder.Reference<DragonBreed> transitioningBreed, int transitionTime)
         {
             this.transitioningBreed = transitioningBreed;
             this.transitionTime = transitionTime;
         }
 
-        public void begin(DragonBreed transitioningBreed)
+        public void begin(Holder.Reference<DragonBreed> transitioningBreed)
         {
-            startFrom(() -> transitioningBreed, BREED_TRANSITION_TIME);
+            startFrom(transitioningBreed, BREED_TRANSITION_TIME);
         }
 
         public boolean isRunning()
@@ -235,13 +264,15 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
         public void save(CompoundTag tag)
         {
-            tag.putString(NBT_TRANSITION_BREED, transitioningBreed.get().id(getLevel().registryAccess()).toString());
+            tag.putString(NBT_TRANSITION_BREED, transitioningBreed.key().location().toString());
             tag.putInt(NBT_TRANSITION_TIME,  transitionTime);
         }
 
-        public void load(CompoundTag tag)
+        public void load(CompoundTag tag, HolderLookup.Provider lookup)
         {
-            startFrom(Suppliers.memoize(() -> BreedRegistry.get(tag.getString(NBT_TRANSITION_BREED), getLevel().registryAccess())), tag.getInt(NBT_TRANSITION_TIME));
+            Holder.Reference<DragonBreed> parsedBreed = DragonBreed.parse(tag.getString(NBT_TRANSITION_BREED), lookup);
+            if (parsedBreed != null)
+                startFrom(parsedBreed, tag.getInt(NBT_TRANSITION_TIME));
         }
     }
 }

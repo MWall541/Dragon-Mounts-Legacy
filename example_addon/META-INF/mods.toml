@@ -1,5 +1,5 @@
 modLoader="lowcodefml" #mandatory
-loaderVersion="[47,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="[51,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license="All rights reserved"
 [[mods]] #mandatory
 # The modid of the mod
@@ -32,13 +32,13 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mollis lacinia magn
 [[dependencies.example_addon]]
     modId="forge"
     mandatory=true
-    versionRange="[47,)"
+    versionRange="[51,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.example_addon]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.20.1]"
+    versionRange="[1.21]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.example_addon]]

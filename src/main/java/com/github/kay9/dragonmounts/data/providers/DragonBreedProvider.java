@@ -3,9 +3,8 @@ package com.github.kay9.dragonmounts.data.providers;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.*;
+import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import com.github.kay9.dragonmounts.habitats.*;
 import com.google.common.collect.ImmutableList;
@@ -19,7 +18,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BiomeTags;
@@ -47,7 +46,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
 
     private static RegistrySetBuilder build()
     {
-        return new RegistrySetBuilder().add(BreedRegistry.REGISTRY_KEY, context ->
+        return new RegistrySetBuilder().add(DragonBreed.REGISTRY_KEY, context ->
         {
 
                     registerBuiltIn(context, DragonBreed.BuiltIn.AETHER,
@@ -165,13 +164,13 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
         });
     }
 
-    private static void registerBuiltIn(BootstapContext<DragonBreed> context, ResourceKey<DragonBreed> id, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound)
+    private static void registerBuiltIn(BootstrapContext<DragonBreed> context, ResourceKey<DragonBreed> id, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound)
     {
         Either<Integer, String> reproConfigTarget = Either.right("config:" + id.location().getPath());
         context.register(id, builtIn(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, reproConfigTarget));
     }
 
-    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound, Either<Integer, String> reproduction)
+    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound, Either<Integer, String> reproduction)
     {
         return new DragonBreed(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, HatchableEggBlock.DEFAULT_HATCH_CHANCE, TameableDragon.BASE_SIZE_MODIFIER, BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES), BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES), reproduction);
     }
@@ -183,7 +182,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
     }
 
     @SafeVarargs
-    private static HolderSet<DamageType> immunities(BootstapContext<DragonBreed>context, ResourceKey<DamageType>... types)
+    private static HolderSet<DamageType> immunities(BootstrapContext<DragonBreed>context, ResourceKey<DamageType>... types)
     {
         var damageTypeLookup = context.lookup(Registries.DAMAGE_TYPE);
         var items = new ArrayList<ResourceKey<DamageType>>();

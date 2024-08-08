@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.abilities;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
@@ -34,9 +35,10 @@ import java.util.function.Supplier;
  *  If the ability DOES NOT require per-entity data, it may be better to off to implement {@link Factory} directly and
  *  return itself.
  */
+//todo registry based
 public interface Ability
 {
-    Map<ResourceLocation, Codec<? extends Factory<Ability>>> REGISTRY = new HashMap<>();
+    Map<ResourceLocation, MapCodec<? extends Factory<Ability>>> REGISTRY = new HashMap<>();
 
     Codec<Factory<Ability>> CODEC = ResourceLocation.CODEC.dispatch(Factory::type, REGISTRY::get);
 
@@ -47,13 +49,13 @@ public interface Ability
     ResourceLocation REAPER_STEP = reg("reaper_step", ReaperStepAbility.CODEC);
     ResourceLocation HYDRO_STEP = reg("hydro_step", HydroStepAbility.CODEC);
 
-    static <T extends Ability> ResourceLocation register(ResourceLocation name, Codec<? extends Factory<T>> codec)
+    static <T extends Ability> ResourceLocation register(ResourceLocation name, MapCodec<? extends Factory<T>> codec)
     {
-        REGISTRY.put(name, (Codec) codec); // hacky generics cast
+        REGISTRY.put(name, (MapCodec) codec); // hacky generics cast
         return name;
     }
 
-    private static <T extends Ability> ResourceLocation reg(String name, Codec<? extends Factory<T>> codec)
+    private static <T extends Ability> ResourceLocation reg(String name, MapCodec<? extends Factory<T>> codec)
     {
         return register(DragonMountsLegacy.id(name), codec);
     }

@@ -17,7 +17,7 @@ public class DataProvider
         var fileHelper = evt.getExistingFileHelper();
 
         gen.addProvider(evt.includeServer(), new BlockTagProvider(output, lookup, DragonMountsLegacy.MOD_ID, fileHelper));
-        gen.addProvider(evt.includeServer(), new LootModifierProvider(output, DragonMountsLegacy.MOD_ID));
+        gen.addProvider(evt.includeServer(), new LootModifierProvider(output, DragonMountsLegacy.MOD_ID, evt.getLookupProvider()));
         gen.addProvider(evt.includeServer(), new DragonBreedProvider(output, lookup));
 
         gen.addProvider(evt.includeClient(), new ModelPropertiesProvider(gen));

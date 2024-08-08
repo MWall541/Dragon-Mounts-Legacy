@@ -1,15 +1,16 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
+import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.Map;
 
-import static com.github.kay9.dragonmounts.dragon.breed.DragonBreed.BuiltIn.*;
+import static com.github.kay9.dragonmounts.dragon.DragonBreed.BuiltIn.*;
 
 public class DMLConfig
 {
@@ -168,9 +169,9 @@ public class DMLConfig
         var chances = ImmutableMap.<String, ForgeConfigSpec.DoubleValue>builder();
         for (var target : DragonEggLootMod.BUILT_IN_CHANCES)
         {
-            var path = formatEggTargetAsPath(target.forBreed().location(), target.target());
+            var path = formatEggTargetAsPath(target.forBreed(), target.target());
             var entry = configurator.comment(
-                            String.format("The chance that a %s egg appears in %s.", target.forBreed().location().getPath(), target.target().getPath()),
+                            String.format("The chance that a %s egg appears in %s.", target.forBreed().location().getPath(), target.target().location().getPath()),
                             "0 = Never Appears, 1 = Guaranteed")
                     .defineInRange(path, target.chance(), 0, 1);
 
@@ -192,11 +193,11 @@ public class DMLConfig
         return lims.build();
     }
 
-    public static String formatEggTargetAsPath(ResourceLocation forBreed, ResourceLocation forTarget)
+    public static String formatEggTargetAsPath(ResourceKey<DragonBreed> forBreed, ResourceKey<LootTable> forTarget)
     {
         return String.format("%s_in_%s_chance",
-                forBreed.getPath(),
-                forTarget.getPath().substring(forTarget.getPath().lastIndexOf('/') + 1));
+                forBreed.location().getPath(),
+                forTarget.location().getPath().substring(forTarget.location().getPath().lastIndexOf('/') + 1));
     }
 
     private static void defineCameraOffsetEntries(ForgeConfigSpec.Builder configurator)

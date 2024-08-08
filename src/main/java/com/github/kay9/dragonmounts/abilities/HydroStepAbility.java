@@ -1,7 +1,7 @@
 package com.github.kay9.dragonmounts.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.WeatheringCopper;
 public class HydroStepAbility extends FootprintAbility implements Ability.Factory<HydroStepAbility>
 {
     public static final HydroStepAbility INSTANCE = new HydroStepAbility();
-    public static final Codec<HydroStepAbility> CODEC = Codec.unit(INSTANCE);
+    public static final MapCodec<HydroStepAbility> CODEC = MapCodec.unit(INSTANCE);
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)

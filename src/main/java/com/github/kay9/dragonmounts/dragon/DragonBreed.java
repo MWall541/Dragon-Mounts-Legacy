@@ -1,10 +1,9 @@
-package com.github.kay9.dragonmounts.dragon.breed;
+package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.abilities.Ability;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import com.github.kay9.dragonmounts.habitats.Habitat;
 import com.github.kay9.dragonmounts.util.DMLUtil;
@@ -13,10 +12,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -25,35 +21,39 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootTable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-@SuppressWarnings("deprecation")
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
-                          Map<Attribute, Double> attributes, List<Ability.Factory<Ability>> abilityTypes, List<Habitat> habitats,
+                          Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<Ability>> abilityTypes, List<Habitat> habitats,
                           HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound,
-                          ResourceLocation deathLoot, int growthTime, float hatchChance, float sizeModifier,
+                          ResourceKey<LootTable> deathLoot, int growthTime, float hatchChance, float sizeModifier,
                           HolderSet<Item> tamingItems, HolderSet<Item> breedingItems, Either<Integer, String> reproLimit)
 {
+    public static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
+
     public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             DMLUtil.HEX_CODEC.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             DMLUtil.HEX_CODEC.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
-            Codec.unboundedMap(BuiltInRegistries.ATTRIBUTE.byNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
+            Codec.unboundedMap(BuiltInRegistries.ATTRIBUTE.holderByNameCodec(), Codec.DOUBLE).optionalFieldOf("attributes", ImmutableMap.of()).forGetter(DragonBreed::attributes),
             Ability.CODEC.listOf().optionalFieldOf("abilities", ImmutableList.of()).forGetter(DragonBreed::abilityTypes),
             Habitat.CODEC.listOf().optionalFieldOf("habitats", ImmutableList.of()).forGetter(DragonBreed::habitats),
             RegistryCodecs.homogeneousList(Registries.DAMAGE_TYPE).optionalFieldOf("immunities", HolderSet.direct()).forGetter(DragonBreed::immunities),
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
-            ResourceLocation.CODEC.optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
+            ResourceKey.codec(Registries.LOOT_TABLE).optionalFieldOf("death_loot", BuiltInLootTables.EMPTY).forGetter(DragonBreed::deathLoot),
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.BASE_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.FLOAT.optionalFieldOf("hatch_chance", HatchableEggBlock.DEFAULT_HATCH_CHANCE).forGetter(DragonBreed::hatchChance),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier),
@@ -73,6 +73,30 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Optional<Holder<SoundEvent>> ambientSound, int growthTime, float sizeModifier)
     {
         return new DragonBreed(primaryColor, secondaryColor, hatchParticles, Map.of(), List.of(), List.of(), HolderSet.direct(), ambientSound, BuiltInLootTables.EMPTY, growthTime, 0, sizeModifier, HolderSet.direct(), HolderSet.direct(), Either.left(0));
+    }
+
+    @Nullable
+    public static Holder.Reference<DragonBreed> parse(String byString, HolderLookup.Provider reg)
+    {
+        ResourceLocation id = ResourceLocation.tryParse(byString);
+        if (id == null) return null;
+        return reg.lookupOrThrow(REGISTRY_KEY).get(ResourceKey.create(REGISTRY_KEY, id)).orElse(null);
+    }
+
+    @Nullable
+    public static Holder.Reference<DragonBreed> get(ResourceKey<DragonBreed> key, HolderLookup.Provider reg)
+    {
+        return reg.lookupOrThrow(REGISTRY_KEY).get(key).orElse(null);
+    }
+
+    public static Holder.Reference<DragonBreed> getRandom(RegistryAccess reg, RandomSource random)
+    {
+        return reg.registryOrThrow(REGISTRY_KEY).getRandom(random).orElseThrow();
+    }
+
+    public static Registry<DragonBreed> registry(RegistryAccess reg)
+    {
+        return reg.registryOrThrow(REGISTRY_KEY);
     }
 
     public void initialize(TameableDragon dragon)
@@ -96,11 +120,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     public int getReproductionLimit()
     {
         return reproLimit().map(Function.identity(), DMLConfig::getReproLimitFor);
-    }
-
-    public ResourceLocation id(RegistryAccess reg)
-    {
-        return BreedRegistry.registry(reg).getKey(this);
     }
 
     public static String getTranslationKey(String resourceLocation)
@@ -152,7 +171,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 
         private static ResourceKey<DragonBreed> key(String id)
         {
-            return ResourceKey.create(BreedRegistry.REGISTRY_KEY, DragonMountsLegacy.id(id));
+            return ResourceKey.create(REGISTRY_KEY, DragonMountsLegacy.id(id));
         }
 
         private BuiltIn() {}

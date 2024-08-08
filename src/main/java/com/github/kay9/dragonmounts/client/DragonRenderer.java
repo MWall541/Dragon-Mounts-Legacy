@@ -2,15 +2,14 @@ package com.github.kay9.dragonmounts.client;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
+import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -19,6 +18,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,10 +67,10 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     @SuppressWarnings("ConstantConditions")
     private DragonModel getModel(TameableDragon dragon)
     {
-        var breed = dragon.getBreed();
+        var breed = dragon.getBreedHolder();
         if (breed == null) return defaultModel;
 
-        var selected = modelCache.get(breed.id(Minecraft.getInstance().level.registryAccess()));
+        var selected = modelCache.get(breed.key().location());
         if (selected == null) return defaultModel;
 
         return selected;
@@ -87,25 +87,25 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     @Override
     public ResourceLocation getTextureLocation(TameableDragon dragon)
     {
-        return getTextureForLayer(dragon.getBreed(), LAYER_BODY);
+        return getTextureForLayer(dragon.getBreedHolder(), LAYER_BODY);
     }
 
     @SuppressWarnings("ConstantConditions")
-    public ResourceLocation getTextureForLayer(@Nullable DragonBreed breed, int layer)
+    public ResourceLocation getTextureForLayer(@Nullable Holder.Reference<DragonBreed> breed, int layer)
     {
         if (breed == null) return DEFAULT_TEXTURES[layer];
 
         // we need to compute texture locations now rather than earlier due to the fact that breeds don't exist then.
-        return textureCache.computeIfAbsent(breed.id(Minecraft.getInstance().level.registryAccess()), DragonRenderer::computeTextureCacheFor)[layer];
+        return textureCache.computeIfAbsent(breed.key().location(), DragonRenderer::computeTextureCacheFor)[layer];
     }
 
     @Override
-    protected void setupRotations(TameableDragon dragon, PoseStack ps, float age, float yaw, float partials)
+    protected void setupRotations(TameableDragon dragon, PoseStack ps, float age, float yaw, float partials, float scale)
     {
-        super.setupRotations(dragon, ps, age, yaw, partials);
+        super.setupRotations(dragon, ps, age, yaw, partials, scale);
         var animator = dragon.getAnimator();
-        var scale = dragon.getScale();
-        ps.scale(scale, scale, scale);
+//        var scale = dragon.getAgeScale(); todo: is scale automatically applied (Override getScale and return getAgeScale?)
+//        ps.scale(scale, scale, scale);
         ps.translate(animator.getModelOffsetX(), animator.getModelOffsetY(), animator.getModelOffsetZ());
         ps.translate(0, 1.5, 0.5); // change rotation point
         ps.mulPose(Axis.XP.rotationDegrees(animator.getModelPitch(partials))); // rotate near the saddle so we can support the player
@@ -133,7 +133,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
 
         ResourceLocation[] cache = new ResourceLocation[TEXTURES.length];
         for (int i = 0; i < TEXTURES.length; i++)
-            cache[i] = new ResourceLocation(breedId.getNamespace(), "textures/entity/dragon/" + breedId.getPath() + "/" + TEXTURES[i] + ".png");
+            cache[i] = ResourceLocation.tryBuild(breedId.getNamespace(), "textures/entity/dragon/" + breedId.getPath() + "/" + TEXTURES[i] + ".png");
         return cache;
     }
 
@@ -144,8 +144,8 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         {
             if (dragon.deathTime == 0)
             {
-                var type = CustomRenderTypes.glow(getTextureForLayer(dragon.getBreed(), LAYER_GLOW));
-                model.renderToBuffer(pMatrixStack, buffer.getBuffer(type), pPackedLight, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
+                var type = CustomRenderTypes.glow(getTextureForLayer(dragon.getBreedHolder(), LAYER_GLOW));
+                model.renderToBuffer(pMatrixStack, buffer.getBuffer(type), pPackedLight, OverlayTexture.NO_OVERLAY, -1);
             }
        }
     };
@@ -155,7 +155,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         public void render(PoseStack ps, MultiBufferSource buffer, int light, TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch)
         {
             if (dragon.isSaddled())
-                renderColoredCutoutModel(model, getTextureForLayer(dragon.getBreed(), LAYER_SADDLE), ps, buffer, light, dragon, 1f, 1f, 1f);
+                renderColoredCutoutModel(model, getTextureForLayer(dragon.getBreedHolder(), LAYER_SADDLE), ps, buffer, light, dragon, -1);
         }
     };
     public final RenderLayer<TameableDragon, DragonModel> DEATH_LAYER = new RenderLayer<>(this)
@@ -166,8 +166,8 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
             if (dragon.deathTime > 0)
             {
                 var delta = dragon.deathTime / (float) dragon.getMaxDeathTime();
-                model.renderToBuffer(ps, buffer.getBuffer(CustomRenderTypes.DISSOLVE), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, delta);
-                model.renderToBuffer(ps, buffer.getBuffer(RenderType.entityDecal(getTextureLocation(dragon))), light, OverlayTexture.pack(0, true), 1f, 1f, 1f, 1f);
+//                model.renderToBuffer(ps, buffer.getBuffer(CustomRenderTypes.DISSOLVE), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, delta); todo deathtime delta
+                model.renderToBuffer(ps, buffer.getBuffer(RenderType.entityDecal(getTextureLocation(dragon))), light, OverlayTexture.pack(0, true), -1);
             }
         }
     };

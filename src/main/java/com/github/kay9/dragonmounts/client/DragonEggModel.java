@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlockEntity;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
@@ -21,10 +21,8 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -57,14 +55,14 @@ public class DragonEggModel implements IUnbakedGeometry<DragonEggModel>
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation)
+    public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides)
     {
         var baked = ImmutableMap.<String, BakedModel>builder();
         for (var entry : models.entrySet())
         {
             var unbaked = entry.getValue();
             unbaked.resolveParents(baker::getModel);
-            baked.put(entry.getKey(), unbaked.bake(baker, unbaked, spriteGetter, modelState, modelLocation, true));
+            baked.put(entry.getKey(), unbaked.bake(baker, unbaked, spriteGetter, modelState, true));
         }
         return new Baked(baked.build(), overrides);
     }
@@ -153,7 +151,7 @@ public class DragonEggModel implements IUnbakedGeometry<DragonEggModel>
         {
             if (level.getBlockEntity(pos) instanceof HatchableEggBlockEntity e && e.hasBreed())
                 return modelData.derive()
-                        .with(Data.PROPERTY, new Data(e.getBreed().id(Minecraft.getInstance().level.registryAccess()).toString()))
+                        .with(Data.PROPERTY, new Data(e.getBreedHolder().getRegisteredName()))
                         .build();
 
             return modelData;
@@ -178,10 +176,10 @@ public class DragonEggModel implements IUnbakedGeometry<DragonEggModel>
             var override = nested.resolve(original, stack, level, entity, pSeed);
             if (override != original) return override;
 
-            var tag = BlockItem.getBlockEntityData(stack);
-            if (tag != null)
+            var breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
+            if (breed != null)
             {
-                var model = owner.models.get(tag.getString(HatchableEggBlock.NBT_BREED));
+                var model = owner.models.get(breed.location().toString());
                 if (model != null) return model;
             }
 

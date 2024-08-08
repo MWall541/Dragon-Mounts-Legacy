@@ -15,8 +15,9 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.Channel;
+import net.minecraftforge.network.ChannelBuilder;
+import net.minecraftforge.network.SimpleChannel;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 
 import static com.github.kay9.dragonmounts.DragonMountsLegacy.*;
@@ -40,11 +41,11 @@ public class ForgeModImpl
 
     static
     {
-        var PROTOCOL_VERSION = "1.O";
-        NETWORK = NetworkRegistry.ChannelBuilder.named(DragonMountsLegacy.id("network"))
-                .clientAcceptedVersions(PROTOCOL_VERSION::equals)
-                .serverAcceptedVersions(PROTOCOL_VERSION::equals)
-                .networkProtocolVersion(() -> PROTOCOL_VERSION)
+        var PROTOCOL_VERSION = 1;
+        NETWORK = ChannelBuilder.named(DragonMountsLegacy.id("network"))
+                .clientAcceptedVersions(Channel.VersionTest.exact(PROTOCOL_VERSION))
+                .serverAcceptedVersions(Channel.VersionTest.exact(PROTOCOL_VERSION))
+                .networkProtocolVersion(PROTOCOL_VERSION)
                 .simpleChannel();
     }
 

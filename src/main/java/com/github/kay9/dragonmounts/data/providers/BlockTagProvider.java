@@ -55,13 +55,13 @@ class BlockTagProvider extends BlockTagsProvider
 
         tag(HotFeetAbility.BURNABLES_TAG)
                 .addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS, BlockTags.CROPS)
-                .add(Blocks.GRASS, Blocks.TALL_GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.DEAD_BUSH, Blocks.PITCHER_PLANT,
+                .add(Blocks.SHORT_GRASS, Blocks.TALL_GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.DEAD_BUSH, Blocks.PITCHER_PLANT,
                         Blocks.BIG_DRIPLEAF, Blocks.SMALL_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.SUGAR_CANE,
                         Blocks.FERN, Blocks.LARGE_FERN, Blocks.PITCHER_PLANT);
 
         tag(ReaperStepAbility.PLANT_DEATH_TAG)
                 .addTags(BlockTags.TALL_FLOWERS, BlockTags.CROPS, BlockTags.SAPLINGS)
-                .add(Blocks.TALL_GRASS, Blocks.GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.SUGAR_CANE, Blocks.BIG_DRIPLEAF_STEM,
+                .add(Blocks.TALL_GRASS, Blocks.SHORT_GRASS, Blocks.SWEET_BERRY_BUSH, Blocks.SUGAR_CANE, Blocks.BIG_DRIPLEAF_STEM,
                 Blocks.BIG_DRIPLEAF, Blocks.FERN, Blocks.LARGE_FERN, Blocks.PITCHER_PLANT);
 
         tag(ReaperStepAbility.PLANT_DESTRUCTION_TAG)

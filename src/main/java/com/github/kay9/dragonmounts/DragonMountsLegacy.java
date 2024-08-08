@@ -3,10 +3,9 @@ package com.github.kay9.dragonmounts;
 import com.github.kay9.dragonmounts.client.*;
 import com.github.kay9.dragonmounts.data.CrossBreedingManager;
 import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
+import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.breed.BreedRegistry;
-import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import com.mojang.serialization.Codec;
 import net.minecraft.client.KeyMapping;
@@ -58,7 +57,7 @@ public class DragonMountsLegacy
 
     public static ResourceLocation id(String path)
     {
-        return new ResourceLocation(MOD_ID, path);
+        return ResourceLocation.tryBuild(MOD_ID, path);
     }
 
     // ========================
@@ -102,7 +101,7 @@ public class DragonMountsLegacy
 
     static void registerDatapacks(TriConsumer<ResourceKey<Registry<DragonBreed>>, Codec<DragonBreed>, Codec<DragonBreed>> registrar)
     {
-        registrar.accept(BreedRegistry.REGISTRY_KEY, DragonBreed.CODEC, DragonBreed.NETWORK_CODEC);
+        registrar.accept(DragonBreed.REGISTRY_KEY, DragonBreed.CODEC, DragonBreed.NETWORK_CODEC);
     }
 
     static void registerCreativeTabItems(ResourceKey<CreativeModeTab> tab, Consumer<ItemStack> registrar)
@@ -124,7 +123,7 @@ public class DragonMountsLegacy
     {
         if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
-            var end = BreedRegistry.registry(level.registryAccess()).getOptional(DragonBreed.BuiltIn.END);
+            var end = DragonBreed.registry(level.registryAccess()).getHolder(DragonBreed.BuiltIn.END);
             if (end.isPresent())
             {
                 if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);

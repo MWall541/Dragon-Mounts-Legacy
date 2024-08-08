@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.habitats;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +14,7 @@ import java.util.function.Function;
 
 public interface Habitat
 {
-    Map<ResourceLocation, Codec<? extends Habitat>> REGISTRY = new HashMap<>();
+    Map<ResourceLocation, MapCodec<? extends Habitat>> REGISTRY = new HashMap<>();
 
     Codec<Habitat> CODEC = ResourceLocation.CODEC.dispatch(Habitat::type, REGISTRY::get);
 
@@ -25,13 +26,13 @@ public interface Habitat
     ResourceLocation NEARBY_BLOCKS = reg("nearby_blocks", NearbyBlocksHabitat.CODEC);
     ResourceLocation DRAGON_BREATH = reg("dragon_breath", DragonBreathHabitat.CODEC);
 
-    static ResourceLocation register(ResourceLocation name, Codec<? extends Habitat> codec)
+    static ResourceLocation register(ResourceLocation name, MapCodec<? extends Habitat> codec)
     {
         REGISTRY.put(name, codec);
         return name;
     }
 
-    private static ResourceLocation reg(String name, Codec<? extends Habitat> codec)
+    private static ResourceLocation reg(String name, MapCodec<? extends Habitat> codec)
     {
         return register(DragonMountsLegacy.id(name), codec);
     }

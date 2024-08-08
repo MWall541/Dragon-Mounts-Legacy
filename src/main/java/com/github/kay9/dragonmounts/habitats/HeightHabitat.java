@@ -1,6 +1,7 @@
 package com.github.kay9.dragonmounts.habitats;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -8,7 +9,7 @@ import net.minecraft.world.level.Level;
 
 public record HeightHabitat(int points, boolean below, int height) implements Habitat
 {
-    public static final Codec<HeightHabitat> CODEC = RecordCodecBuilder.create(func -> func.group(
+    public static final MapCodec<HeightHabitat> CODEC = RecordCodecBuilder.mapCodec(func -> func.group(
             Habitat.withPoints(3, HeightHabitat::points),
             Codec.BOOL.optionalFieldOf("below", false).forGetter(HeightHabitat::below),
             Codec.INT.fieldOf("height").forGetter(HeightHabitat::height)

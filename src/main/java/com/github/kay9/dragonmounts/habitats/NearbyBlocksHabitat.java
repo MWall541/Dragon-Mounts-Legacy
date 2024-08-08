@@ -1,6 +1,6 @@
 package com.github.kay9.dragonmounts.habitats;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.Block;
 
 public record NearbyBlocksHabitat(float multiplier, TagKey<Block> tag) implements Habitat
 {
-    public static final Codec<NearbyBlocksHabitat> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final MapCodec<NearbyBlocksHabitat> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Habitat.withMultiplier(0.5f, NearbyBlocksHabitat::multiplier),
             TagKey.codec(Registries.BLOCK).fieldOf("block_tag").forGetter(NearbyBlocksHabitat::tag)
     ).apply(instance, NearbyBlocksHabitat::new));

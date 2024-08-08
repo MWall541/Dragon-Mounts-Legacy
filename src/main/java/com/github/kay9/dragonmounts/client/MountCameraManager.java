@@ -31,8 +31,8 @@ public class MountCameraManager
         if (Minecraft.getInstance().player.getVehicle() instanceof TameableDragon && !Minecraft.getInstance().options.getCameraType().isFirstPerson())
         {
             var offsets = DMLConfig.getCameraPerspectiveOffset(Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_BACK);
-            camera.move(0, offsets[1].get(), offsets[2].get());
-            camera.move(-camera.getMaxZoom(offsets[0].get()), 0, 0); // do distance calcs AFTER our new position is set
+            camera.move(0, offsets[1].get().floatValue(), offsets[2].get().floatValue());
+            camera.move(-camera.getMaxZoom(offsets[0].get().floatValue()), 0, 0); // do distance calcs AFTER our new position is set
         }
     }
 }

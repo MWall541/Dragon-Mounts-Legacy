@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "include": [
+                "dragonmounts:dragon_breed",
+                "minecraft:custom_name"
+              ],
+              "source": "block_entity"
+            },
+            {
+              "block": "dragonmounts:dragon_egg",
+              "function": "minecraft:copy_state",
+              "properties": [
+                "hatch_stage"
+              ]
+            }
+          ],
+          "name": "dragonmounts:dragon_egg"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "dragonmounts:blocks/dragon_egg"
+}

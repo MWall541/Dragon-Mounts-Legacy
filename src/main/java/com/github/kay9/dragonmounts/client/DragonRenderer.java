@@ -70,7 +70,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         var breed = dragon.getBreedHolder();
         if (breed == null) return defaultModel;
 
-        var selected = modelCache.get(breed.key().location());
+        var selected = modelCache.get(breed.unwrapKey().get().location());
         if (selected == null) return defaultModel;
 
         return selected;
@@ -91,12 +91,12 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     }
 
     @SuppressWarnings("ConstantConditions")
-    public ResourceLocation getTextureForLayer(@Nullable Holder.Reference<DragonBreed> breed, int layer)
+    public ResourceLocation getTextureForLayer(@Nullable Holder<DragonBreed> breed, int layer)
     {
         if (breed == null) return DEFAULT_TEXTURES[layer];
 
         // we need to compute texture locations now rather than earlier due to the fact that breeds don't exist then.
-        return textureCache.computeIfAbsent(breed.key().location(), DragonRenderer::computeTextureCacheFor)[layer];
+        return textureCache.computeIfAbsent(breed.unwrapKey().get().location(), DragonRenderer::computeTextureCacheFor)[layer];
     }
 
     @Override
@@ -104,8 +104,9 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     {
         super.setupRotations(dragon, ps, age, yaw, partials, scale);
         var animator = dragon.getAnimator();
-//        var scale = dragon.getAgeScale(); todo: is scale automatically applied (Override getScale and return getAgeScale?)
-//        ps.scale(scale, scale, scale);
+        super.scale(dragon, ps, partials);
+        scale = dragon.getAgeScale();
+        ps.scale(scale, scale, scale);
         ps.translate(animator.getModelOffsetX(), animator.getModelOffsetY(), animator.getModelOffsetZ());
         ps.translate(0, 1.5, 0.5); // change rotation point
         ps.mulPose(Axis.XP.rotationDegrees(animator.getModelPitch(partials))); // rotate near the saddle so we can support the player

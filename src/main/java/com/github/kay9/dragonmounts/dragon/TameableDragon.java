@@ -117,7 +117,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // server/client delegates
     private final DragonAnimator animator;
     private final List<Ability> abilities = new ArrayList<>();
-    private Holder.Reference<DragonBreed> breed;
+    private Holder<DragonBreed> breed;
     private int reproCount;
     private float ageProgress = 1; // default to adult
     private boolean flying;
@@ -238,7 +238,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.set(DATA_AGE, getAge());
     }
 
-    public void setBreed(Holder.Reference<DragonBreed> dragonBreed)
+    public void setBreed(Holder<DragonBreed> dragonBreed)
     {
         if (breed != dragonBreed) // prevent loops, unnecessary work, etc.
         {
@@ -261,7 +261,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return breed.get();
     }
 
-    public Holder.Reference<DragonBreed> getBreedHolder()
+    public Holder<DragonBreed> getBreedHolder()
     {
         return breed;
     }
@@ -681,9 +681,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected Component getTypeName()
     {
-        if (getBreed() != null)
-            return Component.translatable(DragonBreed.getTranslationKey(getBreedHolder().getRegisteredName()));
-
+        if (getBreedHolder() != null) return DragonBreed.getTranslation(getBreedHolder());
         return super.getTypeName();
     }
 
@@ -705,7 +703,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         if (successful)
         {
-            setTame(true, true);
+            tame(player);
             navigation.stop();
             setTarget(null);
             setOwnerUUID(player.getUUID());
@@ -951,18 +949,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         ridden.yRotO = ridden.getYRot();
         ridden.setYBodyRot(yBodyRot);
 
-
+        super.positionRider(ridden, pCallback);
     }
 
     @Override
-    protected Vec3 getPassengerAttachmentPoint(Entity pEntity, EntityDimensions dimensions, float partialTick)
+    protected Vec3 getPassengerAttachmentPoint(Entity ridden, EntityDimensions dimensions, float partialTick)
     {
-        //todo
-        //        var rePos = new Vec3(0, getPassengersRidingOffset() + ridden.getMyRidingOffset(), getAgeScale())
-//                .yRot((float) Math.toRadians(-yBodyRot))
-//                .add(position());
-//        pCallback.accept(ridden, rePos.x, rePos.y, rePos.z);
-        return super.getPassengerAttachmentPoint(pEntity, dimensions, partialTick);
+        return new Vec3(0, getBbHeight(), 1).yRot(-getYRot() * ((float) Math.PI / 180f));
     }
 
     @Override

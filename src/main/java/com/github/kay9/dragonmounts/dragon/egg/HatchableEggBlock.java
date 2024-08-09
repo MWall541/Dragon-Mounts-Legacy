@@ -88,13 +88,14 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     {
         if (Minecraft.getInstance().level != null)
         {
-            for (var key : DragonBreed.registry(Minecraft.getInstance().level.registryAccess()).registryKeySet())
-                registrar.accept(Item.create(key));
+            DragonBreed.registry(Minecraft.getInstance().level.registryAccess())
+                    .holders()
+                    .forEach(breed -> registrar.accept(Item.create(breed)));
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static HatchableEggBlockEntity place(ServerLevel level, BlockPos pos, BlockState state, Holder.Reference<DragonBreed> breed)
+    public static HatchableEggBlockEntity place(ServerLevel level, BlockPos pos, BlockState state, Holder<DragonBreed> breed)
     {
         level.setBlock(pos, state, Block.UPDATE_ALL);
 
@@ -116,9 +117,9 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player)
     {
         if (level.getBlockEntity(pos) instanceof HatchableEggBlockEntity data)
-            return Item.create(data.getBreedHolder().key());
+            return Item.create(data.getBreedHolder());
 
-        return Item.create(DragonBreed.getRandom(level.registryAccess(), player.getRandom()).key());
+        return Item.create(DragonBreed.getRandom(level.registryAccess(), player.getRandom()));
     }
 
     @Nullable
@@ -155,7 +156,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
     {
         if (level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
                 && e.hasBreed()
-                && e.getBreedHolder().key().location().getPath().equals("end")
+                && e.getBreedHolder().unwrapKey().get().location().getPath().equals("end")
                 && !state.getValue(HATCHING))
             teleport(state, level, at); // retain original dragon egg teleport behavior
     }
@@ -166,7 +167,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         if (!player.getAbilities().instabuild
                 && level.getBlockEntity(at) instanceof HatchableEggBlockEntity e
                 && e.hasBreed()
-                && e.getBreedHolder().key().location().getPath().equals("end")
+                && e.getBreedHolder().unwrapKey().get().location().getPath().equals("end")
                 && !state.getValue(HATCHING))
             return false; // retain original dragon egg teleport behavior; DON'T destroy!
 
@@ -365,10 +366,10 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
             super(DMLRegistry.EGG_BLOCK.get(), new Properties().rarity(Rarity.EPIC));
         }
 
-        public static ItemStack create(ResourceKey<DragonBreed> breed)
+        public static ItemStack create(Holder<DragonBreed> breed)
         {
             ItemStack stack = new ItemStack(DMLRegistry.EGG_BLOCK_ITEM.get());
-            stack.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), breed);
+            setBreed(stack, breed);
             return stack;
         }
 
@@ -380,14 +381,26 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
             // ensure a breed exists for this egg. if not, assign a random one.
             // possible cause is through commands, or other unnatural means.
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-            ResourceKey<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
-            if (server != null && breed == null)
+            Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
+            if (breed == null && server != null)
             {
-                breed = DragonBreed.getRandom(server.registryAccess(), server.overworld().getRandom()).key();
-                stack.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), breed);
+                setBreed(stack, DragonBreed.getRandom(server.registryAccess(), server.overworld().getRandom()));
             }
+      }
 
-            stack.set(DataComponents.ITEM_NAME, Component.translatable(String.join(".", stack.getDescriptionId(), breed.location().toString().replace(':', '.'))));
+        private static void setBreed(ItemStack stack, Holder<DragonBreed> breed)
+        {
+            stack.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), breed);
+        }
+
+        @Override
+        public Component getName(ItemStack stack)
+        {
+            Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
+
+            if (breed == null)
+                return super.getName(stack);
+            return Component.translatable(String.join(".", stack.getDescriptionId(), breed.getRegisteredName().replace(':', '.')));
         }
 
         @Override
@@ -395,12 +408,12 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         {
             if (player.getAbilities().instabuild && target instanceof TameableDragon dragon)
             {
-                ResourceKey<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
+                Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
 
                 // silently fail if for some reason we don't have a breed available; shouldn't be possible though.
                 if (breed != null)
                 {
-                    dragon.setBreed(DragonBreed.get(breed, player.registryAccess()));
+                    dragon.setBreed(DragonBreed.get(breed.unwrapKey().get(), player.registryAccess()));
                     return InteractionResult.sidedSuccess(player.level().isClientSide);
                 }
             }

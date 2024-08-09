@@ -179,7 +179,7 @@ public class DragonEggModel implements IUnbakedGeometry<DragonEggModel>
             var breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
             if (breed != null)
             {
-                var model = owner.models.get(breed.location().toString());
+                var model = owner.models.get(breed.getRegisteredName());
                 if (model != null) return model;
             }
 

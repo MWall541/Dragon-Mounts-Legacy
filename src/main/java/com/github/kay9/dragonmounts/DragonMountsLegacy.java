@@ -101,7 +101,7 @@ public class DragonMountsLegacy
 
     static void registerDatapacks(TriConsumer<ResourceKey<Registry<DragonBreed>>, Codec<DragonBreed>, Codec<DragonBreed>> registrar)
     {
-        registrar.accept(DragonBreed.REGISTRY_KEY, DragonBreed.CODEC, DragonBreed.NETWORK_CODEC);
+        registrar.accept(DragonBreed.REGISTRY_KEY, DragonBreed.DIRECT_CODEC, DragonBreed.NETWORK_CODEC);
     }
 
     static void registerCreativeTabItems(ResourceKey<CreativeModeTab> tab, Consumer<ItemStack> registrar)

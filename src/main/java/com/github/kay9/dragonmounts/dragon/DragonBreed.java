@@ -12,11 +12,17 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -44,7 +50,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 {
     public static final ResourceKey<Registry<DragonBreed>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("dragon_breeds"));
 
-    public static final Codec<DragonBreed> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<DragonBreed> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             DMLUtil.HEX_CODEC.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
             DMLUtil.HEX_CODEC.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
@@ -69,6 +75,9 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier)
     ).apply(instance, DragonBreed::fromNetwork));
+
+    public static final Codec<Holder<DragonBreed>> CODEC = RegistryFixedCodec.create(REGISTRY_KEY);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<DragonBreed>> STREAM_CODEC = ByteBufCodecs.holderRegistry(REGISTRY_KEY);
 
     public static DragonBreed fromNetwork(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Optional<Holder<SoundEvent>> ambientSound, int growthTime, float sizeModifier)
     {
@@ -122,9 +131,10 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         return reproLimit().map(Function.identity(), DMLConfig::getReproLimitFor);
     }
 
-    public static String getTranslationKey(String resourceLocation)
+    public static Component getTranslation(Holder<DragonBreed> breed)
     {
-        return "dragon_breed." + resourceLocation.replace(':', '.');
+        if (!breed.isBound()) return DMLRegistry.DRAGON.get().getDescription();
+        return Component.translatable("dragon_breed." + breed.getRegisteredName().replace(':', '.'));
     }
 
     private void applyAttributes(TameableDragon dragon)

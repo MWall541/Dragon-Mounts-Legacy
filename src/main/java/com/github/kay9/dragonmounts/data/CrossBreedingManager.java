@@ -46,9 +46,9 @@ public class CrossBreedingManager extends SimpleJsonResourceReloadListener
     }
 
     @Nullable
-    public Holder.Reference<DragonBreed> getCrossBreed(Holder.Reference<DragonBreed> parent, Holder.Reference<DragonBreed> mate, HolderLookup.Provider ra)
+    public Holder<DragonBreed> getCrossBreed(Holder<DragonBreed> parent, Holder<DragonBreed> mate, HolderLookup.Provider ra)
     {
-        ResourceKey<DragonBreed> result = crosses.get(new Couple(parent.key(), mate.key()));
+        ResourceKey<DragonBreed> result = crosses.get(new Couple(parent.unwrapKey().orElseThrow(), mate.unwrapKey().orElseThrow()));
 
         return result == null? null : DragonBreed.get(result, ra);
     }

@@ -1,4 +1,7 @@
 {
+  "remove": [
+    "minecraft:wither_rose"
+  ],
   "values": [
     "#minecraft:small_flowers",
     "minecraft:red_mushroom",

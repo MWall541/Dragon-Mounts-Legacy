@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -21,7 +22,7 @@ import static com.github.kay9.dragonmounts.dragon.DragonBreed.BuiltIn.*;
 public class DragonEggLootMod extends LootModifier
 {
     public static final MapCodec<DragonEggLootMod> CODEC = RecordCodecBuilder.mapCodec(i -> codecStart(i)
-            .and(ResourceKey.codec(DragonBreed.REGISTRY_KEY).fieldOf("egg_breed").forGetter(m -> m.id))
+            .and(DragonBreed.CODEC.fieldOf("egg_breed").forGetter(m -> m.breed))
             .and(Codec.BOOL.optionalFieldOf("replace_first", false).forGetter(m -> m.replaceFirst))
             .apply(i, DragonEggLootMod::new));
 
@@ -37,20 +38,20 @@ public class DragonEggLootMod extends LootModifier
             new Target(WATER, BuiltInLootTables.BURIED_TREASURE, 0.175)
     };
 
-    private final ResourceKey<DragonBreed> id;
+    private final Holder<DragonBreed> breed;
     private final boolean replaceFirst;
 
-    public DragonEggLootMod(LootItemCondition[] conditions, ResourceKey<DragonBreed> breed, boolean replaceFirst)
+    public DragonEggLootMod(LootItemCondition[] conditions, Holder<DragonBreed> breed, boolean replaceFirst)
     {
         super(conditions);
-        this.id = breed;
+        this.breed = breed;
         this.replaceFirst = replaceFirst;
     }
 
     @Override
     protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
     {
-        var egg = HatchableEggBlock.Item.create(id);
+        var egg = HatchableEggBlock.Item.create(breed);
 
         if (replaceFirst) generatedLoot.set(0, egg);
         else generatedLoot.add(egg);

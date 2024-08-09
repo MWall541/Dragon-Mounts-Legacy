@@ -59,20 +59,22 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
 
     private static void setBreed(ItemStack stack, Holder<DragonBreed> breed)
     {
-        // add breed data
+        // add breed data, used by entity type spawning in general. annoying, unfortunately.
         CompoundTag entityTag = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY).copyTag();
         entityTag.putString(TameableDragon.NBT_BREED, breed.getRegisteredName());
         stack.set(DataComponents.ENTITY_DATA, CustomData.of(entityTag));
 
-        // visual colors of spawn egg
+        // for colors and item name
         stack.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), breed);
     }
 
     @Override
     public Component getName(ItemStack stack)
     {
-        String breedId = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY).copyTag().getString(TameableDragon.NBT_BREED);
-        return Component.translatable(String.join(".", stack.getDescriptionId(), breedId.replace(':', '.')));
+        Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
+
+        if (breed == null) return super.getName(stack);
+        return Component.translatable(String.join(".", stack.getDescriptionId(), breed.getRegisteredName().replace(':', '.')));
     }
 
     @Override

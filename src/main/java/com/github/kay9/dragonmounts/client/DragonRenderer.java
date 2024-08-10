@@ -146,7 +146,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
             if (dragon.deathTime == 0)
             {
                 var type = CustomRenderTypes.glow(getTextureForLayer(dragon.getBreedHolder(), LAYER_GLOW));
-                model.renderToBuffer(pMatrixStack, buffer.getBuffer(type), pPackedLight, OverlayTexture.NO_OVERLAY, -1);
+                model.renderToBuffer(pMatrixStack, buffer.getBuffer(type), 0xffffff, OverlayTexture.NO_OVERLAY, -1);
             }
        }
     };
@@ -166,8 +166,8 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         {
             if (dragon.deathTime > 0)
             {
-                var delta = dragon.deathTime / (float) dragon.getMaxDeathTime();
-//                model.renderToBuffer(ps, buffer.getBuffer(CustomRenderTypes.DISSOLVE), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, delta); todo deathtime delta
+                int delta = (int) (255 * (dragon.deathTime / (float) dragon.getMaxDeathTime()));
+                model.renderToBuffer(ps, buffer.getBuffer(CustomRenderTypes.DISSOLVE), light, OverlayTexture.NO_OVERLAY, 0xf | (delta << 24));
                 model.renderToBuffer(ps, buffer.getBuffer(RenderType.entityDecal(getTextureLocation(dragon))), light, OverlayTexture.pack(0, true), -1);
             }
         }

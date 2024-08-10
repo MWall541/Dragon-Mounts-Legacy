@@ -383,9 +383,7 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
             Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
             if (breed == null && server != null)
-            {
                 setBreed(stack, DragonBreed.getRandom(server.registryAccess(), server.overworld().getRandom()));
-            }
       }
 
         private static void setBreed(ItemStack stack, Holder<DragonBreed> breed)

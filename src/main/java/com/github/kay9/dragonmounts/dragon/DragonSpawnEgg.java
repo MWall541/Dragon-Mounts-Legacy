@@ -7,9 +7,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -49,20 +52,25 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         // ensure a breed exists for this egg. if not, assign a random one.
         // possible cause is through commands, or other unnatural means.
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        CompoundTag tag = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY).copyTag();
-        Holder.Reference<DragonBreed> breed = DragonBreed.parse(tag.getString(TameableDragon.NBT_BREED), server.registryAccess());
+        RegistryOps<Tag> ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+        Holder<DragonBreed> breed = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY)
+                .read(ops, DragonBreed.CODEC.fieldOf(TameableDragon.NBT_BREED))
+                .result()
+                .orElse(null);
         if (breed == null)
-            breed = DragonBreed.getRandom(server.registryAccess(), server.overworld().getRandom());
-
-        setBreed(stack, breed);
+            setBreed(stack, DragonBreed.getRandom(server.registryAccess(), server.overworld().getRandom()));
     }
 
     private static void setBreed(ItemStack stack, Holder<DragonBreed> breed)
     {
-        // add breed data, used by entity type spawning in general. annoying, unfortunately.
-        CompoundTag entityTag = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY).copyTag();
-        entityTag.putString(TameableDragon.NBT_BREED, breed.getRegisteredName());
-        stack.set(DataComponents.ENTITY_DATA, CustomData.of(entityTag));
+        // add breed data, used by entity type spawning in general. annoying, but necessary.
+        CustomData entityBreedId = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY)
+                .update(t ->
+                {
+                    t.putString("id", DMLRegistry.DRAGON.getId().toString()); // necessary otherwise CustomData throws an exception...
+                    t.putString(TameableDragon.NBT_BREED, breed.getRegisteredName());
+                });
+        stack.set(DataComponents.ENTITY_DATA, entityBreedId);
 
         // for colors and item name
         stack.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), breed);

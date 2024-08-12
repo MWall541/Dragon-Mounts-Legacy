@@ -1,10 +1,9 @@
-package com.github.kay9.dragonmounts.abilities;
+package com.github.kay9.dragonmounts.dragon.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 
@@ -42,8 +41,8 @@ public class SnowStepperAbility extends FootprintAbility implements Ability.Fact
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Factory<? extends Ability>> codec()
     {
-        return SNOW_STEPPER;
+        return CODEC;
     }
 }

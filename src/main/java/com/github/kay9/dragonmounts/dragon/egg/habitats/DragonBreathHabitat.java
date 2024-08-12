@@ -1,5 +1,6 @@
-package com.github.kay9.dragonmounts.habitats;
+package com.github.kay9.dragonmounts.dragon.egg.habitats;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,8 +24,8 @@ public enum DragonBreathHabitat implements Habitat
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Habitat> codec()
     {
-        return Habitat.DRAGON_BREATH;
+        return CODEC;
     }
 }

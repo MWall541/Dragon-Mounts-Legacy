@@ -1,14 +1,20 @@
-package com.github.kay9.dragonmounts.abilities;
+package com.github.kay9.dragonmounts.dragon.abilities;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -38,27 +44,9 @@ import java.util.function.Supplier;
 //todo registry based
 public interface Ability
 {
-    Map<ResourceLocation, MapCodec<? extends Factory<Ability>>> REGISTRY = new HashMap<>();
-
-    Codec<Factory<Ability>> CODEC = ResourceLocation.CODEC.dispatch(Factory::type, REGISTRY::get);
-
-    ResourceLocation FROST_WALKER = reg("frost_walker", FrostWalkerAbility.CODEC);
-    ResourceLocation GREEN_TOES = reg("green_toes", GreenToesAbility.CODEC);
-    ResourceLocation SNOW_STEPPER = reg("snow_stepper", SnowStepperAbility.CODEC);
-    ResourceLocation HOT_FEET = reg("hot_feet", HotFeetAbility.CODEC);
-    ResourceLocation REAPER_STEP = reg("reaper_step", ReaperStepAbility.CODEC);
-    ResourceLocation HYDRO_STEP = reg("hydro_step", HydroStepAbility.CODEC);
-
-    static <T extends Ability> ResourceLocation register(ResourceLocation name, MapCodec<? extends Factory<T>> codec)
-    {
-        REGISTRY.put(name, (MapCodec) codec); // hacky generics cast
-        return name;
-    }
-
-    private static <T extends Ability> ResourceLocation reg(String name, MapCodec<? extends Factory<T>> codec)
-    {
-        return register(DragonMountsLegacy.id(name), codec);
-    }
+    ResourceKey<Registry<MapCodec<? extends Factory<? extends Ability>>>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("ability_type"));
+    Supplier<IForgeRegistry<MapCodec<? extends Factory<? extends Ability>>>> REGISTRY = Suppliers.memoize(() -> RegistryManager.ACTIVE.getRegistry(REGISTRY_KEY));
+    Codec<Factory<? extends Ability>> CODEC = Codec.lazyInitialized(() -> REGISTRY.get().getCodec().dispatch(Factory::codec, Function.identity()));
 
     default void initialize(TameableDragon dragon) {}
 
@@ -84,9 +72,9 @@ public interface Ability
      * example.
      * <br><br>
      * It is crucially important that if you are extending a class already implementing {@link Factory} that
-     * you override {@link Factory#create} and {@link Factory#type}. <br>
+     * you override {@link Factory#create} and {@link Factory#codec}. <br>
      * If the parent ability class is a breed specific type, and your type is an entity specific, {@link Factory#create} and
-     * {@link Factory#type} do not matter since your codec SHOULD NOT USE THEM! You MUST create a new factory type for per-entity
+     * {@link Factory#codec} do not matter since your codec SHOULD NOT USE THEM! You MUST create a new factory type for per-entity
      * implementations, or use {@link Ability#simpleFactory}
      */
     interface Factory<T extends Ability>
@@ -97,35 +85,35 @@ public interface Ability
          */
         T create();
 
-        ResourceLocation type();
+        MapCodec<? extends Factory<? extends Ability>> codec();
     }
 
-    /**
-     * While this is here, I don't necessarily recommend using it because the type has to be created to serialize
-     * its values, but it's not exactly a deal-breaker at data-generation. Just... impractical. <br>
-     * Example usage:
-     * <pre>
-     * {@code Codec<Factory<MyAbility>> CODEC = Codec.FLOAT
-     *  .xmap(myFloat -> Ability.simpleFactory(() -> new MyAbility(myfloat)), myFactory -> myFactory.create().myFloat)
-     *  .fieldOf("my_float")
-     *  .codec();}
-     * </pre>
-     */
-    static <T extends Ability> Factory<T> simpleFactory(ResourceLocation id, Supplier<T> factory)
-    {
-        return new Factory<>()
-        {
-            @Override
-            public T create()
-            {
-                return factory.get();
-            }
-
-            @Override
-            public ResourceLocation type()
-            {
-                return id;
-            }
-        };
-    }
+//    /**
+//     * While this is here, I don't necessarily recommend using it because the type has to be created to serialize
+//     * its values, but it's not exactly a deal-breaker at data-generation. Just... impractical. <br>
+//     * Example usage:
+//     * <pre>
+//     * {@code Codec<Factory<MyAbility>> CODEC = Codec.FLOAT
+//     *  .xmap(myFloat -> Ability.simpleFactory(() -> new MyAbility(myfloat)), myFactory -> myFactory.create().myFloat)
+//     *  .fieldOf("my_float")
+//     *  .codec();}
+//     * </pre>
+//     */
+//    static <T extends Ability> Factory<T> simpleFactory(ResourceLocation id, Supplier<T> factory)
+//    {
+//        return new Factory<>()
+//        {
+//            @Override
+//            public T create()
+//            {
+//                return factory.get();
+//            }
+//
+//            @Override
+//            public ResourceLocation codec()
+//            {
+//                return id;
+//            }
+//        };
+//    }
 }

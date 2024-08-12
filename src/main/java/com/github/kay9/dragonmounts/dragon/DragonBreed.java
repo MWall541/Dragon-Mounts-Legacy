@@ -3,16 +3,15 @@ package com.github.kay9.dragonmounts.dragon;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.abilities.Ability;
+import com.github.kay9.dragonmounts.dragon.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
-import com.github.kay9.dragonmounts.habitats.Habitat;
+import com.github.kay9.dragonmounts.dragon.egg.habitats.Habitat;
 import com.github.kay9.dragonmounts.util.DMLUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -43,7 +42,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public record DragonBreed(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles,
-                          Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<Ability>> abilityTypes, List<Habitat> habitats,
+                          Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<? extends Ability>> abilityTypes, List<Habitat> habitats,
                           HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound,
                           ResourceKey<LootTable> deathLoot, int growthTime, float hatchChance, float sizeModifier,
                           HolderSet<Item> tamingItems, HolderSet<Item> breedingItems, Either<Integer, String> reproLimit)

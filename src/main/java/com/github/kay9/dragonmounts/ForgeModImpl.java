@@ -1,6 +1,10 @@
 package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.MountCameraManager;
+import com.github.kay9.dragonmounts.dragon.abilities.Ability;
+import com.github.kay9.dragonmounts.dragon.egg.habitats.Habitat;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,6 +23,9 @@ import net.minecraftforge.network.Channel;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.SimpleChannel;
 import net.minecraftforge.registries.DataPackRegistryEvent;
+import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegistryBuilder;
+import net.minecraftforge.registries.RegistryManager;
 
 import static com.github.kay9.dragonmounts.DragonMountsLegacy.*;
 
@@ -59,6 +66,8 @@ public class ForgeModImpl
 
         modBus.addListener((EntityAttributeCreationEvent e) -> registerEntityAttributes(e::put));
         modBus.addListener((DataPackRegistryEvent.NewRegistry e) -> registerDatapacks(e::dataPackRegistry));
+        modBus.addListener((NewRegistryEvent e) -> e.create(RegistryBuilder.of(Ability.REGISTRY_KEY.location())));
+        modBus.addListener((NewRegistryEvent e) -> e.create(RegistryBuilder.of(Habitat.REGISTRY_KEY.location())));
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {

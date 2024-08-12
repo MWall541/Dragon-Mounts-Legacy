@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.habitats;
+package com.github.kay9.dragonmounts.dragon.egg.habitats;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -25,8 +25,8 @@ public record FluidHabitat(float multiplier, TagKey<Fluid> fluidType) implements
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Habitat> codec()
     {
-        return Habitat.IN_FLUID;
+        return CODEC;
     }
 }

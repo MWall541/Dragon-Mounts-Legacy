@@ -1,6 +1,7 @@
-package com.github.kay9.dragonmounts.abilities;
+package com.github.kay9.dragonmounts.dragon.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -99,8 +100,8 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Factory<? extends Ability>> codec()
     {
-        return GREEN_TOES;
+        return CODEC;
     }
 }

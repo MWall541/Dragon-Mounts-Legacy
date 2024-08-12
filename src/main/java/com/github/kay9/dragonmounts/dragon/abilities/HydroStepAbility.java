@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.abilities;
+package com.github.kay9.dragonmounts.dragon.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.MapCodec;
@@ -76,8 +76,8 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Factory<? extends Ability>> codec()
     {
-        return HYDRO_STEP;
+        return CODEC;
     }
 }

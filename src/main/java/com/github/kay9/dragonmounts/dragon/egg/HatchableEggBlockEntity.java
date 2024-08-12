@@ -3,7 +3,7 @@ package com.github.kay9.dragonmounts.dragon.egg;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.habitats.Habitat;
+import com.github.kay9.dragonmounts.dragon.egg.habitats.Habitat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -22,8 +22,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Comparator;
 
 public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 {

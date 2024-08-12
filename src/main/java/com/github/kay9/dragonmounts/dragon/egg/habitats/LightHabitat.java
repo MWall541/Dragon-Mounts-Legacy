@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.habitats;
+package com.github.kay9.dragonmounts.dragon.egg.habitats;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -23,8 +23,8 @@ public record LightHabitat(int points, boolean below, int light) implements Habi
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Habitat> codec()
     {
-        return Habitat.LIGHT;
+        return CODEC;
     }
 }

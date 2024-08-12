@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.habitats;
+package com.github.kay9.dragonmounts.dragon.egg.habitats;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -23,8 +23,8 @@ public record BiomeHabitat(int points, TagKey<Biome> biomeTag) implements Habita
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Habitat> codec()
     {
-        return Habitat.BIOMES;
+        return CODEC;
     }
 }

@@ -1,8 +1,8 @@
 package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.abilities.HotFeetAbility;
-import com.github.kay9.dragonmounts.abilities.ReaperStepAbility;
+import com.github.kay9.dragonmounts.dragon.abilities.HotFeetAbility;
+import com.github.kay9.dragonmounts.dragon.abilities.ReaperStepAbility;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;

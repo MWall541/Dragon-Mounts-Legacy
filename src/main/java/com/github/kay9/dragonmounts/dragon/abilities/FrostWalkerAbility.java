@@ -1,4 +1,4 @@
-package com.github.kay9.dragonmounts.abilities;
+package com.github.kay9.dragonmounts.dragon.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
@@ -92,8 +92,8 @@ public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerA
     }
 
     @Override
-    public ResourceLocation type()
+    public MapCodec<? extends Factory<? extends Ability>> codec()
     {
-        return FROST_WALKER;
+        return CODEC;
     }
 }

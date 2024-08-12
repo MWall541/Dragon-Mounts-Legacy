@@ -2,11 +2,11 @@ package com.github.kay9.dragonmounts.data.providers;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.abilities.*;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.abilities.*;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
-import com.github.kay9.dragonmounts.habitats.*;
+import com.github.kay9.dragonmounts.dragon.egg.habitats.*;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.core.Holder;
@@ -164,13 +164,13 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
         });
     }
 
-    private static void registerBuiltIn(BootstrapContext<DragonBreed> context, ResourceKey<DragonBreed> id, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound)
+    private static void registerBuiltIn(BootstrapContext<DragonBreed> context, ResourceKey<DragonBreed> id, int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<? extends Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound)
     {
         Either<Integer, String> reproConfigTarget = Either.right("config:" + id.location().getPath());
         context.register(id, builtIn(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, reproConfigTarget));
     }
 
-    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound, Either<Integer, String> reproduction)
+    public static DragonBreed builtIn(int primaryColor, int secondaryColor, Optional<ParticleOptions> hatchParticles, Map<Holder<Attribute>, Double> attributes, List<Ability.Factory<? extends Ability>> abilities, List<Habitat> habitats, HolderSet<DamageType> immunities, Optional<Holder<SoundEvent>> ambientSound, Either<Integer, String> reproduction)
     {
         return new DragonBreed(primaryColor, secondaryColor, hatchParticles, attributes, abilities, habitats, immunities, ambientSound, BuiltInLootTables.EMPTY, TameableDragon.BASE_GROWTH_TIME, HatchableEggBlock.DEFAULT_HATCH_CHANCE, TameableDragon.BASE_SIZE_MODIFIER, BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES), BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES), reproduction);
     }

@@ -113,7 +113,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     // other constants
     public static final int AGE_UPDATE_INTERVAL = 100; // every 5 seconds
-    public static final ResourceLocation SCALE_MODIFIER_ID = DragonMountsLegacy.id("age_scale_modifier");
+    public static final ResourceLocation AGE_ATTR_MODIFIER_ID = DragonMountsLegacy.id("age_scale_modifier");
     public static final int GROUND_CLEARENCE_THRESHOLD = 3; // height in blocks (multiplied by scale of dragon)
     private final EntityDimensions SITTING_DIMENSIONS = EntityDimensions.scalable(BASE_WIDTH, 2.15f).withEyeHeight(2.58f);
 
@@ -1078,9 +1078,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
             // negate modifier value since the operation is as follows: base_value += modifier * base_value
             double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
-            var mod = new AttributeModifier(SCALE_MODIFIER_ID, modValue, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+            var mod = new AttributeModifier(AGE_ATTR_MODIFIER_ID, modValue, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 
-            getAttribute(MAX_HEALTH).addOrUpdateTransientModifier(mod);
+            getAttribute(MAX_HEALTH).addOrReplacePermanentModifier(mod); // needs to be serialized otherwise health fraction gets weird at deserialization time
             getAttribute(ATTACK_DAMAGE).addOrUpdateTransientModifier(mod);
 
             // restore health fraction

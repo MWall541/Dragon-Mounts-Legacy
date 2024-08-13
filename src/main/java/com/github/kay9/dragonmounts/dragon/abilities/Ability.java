@@ -6,11 +6,8 @@ import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 
@@ -49,8 +46,6 @@ public interface Ability
     Codec<Factory<? extends Ability>> CODEC = Codec.lazyInitialized(() -> REGISTRY.get().getCodec().dispatch(Factory::codec, Function.identity()));
 
     default void initialize(TameableDragon dragon) {}
-
-    default void close(TameableDragon dragon) {}
 
     default void write(TameableDragon dragon, CompoundTag nbt) {}
 

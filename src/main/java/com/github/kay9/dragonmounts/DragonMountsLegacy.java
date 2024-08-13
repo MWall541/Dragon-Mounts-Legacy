@@ -6,16 +6,15 @@ import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.github.kay9.dragonmounts.dragon.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -115,6 +114,11 @@ public class DragonMountsLegacy
     static void registerEntityAttributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> registrar)
     {
         registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
+    }
+
+    static void registerEntityDataSerializers()
+    {
+        EntityDataSerializers.registerSerializer(TameableDragon.DRAGON_BREED_SERIALIZER);
     }
 
     // ========================

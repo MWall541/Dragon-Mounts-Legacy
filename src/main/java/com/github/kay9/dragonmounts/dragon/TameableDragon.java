@@ -3,12 +3,12 @@ package com.github.kay9.dragonmounts.dragon;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
-import com.github.kay9.dragonmounts.dragon.abilities.Ability;
 import com.github.kay9.dragonmounts.client.DragonAnimator;
 import com.github.kay9.dragonmounts.client.KeyMappings;
 import com.github.kay9.dragonmounts.client.MountCameraManager;
 import com.github.kay9.dragonmounts.client.MountControlsMessenger;
 import com.github.kay9.dragonmounts.data.CrossBreedingManager;
+import com.github.kay9.dragonmounts.dragon.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBodyController;
 import com.github.kay9.dragonmounts.dragon.ai.DragonBreedGoal;
 import com.github.kay9.dragonmounts.dragon.ai.DragonFollowOwnerGoal;
@@ -19,7 +19,9 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
@@ -83,7 +85,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * @author Kay9
  */
 @SuppressWarnings({"deprecation", "SameReturnValue"})
-public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable
+public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable, VariantHolder<Holder<DragonBreed>>
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3; // actual speed varies from ground friction
@@ -99,7 +101,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final float BASE_SIZE_MODIFIER = 1.0f;
 
     // data value IDs
-    private static final EntityDataAccessor<String> DATA_BREED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.STRING);
+    public static final EntityDataSerializer<Optional<Holder<DragonBreed>>> DRAGON_BREED_SERIALIZER = EntityDataSerializer.forValueType(DragonBreed.STREAM_CODEC.apply(ByteBufCodecs::optional));
+    private static final EntityDataAccessor<Optional<Holder<DragonBreed>>> DATA_BREED = SynchedEntityData.defineId(TameableDragon.class, DRAGON_BREED_SERIALIZER);
     private static final EntityDataAccessor<Boolean> DATA_SADDLED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_AGE = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.INT);
 
@@ -110,15 +113,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     // other constants
     public static final int AGE_UPDATE_INTERVAL = 100; // every 5 seconds
-    public static final ResourceLocation SCALE_MODIFIER_ID = DragonMountsLegacy.id("age_scale_modifier"); // just a random uuid I took online
+    public static final ResourceLocation SCALE_MODIFIER_ID = DragonMountsLegacy.id("age_scale_modifier");
     public static final int GROUND_CLEARENCE_THRESHOLD = 3; // height in blocks (multiplied by scale of dragon)
     private final EntityDimensions SITTING_DIMENSIONS = EntityDimensions.scalable(BASE_WIDTH, 2.15f).withEyeHeight(2.58f);
 
     // server/client delegates
     private final DragonAnimator animator;
     private final List<Ability> abilities = new ArrayList<>();
-    private Holder<DragonBreed> breed;
-    private int reproCount;
+    private int reproductionCount;
     private float ageProgress = 1; // default to adult
     private boolean flying;
     private boolean nearGround;
@@ -187,7 +189,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super.defineSynchedData(builder);
 
-        builder.define(DATA_BREED, "");
+        builder.define(DATA_BREED, Optional.empty());
         builder.define(DATA_SADDLED, false);
         builder.define(DATA_AGE, 0); // default to adult stage
     }
@@ -197,7 +199,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         if (DATA_BREED.equals(data))
         {
-            setBreed(DragonBreed.parse(entityData.get(DATA_BREED), level().registryAccess()));
+            getBreed().initialize(this);
             updateAgeProperties();
         }
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
@@ -209,14 +211,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putBoolean(NBT_SADDLED, isSaddled());
-        compound.putInt(NBT_REPRO_COUNT, reproCount);
 
-        if (getBreedHolder() != null) // breed is not read by the time the packet is being sent...
+        if (getBreedHolder() != null) // entity creation sometimes looks to merge already existing data, which we don't have at creation...
         {
             compound.putString(NBT_BREED, getBreedHolder().getRegisteredName());
             for (var ability : getAbilities()) ability.write(this, compound);
         }
+
+        compound.putBoolean(NBT_SADDLED, isSaddled());
+        compound.putInt(NBT_REPRO_COUNT, reproductionCount);
     }
 
     @Override
@@ -224,29 +227,29 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         // read and set breed first before reading everything else so things can override correctly,
         // e.g. attributes.
-        var breed = DragonBreed.parse(compound.getString(NBT_BREED), level().registryAccess());
-        if (breed != null) setBreed(breed);
+        Holder<DragonBreed> breed = DragonBreed.parse(compound.getString(NBT_BREED), registryAccess());
+        if (breed == null)
+            breed = DragonBreed.getRandom(registryAccess(), getRandom()); // wasn't assigned one (summon command?)
+
+        setBreed(breed);
 
         super.readAdditionalSaveData(compound);
 
         setSaddled(compound.getBoolean(NBT_SADDLED));
-        this.reproCount = compound.getInt(NBT_REPRO_COUNT);
+        this.reproductionCount = compound.getInt(NBT_REPRO_COUNT);
 
         for (var ability : getAbilities()) ability.read(this, compound);
 
         // set sync age data after we read it in AgeableMob
-        entityData.set(DATA_AGE, getAge());
+        getEntityData().set(DATA_AGE, getAge());
     }
 
     public void setBreed(Holder<DragonBreed> dragonBreed)
     {
-        if (breed != dragonBreed) // prevent loops, unnecessary work, etc.
-        {
-            if (breed != null) breed.get().close(this);
-            this.breed = dragonBreed;
-            breed.get().initialize(this);
-            getEntityData().set(DATA_BREED, breed.getRegisteredName());
-        }
+        if (getBreedHolder() != null)
+            throw new IllegalStateException("Trying to set breed of a dragon that already has one!");
+
+        getEntityData().set(DATA_BREED, Optional.of(dragonBreed));
     }
 
     /**
@@ -257,13 +260,31 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Nullable
     public DragonBreed getBreed()
     {
-        if (breed == null) return null;
-        return breed.get();
+        if (getBreedHolder() == null) return null;
+        return getBreedHolder().get();
     }
 
+    /**
+     * Nullable: The breed type may not be available pre-deserialization or the client hasn't received a data sync
+     * yet.
+     * @return The holder of this dragon's breed type.
+     */
+    @Nullable
     public Holder<DragonBreed> getBreedHolder()
     {
-        return breed;
+        return getEntityData().get(DATA_BREED).orElse(null);
+    }
+
+    @Override
+    public void setVariant(Holder<DragonBreed> variant)
+    {
+        setBreed(variant);
+    }
+
+    @Override
+    public Holder<DragonBreed> getVariant()
+    {
+        return getBreedHolder();
     }
 
     public List<Ability> getAbilities()
@@ -303,7 +324,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public void addReproCount()
     {
-        reproCount++;
+        reproductionCount++;
     }
 
     public boolean canFly()
@@ -349,9 +370,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     public void tick()
     {
-        if (isServer() && breed == null) // if we don't have a breed at this point, we should assume we aren't getting one, so assign a random one.
-            setBreed(DragonBreed.getRandom(level().registryAccess(), getRandom()));
-
         super.tick();
 
         if (isServer())
@@ -821,7 +839,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (!isTame() || getBreed() == null) return false;
 
         var limit = getBreed().getReproductionLimit();
-        return reproCount < limit || limit == -1;
+        return reproductionCount < limit || limit == -1;
     }
 
     @Override

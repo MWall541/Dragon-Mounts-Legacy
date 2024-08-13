@@ -3,8 +3,6 @@ package com.github.kay9.dragonmounts;
 import com.github.kay9.dragonmounts.client.MountCameraManager;
 import com.github.kay9.dragonmounts.dragon.abilities.Ability;
 import com.github.kay9.dragonmounts.dragon.egg.habitats.Habitat;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,6 +14,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -25,7 +24,6 @@ import net.minecraftforge.network.SimpleChannel;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.RegistryManager;
 
 import static com.github.kay9.dragonmounts.DragonMountsLegacy.*;
 
@@ -68,6 +66,7 @@ public class ForgeModImpl
         modBus.addListener((DataPackRegistryEvent.NewRegistry e) -> registerDatapacks(e::dataPackRegistry));
         modBus.addListener((NewRegistryEvent e) -> e.create(RegistryBuilder.of(Ability.REGISTRY_KEY.location())));
         modBus.addListener((NewRegistryEvent e) -> e.create(RegistryBuilder.of(Habitat.REGISTRY_KEY.location())));
+        modBus.addListener((FMLCommonSetupEvent e) -> registerEntityDataSerializers());
 
         if (FMLLoader.getDist() == Dist.CLIENT) // Client Events
         {

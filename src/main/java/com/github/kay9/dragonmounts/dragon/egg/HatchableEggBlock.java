@@ -3,7 +3,6 @@ package com.github.kay9.dragonmounts.dragon.egg;
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -14,18 +13,14 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -183,14 +178,6 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
         int stage = stateGetter != null? stateGetter.get(HATCH_STAGE) : 0;
         tooltips.add(Component.translatable(getDescriptionId() + ".hatch_stage." + stage)
                 .withStyle(ChatFormatting.GRAY));
-
-        var player = Minecraft.getInstance().player;
-        if (player != null && player.getAbilities().instabuild)
-        {
-            tooltips.add(CommonComponents.EMPTY);
-            tooltips.add(Component.translatable(getDescriptionId() + ".desc1").withStyle(ChatFormatting.GRAY));
-            tooltips.add(CommonComponents.space().append(Component.translatable(getDescriptionId() + ".desc2")).withStyle(ChatFormatting.BLUE));
-        }
     }
 
     @Override
@@ -399,24 +386,6 @@ public class HatchableEggBlock extends DragonEggBlock implements EntityBlock, Si
             if (breed == null)
                 return super.getName(stack);
             return Component.translatable(String.join(".", stack.getDescriptionId(), breed.getRegisteredName().replace(':', '.')));
-        }
-
-        @Override
-        public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand)
-        {
-            if (player.getAbilities().instabuild && target instanceof TameableDragon dragon)
-            {
-                Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
-
-                // silently fail if for some reason we don't have a breed available; shouldn't be possible though.
-                if (breed != null)
-                {
-                    dragon.setBreed(DragonBreed.get(breed.unwrapKey().get(), player.registryAccess()));
-                    return InteractionResult.sidedSuccess(player.level().isClientSide);
-                }
-            }
-
-            return super.interactLivingEntity(stack, player, target, hand);
         }
     }
 }

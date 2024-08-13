@@ -30,7 +30,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -118,13 +117,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         }
     }
 
-    public void close(TameableDragon dragon)
-    {
-        cleanAttributes(dragon);
-        for (Ability ability : dragon.getAbilities()) ability.close(dragon);
-        dragon.getAbilities().clear();
-    }
-
     public int getReproductionLimit()
     {
         return reproLimit().map(Function.identity(), DMLConfig::getReproLimitFor);
@@ -144,24 +136,6 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         {
             AttributeInstance inst = dragon.getAttribute(att);
             if (inst != null) inst.setBaseValue(value);
-        });
-
-        dragon.setHealth(dragon.getMaxHealth() * healthFrac);
-    }
-
-    private void cleanAttributes(TameableDragon dragon)
-    {
-        float healthFrac = dragon.getHealthFraction(); // in case max health is changed
-        var defaults = DefaultAttributes.getSupplier(DMLRegistry.DRAGON.get());
-
-        attributes().forEach((att, value) ->
-        {
-            var instance = dragon.getAttribute(att);
-            if (instance != null)
-            {
-                instance.removeModifiers();
-                instance.setBaseValue(defaults.getBaseValue(att));
-            }
         });
 
         dragon.setHealth(dragon.getMaxHealth() * healthFrac);

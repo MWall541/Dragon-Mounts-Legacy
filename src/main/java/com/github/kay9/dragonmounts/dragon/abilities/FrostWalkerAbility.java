@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FrostedIceBlock;
@@ -37,12 +36,6 @@ public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerA
     public void initialize(TameableDragon dragon)
     {
         dragon.setPathfindingMalus(PathType.WATER, 0);
-    }
-
-    @Override
-    public void close(TameableDragon dragon)
-    {
-        dragon.setPathfindingMalus(PathType.WATER, PathType.WATER.getMalus());
     }
 
     @Override

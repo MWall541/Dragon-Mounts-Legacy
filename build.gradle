@@ -125,6 +125,7 @@ tasks.named('jar', Jar).configure {
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : project.jar.archiveVersion,
                 "Implementation-Vendor"   : "Kay9",
+                "MixinConfigs"            : "${mod_id}.mixins.json"
         ])
     }
 

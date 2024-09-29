@@ -19,6 +19,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.nether": "ネザードラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.water": "ウォータードラゴンのスポーンエッグ",
 
+  "block.dragonmounts.dragon_egg": "ドラゴンのスポーンエッグ",
   "block.dragonmounts.dragon_egg.remaining_time": "%s秒以内に孵化します。",
   "block.dragonmounts.dragon_egg.change_breeds": "クリエイティブモード：ドラゴンと対話することでドラゴンの品種がこの卵の品種に代わります。",
 

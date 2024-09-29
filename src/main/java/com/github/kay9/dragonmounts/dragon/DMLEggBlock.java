@@ -126,7 +126,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public Component getName(ItemStack stack)
         {
             var tag = stack.getTag();
-            if (tag == null || tag.contains(DATA_ITEM_NAME))
+            if (tag != null && tag.contains(DATA_ITEM_NAME))
                 return Component.translatable(tag.getString(DATA_ITEM_NAME));
             return super.getName(stack);
         }

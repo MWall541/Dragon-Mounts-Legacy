@@ -27,6 +27,7 @@
   "block.dragonmounts.dragon_egg.hatch_stage.2": "Здається, воно ворушиться час від часу. Можливо, воно близьке до вилуплення.",
   "block.dragonmounts.dragon_egg.hatch_stage.3": "Чути звуки, що долинають зсередини! Воно скоро вилупиться!",
   "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
+  "block.dragonmounts.dragon_egg": "Яйце виклику дракона",
 
   "block.dragonmounts.dragon_egg.dragonmounts.aether": "Яйце дракона Етеру",
   "block.dragonmounts.dragon_egg.dragonmounts.fire": "Яйце вогневого дракона",

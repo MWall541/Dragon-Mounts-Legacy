@@ -75,7 +75,6 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         if (entity instanceof Entity e)
         {
             startHatching(e.getBreed(level.registryAccess()), e.getHatchTime(), level, pos);
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
@@ -109,6 +108,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
             egg.setHatchTime(hatchTime);
             egg.setPos(pos.getX() + 0.5d, pos.getY() + 0.1d, pos.getZ() + 0.5d);
             level.addFreshEntity(egg);
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS); // Clean up original dragon egg
         }
     }
 
@@ -126,7 +126,7 @@ public class DMLEggBlock extends DragonEggBlock implements EntityBlock
         public Component getName(ItemStack stack)
         {
             var tag = stack.getTag();
-            if (tag == null || tag.contains(DATA_ITEM_NAME))
+            if (tag != null && tag.contains(DATA_ITEM_NAME))
                 return Component.translatable(tag.getString(DATA_ITEM_NAME));
             return super.getName(stack);
         }

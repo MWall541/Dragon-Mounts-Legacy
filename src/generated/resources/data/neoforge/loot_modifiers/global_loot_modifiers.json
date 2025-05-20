@@ -1,0 +1,13 @@
+{
+  "entries": [
+    "dragonmounts:dragonmounts/aether/chests/simple_dungeon",
+    "dragonmounts:dragonmounts/ghost/chests/woodland_mansion",
+    "dragonmounts:dragonmounts/water/chests/buried_treasure",
+    "dragonmounts:dragonmounts/fire/chests/desert_pyramid",
+    "dragonmounts:dragonmounts/forest/chests/jungle_temple",
+    "dragonmounts:dragonmounts/ghost/chests/abandoned_mineshaft",
+    "dragonmounts:dragonmounts/ice/chests/igloo_chest",
+    "dragonmounts:dragonmounts/nether/chests/bastion_treasure"
+  ],
+  "replace": false
+}

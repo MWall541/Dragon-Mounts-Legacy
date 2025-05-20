@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - master
+      - neoforge
       - 'mc/**'
   pull_request:
     branches:
       - master
+      - neoforge
       - 'mc/**'
 
 jobs:
@@ -28,7 +30,7 @@ jobs:
         distribution: 'temurin'
         
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Build with Gradle
       run: ./gradlew build -Pmod_version=${{ github.run_id }}-artifact
@@ -36,5 +38,5 @@ jobs:
     - name: Publish Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: forge-build
+        name: ${{ github.ref_name }}
         path: build/libs/

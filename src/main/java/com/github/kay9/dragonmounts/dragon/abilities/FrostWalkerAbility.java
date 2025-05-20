@@ -10,8 +10,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FrostedIceBlock;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.EventHooks;
 
 
 public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerAbility>
@@ -60,7 +60,7 @@ public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerA
 
             if (currentState != FrostedIceBlock.meltsInto())
                 continue;
-            if (ForgeEventFactory.onBlockPlace(dragon, BlockSnapshot.create(level.dimension(), level, carat), Direction.UP))
+            if (EventHooks.onBlockPlace(dragon, BlockSnapshot.create(level.dimension(), level, carat), Direction.UP))
                 continue;
 
             var ice = Blocks.FROSTED_ICE.defaultBlockState();

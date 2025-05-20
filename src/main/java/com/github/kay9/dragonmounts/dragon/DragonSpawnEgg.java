@@ -1,19 +1,15 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
@@ -23,14 +19,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.server.ServerLifecycleHooks;
-import org.apache.commons.lang3.StringUtils;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class DragonSpawnEgg extends ForgeSpawnEggItem
+public class DragonSpawnEgg extends DeferredSpawnEggItem
 {
     public DragonSpawnEgg()
     {
@@ -67,7 +62,7 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
         CustomData entityBreedId = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY)
                 .update(t ->
                 {
-                    t.putString("id", DMLRegistry.DRAGON.getId().toString()); // necessary otherwise CustomData throws an exception...
+                    t.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(DMLRegistry.DRAGON.get()).getNamespace()); // necessary otherwise CustomData throws an exception...
                     t.putString(TameableDragon.NBT_BREED, breed.getRegisteredName());
                 });
         stack.set(DataComponents.ENTITY_DATA, entityBreedId);
@@ -112,6 +107,6 @@ public class DragonSpawnEgg extends ForgeSpawnEggItem
     {
         Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
         if (breed == null || !breed.isBound()) return 0xff;
-        return (tintIndex == 0? breed.get().primaryColor() : breed.get().secondaryColor()) | (255 << 24);
+        return (tintIndex == 0? breed.value().primaryColor() : breed.value().secondaryColor()) | (255 << 24);
     }
 }

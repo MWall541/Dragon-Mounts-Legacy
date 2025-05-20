@@ -63,8 +63,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.fluids.FluidType;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -261,7 +261,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public DragonBreed getBreed()
     {
         if (getBreedHolder() == null) return null;
-        return getBreedHolder().get();
+        return getBreedHolder().value();
     }
 
     /**
@@ -521,7 +521,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // give the saddle back!
-        if (isTamedFor(player) && isSaddled() && stack.is(Tags.Items.SHEARS))
+        if (isTamedFor(player) && isSaddled() && stack.is(Tags.Items.TOOLS_SHEAR))
         {
             spawnAtLocation(Items.SADDLE);
             player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
@@ -599,8 +599,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected SoundEvent getAmbientSound()
     {
         return Optional.ofNullable(getBreedHolder())
-                .flatMap(b -> b.get().ambientSound())
-                .map(Holder::get)
+                .flatMap(b -> b.value().ambientSound())
+                .map(Holder::value)
                 .orElse(DMLRegistry.DRAGON_AMBIENT_SOUND.get());
     }
 

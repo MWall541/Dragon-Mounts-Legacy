@@ -1,12 +1,10 @@
 modLoader="lowcodefml" #mandatory
-loaderVersion="[51,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="[4,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license="All rights reserved"
 [[mods]] #mandatory
 # The modid of the mod
 modId="example_addon" #mandatory
 # The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-# ${file.jarVersion} will substitute the value of the Implementation-Version as read from the mod's JAR file metadata
-# see the associated build.gradle script for how to populate this completely automatically during a build
 version="1.0.0" #mandatory
  # A display name for the mod
 displayName="Example Breed Addon" #mandatory
@@ -30,20 +28,20 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mollis lacinia magn
 '''
 # Dependencies. Update these alongside the mod.
 [[dependencies.example_addon]]
-    modId="forge"
-    mandatory=true
-    versionRange="[51,)"
+    modId="neoforge"
+    type="required"
+    versionRange="[21.1.1,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.example_addon]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="[1.21]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.example_addon]]
     modId="dragonmounts"
-    mandatory=true
+    type="required"
     versionRange="[1.2,)"
     ordering="NONE"
     side="BOTH"

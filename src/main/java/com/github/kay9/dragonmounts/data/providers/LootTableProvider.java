@@ -32,11 +32,6 @@ public class LootTableProvider extends net.minecraft.data.loot.LootTableProvider
         ), registries);
     }
 
-    @Override
-    protected void validate(Registry<LootTable> map, ValidationContext validationcontext, ProblemReporter report)
-    {
-    }
-
     private static class Blocks extends BlockLootSubProvider
     {
         public Blocks(HolderLookup.Provider registry)

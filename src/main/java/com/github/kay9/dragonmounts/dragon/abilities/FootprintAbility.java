@@ -2,7 +2,7 @@ package com.github.kay9.dragonmounts.dragon.abilities;
 
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import net.minecraft.core.BlockPos;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class FootprintAbility implements Ability
 {
@@ -10,7 +10,7 @@ public abstract class FootprintAbility implements Ability
     public void onMove(TameableDragon dragon)
     {
         if (dragon.getAgeProgress() < 0.5 || !dragon.onGround()) return;
-        if (!ForgeEventFactory.getMobGriefingEvent(dragon.level(), dragon)) return;
+        if (!EventHooks.canEntityGrief(dragon.level(), dragon)) return;
 
         var chance = getFootprintChance(dragon);
         if (chance == 0) return;

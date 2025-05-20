@@ -1,77 +1,19 @@
 plugins {
+    id 'java-library'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
-    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'net.neoforged.gradle.userdev' version '7.0.145'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 version = "$game_version-$mod_version"
 group = 'com.github.kay9.dragonmounts'
 
-base {
-    archivesName = mod_id
-}
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
-
-sourceSets {
-    // include generated resources
-    main.resources { srcDir 'src/generated/resources' }
-
-    // include example addon
-    exampleAddon {
-        resources {
-            srcDir "example_addon"
-        }
-    }
-}
-
-minecraft {
-    mappings channel: 'parchment', version: "${mappings_version}"
-
-    reobf = false
-
-    copyIdeResources = true
-
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                // required if including example below
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-
-                // include example addon as individual mod
-                example_addon {
-                    source sourceSets.exampleAddon
-                }
-            }
-        }
-
-        client {}
-
-        client2 {
-            //noinspection GroovyAssignabilityCheck
-            parent runs.client
-            args '--username', 'Dev2'
-        }
-
-        server {
-            arg "nogui"
-        }
-
-        data {
-            args '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-        }
-    }
-}
-
 repositories {
+    mavenLocal()
+
     maven {
         // location of the maven that hosts JEI files since January 2023
         name = "Jared's maven"
@@ -79,56 +21,76 @@ repositories {
     }
 }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${game_version}-${forge_version}"
-
-    annotationProcessor "org.spongepowered:mixin:${mixin_processor_version}:processor"
-
-//    runtimeOnly(fg.deobf("mezz.jei:jei-${game_version}-forge:${jei_version}"))
-
-    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
+base {
+    archivesName = mod_id
 }
 
-processResources {
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+minecraft.accessTransformers.file file('src/main/resources/META-INF/accesstransformer.cfg')
+
+sourceSets {
+    // include generated resources
+    main.resources { srcDir 'src/generated/resources' }
+
+    // include example addon
+//    exampleAddon.resources { srcDir 'example_addon' }
+}
+
+runs {
+    configureEach {
+        systemProperty 'forge.logging.console.level', 'debug'
+
+        modSources {
+            add project.sourceSets.main
+//            add project.sourceSets.exampleAddon
+        }
+    }
+
+    client {
+        programArguments.addAll '--username', 'Player###'
+    }
+
+    server {
+        programArgument '--nogui'
+    }
+
+    data {
+        programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
+
+    localRuntime "mezz.jei:jei-${game_version}-neoforge:${jei_version}"
+}
+
+tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
             minecraft_version: game_version,
             minecraft_version_range: game_version_range,
-            forge_version: forge_version,
-            forge_version_range: forge_version_range,
+            neo_version: neo_version,
+            neo_version_range: neo_version_range,
             loader_version_range: loader_version_range,
             mod_id: mod_id,
             mod_name: mod_name,
+            mod_description: mod_description,
             mod_version: mod_version,
-            game_pack_format: game_pack_format
+            license: license
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+    filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties
     }
 }
 
-mixin {
-    add sourceSets.main, "${mod_id}.mixins.refmap.json"
-    config "${mod_id}.mixins.json"
-
-    debug.export = true
-}
-
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
-    manifest {
-        attributes([
-                "Specification-Title"     : "dragonmounts",
-                "Specification-Vendor"    : "Kay9",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "Kay9",
-                "MixinConfigs"            : "${mod_id}.mixins.json"
-        ])
-    }
-
     // data-gen artifacts aren't necessary in release builds.
     exclude('com/github/kay9/dragonmounts/data/providers/**')
     exclude('.cache')
@@ -138,12 +100,9 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-// Merge the resources and classes into the same directory.
-// This is done because java expects modules to be in a single directory.
-// And if we have it in multiple we have to do performance intensive hacks like having the UnionFileSystem
-// This will eventually be migrated to ForgeGradle so modders don't need to manually do it. But that is later.
-sourceSets.each {
-    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
-    it.output.resourcesDir = dir
-    it.java.destinationDirectory = dir
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

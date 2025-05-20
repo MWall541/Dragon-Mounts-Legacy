@@ -3,6 +3,9 @@ package com.github.kay9.dragonmounts.util;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 
 public class DMLUtil
 {
@@ -17,4 +20,10 @@ public class DMLUtil
             return DataResult.error(() -> String.format("[%s] Hexadecimal Codec error: '%s' is not a valid hex value.", DragonMountsLegacy.MOD_ID, s));
         }
     }, Integer::toHexString);
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static <T> Registry<T> castRegistry(ResourceKey<? extends Registry<? extends T>> key)
+    {
+        return (Registry<T>) BuiltInRegistries.REGISTRY.getOrThrow((ResourceKey) key);
+    }
 }

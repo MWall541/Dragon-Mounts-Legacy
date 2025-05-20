@@ -120,7 +120,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
     public DragonBreed getBreed()
     {
-        return breed.get();
+        return breed.value();
     }
 
     public Holder<DragonBreed> getBreedHolder()
@@ -180,7 +180,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         for (Holder.Reference<DragonBreed> breed : DragonBreed.registry(getLevel().registryAccess()).holders().toList())
         {
             int points = 0;
-            for (Habitat habitat : breed.get().habitats()) points += habitat.getHabitatPoints(level, getBlockPos());
+            for (Habitat habitat : breed.value().habitats()) points += habitat.getHabitatPoints(level, getBlockPos());
             if (points > MIN_HABITAT_POINTS && points > prevPoints)
             {
                 winner = breed;
@@ -209,7 +209,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         {
             if (isRunning())
             {
-                if (transitioningBreed.get() == null) // invalid breed id, etc.
+                if (transitioningBreed.value() == null) // invalid breed id, etc.
                 {
                     transitionTime = 0;
                     return;
@@ -229,7 +229,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
                         var px = pos.getX() + random.nextDouble();
                         var py = pos.getY() + random.nextDouble();
                         var pz = pos.getZ() + random.nextDouble();
-                        var particle = HatchableEggBlock.dustParticleFor(transitioningBreed.get(), random);
+                        var particle = HatchableEggBlock.dustParticleFor(transitioningBreed.value(), random);
 
                         getLevel().addParticle(particle, px, py, pz, 0, 0, 0);
                     }

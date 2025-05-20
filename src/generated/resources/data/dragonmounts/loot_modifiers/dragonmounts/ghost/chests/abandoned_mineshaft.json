@@ -2,7 +2,7 @@
   "type": "dragonmounts:dragon_egg_loot",
   "conditions": [
     {
-      "condition": "forge:loot_table_id",
+      "condition": "neoforge:loot_table_id",
       "loot_table_id": "minecraft:chests/abandoned_mineshaft"
     },
     {

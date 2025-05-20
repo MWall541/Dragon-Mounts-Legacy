@@ -10,8 +10,8 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.data.GlobalLootModifierProvider;
-import net.minecraftforge.common.loot.LootTableIdCondition;
+import net.neoforged.neoforge.common.data.GlobalLootModifierProvider;
+import net.neoforged.neoforge.common.loot.LootTableIdCondition;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,17 +19,17 @@ class LootModifierProvider extends GlobalLootModifierProvider
 {
     LootModifierProvider(PackOutput output, String modid, CompletableFuture<HolderLookup.Provider> registries)
     {
-        super(output, modid, registries);
+        super(output, registries, modid);
     }
 
     @Override
-    protected void start(HolderLookup.Provider registry)
+    protected void start()
     {
         for (var target : DragonEggLootMod.BUILT_IN_CHANCES)
-            addWithConfigChance(target.forBreed(), target.target(), registry);
+            addWithConfigChance(target.forBreed(), target.target());
     }
 
-    private void addWithConfigChance(ResourceKey<DragonBreed> breedId, ResourceKey<LootTable> table, HolderLookup.Provider registry)
+    private void addWithConfigChance(ResourceKey<DragonBreed> breedId, ResourceKey<LootTable> table)
     {
         var conditions = new LootItemCondition[]{
                 LootTableIdCondition.builder(table.location()).build(),
@@ -37,7 +37,7 @@ class LootModifierProvider extends GlobalLootModifierProvider
         };
 
         var path = String.join("/", breedId.location().getNamespace(), breedId.location().getPath(), table.location().getPath());
-        Holder<DragonBreed> breed = DragonBreed.get(breedId, registry);
+        Holder<DragonBreed> breed = DragonBreed.get(breedId, registries);
         super.add(path, new DragonEggLootMod(conditions, breed, false));
     }
 }

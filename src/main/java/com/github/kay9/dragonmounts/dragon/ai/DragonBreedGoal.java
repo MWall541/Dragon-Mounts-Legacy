@@ -5,8 +5,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.level.GameRules;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class DragonBreedGoal extends BreedGoal
     protected void breed()
     {
         // Respect Mod compatibility
-        if (MinecraftForge.EVENT_BUS.post(new BabyEntitySpawnEvent(animal, partner, null)))
+        if (NeoForge.EVENT_BUS.post(new BabyEntitySpawnEvent(animal, partner, null)).isCanceled())
         {
             // Reset the "inLove" state for the animals
             animal.setAge(6000);

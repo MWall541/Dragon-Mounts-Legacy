@@ -14,7 +14,6 @@ import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -30,8 +29,9 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.client.ClientHooks;
+import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -48,7 +48,7 @@ import java.util.function.Consumer;
  * Load events register our custom content into the game,
  * Game events are the way the mod interacts with the game's behavior.
  * Event methods can be triggered by:
- *  - Mod loader event dispatchers ({@link ForgeModImpl})
+ *  - Mod loader event dispatchers ({@link NeoModImpl})
  *  - Mixins that inject callbacks to here
  */
 public class DragonMountsLegacy
@@ -68,12 +68,12 @@ public class DragonMountsLegacy
     static void registerRenderers()
     {
         EntityRenderers.register(DMLRegistry.DRAGON.get(), DragonRenderer::new);
-        ForgeHooksClient.registerLayerDefinition(DragonRenderer.MODEL_LOCATION, () -> DragonModel.createBodyLayer(DragonModel.Properties.STANDARD));
+        ClientHooks.registerLayerDefinition(DragonRenderer.MODEL_LOCATION, () -> DragonModel.createBodyLayer(DragonModel.Properties.STANDARD));
     }
 
-    static void registerEggModelLoader(BiConsumer<String, IGeometryLoader<DragonEggModel>> registrar)
+    static void registerEggModelLoader(BiConsumer<ResourceLocation, IGeometryLoader<DragonEggModel>> registrar)
     {
-        registrar.accept("dragon_egg", DragonEggModel.Loader.INSTANCE);
+        registrar.accept(id("dragon_egg"), DragonEggModel.Loader.INSTANCE);
     }
 
     static void registerItemColors(ItemColors colors)
@@ -116,9 +116,12 @@ public class DragonMountsLegacy
         registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
     }
 
-    static void registerEntityDataSerializers()
+    static void registerOtherObjects(Registry<?> registry)
     {
-        EntityDataSerializers.registerSerializer(TameableDragon.DRAGON_BREED_SERIALIZER);
+        if (registry.key() == NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS)
+        {
+            Registry.register(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, id("dragon_breed_serializer"), TameableDragon.DRAGON_BREED_SERIALIZER);
+        }
     }
 
     // ========================
@@ -144,9 +147,9 @@ public class DragonMountsLegacy
         return false;
     }
 
-    static void clientTick(boolean head)
+    static void clientTick()
     {
-        if (!head) MountControlsMessenger.tick();
+        MountControlsMessenger.tick();
     }
 
     static void onKeyPress(int key, int action, int modifiers)

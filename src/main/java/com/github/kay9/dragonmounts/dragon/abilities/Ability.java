@@ -2,14 +2,13 @@ package com.github.kay9.dragonmounts.dragon.abilities;
 
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.util.DMLUtil;
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -42,8 +41,7 @@ import java.util.function.Supplier;
 public interface Ability
 {
     ResourceKey<Registry<MapCodec<? extends Factory<? extends Ability>>>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("ability_type"));
-    Supplier<IForgeRegistry<MapCodec<? extends Factory<? extends Ability>>>> REGISTRY = Suppliers.memoize(() -> RegistryManager.ACTIVE.getRegistry(REGISTRY_KEY));
-    Codec<Factory<? extends Ability>> CODEC = Codec.lazyInitialized(() -> REGISTRY.get().getCodec().dispatch(Factory::codec, Function.identity()));
+    Codec<Factory<? extends Ability>> CODEC = Codec.lazyInitialized(() -> DMLUtil.castRegistry(REGISTRY_KEY).byNameCodec().dispatch(Factory::codec, Function.identity()));
 
     default void initialize(TameableDragon dragon) {}
 

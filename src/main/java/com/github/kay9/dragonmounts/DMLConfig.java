@@ -6,7 +6,7 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Map;
 
@@ -14,37 +14,37 @@ import static com.github.kay9.dragonmounts.dragon.DragonBreed.BuiltIn.*;
 
 public class DMLConfig
 {
-    public static final ForgeConfigSpec COMMON_SPEC;
+    public static final ModConfigSpec COMMON_SPEC;
 
-    private static final ForgeConfigSpec.BooleanValue ALLOW_EGG_OVERRIDE;
+    private static final ModConfigSpec.BooleanValue ALLOW_EGG_OVERRIDE;
 
     public static boolean allowEggOverride()
     {
         return ALLOW_EGG_OVERRIDE.get();
     }
 
-    private static final ForgeConfigSpec.BooleanValue REPLENISH_EGGS;
+    private static final ModConfigSpec.BooleanValue REPLENISH_EGGS;
 
     public static boolean replenishEggs()
     {
         return REPLENISH_EGGS.get();
     }
 
-    private static final ForgeConfigSpec.BooleanValue USE_LOOT_TABLES;
+    private static final ModConfigSpec.BooleanValue USE_LOOT_TABLES;
 
     public static boolean useLootTables()
     {
         return USE_LOOT_TABLES.get();
     }
 
-    private static final ForgeConfigSpec.BooleanValue UPDATE_HABITATS;
+    private static final ModConfigSpec.BooleanValue UPDATE_HABITATS;
 
     public static boolean updateHabitats()
     {
         return UPDATE_HABITATS.get();
     }
 
-    private static final Map<String, ForgeConfigSpec.DoubleValue> EGG_CHANCES;
+    private static final Map<String, ModConfigSpec.DoubleValue> EGG_CHANCES;
 
     public static float getEggChanceFor(String configTarget)
     {
@@ -53,7 +53,7 @@ public class DMLConfig
         return chance.get().floatValue();
     }
 
-    private static final Map<String, ForgeConfigSpec.IntValue> REPRO_LIMITS;
+    private static final Map<String, ModConfigSpec.IntValue> REPRO_LIMITS;
 
     public static int getReproLimitFor(String configTarget)
     {
@@ -64,7 +64,7 @@ public class DMLConfig
 
     static
     {
-        var configurator = new ForgeConfigSpec.Builder()
+        var configurator = new ModConfigSpec.Builder()
                 .push("config");
 
         ALLOW_EGG_OVERRIDE = configurator.comment(
@@ -113,16 +113,16 @@ public class DMLConfig
         COMMON_SPEC = configurator.build();
     }
 
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue CAMERA_DRIVEN_FLIGHT;
+    public static final ModConfigSpec.BooleanValue CAMERA_DRIVEN_FLIGHT;
 
     public static boolean cameraDrivenFlight()
     {
         return CAMERA_DRIVEN_FLIGHT.get();
     }
 
-    public static final ForgeConfigSpec.BooleanValue THIRD_PERSON_ON_MOUNT;
+    public static final ModConfigSpec.BooleanValue THIRD_PERSON_ON_MOUNT;
 
     public static boolean thirdPersonOnMount()
     {
@@ -131,16 +131,16 @@ public class DMLConfig
 
     // [0][0..2] = Back third person  ; distance, vertical, horizontal
     // [1][0..2] = Front third person ; distance, vertical, horizontal
-    private static final ForgeConfigSpec.DoubleValue[][] CAMERA_OFFSETS = new ForgeConfigSpec.DoubleValue[2][3];
+    private static final ModConfigSpec.DoubleValue[][] CAMERA_OFFSETS = new ModConfigSpec.DoubleValue[2][3];
 
-    public static ForgeConfigSpec.DoubleValue[] getCameraPerspectiveOffset(boolean back)
+    public static ModConfigSpec.DoubleValue[] getCameraPerspectiveOffset(boolean back)
     {
         return CAMERA_OFFSETS[back? 0 : 1];
     }
 
     static
     {
-        var configurator = new ForgeConfigSpec.Builder()
+        var configurator = new ModConfigSpec.Builder()
                 .push("client");
 
         CAMERA_DRIVEN_FLIGHT = configurator.comment(
@@ -164,9 +164,9 @@ public class DMLConfig
         CLIENT_SPEC = configurator.build();
     }
 
-    private static ImmutableMap<String, ForgeConfigSpec.DoubleValue> defineChanceEntries(ForgeConfigSpec.Builder configurator)
+    private static ImmutableMap<String, ModConfigSpec.DoubleValue> defineChanceEntries(ModConfigSpec.Builder configurator)
     {
-        var chances = ImmutableMap.<String, ForgeConfigSpec.DoubleValue>builder();
+        var chances = ImmutableMap.<String, ModConfigSpec.DoubleValue>builder();
         for (var target : DragonEggLootMod.BUILT_IN_CHANCES)
         {
             var path = formatEggTargetAsPath(target.forBreed(), target.target());
@@ -180,9 +180,9 @@ public class DMLConfig
         return chances.build();
     }
 
-    private static ImmutableMap<String, ForgeConfigSpec.IntValue> defineReproLimEntries(ForgeConfigSpec.Builder configurator)
+    private static ImmutableMap<String, ModConfigSpec.IntValue> defineReproLimEntries(ModConfigSpec.Builder configurator)
     {
-        var lims = ImmutableMap.<String, ForgeConfigSpec.IntValue>builder();
+        var lims = ImmutableMap.<String, ModConfigSpec.IntValue>builder();
         for (var type : new ResourceKey[]{AETHER, END, FIRE, FOREST, GHOST, ICE, NETHER, WATER})
         {
             var path = type.location().getPath();
@@ -200,10 +200,10 @@ public class DMLConfig
                 forTarget.location().getPath().substring(forTarget.location().getPath().lastIndexOf('/') + 1));
     }
 
-    private static void defineCameraOffsetEntries(ForgeConfigSpec.Builder configurator)
+    private static void defineCameraOffsetEntries(ModConfigSpec.Builder configurator)
     {
         var perspectiveName = "back";
-        for (ForgeConfigSpec.DoubleValue[] perspective : CAMERA_OFFSETS)
+        for (ModConfigSpec.DoubleValue[] perspective : CAMERA_OFFSETS)
         {
             configurator.push("third_person_" + perspectiveName);
             perspectiveName = "front";

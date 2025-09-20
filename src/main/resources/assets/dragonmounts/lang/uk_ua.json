@@ -43,7 +43,7 @@
   "key.dragonmounts.dismount": "Dismount",
   "key.dragonmounts.camera_flight": "Flight Commands",
 
-  "mount.dragon.dragon_controls": "Натисніть %s, щоб здійнятися та %s, щоб спуститися",
+  "mount.dragon.dragon_controls": "Press %s to Ascend, %s to Descend and %s to Dismount",
   "mount.dragon.camera_controls.enabled": "%s тепер здіймається в напрямку вашого погляду",
   "mount.dragon.camera_controls.disabled": "%s тепер здіймається лише по вашій команді",
 

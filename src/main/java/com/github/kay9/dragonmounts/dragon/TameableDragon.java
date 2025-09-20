@@ -419,7 +419,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (isFlying() && hasLocalDriver())
         {
             moveForward = moveForward > 0? moveForward : 0;
-            if (driver.jumping) moveY = 1;
+            if (KeyMappings.FLIGHT_ASCENT_KEY.isDown()) moveY = 1;
             else if (KeyMappings.FLIGHT_DESCENT_KEY.isDown()) moveY = -1;
             else if (moveForward > 0 && DMLConfig.cameraDrivenFlight()) moveY = -driver.getXRot() / 90; // normalize from -1 to 1
         }
@@ -450,7 +450,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         if (isControlledByLocalInstance())
         {
-            if (!isFlying() && canFly() && driver.jumping) liftOff();
+            if (!isFlying() && canFly() && KeyMappings.FLIGHT_ASCENT_KEY.isDown()) liftOff();
         }
     }
 

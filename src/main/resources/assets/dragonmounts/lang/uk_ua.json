@@ -37,10 +37,13 @@
   "block.dragonmounts.dragon_egg.dragonmounts.nether": "Яйце незерського дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.water": "Яйце водяного дракона",
 
-  "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
-  "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",
+  "key.categories.dragonmounts": "Dragon Mounts: Legacy",
+  "key.dragonmounts.flight_ascent": "Ascend (Flying)",
+  "key.dragonmounts.flight_descent": "Descend (Flying)",
+  "key.dragonmounts.dismount": "Dismount",
+  "key.dragonmounts.camera_flight": "Flight Commands",
 
-  "mount.dragon.vertical_controls": "Натисніть %s, щоб здійнятися та %s, щоб спуститися",
+  "mount.dragon.dragon_controls": "Натисніть %s, щоб здійнятися та %s, щоб спуститися",
   "mount.dragon.camera_controls.enabled": "%s тепер здіймається в напрямку вашого погляду",
   "mount.dragon.camera_controls.disabled": "%s тепер здіймається лише по вашій команді",
 

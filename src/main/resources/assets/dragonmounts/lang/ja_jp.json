@@ -31,10 +31,13 @@
   "block.dragonmounts.dragon_egg.dragonmounts.nether": "ネザードラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.water": "ウォータードラゴンの卵",
 
-  "key.dragonmounts.flight_descent": "Dragon Mount フライト降下",
-  "key.dragonmounts.camera_flight": "Dragon Mount フライトコマンド",
+  "key.categories.dragonmounts": "Dragon Mounts: Legacy",
+  "key.dragonmounts.flight_ascent": "Ascend (Flying)",
+  "key.dragonmounts.flight_descent": "Descend (Flying)",
+  "key.dragonmounts.dismount": "Dismount",
+  "key.dragonmounts.camera_flight": "Flight Commands",
 
-  "mount.dragon.vertical_controls": "%sで上昇し%sで降下します",
+  "mount.dragon.dragon_controls": "%sで上昇し%sで降下します",
   "mount.dragon.camera_controls.enabled": "%sはあなたの方へ向かって上昇していきます",
   "mount.dragon.camera_controls.disabled": "%sはあなたのコマンドでのみ上昇するようになりました",
 

@@ -732,10 +732,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return super.getTypeName();
     }
 
-    public boolean isFoodItem(ItemStack stack)
-    {
+    public boolean isFoodItem(ItemStack stack) {
         var food = stack.getItem().getFoodProperties(stack, this);
-        return food != null && food.isMeat();
+
+        // Check if it has food properties and is meat
+        boolean isMeat = food != null && food.isMeat();
+
+        // Fish items only count if they have food properties
+        boolean isEdibleFish = stack.is(net.minecraft.tags.ItemTags.FISHES) && food != null;
+
+        return isMeat || isEdibleFish;
     }
 
     // the "food" that enables breeding mode

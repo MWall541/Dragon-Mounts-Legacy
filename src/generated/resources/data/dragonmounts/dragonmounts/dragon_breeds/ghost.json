@@ -1,5 +1,6 @@
 {
   "attributes": {
+    "minecraft:generic.armor": 4.0,
     "minecraft:generic.armor_toughness": 4.0,
     "minecraft:generic.max_health": 50.0
   },

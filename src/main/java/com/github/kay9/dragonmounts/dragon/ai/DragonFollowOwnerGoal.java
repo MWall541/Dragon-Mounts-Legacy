@@ -52,6 +52,8 @@ public class DragonFollowOwnerGoal extends Goal
 
     public boolean canUse()
     {
+        if (dragon.getTarget() != null) return false; // skip following if attacking
+
         LivingEntity livingentity = dragon.getOwner();
         if (livingentity == null) {
             return false;

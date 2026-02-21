@@ -141,11 +141,9 @@ public class DragonMountsLegacy
 
     static void clientTick(boolean head)
     {
-        if (!head) MountControlsMessenger.tick();
-    }
+        if (!head) return;
 
-    static void onKeyPress(int key, int action, int modifiers)
-    {
-        KeyMappings.handleKeyPress(key, action);
+        MountControlsMessenger.tick();
+        KeyMappings.clientTick();
     }
 }

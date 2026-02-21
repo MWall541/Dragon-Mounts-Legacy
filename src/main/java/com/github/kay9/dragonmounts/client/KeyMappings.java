@@ -32,20 +32,42 @@ public class KeyMappings
         registrar.accept(SHOOT_FIREBALL);
     }
 
-    public static void handleKeyPress(int key, int action)
-    {
-        if (key == CAMERA_CONTROLS.getKey().getValue()
-                && action == GLFW.GLFW_PRESS
-                && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon d)
-        {
-            DMLConfig.CAMERA_DRIVEN_FLIGHT.set(!DMLConfig.cameraDrivenFlight());
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("mount.dragon.camera_controls." + (DMLConfig.cameraDrivenFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
+    public static void clientTick() {
+        Minecraft mc = Minecraft.getInstance();
+
+        // Only run in-game
+        if (mc.player == null || mc.level == null) {
+            return;
         }
 
-        // Fireball Key
-        if (key == SHOOT_FIREBALL.getKey().getValue()
-                && action == GLFW.GLFW_PRESS
-                && Minecraft.getInstance().player.getVehicle() instanceof TameableDragon) {
+        var player = mc.player;
+
+        /*
+         * CAMERA TOGGLE (PRESS ONLY)
+         */
+        while (CAMERA_CONTROLS.consumeClick()) {
+            if (player.getVehicle() instanceof TameableDragon d) {
+
+                DMLConfig.CAMERA_DRIVEN_FLIGHT.set(!DMLConfig.cameraDrivenFlight());
+
+                player.displayClientMessage(
+                        Component.translatable(
+                                "mount.dragon.camera_controls." +
+                                        (DMLConfig.cameraDrivenFlight()
+                                                ? "enabled"
+                                                : "disabled"),
+                                d.getDisplayName()
+                        ),
+                        true
+                );
+            }
+        }
+
+        /*
+         * FIREBALL (HELD KEY)
+         */
+        if (SHOOT_FIREBALL.isDown()
+                && player.getVehicle() instanceof TameableDragon) {
 
             ForgeModImpl.NETWORK.sendToServer(new FireballPacket());
         }

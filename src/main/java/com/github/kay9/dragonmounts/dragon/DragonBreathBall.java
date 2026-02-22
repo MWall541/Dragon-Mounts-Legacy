@@ -123,7 +123,7 @@ public class DragonBreathBall extends LargeFireball {
                     }
                     // Deal damage to everyone not immune, even fire-immune mobs
                     if (owner instanceof LivingEntity livingOwner) {
-                        entity.hurt(level().damageSources().inFire(), 6.0f);
+                        entity.hurt(level().damageSources().fireball(this, livingOwner), 6.0f);
                     }
                 }
             }

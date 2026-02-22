@@ -1,6 +1,7 @@
 {
   "attributes": {
-    "minecraft:generic.max_health": 90.0
+    "minecraft:generic.max_health": 150.0,
+    "minecraft:generic.armor": 8.0
   },
   "habitats": [
     {

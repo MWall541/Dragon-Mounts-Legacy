@@ -1,5 +1,7 @@
 {
   "attributes": {
+    "minecraft:generic.max_health": 100.0,
+    "minecraft:generic.armor": 8.0,
     "minecraft:generic.attack_damage": 10.0
   },
   "abilities": [

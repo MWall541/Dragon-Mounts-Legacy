@@ -85,7 +85,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final double BASE_SPEED_GROUND = 0.3; // actual speed varies from ground friction
     public static final double BASE_SPEED_FLYING = 0.32;
     public static final double BASE_DAMAGE = 8;
-    public static final double BASE_HEALTH = 60;
+    public static final double BASE_HEALTH = 100;
     public static final double BASE_FOLLOW_RANGE = 16;
     public static final int BASE_KB_RESISTANCE = 1;
     public static final float BASE_WIDTH = 2.75f; // adult sizes

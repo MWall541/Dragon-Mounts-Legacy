@@ -54,7 +54,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x718AA9,
                             0xE6E6E6,
                             Optional.empty(),
-                            of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.225f),
+                            of(Attributes.FLYING_SPEED, TameableDragon.BASE_SPEED_FLYING * 1.225f, Attributes.ARMOR, 8.0D),
                             list(),
                             list(
                                     new HeightHabitat(3, false, 200)
@@ -66,7 +66,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x161616,
                             0xff63e8,
                             Optional.of(ParticleTypes.PORTAL),
-                            of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.5),
+                            of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.5, Attributes.ARMOR, 8.0D),
                             list(), // teleport ability?
                             list(
                                     DragonBreathHabitat.INSTANCE
@@ -78,7 +78,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x912400,
                             0xff9819,
                             Optional.of(ParticleTypes.FLAME),
-                            of(Attributes.ATTACK_DAMAGE, TameableDragon.BASE_DAMAGE + 2),
+                            of(Attributes.ATTACK_DAMAGE, TameableDragon.BASE_DAMAGE + 2, Attributes.ARMOR, 8.0D),
                             list(
                                     HotFeetAbility.INSTANCE
                             ),
@@ -92,7 +92,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x054a00,
                             0x0a9600,
                             Optional.of(ParticleTypes.HAPPY_VILLAGER),
-                            of(Attributes.MOVEMENT_SPEED, TameableDragon.BASE_SPEED_GROUND + 0.2),
+                            of(Attributes.MOVEMENT_SPEED, TameableDragon.BASE_SPEED_GROUND + 0.45, Attributes.ARMOR, 8.0D),
                             list(
                                     GreenToesAbility.INSTANCE
                             ),
@@ -107,7 +107,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0xc4c4c4,
                             0xc2f8ff,
                             Optional.empty(),
-                            of(Attributes.ARMOR_TOUGHNESS, 4.0D),
+                            of(Attributes.ARMOR_TOUGHNESS, 4.0D, Attributes.ARMOR, 6.0D),
                             list(
                                     ReaperStepAbility.INSTANCE
                             ),
@@ -124,7 +124,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0xffffff,
                             0x00E1FF,
                             Optional.of(ParticleTypes.SNOWFLAKE),
-                            of(Attributes.ATTACK_DAMAGE, TameableDragon.BASE_DAMAGE + 2),
+                            of(Attributes.ATTACK_DAMAGE, TameableDragon.BASE_DAMAGE + 2, Attributes.ARMOR, 8.0D),
                             list(
                                     FrostWalkerAbility.create(3),
                                     SnowStepperAbility.INSTANCE
@@ -139,7 +139,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x912400,
                             0x2e0b00,
                             Optional.of(ParticleTypes.SOUL_FIRE_FLAME),
-                            of(Attributes.ARMOR, 8d),
+                            of(Attributes.ARMOR, 16.0d),
                             list(),
                             list(
                                     new NearbyBlocksHabitat(0.5f, BlockTagProvider.NETHER_DRAGON_HABITAT_BLOCKS),
@@ -152,7 +152,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x0062ff,
                             0x5999ff,
                             Optional.of(ParticleTypes.DRIPPING_WATER),
-                            of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.25),
+                            of(Attributes.MAX_HEALTH, TameableDragon.BASE_HEALTH * 1.3, Attributes.ARMOR, 8.0D),
                             list(
                                     HydroStepAbility.INSTANCE
                             ),

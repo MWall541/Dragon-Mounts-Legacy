@@ -19,7 +19,7 @@ import java.util.Objects;
 
 public class DragonBreathBall extends LargeFireball {
 
-    private final double maxDistance = 16.0; // max distance in blocks
+    private final double maxDistance = 20.0; // max distance in blocks
     private final double startX;
     private final double startY;
     private final double startZ;

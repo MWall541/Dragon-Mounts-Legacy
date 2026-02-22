@@ -86,7 +86,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public static final double BASE_SPEED_FLYING = 0.32;
     public static final double BASE_DAMAGE = 8;
     public static final double BASE_HEALTH = 100;
-    public static final double BASE_FOLLOW_RANGE = 16;
+    public static final double BASE_FOLLOW_RANGE = 24;
     public static final int BASE_KB_RESISTANCE = 1;
     public static final float BASE_WIDTH = 2.75f; // adult sizes
     public static final float BASE_HEIGHT = 2.75f;
@@ -166,7 +166,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         goalSelector.addGoal(3, new DragonFireballAttackGoal(this));
         goalSelector.addGoal(4, new MeleeAttackGoal(this, 1, true));
         // goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
-        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1f, 10f, 3.5f, 32f));
+        goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1f, 24f, 3.5f, 32f));
         goalSelector.addGoal(6, new DragonBreedGoal(this));
         goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.85f));
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
@@ -390,15 +390,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         boolean flying = shouldFly();
         if (flying != isFlying())
         {
-            LivingEntity currentTarget = getTarget();
             setFlying(flying);
             if (isServer()) setNavigation(flying);
-
-            // reassign the target after navigation switch
-            if (currentTarget != null && canAttack(currentTarget)) {
-                setTarget(currentTarget);
-                navigation.moveTo(currentTarget, 1.0); // optional: restart pathfinding
-            }
         }
 
         // ----------------------------
@@ -407,7 +400,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         LivingEntity target = getTarget();
         if (target != null && canAttack(target)) {
             double dx = target.getX() - getX();
-            double dy = target.getY(0.5) - getEyeY(); // aim roughly at center
+            double dy = target.getY(0.3) - getEyeY(); // aim roughly at center
             double dz = target.getZ() - getZ();
             double distXZ = Math.sqrt(dx * dx + dz * dz);
 
@@ -1282,25 +1275,35 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return getControllingPassenger() instanceof Player p && p.isLocalPlayer();
     }
 
+    public double getMouthY() {
+        // Slightly below eyes.
+        return getEyeY() - 0.8 * getScale();
+    }
+
     @Override
     public void onKeyPacket(Entity keyPresser) {
         if (keyPresser.isPassengerOfSameVehicle(this)) {
             if (isServer() && this.getOwner() != null && this.getOwner().equals(keyPresser)) {
                 Vec3 look = this.getLookAngle();
                 Level level = this.level();
-                DragonBreathBall largefireball = new DragonBreathBall(level, this, look.x, look.y, look.z, 1);
-                largefireball.setOwner(keyPresser);
-                largefireball.setPos(this.getX() + look.x * 7.0D, this.getY(0.4D) + 0.4D, this.getZ() + look.z * 7.0D);
 
-                level.addFreshEntity(largefireball);
+                DragonBreathBall fireball = new DragonBreathBall(level, this, look.x, look.y, look.z, 1);
+                fireball.setOwner(keyPresser);
+                fireball.setPos(
+                        this.getX() + look.x * 5.0D,
+                        getMouthY(),
+                        this.getZ() + look.z * 5.0D
+                );
+
+                level.addFreshEntity(fireball);
             }
         }
     }
 
     public class DragonFireballAttackGoal extends Goal {
         private final TameableDragon dragon;
-        private int attackCooldown;
 
+        private int attackCooldown;
         private int burstShotsRemaining = 0;
         private int burstDelay = 0;
 
@@ -1308,7 +1311,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         private static final int BURST_SIZE = 15;
         private static final int BURST_INTERVAL = 0; // ticks between shots
-        private static final int BURST_COOLDOWN = 10; // delay between volleys
+        private static final int BURST_COOLDOWN = 2; // delay between volleys
+        private static final double MAX_ATTACK_DISTANCE_SQR = 2500.0;
+        private static final double MIN_FIREBALL_DISTANCE_SQR = 16.0;
 
         public DragonFireballAttackGoal(TameableDragon dragon) {
             this.dragon = dragon;
@@ -1316,66 +1321,54 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             this.attackCooldown = 0; // Initial cooldown
         }
 
-        @Override
-        public boolean canUse() {
-            LivingEntity target = this.dragon.getTarget();
-            if (target == null || !this.dragon.hasLineOfSight(target)) {
-                return false;
-            }
+        @Override public boolean canUse() {
+            LivingEntity target = dragon.getTarget();
+            if (target == null || !target.isAlive()) return false;
+            double distance = dragon.distanceToSqr(target);
+            return distance <= MAX_ATTACK_DISTANCE_SQR && distance >= MIN_FIREBALL_DISTANCE_SQR;
+        }
 
-            double distance = this.dragon.distanceToSqr(target);
-
-            // Only use fireball if the target is farther than 4 blocks (4*4 = 16)
-            return distance > 16;
+        @Override public boolean canContinueToUse() {
+            LivingEntity target = dragon.getTarget();
+            if (target == null || !target.isAlive()) return false;
+            double distance = dragon.distanceToSqr(target);
+            return distance <= MAX_ATTACK_DISTANCE_SQR && distance >= MIN_FIREBALL_DISTANCE_SQR;
         }
 
         @Override
         public void tick() {
-            LivingEntity target = this.dragon.getTarget();
-            if (target == null) return;
+            LivingEntity target = dragon.getTarget();
+            if (target != null) {
+                double distance = dragon.distanceToSqr(target);
+                if (distance >= MIN_FIREBALL_DISTANCE_SQR) {
+                    // ACTIVE BURST (shooting)
+                    if (burstShotsRemaining > 0) {
+                        if (--burstDelay <= 0) {
+                            ensureFlying();
+                            shootFireball(target);
 
-            // =========================
-            // ACTIVE BURST (shooting)
-            // =========================
-            if (burstShotsRemaining > 0) {
-                if (--burstDelay <= 0) {
-
-                    // Only lift off if not already flying
-                    if (!dragon.isFlying()) {
-                        liftOff();
-                        setFlying(true);
-                        startedFlying = true;
+                            burstShotsRemaining--;
+                            burstDelay = BURST_INTERVAL;
+                        }
+                        return; // fireball cooldown handled
                     }
 
-                    shootFireball(target);
+                    // COOLDOWN BETWEEN BURSTS
+                    if (attackCooldown > 0) {
+                        attackCooldown--;
+                        return;
+                    }
 
-                    burstShotsRemaining--;
-                    burstDelay = BURST_INTERVAL;
+                    // START NEW BURST
+                    burstShotsRemaining = BURST_SIZE;
+                    burstDelay = 0;
+                    attackCooldown = BURST_COOLDOWN;
+
+                    // Ensure dragon lifts off at start of burst if not already flying
+                    ensureFlying();
                 }
 
-                return;
-            }
-
-            // =========================
-            // COOLDOWN BETWEEN BURSTS
-            // =========================
-            if (attackCooldown > 0) {
-                attackCooldown--;
-                return;
-            }
-
-            // =========================
-            // START NEW BURST
-            // =========================
-            burstShotsRemaining = BURST_SIZE;
-            burstDelay = 0;
-            attackCooldown = BURST_COOLDOWN;
-
-            // Ensure dragon lifts off at start of burst if not already flying
-            if (!dragon.isFlying()) {
-                liftOff();
-                setFlying(true);
-                startedFlying = true;
+                dragon.getLookControl().setLookAt(target, 30.0F, 30.0F);
             }
         }
 
@@ -1391,15 +1384,28 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             }
         }
 
+        private void ensureFlying() {
+            // Only lift off if not already flying
+            if (!dragon.isFlying()) {
+                liftOff();
+                setFlying(true);
+                startedFlying = true;
+            }
+        }
+
         private void shootFireball(LivingEntity target) {
-            Level level = this.dragon.level();
             if (isServer()) {
-                Vec3 look = this.dragon.getLookAngle();
+                Vec3 look = dragon.getLookAngle();
+                Level level = dragon.level();
 
                 // Create and shoot fireball
-                DragonBreathBall fireball = new DragonBreathBall(level, this.dragon, look.x, look.y, look.z, 1);
-                fireball.setOwner(this.dragon);
-                fireball.setPos(this.dragon.getX() + look.x * 7.0D, this.dragon.getY(0.4D) + 0.4D, this.dragon.getZ() + look.z * 7.0D);
+                DragonBreathBall fireball = new DragonBreathBall(level, dragon, look.x, look.y, look.z, 1);
+                fireball.setOwner(dragon);
+                fireball.setPos(
+                        dragon.getX() + look.x * 5.0D,
+                        dragon.getMouthY(),
+                        dragon.getZ() + look.z * 5.0D
+                );
 
                 level.addFreshEntity(fireball);
             }

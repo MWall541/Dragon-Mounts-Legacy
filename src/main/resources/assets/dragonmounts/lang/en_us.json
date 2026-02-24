@@ -9,6 +9,7 @@
   "dragon_breed.dragonmounts.ice": "Ice Dragon",
   "dragon_breed.dragonmounts.nether": "Nether Dragon",
   "dragon_breed.dragonmounts.water": "Water Dragon",
+  "dragon_breed.dragonmounts.storm": "Storm Dragon",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
@@ -18,6 +19,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.ice": "Ice Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.nether": "Nether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.water": "Water Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.storm": "Storm Dragon Spawn Egg",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
@@ -35,6 +37,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.ice": "Ice Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.nether": "Nether Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.water": "Water Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.storm": "Storm Dragon Egg",
 
   "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
   "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",

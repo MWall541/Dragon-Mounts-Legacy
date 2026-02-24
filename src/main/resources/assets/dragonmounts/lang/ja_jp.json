@@ -9,6 +9,7 @@
   "dragon_breed.dragonmounts.ice": "アイスドラゴン",
   "dragon_breed.dragonmounts.nether": "ネザードラゴン",
   "dragon_breed.dragonmounts.water": "ウォータードラゴン",
+  "dragon_breed.dragonmounts.storm": "ストームドラゴン",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "エーテルドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "ファイアドラゴンのスポーンエッグ",
@@ -18,9 +19,15 @@
   "item.dragonmounts.spawn_egg.dragonmounts.ice": "アイスドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.nether": "ネザードラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.water": "ウォータードラゴンのスポーンエッグ",
+  "item.dragonmounts.spawn_egg.dragonmounts.storm": "ストームドラゴンのスポーンエッグ",
 
   "block.dragonmounts.dragon_egg.remaining_time": "%s秒以内に孵化します。",
-  "block.dragonmounts.dragon_egg.change_breeds": "クリエイティブモード：ドラゴンと対話することでドラゴンの品種がこの卵の品種に代わります。",
+  "block.dragonmounts.dragon_egg.desc1": "ドラゴンとの交流:",
+  "block.dragonmounts.dragon_egg.desc2": "品種タイプの変更",
+  "block.dragonmounts.dragon_egg.hatch_stage.0": "この卵が孵化するまでにはかなり時間がかかりそうです。",
+  "block.dragonmounts.dragon_egg.hatch_stage.1": "これから何が孵化するのでしょうか？孵化には程遠いようです。",
+  "block.dragonmounts.dragon_egg.hatch_stage.2": "時々動いているようです。孵化が近いのかもしれません。",
+  "block.dragonmounts.dragon_egg.hatch_stage.3": "中から音が聞こえます！もうすぐ孵化します！",
 
   "block.dragonmounts.dragon_egg.dragonmounts.aether": "エーテルドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.fire": "ファイアドラゴンの卵",
@@ -30,9 +37,11 @@
   "block.dragonmounts.dragon_egg.dragonmounts.ice": "アイスドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.nether": "ネザードラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.water": "ウォータードラゴンの卵",
+  "block.dragonmounts.dragon_egg.dragonmounts.storm": "ストームドラゴンの卵",
 
   "key.dragonmounts.flight_descent": "Dragon Mount フライト降下",
   "key.dragonmounts.camera_flight": "Dragon Mount フライトコマンド",
+  "key.dragonmounts.shoot_fireball": "Dragon Mount ドラゴンブレス",
 
   "mount.dragon.vertical_controls": "%sで上昇し%sで降下します",
   "mount.dragon.camera_controls.enabled": "%sはあなたの方へ向かって上昇していきます",

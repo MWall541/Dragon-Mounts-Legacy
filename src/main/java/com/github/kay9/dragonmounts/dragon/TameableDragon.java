@@ -570,27 +570,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
 
-        // ride on
-        if (isSaddled() && !isHatchling() && !isFood(stack) && this.canAddPassenger(player))
-        {
-            if (isServer())
-            {
-                // Ensure only the owner or others while the owner is riding can mount
-                if (getOwner() != null) {
-                    boolean isOwnerRiding = this.getPassengers().contains(getOwner());
-
-                    if (player.getUUID().equals(getOwner().getUUID()) || isOwnerRiding) {
-                        player.startRiding(this);
-                        navigation.stop();
-                        setTarget(null);
-                        setOrderedToSit(false);
-                        setInSittingPose(false);
-                        return InteractionResult.sidedSuccess(level().isClientSide);
-                    }
-                }
-            }
-        }
-
         // equip dragon armor
         DragonArmorType armorType = getArmorFromItem(stack);
 
@@ -632,6 +611,27 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
 
             return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+
+        // ride on
+        if (isSaddled() && !isHatchling() && !isFood(stack) && this.canAddPassenger(player))
+        {
+            if (isServer())
+            {
+                // Ensure only the owner or others while the owner is riding can mount
+                if (getOwner() != null) {
+                    boolean isOwnerRiding = this.getPassengers().contains(getOwner());
+
+                    if (player.getUUID().equals(getOwner().getUUID()) || isOwnerRiding) {
+                        player.startRiding(this);
+                        navigation.stop();
+                        setTarget(null);
+                        setOrderedToSit(false);
+                        setInSittingPose(false);
+                        return InteractionResult.sidedSuccess(level().isClientSide);
+                    }
+                }
+            }
         }
 
         return super.mobInteract(player, hand);

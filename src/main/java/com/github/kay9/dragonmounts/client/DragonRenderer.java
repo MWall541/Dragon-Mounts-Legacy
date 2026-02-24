@@ -239,7 +239,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
                         return;
 
                     renderColoredCutoutModel(
-                            getParentModel(),
+                            model,
                             texture,
                             ps,
                             buffer,

@@ -92,7 +92,7 @@ class DragonBreedProvider extends DatapackBuiltinEntriesProvider
                             0x054a00,
                             0x0a9600,
                             Optional.of(ParticleTypes.HAPPY_VILLAGER),
-                            of(Attributes.MOVEMENT_SPEED, TameableDragon.BASE_SPEED_GROUND + 0.45, Attributes.ARMOR, 8.0D),
+                            of(Attributes.MOVEMENT_SPEED, TameableDragon.BASE_SPEED_GROUND + 0.6, Attributes.ARMOR, 8.0D),
                             list(
                                     GreenToesAbility.INSTANCE
                             ),

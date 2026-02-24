@@ -2,7 +2,7 @@
   "attributes": {
     "minecraft:generic.max_health": 100.0,
     "minecraft:generic.armor": 8.0,
-    "minecraft:generic.movement_speed": 0.75
+    "minecraft:generic.movement_speed": 0.6
   },
   "abilities": [
     {

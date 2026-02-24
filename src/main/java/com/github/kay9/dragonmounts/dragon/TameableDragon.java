@@ -32,10 +32,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
@@ -98,6 +95,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private static final EntityDataAccessor<String> DATA_BREED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Boolean> DATA_SADDLED = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_AGE = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_ARMOR_TYPE = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.INT);
+    private static final DragonArmorType[] ARMOR_VALUES = DragonArmorType.values();
 
     // data NBT IDs
     public static final String NBT_BREED = "Breed";
@@ -107,6 +106,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // other constants
     public static final int AGE_UPDATE_INTERVAL = 100; // every 5 seconds
     public static final UUID SCALE_MODIFIER_UUID = UUID.fromString("856d4ba4-9ffe-4a52-8606-890bb9be538b"); // just a random uuid I took online
+    public static final UUID ARMOR_MODIFIER_UUID = UUID.fromString("2c7a6c2e-6f4c-4d4e-9f19-9c1d2bb6a111"); // just a random uuid I took online (1)
     public static final int GROUND_CLEARENCE_THRESHOLD = 3; // height in blocks (multiplied by scale of dragon)
 
     // server/client delegates
@@ -154,7 +154,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 .add(FOLLOW_RANGE, BASE_FOLLOW_RANGE)
                 .add(KNOCKBACK_RESISTANCE, BASE_KB_RESISTANCE)
                 .add(ATTACK_DAMAGE, BASE_DAMAGE)
-                .add(FLYING_SPEED, BASE_SPEED_FLYING);
+                .add(FLYING_SPEED, BASE_SPEED_FLYING)
+                .add(Attributes.ARMOR, 0.0D);
     }
 
     @Override
@@ -186,6 +187,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.define(DATA_BREED,"");
         entityData.define(DATA_SADDLED, false);
         entityData.define(DATA_AGE, 0); // default to adult stage
+        entityData.define(DATA_ARMOR_TYPE, DragonArmorType.NONE.ordinal());
     }
 
     @Override
@@ -198,6 +200,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
         else if (DATA_FLAGS_ID.equals(data)) refreshDimensions();
         else if (DATA_AGE.equals(data)) updateAgeProperties();
+        else if (DATA_ARMOR_TYPE.equals(data)) updateArmorAttributes();
         else super.onSyncedDataUpdated(data);
     }
 
@@ -210,6 +213,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         if (getBreed() != null) // breed is not read by the time the packet is being sent...
         {
+            if (hasArmor())
+                compound.putString("DragonArmor", getArmorType().name());
+
             compound.putString(NBT_BREED, getBreed().id(level().registryAccess()).toString());
             for (var ability : getAbilities()) ability.write(this, compound);
         }
@@ -232,6 +238,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         // set sync age data after we read it in AgeableMob
         entityData.set(DATA_AGE, getAge());
+
+        if (compound.contains("DragonArmor")) {
+            setArmorType(DragonArmorType.valueOf(compound.getString("DragonArmor")));
+        }
     }
 
     public void setBreed(DragonBreed dragonBreed)
@@ -579,6 +589,49 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     }
                 }
             }
+        }
+
+        // equip dragon armor
+        DragonArmorType armorType = getArmorFromItem(stack);
+
+        if (isTamedFor(player)
+                && armorType != DragonArmorType.NONE
+                && !hasArmor()) {
+
+            if (isServer()) {
+                setArmorType(armorType);
+
+                stack.shrink(1);
+                playSound(SoundEvents.HORSE_ARMOR, 1f, 1f);
+            }
+
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+
+        // give that armor back
+        if (isTamedFor(player)
+                && hasArmor()
+                && stack.is(Tags.Items.SHEARS)) {
+
+            if (isServer()) {
+
+                DragonArmorType oldArmor = getArmorType();
+
+                setArmorType(DragonArmorType.NONE);
+
+                ItemStack armorStack = getItemFromArmor(oldArmor);
+
+                if (!armorStack.isEmpty()) {
+                    if (!player.addItem(armorStack)) {
+                        player.drop(armorStack, false);
+                    }
+                }
+            }
+
+            player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
+            stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+
+            return InteractionResult.sidedSuccess(level().isClientSide);
         }
 
         return super.mobInteract(player, hand);
@@ -1409,6 +1462,81 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
                 level.addFreshEntity(fireball);
             }
+        }
+    }
+
+    public enum DragonArmorType {
+        NONE(0, "none"),
+        COPPER(4, "copper"),
+        IRON(8, "iron"),
+        GOLD(6, "gold"),
+        EMERALD(10, "emerald"),
+        DIAMOND(12, "diamond"),
+        NETHERITE(16, "netherite");
+
+        public final double armorValue;
+        public final String textureName;
+
+        DragonArmorType(double armorValue, String textureName) {
+            this.armorValue = armorValue;
+            this.textureName = textureName;
+        }
+    }
+
+    public DragonArmorType getArmorType() {
+        return ARMOR_VALUES[entityData.get(DATA_ARMOR_TYPE)];
+    }
+
+    public boolean hasArmor() {
+        return getArmorType() != DragonArmorType.NONE;
+    }
+
+    public void setArmorType(DragonArmorType type) {
+        entityData.set(DATA_ARMOR_TYPE, type.ordinal());
+        updateArmorAttributes();
+    }
+
+    private DragonArmorType getArmorFromItem(ItemStack stack) {
+        if (stack.is(Blocks.COPPER_BLOCK.asItem())) return DragonArmorType.COPPER;
+        if (stack.is(Blocks.IRON_BLOCK.asItem())) return DragonArmorType.IRON;
+        if (stack.is(Blocks.GOLD_BLOCK.asItem())) return DragonArmorType.GOLD;
+        if (stack.is(Blocks.EMERALD_BLOCK.asItem())) return DragonArmorType.EMERALD;
+        if (stack.is(Blocks.DIAMOND_BLOCK.asItem())) return DragonArmorType.DIAMOND;
+        if (stack.is(Blocks.NETHERITE_BLOCK.asItem())) return DragonArmorType.NETHERITE;
+
+        return DragonArmorType.NONE;
+    }
+
+    public ItemStack getItemFromArmor(DragonArmorType type) {
+        return switch (type) {
+            case COPPER -> new ItemStack(Items.COPPER_BLOCK);
+            case IRON -> new ItemStack(Items.IRON_BLOCK);
+            case GOLD -> new ItemStack(Items.GOLD_BLOCK);
+            case DIAMOND -> new ItemStack(Items.DIAMOND_BLOCK);
+            case EMERALD -> new ItemStack(Items.EMERALD_BLOCK);
+            case NETHERITE -> new ItemStack(Items.NETHERITE_BLOCK);
+            default -> ItemStack.EMPTY;
+        };
+    }
+
+    private void updateArmorAttributes() {
+        if (!isServer()) return;
+
+        AttributeInstance armorAttr = getAttribute(Attributes.ARMOR);
+        if (armorAttr == null) return;
+
+        armorAttr.removeModifier(ARMOR_MODIFIER_UUID);
+
+        DragonArmorType type = getArmorType();
+        if (type != DragonArmorType.NONE) {
+            armorAttr.addTransientModifier(
+                    new AttributeModifier(
+                            ARMOR_MODIFIER_UUID,
+                            "Dragon armor",
+                            type.armorValue,
+                            AttributeModifier.Operation.ADDITION
+                    )
+            );
         }
     }
 }

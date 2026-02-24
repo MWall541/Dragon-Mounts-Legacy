@@ -34,6 +34,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     private static final int LAYER_BODY = 0;
     private static final int LAYER_GLOW = 1;
     private static final int LAYER_SADDLE = 2;
+    private static final int LAYER_ARMOR = 3;
 
     private final DragonModel defaultModel;
     private final Map<ResourceLocation, DragonModel> modelCache;
@@ -47,6 +48,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         this.modelCache = bakeModels(modelBakery);
 
         addLayer(GLOW_LAYER);
+        addLayer(ARMOR_LAYER);
         addLayer(SADDLE_LAYER);
         addLayer(DEATH_LAYER);
     }
@@ -194,4 +196,57 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
             super(null, null, null, 0, false, true, null, null);
         }
     }
+
+    private static final Map<TameableDragon.DragonArmorType, ResourceLocation> ARMOR_TEXTURES =
+            Util.make(new HashMap<>(), map -> {
+
+                for (var type : TameableDragon.DragonArmorType.values()) {
+                    if (type == TameableDragon.DragonArmorType.NONE) continue;
+
+                    map.put(type,
+                            DragonMountsLegacy.id(
+                                    "textures/entity/dragon/armor/" +
+                                            type.textureName + ".png"
+                            )
+                    );
+                }
+            });
+
+    public final RenderLayer<TameableDragon, DragonModel> ARMOR_LAYER =
+            new RenderLayer<>(this)
+            {
+                @Override
+                public void render(
+                        PoseStack ps,
+                        MultiBufferSource buffer,
+                        int light,
+                        TameableDragon dragon,
+                        float limbSwing,
+                        float limbSwingAmount,
+                        float partialTicks,
+                        float ageInTicks,
+                        float netHeadYaw,
+                        float headPitch)
+                {
+                    var armor = dragon.getArmorType();
+
+                    if (armor == TameableDragon.DragonArmorType.NONE)
+                        return;
+
+                    ResourceLocation texture = ARMOR_TEXTURES.get(armor);
+
+                    if (texture == null)
+                        return;
+
+                    renderColoredCutoutModel(
+                            getParentModel(),
+                            texture,
+                            ps,
+                            buffer,
+                            light,
+                            dragon,
+                            1f, 1f, 1f
+                    );
+                }
+            };
 }

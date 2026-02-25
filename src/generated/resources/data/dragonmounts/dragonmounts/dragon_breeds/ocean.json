@@ -1,0 +1,36 @@
+{
+  "attributes": {
+    "minecraft:generic.max_health": 130.0,
+    "minecraft:generic.armor": 8.0
+  },
+  "abilities": [
+    {
+      "type": "dragonmounts:hydro_step"
+    }
+  ],
+  "habitats": [
+    {
+      "type": "dragonmounts:in_fluid",
+      "fluid_tag": "minecraft:water",
+      "point_multiplier": 1.0
+    },
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:water_dragon_habitat_blocks"
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:bubble"
+  },
+  "immunities": [
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:drown",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "9efff3",
+  "reproduction_limit": "config:water",
+  "secondary_color": "4dc9ff"
+}

@@ -28,7 +28,14 @@ public class MountControlsMessenger
     {
         if (delay > 0)
         {
-            var player = Minecraft.getInstance().player;
+            var mc = Minecraft.getInstance();
+            var player = mc.player;
+
+            if (player == null || mc.level == null) {
+                delay = 0;
+                return;
+            }
+
             if (!(player.getVehicle() instanceof TameableDragon))
             {
                 delay = 0;

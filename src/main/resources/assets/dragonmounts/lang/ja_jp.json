@@ -57,6 +57,7 @@
   "key.dragonmounts.flight_descent": "Dragon Mount フライト降下",
   "key.dragonmounts.camera_flight": "Dragon Mount フライトコマンド",
   "key.dragonmounts.shoot_fireball": "Dragon Mount ドラゴンブレス",
+  "key.dragonmounts.dragon_inventory": "Dragon Mount ドラゴンインベントリ",
 
   "mount.dragon.vertical_controls": "%sで上昇し%sで降下します",
   "mount.dragon.camera_controls.enabled": "%sはあなたの方へ向かって上昇していきます",

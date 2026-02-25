@@ -5,6 +5,7 @@ import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.ForgeModImpl;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.network.FireballPacket;
+import com.github.kay9.dragonmounts.network.OpenDragonInventoryPacket;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -18,6 +19,7 @@ public class KeyMappings
     public static final KeyMapping FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z, "key.categories.movement");
     public static final KeyMapping CAMERA_CONTROLS = keymap("camera_flight", GLFW.GLFW_KEY_F6, "key.categories.movement");
     public static final KeyMapping SHOOT_FIREBALL = keymap("shoot_fireball", InputConstants.KEY_G, "key.categories.movement");
+    public static final KeyMapping DRAGON_INVENTORY = keymap("dragon_inventory", InputConstants.KEY_I, "key.categories.movement");
 
     @SuppressWarnings({"ConstantConditions"})
     private static KeyMapping keymap(String name, int defaultMapping, String category)
@@ -30,6 +32,7 @@ public class KeyMappings
         registrar.accept(FLIGHT_DESCENT_KEY);
         registrar.accept(CAMERA_CONTROLS);
         registrar.accept(SHOOT_FIREBALL);
+        registrar.accept(DRAGON_INVENTORY);
     }
 
     public static void clientTick() {
@@ -66,10 +69,16 @@ public class KeyMappings
         /*
          * FIREBALL (HELD KEY)
          */
-        if (SHOOT_FIREBALL.isDown()
-                && player.getVehicle() instanceof TameableDragon) {
-
+        if (SHOOT_FIREBALL.isDown() && player.getVehicle() instanceof TameableDragon) {
             ForgeModImpl.NETWORK.sendToServer(new FireballPacket());
+        }
+
+        if (DRAGON_INVENTORY.consumeClick()) {
+            if (player.getVehicle() instanceof TameableDragon dragon) {
+                ForgeModImpl.NETWORK.sendToServer(
+                        new OpenDragonInventoryPacket(dragon.getId())
+                );
+            }
         }
     }
 }

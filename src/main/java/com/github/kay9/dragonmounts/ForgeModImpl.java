@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.client.MountCameraManager;
 import com.github.kay9.dragonmounts.network.FireballPacket;
+import com.github.kay9.dragonmounts.network.OpenDragonInventoryPacket;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.MinecraftForge;
@@ -57,6 +58,15 @@ public class ForgeModImpl
                 FireballPacket::encode, // Encoding logic
                 FireballPacket::decode, // Decoding logic
                 FireballPacket::handle // Handling logic when the packet is received
+        );
+
+        // Open Dragon Inventory packet
+        NETWORK.registerMessage(
+                1, // Packet ID (incremented)
+                OpenDragonInventoryPacket.class,
+                OpenDragonInventoryPacket::encode,
+                OpenDragonInventoryPacket::decode,
+                OpenDragonInventoryPacket::handle
         );
 
         var modBus = FMLJavaModLoadingContext.get().getModEventBus();

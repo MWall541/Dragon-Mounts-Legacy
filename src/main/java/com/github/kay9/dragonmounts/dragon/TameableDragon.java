@@ -30,6 +30,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
@@ -43,7 +45,10 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SaddleItem;
@@ -76,7 +81,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * @author Kay9
  */
 @SuppressWarnings({"deprecation", "SameReturnValue"})
-public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable, KeybindUsingMount
+public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable, KeybindUsingMount, MenuProvider
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3; // actual speed varies from ground friction
@@ -97,6 +102,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private static final EntityDataAccessor<Integer> DATA_AGE = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_ARMOR_TYPE = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.INT);
     private static final DragonArmorType[] ARMOR_VALUES = DragonArmorType.values();
+    private static final EntityDataAccessor<Boolean> DATA_HAS_CHEST = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
+    private SimpleContainer chestInventory;
 
     // data NBT IDs
     public static final String NBT_BREED = "Breed";
@@ -188,6 +195,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.define(DATA_SADDLED, false);
         entityData.define(DATA_AGE, 0); // default to adult stage
         entityData.define(DATA_ARMOR_TYPE, DragonArmorType.NONE.ordinal());
+        entityData.define(DATA_HAS_CHEST, false);
     }
 
     @Override
@@ -219,6 +227,20 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             compound.putString(NBT_BREED, getBreed().id(level().registryAccess()).toString());
             for (var ability : getAbilities()) ability.write(this, compound);
         }
+
+        // Chest inventory
+        if (hasChest() && chestInventory != null) {
+            CompoundTag invTag = new CompoundTag();
+
+            for (int i = 0; i < chestInventory.getContainerSize(); i++) {
+                ItemStack stack = chestInventory.getItem(i);
+                if (!stack.isEmpty()) {
+                    invTag.put("Slot" + i, stack.save(new CompoundTag()));
+                }
+            }
+
+            compound.put("DragonChest", invTag);
+        }
     }
 
     @Override
@@ -241,6 +263,22 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         if (compound.contains("DragonArmor")) {
             setArmorType(DragonArmorType.valueOf(compound.getString("DragonArmor")));
+        }
+
+        if (compound.contains("DragonChest")) {
+            setHasChest(true); // ensures inventory exists and syncs DATA_HAS_CHEST
+
+            if (chestInventory == null)
+                chestInventory = new SimpleContainer(27);
+
+            CompoundTag invTag = compound.getCompound("DragonChest");
+            for (int i = 0; i < chestInventory.getContainerSize(); i++) {
+                if (invTag.contains("Slot" + i)) {
+                    chestInventory.setItem(i, ItemStack.of(invTag.getCompound("Slot" + i)));
+                }
+            }
+        } else {
+            setHasChest(false); // fallback if NBT doesn't have chest
         }
     }
 
@@ -573,9 +611,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // equip dragon armor
         DragonArmorType armorType = getArmorFromItem(stack);
 
-        if (isTamedFor(player)
-                && armorType != DragonArmorType.NONE
-                && !hasArmor()) {
+        if (isTamedFor(player) && armorType != DragonArmorType.NONE && !hasArmor()) {
 
             if (isServer()) {
                 setArmorType(armorType);
@@ -588,9 +624,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // give that armor back
-        if (isTamedFor(player)
-                && hasArmor()
-                && stack.is(Tags.Items.SHEARS)) {
+        if (isTamedFor(player) && hasArmor() && stack.is(Tags.Items.SHEARS)) {
 
             if (isServer()) {
 
@@ -605,6 +639,46 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                         player.drop(armorStack, false);
                     }
                 }
+            }
+
+            player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
+            stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+
+        // put chest on dragon
+        if (isTamedFor(player) && !hasChest() && stack.is(Items.CHEST)) {
+
+            if (isServer()) {
+                setHasChest(true);
+                stack.shrink(1);
+                playSound(SoundEvents.DONKEY_CHEST, 1f, 1f);
+            }
+
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
+
+        // remove chest
+        if (isTamedFor(player) && hasChest() && stack.is(Tags.Items.SHEARS)) {
+
+            if (isServer()) {
+
+                // drop contents first
+                if (chestInventory != null) {
+                    for (int i = 0; i < chestInventory.getContainerSize(); i++) {
+                        ItemStack stackInSlot = chestInventory.getItem(i);
+                        if (!stackInSlot.isEmpty()) {
+                            spawnAtLocation(stackInSlot);
+                            chestInventory.setItem(i, ItemStack.EMPTY); // clear after dropping
+                        }
+                    }
+                }
+
+                setHasChest(false);
+
+                // drop chest item
+                spawnAtLocation(Items.CHEST);
             }
 
             player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
@@ -876,7 +950,31 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super.dropCustomDeathLoot(source, looting, recentlyHitIn);
 
+        // Drop saddle
         if (isSaddled()) spawnAtLocation(Items.SADDLE);
+
+        // Drop block used for the armor
+        if (hasArmor()) {
+            ItemStack armorStack = getItemFromArmor(getArmorType());
+
+            if (!armorStack.isEmpty()) {
+                spawnAtLocation(armorStack);
+            }
+        }
+
+        // Drop chest + contents
+        if (hasChest() && chestInventory != null) {
+
+            spawnAtLocation(Items.CHEST);
+
+            for (int i = 0; i < chestInventory.getContainerSize(); i++) {
+                ItemStack stack = chestInventory.getItem(i);
+
+                if (!stack.isEmpty()) {
+                    spawnAtLocation(stack);
+                }
+            }
+        }
     }
 
     @Override
@@ -1537,6 +1635,41 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                             AttributeModifier.Operation.ADDITION
                     )
             );
+        }
+    }
+
+    public boolean hasChest() {
+        return entityData.get(DATA_HAS_CHEST);
+    }
+
+    public void setHasChest(boolean value) {
+        entityData.set(DATA_HAS_CHEST, value);
+
+        if (hasChest() && chestInventory == null) {
+            chestInventory = new SimpleContainer(27);
+        }
+        if (!hasChest()) {
+            chestInventory = null;
+        }
+    }
+
+    @Override
+    public @NotNull Component getDisplayName() {
+        return getName();
+    }
+
+    @Override
+    public ChestMenu createMenu(int id, Inventory playerInventory, Player player) {
+
+        if (!hasChest())
+            return null;
+
+        return new ChestMenu(MenuType.GENERIC_9x3, id, playerInventory, chestInventory, 3);
+    }
+
+    public void openChestInventory(Player player) {
+        if (isServer() && hasChest()) {
+            player.openMenu(this);
         }
     }
 }

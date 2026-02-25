@@ -31,10 +31,10 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
     public static final ModelLayerLocation MODEL_LOCATION = new ModelLayerLocation(DragonMountsLegacy.id("dragon"), "main");
     private static final ResourceLocation[] DEFAULT_TEXTURES = computeTextureCacheFor(DragonBreed.BuiltIn.END.location());
     private static final ResourceLocation DISSOLVE_TEXTURE = DragonMountsLegacy.id("textures/entity/dragon/dissolve.png");
+    private static final ResourceLocation CHEST_TEXTURE = DragonMountsLegacy.id("textures/entity/dragon/chest.png");
     private static final int LAYER_BODY = 0;
     private static final int LAYER_GLOW = 1;
     private static final int LAYER_SADDLE = 2;
-    private static final int LAYER_ARMOR = 3;
 
     private final DragonModel defaultModel;
     private final Map<ResourceLocation, DragonModel> modelCache;
@@ -50,6 +50,7 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
         addLayer(GLOW_LAYER);
         addLayer(ARMOR_LAYER);
         addLayer(SADDLE_LAYER);
+        addLayer(CHEST_LAYER);
         addLayer(DEATH_LAYER);
     }
 
@@ -241,6 +242,36 @@ public class DragonRenderer extends MobRenderer<TameableDragon, DragonModel>
                     renderColoredCutoutModel(
                             model,
                             texture,
+                            ps,
+                            buffer,
+                            light,
+                            dragon,
+                            1f, 1f, 1f
+                    );
+                }
+            };
+
+    public final RenderLayer<TameableDragon, DragonModel> CHEST_LAYER =
+            new RenderLayer<>(this) {
+                @Override
+                public void render(
+                        PoseStack ps,
+                        MultiBufferSource buffer,
+                        int light,
+                        TameableDragon dragon,
+                        float limbSwing,
+                        float limbSwingAmount,
+                        float partialTicks,
+                        float ageInTicks,
+                        float netHeadYaw,
+                        float headPitch) {
+
+                    if (!dragon.hasChest())
+                        return;
+
+                    renderColoredCutoutModel(
+                            model,
+                            CHEST_TEXTURE,
                             ps,
                             buffer,
                             light,

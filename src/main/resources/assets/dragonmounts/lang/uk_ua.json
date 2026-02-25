@@ -57,6 +57,7 @@
   "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
   "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",
   "key.dragonmounts.shoot_fireball": "Драконячий подих",
+  "key.dragonmounts.dragon_inventory": "Інвентар дракона",
 
   "mount.dragon.vertical_controls": "Натисніть %s, щоб здійнятися та %s, щоб спуститися",
   "mount.dragon.camera_controls.enabled": "%s тепер здіймається в напрямку вашого погляду",

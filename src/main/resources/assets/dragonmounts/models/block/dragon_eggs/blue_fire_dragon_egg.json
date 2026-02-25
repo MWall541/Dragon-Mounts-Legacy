@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/dragon_egg",
+  "textures": {
+    "particle": "dragonmounts:block/blue_fire_dragon_egg",
+    "all": "dragonmounts:block/blue_fire_dragon_egg"
+  }
+}

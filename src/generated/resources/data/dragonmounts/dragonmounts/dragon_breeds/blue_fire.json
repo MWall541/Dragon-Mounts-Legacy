@@ -1,0 +1,39 @@
+{
+  "attributes": {
+    "minecraft:generic.max_health": 100.0,
+    "minecraft:generic.armor": 8.0,
+    "minecraft:generic.attack_damage": 10.0
+  },
+  "abilities": [
+    {
+      "type": "dragonmounts:hot_feet"
+    }
+  ],
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:blue_fire_dragon_habitat_blocks",
+      "point_multiplier": 1.0
+    },
+    {
+      "type": "dragonmounts:in_fluid",
+      "fluid_tag": "minecraft:lava",
+      "point_multiplier": 3.0
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:soul_fire_flame"
+  },
+  "immunities": [
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:lava",
+    "minecraft:hot_floor",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "0011ff",
+  "reproduction_limit": "config:blue_fire",
+  "secondary_color": "00ccff"
+}

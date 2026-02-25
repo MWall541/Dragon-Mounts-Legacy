@@ -7,8 +7,9 @@
   },
   "habitats": [
     {
-      "type": "dragonmounts:world_height",
-      "height": 200
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:storm_dragon_habitat_blocks",
+      "point_multiplier": 1.0
     }
   ],
   "immunities": [
@@ -19,6 +20,6 @@
     "minecraft:dragon_breath"
   ],
   "primary_color": "000435",
-  "reproduction_limit": "config:lightning",
+  "reproduction_limit": "config:storm",
   "secondary_color": "ffff00"
 }

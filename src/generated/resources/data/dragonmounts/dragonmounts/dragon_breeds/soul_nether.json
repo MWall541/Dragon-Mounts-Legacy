@@ -6,7 +6,7 @@
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",
-      "block_tag": "dragonmounts:nether_dragon_habitat_blocks"
+      "block_tag": "dragonmounts:soul_nether_dragon_habitat_blocks"
     },
     {
       "type": "dragonmounts:biome",
@@ -15,7 +15,7 @@
     }
   ],
   "hatch_particles": {
-    "type": "minecraft:flame"
+    "type": "minecraft:soul_fire_flame"
   },
   "immunities": [
     "minecraft:on_fire",
@@ -26,7 +26,7 @@
     "minecraft:sweet_berry_bush",
     "minecraft:dragon_breath"
   ],
-  "primary_color": "912400",
-  "reproduction_limit": "config:nether",
-  "secondary_color": "2e0b00"
+  "primary_color": "00fbff",
+  "reproduction_limit": "config:soul_nether",
+  "secondary_color": "00424d"
 }

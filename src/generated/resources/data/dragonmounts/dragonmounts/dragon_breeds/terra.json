@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "minecraft:generic.max_health": 120.0,
+    "minecraft:generic.armor": 10.0
+  },
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:terra_dragon_habitat_blocks"
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:falling_dust"
+  },
+  "immunities": [
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "703e2e",
+  "reproduction_limit": "config:terra",
+  "secondary_color": "944528"
+}

@@ -13,6 +13,7 @@
     }
   ],
   "immunities": [
+    "minecraft:lightning_bolt",
     "minecraft:on_fire",
     "minecraft:in_fire",
     "minecraft:cactus",

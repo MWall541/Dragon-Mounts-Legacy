@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "minecraft:generic.armor": 8.0,
+    "minecraft:generic.max_health": 100.0
+  },
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:zombie_dragon_habitat_blocks",
+      "point_multiplier": 1.0
+    }
+  ],
+  "immunities": [
+    "minecraft:in_wall",
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:drown",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "567a42",
+  "reproduction_limit": "config:zombie",
+  "secondary_color": "a1a34d"
+}

@@ -2,8 +2,8 @@
   "attributes": {
     "minecraft:generic.max_health": 100.0,
     "minecraft:generic.armor": 4.0,
-    "minecraft:generic.flying_speed": 0.2,
-    "minecraft:generic.movement_speed": 0.3
+    "minecraft:generic.flying_speed": 0.35,
+    "minecraft:generic.movement_speed": 0.4
   },
   "habitats": [
     {
@@ -20,5 +20,5 @@
   ],
   "primary_color": "a9a9a9",
   "reproduction_limit": "config:lightning",
-  "secondary_color": "808080"
+  "secondary_color": "FFFF00"
 }

@@ -1,7 +1,7 @@
 {
   "attributes": {
-    "minecraft:generic.armor": 8.0,
-    "minecraft:generic.max_health": 100.0
+    "minecraft:generic.armor": 4.0,
+    "minecraft:generic.max_health": 80.0
   },
   "habitats": [
     {
@@ -11,6 +11,7 @@
     }
   ],
   "immunities": [
+    "minecraft:magic",
     "minecraft:in_wall",
     "minecraft:on_fire",
     "minecraft:in_fire",

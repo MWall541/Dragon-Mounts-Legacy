@@ -10,6 +10,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -73,8 +76,45 @@ public class KeyMappings
             ForgeModImpl.NETWORK.sendToServer(new FireballPacket());
         }
 
+
+        /*
+         * OPEN DRAGON INVENTORY
+         */
+        // OPEN DRAGON INVENTORY USING KEYBIND
         if (DRAGON_INVENTORY.consumeClick()) {
-            if (player.getVehicle() instanceof TameableDragon dragon) {
+            TameableDragon dragon = null;
+
+            // First, check if riding
+            if (player.getVehicle() instanceof TameableDragon d) {
+                dragon = d;
+            } else {
+                // Raytrace / attack-range check
+                Vec3 eyePos = player.getEyePosition(1.0f);
+                Vec3 look = player.getLookAngle();
+                Vec3 endPos = eyePos.add(look.scale(4.0)); // 4 block reach
+
+                // Raytrace to hit entities
+                double closestDist = Double.MAX_VALUE;
+                for (TameableDragon td : player.level().getEntitiesOfClass(TameableDragon.class,
+                        player.getBoundingBox().expandTowards(look.scale(5.0)))) {
+
+                    if (!td.hasChest()) continue;
+
+                    // Get bounding box and check intersection with ray
+                    var bb = td.getBoundingBox();
+                    var optionalHit = bb.clip(eyePos, endPos); // returns Optional<Vec3>
+                    if (optionalHit.isPresent()) {
+                        double distSqr = eyePos.distanceToSqr(optionalHit.get()); // unwrap
+                        if (distSqr < closestDist) {
+                            closestDist = distSqr;
+                            dragon = td;
+                        }
+                    }
+                }
+            }
+
+            // send packet if we found a dragon
+            if (dragon != null) {
                 ForgeModImpl.NETWORK.sendToServer(
                         new OpenDragonInventoryPacket(dragon.getId())
                 );

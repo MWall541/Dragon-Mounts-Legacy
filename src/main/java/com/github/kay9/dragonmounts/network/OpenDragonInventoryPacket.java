@@ -45,11 +45,7 @@ public class OpenDragonInventoryPacket {
 
             if (entity instanceof TameableDragon dragon) {
 
-                // security checks (VERY important)
-                if (!dragon.isOwnedBy(player))
-                    return;
-
-                if (player.getVehicle() != dragon)
+                if (!dragon.isOwnedBy(player) && !dragon.getPassengers().contains(player))
                     return;
 
                 dragon.openChestInventory(player);

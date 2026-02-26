@@ -19,7 +19,6 @@ import java.util.Objects;
 
 public class DragonBreathBall extends LargeFireball {
 
-    private final double maxDistance = 20.0; // max distance in blocks
     private final double startX;
     private final double startY;
     private final double startZ;
@@ -42,6 +41,8 @@ public class DragonBreathBall extends LargeFireball {
         double dy = this.getY() - startY;
         double dz = this.getZ() - startZ;
         double distanceSq = dx*dx + dy*dy + dz*dz;
+        // max distance in blocks
+        double maxDistance = 20.0;
         if (distanceSq > maxDistance * maxDistance) {
             // Explode even if it didn't hit a block
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
@@ -49,7 +50,7 @@ public class DragonBreathBall extends LargeFireball {
     }
 
     @Override
-    protected boolean canHitEntity(Entity target) {
+    protected boolean canHitEntity(@NotNull Entity target) {
 
         Entity owner = this.getOwner();
 
@@ -89,7 +90,7 @@ public class DragonBreathBall extends LargeFireball {
     }
 
     @Override
-    protected void onHit(HitResult result) {
+    protected void onHit(@NotNull HitResult result) {
         if (!this.level().isClientSide) {
             Entity owner = this.getOwner();
             // Check if owner is alive to prevent null pointer crashes

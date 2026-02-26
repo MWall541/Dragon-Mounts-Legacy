@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.dragon;
 import net.minecraft.core.Direction;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LlamaSpit;
@@ -87,6 +88,26 @@ public class IceDragonBreathBall extends LlamaSpit {
             Entity owner = this.getOwner();
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
+
+                // 10% chance to summon a cloud
+                if (this.random.nextFloat() < 0.10f) {
+                    AreaEffectCloud cloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
+                    if (owner instanceof LivingEntity livingOwner) {
+                        cloud.setOwner(livingOwner);
+                    }
+
+                    cloud.setParticle(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE);
+                    cloud.setRadius(2.0F);
+                    cloud.setDuration(60); // 3 seconds
+                    cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
+
+                    cloud.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2));
+                    cloud.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 0));
+                    cloud.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
+
+                    this.level().addFreshEntity(cloud);
+                }
+
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
 
@@ -112,14 +133,7 @@ public class IceDragonBreathBall extends LlamaSpit {
                     if (!immuneEntities.contains(entity)) {
                         if (owner instanceof LivingEntity livingOwner) {
                             entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
-
-                            // Apply Status Effects if the target is a LivingEntity
-                            if (entity instanceof LivingEntity livingTarget) {
-                                // Slowness III (amplifier 2) for 5 seconds (100 ticks)
-                                livingTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2), livingOwner);
-                                // Mining Fatigue I (amplifier 0) for 5 seconds (100 ticks)
-                                livingTarget.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 0), livingOwner);
-                            }
+                            entity.setTicksFrozen(560);
                         }
                     }
                 }

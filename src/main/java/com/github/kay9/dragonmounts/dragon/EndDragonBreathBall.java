@@ -1,12 +1,13 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import net.minecraft.core.Direction;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.DragonFireball;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -95,17 +96,21 @@ public class EndDragonBreathBall extends DragonFireball {
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
 
-                AreaEffectCloud cloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
-                if (owner instanceof LivingEntity livingOwner) {
-                    cloud.setOwner(livingOwner);
-                }
-                cloud.setParticle(net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH);
-                cloud.setRadius(1.0F);
-                cloud.setDuration(14); // 0.7
-                cloud.setRadiusPerTick((1.0F - cloud.getRadius()) / (float)cloud.getDuration());
-                cloud.setPotion(Potions.STRONG_HARMING); // Deals "Instant Damage" like the vanilla breath
+                // 10% chance to summon a cloud
+                if (this.random.nextFloat() < 0.10f) {
+                    AreaEffectCloud cloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
+                    if (owner instanceof LivingEntity livingOwner) {
+                        cloud.setOwner(livingOwner);
+                    }
 
-                this.level().addFreshEntity(cloud);
+                    cloud.setParticle(net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH);
+                    cloud.setRadius(2.0F);
+                    cloud.setDuration(60); // 3 seconds
+                    cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
+                    cloud.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
+
+                    this.level().addFreshEntity(cloud);
+                }
 
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
@@ -122,7 +127,7 @@ public class EndDragonBreathBall extends DragonFireball {
                     immuneEntities.add(owner);
                 }
 
-                // Add all nearby IceDragonBreathBall instances (to prevent chain fire)
+                // Add all nearby EndDragonBreathBall instances (to prevent chain fire)
                 immuneEntities.add(this); // the snowball itself
 
                 // Damage entities caught in the explosion

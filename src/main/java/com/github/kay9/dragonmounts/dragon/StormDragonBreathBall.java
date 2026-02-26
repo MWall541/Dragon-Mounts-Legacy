@@ -1,6 +1,9 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import net.minecraft.core.Direction;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Snowball;
@@ -86,18 +89,34 @@ public class StormDragonBreathBall extends Snowball {
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
 
-                net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(this.level());
-                if (lightning != null) {
-                    // Position the lightning exactly where the projectile hit
-                    lightning.moveTo(this.getX(), this.getY(), this.getZ());
+                // 10% chance to summon a lightning and a cloud
+                if (this.random.nextFloat() < 0.10f) {
+                    net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(this.level());
+                    if (lightning != null) {
+                        // Position the lightning exactly where the projectile hit
+                        lightning.moveTo(this.getX(), this.getY(), this.getZ());
 
-                    // Link the lightning to the shooter (for death messages/advancements)
-                    if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
-                        lightning.setCause(player);
+                        // Link the lightning to the shooter (for death messages/advancements)
+                        if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
+                            lightning.setCause(player);
+                        }
+
+                        // Add it to the world
+                        this.level().addFreshEntity(lightning);
                     }
 
-                    // Add it to the world
-                    this.level().addFreshEntity(lightning);
+                    AreaEffectCloud cloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
+                    if (owner instanceof LivingEntity livingOwner) {
+                        cloud.setOwner(livingOwner);
+                    }
+
+                    cloud.setParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK);
+                    cloud.setRadius(2.0F);
+                    cloud.setDuration(60); // 3 seconds
+                    cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
+                    cloud.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
+
+                    this.level().addFreshEntity(cloud);
                 }
 
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
@@ -115,7 +134,7 @@ public class StormDragonBreathBall extends Snowball {
                     immuneEntities.add(owner);
                 }
 
-                // Add all nearby IceDragonBreathBall instances (to prevent chain fire)
+                // Add all nearby StormDragonBreathBall instances (to prevent chain fire)
                 immuneEntities.add(this); // the snowball itself
 
                 // Damage entities caught in the explosion

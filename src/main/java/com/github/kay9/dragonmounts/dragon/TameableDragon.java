@@ -1446,7 +1446,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public double getMouthY() {
         // Slightly below eyes.
-        return getEyeY() - 0.8 * getScale();
+        return getEyeY() - getScale();
     }
 
     @Override
@@ -1454,17 +1454,19 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (keyPresser.isPassengerOfSameVehicle(this)) {
             if (isServer() && this.getOwner() != null && this.getOwner().equals(keyPresser)) {
                 Vec3 look = this.getLookAngle();
-                Level level = this.level();
 
-                DragonBreathBall fireball = new DragonBreathBall(level, this, look.x, look.y, look.z, 1);
-                fireball.setOwner(keyPresser);
-                fireball.setPos(
-                        this.getX() + look.x * 5.0D,
-                        getMouthY(),
-                        this.getZ() + look.z * 5.0D
-                );
-
-                level.addFreshEntity(fireball);
+                if (isIceBreed()) {
+                    IceDragonBreathBall iceBall = new IceDragonBreathBall(level(), this);
+                    iceBall.setOwner(keyPresser);
+                    iceBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
+                    iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
+                    level().addFreshEntity(iceBall);
+                } else {
+                    DragonBreathBall fireBall = new DragonBreathBall(level(), this, look.x, look.y, look.z, 1);
+                    fireBall.setOwner(keyPresser);
+                    fireBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
+                    level().addFreshEntity(fireBall);
+                }
             }
         }
     }
@@ -1565,18 +1567,20 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         private void shootFireball(LivingEntity target) {
             if (isServer()) {
                 Vec3 look = dragon.getLookAngle();
-                Level level = dragon.level();
 
                 // Create and shoot fireball
-                DragonBreathBall fireball = new DragonBreathBall(level, dragon, look.x, look.y, look.z, 1);
-                fireball.setOwner(dragon);
-                fireball.setPos(
-                        dragon.getX() + look.x * 5.0D,
-                        dragon.getMouthY(),
-                        dragon.getZ() + look.z * 5.0D
-                );
-
-                level.addFreshEntity(fireball);
+                if (dragon.isIceBreed()) {
+                    IceDragonBreathBall iceBall = new IceDragonBreathBall(dragon.level(), dragon);
+                    iceBall.setOwner(dragon);
+                    iceBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
+                    iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
+                    dragon.level().addFreshEntity(iceBall);
+                } else {
+                    DragonBreathBall fireBall = new DragonBreathBall(dragon.level(), dragon, look.x, look.y, look.z, 1);
+                    fireBall.setOwner(dragon);
+                    fireBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
+                    dragon.level().addFreshEntity(fireBall);
+                }
             }
         }
     }
@@ -1689,5 +1693,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (isServer() && hasChest()) {
             player.openMenu(this);
         }
+    }
+
+    public boolean isIceBreed() {
+        if (getBreed() == null) return false;
+        ResourceLocation breedId = getBreed().id(level().registryAccess());
+
+        // This checks if the ID matches the built-in ice key or has "ice" in the path
+        return  breedId.getPath().contains("ice") ||
+                breedId.getPath().contains("water") ||
+                breedId.getPath().contains("ocean") ||
+                breedId.getPath().contains("aether") ||
+                breedId.getPath().contains("ghost");
     }
 }

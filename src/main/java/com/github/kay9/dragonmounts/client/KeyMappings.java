@@ -10,8 +10,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
@@ -91,12 +89,13 @@ public class KeyMappings
                 // Raytrace / attack-range check
                 Vec3 eyePos = player.getEyePosition(1.0f);
                 Vec3 look = player.getLookAngle();
-                Vec3 endPos = eyePos.add(look.scale(4.0)); // 4 block reach
+                double range = player.getEntityReach() + 1.0;
+                Vec3 endPos = eyePos.add(look.scale(range));
 
                 // Raytrace to hit entities
                 double closestDist = Double.MAX_VALUE;
                 for (TameableDragon td : player.level().getEntitiesOfClass(TameableDragon.class,
-                        player.getBoundingBox().expandTowards(look.scale(5.0)))) {
+                        player.getBoundingBox().expandTowards(look.scale(range)))) {
 
                     if (!td.hasChest()) continue;
 

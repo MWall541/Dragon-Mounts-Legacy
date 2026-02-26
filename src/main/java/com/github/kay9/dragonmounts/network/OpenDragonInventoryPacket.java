@@ -45,9 +45,36 @@ public class OpenDragonInventoryPacket {
 
             if (entity instanceof TameableDragon dragon) {
 
-                if (!dragon.isOwnedBy(player) && !dragon.getPassengers().contains(player))
+                // must be tamed and has an owner
+                if (!dragon.isTame() || dragon.getOwnerUUID() == null)
                     return;
 
+                // must have a chest
+                if (!dragon.hasChest())
+                    return;
+
+                // If player is riding
+                if (player.getVehicle() == dragon) {
+
+                    // must actually be passenger
+                    if (!dragon.getPassengers().contains(player))
+                        return;
+
+                    // open the inventory while riding the dragon
+                    dragon.openChestInventory(player);
+                    return;
+                }
+
+                // if player is in interaction range
+                double range = player.getEntityReach() + 1.0;
+                if (player.distanceToSqr(dragon) > range * range)
+                    return;
+
+                // must see dragon (no opening through walls)
+                if (!player.hasLineOfSight(dragon))
+                    return;
+
+                // anyone in interaction range can open through keybind
                 dragon.openChestInventory(player);
             }
         });

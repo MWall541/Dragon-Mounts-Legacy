@@ -1467,6 +1467,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     stormBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
                     stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
                     level().addFreshEntity(stormBall);
+                } else if (isEndBreed()) {
+                    EndDragonBreathBall endBall = new EndDragonBreathBall(level(), this, look.x, look.y, look.z);
+                    endBall.setOwner(keyPresser);
+                    endBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
+                    level().addFreshEntity(endBall);
                 } else {
                     DragonBreathBall fireBall = new DragonBreathBall(level(), this, look.x, look.y, look.z, 1);
                     fireBall.setOwner(keyPresser);
@@ -1587,6 +1592,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     stormBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
                     stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
                     dragon.level().addFreshEntity(stormBall);
+                } else if (dragon.isEndBreed()) {
+                    EndDragonBreathBall endBall = new EndDragonBreathBall(dragon.level(), dragon, look.x, look.y, look.z);
+                    endBall.setOwner(dragon);
+                    endBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
+                    dragon.level().addFreshEntity(endBall);
                 } else {
                     DragonBreathBall fireBall = new DragonBreathBall(dragon.level(), dragon, look.x, look.y, look.z, 1);
                     fireBall.setOwner(dragon);
@@ -1723,5 +1733,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
         return  breedId.getPath().contains("storm");
+    }
+
+    public boolean isEndBreed() {
+        if (getBreed() == null) return false;
+        ResourceLocation breedId = getBreed().id(level().registryAccess());
+
+        return  breedId.getPath().contains("end");
     }
 }

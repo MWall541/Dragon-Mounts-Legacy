@@ -199,7 +199,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> data)
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> data)
     {
         if (DATA_BREED.equals(data))
         {
@@ -213,7 +213,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound)
+    public void addAdditionalSaveData(@NotNull CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
         compound.putBoolean(NBT_SADDLED, isSaddled());
@@ -474,7 +474,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public void travel(Vec3 vec3)
+    public void travel(@NotNull Vec3 vec3)
     {
         if (isFlying())
         {
@@ -494,7 +494,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected Vec3 getRiddenInput(Player driver, Vec3 move)
+    protected @NotNull Vec3 getRiddenInput(Player driver, Vec3 move)
     {
         double moveSideways = move.x;
         double moveY = move.y;
@@ -539,14 +539,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected float getRiddenSpeed(Player driver)
+    protected float getRiddenSpeed(@NotNull Player driver)
     {
         return (float) getAttributeValue(isFlying()? FLYING_SPEED : MOVEMENT_SPEED);
     }
 
     @Override
     @SuppressWarnings("ConstantConditions") // I bet the breed exists at this point...
-    public InteractionResult mobInteract(Player player, InteractionHand hand)
+    public @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand)
     {
         var stack = player.getItemInHand(hand);
 
@@ -742,7 +742,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource)
+    public boolean causeFallDamage(float pFallDistance, float pMultiplier, @NotNull DamageSource pSource)
     {
         return !canFly() && super.causeFallDamage(pFallDistance, pMultiplier, pSource);
     }
@@ -771,7 +771,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     @Nullable
     @Override
-    protected SoundEvent getHurtSound(DamageSource damageSourceIn)
+    protected SoundEvent getHurtSound(@NotNull DamageSource damageSourceIn)
     {
         return SoundEvents.ENDER_DRAGON_HURT;
     }
@@ -791,7 +791,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public SoundEvent getEatingSound(ItemStack itemStackIn)
+    public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStackIn)
     {
         return SoundEvents.GENERIC_EAT;
     }
@@ -810,7 +810,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * Plays step sound at given x, y, z for the entity
      */
     @Override
-    protected void playStepSound(BlockPos entityPos, BlockState state)
+    protected void playStepSound(@NotNull BlockPos entityPos, @NotNull BlockState state)
     {
         if (isInWater()) return;
 
@@ -862,7 +862,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected Component getTypeName()
+    protected @NotNull Component getTypeName()
     {
         if (getBreed() != null)
             return Component.translatable(DragonBreed.getTranslationKey(getBreed().id(level().registryAccess()).toString()));
@@ -915,7 +915,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * Returns the height of the eyes. Used for looking at other entities.
      */
     @Override
-    protected float getStandingEyeHeight(Pose poseIn, EntityDimensions sizeIn)
+    protected float getStandingEyeHeight(@NotNull Pose poseIn, EntityDimensions sizeIn)
     {
         return sizeIn.height * 1.2f;
     }
@@ -964,7 +964,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHitIn)
+    protected void dropCustomDeathLoot(@NotNull DamageSource source, int looting, boolean recentlyHitIn)
     {
         super.dropCustomDeathLoot(source, looting, recentlyHitIn);
 
@@ -996,7 +996,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected ResourceLocation getDefaultLootTable()
+    protected @NotNull ResourceLocation getDefaultLootTable()
     {
         if (getBreed() == null) return BuiltInLootTables.EMPTY;
         return getBreed().deathLoot();
@@ -1027,7 +1027,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public void swing(InteractionHand hand)
+    public void swing(@NotNull InteractionHand hand)
     {
         // play eating sound
         playSound(getAttackSound(), 1, 0.7f);
@@ -1038,7 +1038,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * Called when the entity is attacked.
      */
     @Override
-    public boolean hurt(DamageSource src, float par2)
+    public boolean hurt(@NotNull DamageSource src, float par2)
     {
         if (isInvulnerableTo(src)) return false;
 
@@ -1052,7 +1052,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * Returns true if the mob is currently able to mate with the specified mob.
      */
     @Override
-    public boolean canMate(Animal mate)
+    public boolean canMate(@NotNull Animal mate)
     {
         if (mate == this) return false; // No. Just... no.
         if (!(mate instanceof TameableDragon dragonMate)) return false;
@@ -1074,7 +1074,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     @Override
     @SuppressWarnings("ConstantConditions") // breed nullability is checked in canReproduce
-    public void spawnChildFromBreeding(ServerLevel level, Animal animal)
+    public void spawnChildFromBreeding(@NotNull ServerLevel level, @NotNull Animal animal)
     {
         if (!(animal instanceof TameableDragon mate))
         {
@@ -1135,7 +1135,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     @Override
     @SuppressWarnings("ConstantConditions")
-    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob)
+    public AgeableMob getBreedOffspring(@NotNull ServerLevel level, @NotNull AgeableMob mob)
     {
         var offspring = DMLRegistry.DRAGON.get().create(level);
         if (getBreed() != null) offspring.setBreed(getBreed());
@@ -1143,18 +1143,18 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean wantsToAttack(LivingEntity target, LivingEntity owner)
+    public boolean wantsToAttack(@NotNull LivingEntity target, @NotNull LivingEntity owner)
     {
         return !(target instanceof TamableAnimal tameable) || !Objects.equals(tameable.getOwner(), owner);
     }
 
     @Override
-    public boolean canAttack(LivingEntity target)
+    public boolean canAttack(@NotNull LivingEntity target)
     {
         return !isHatchling() && !hasControllingPassenger() && super.canAttack(target);
     }
 
-    public boolean canAddPassenger(Entity passenger) {
+    public boolean canAddPassenger(@NotNull Entity passenger) {
         return this.getPassengers().size() <= 2;
     }
 
@@ -1169,7 +1169,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected void addPassenger(Entity passenger)
+    protected void addPassenger(@NotNull Entity passenger)
     {
         super.addPassenger(passenger);
 
@@ -1187,14 +1187,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected void removePassenger(Entity passenger)
+    protected void removePassenger(@NotNull Entity passenger)
     {
         if (hasLocalDriver()) MountCameraManager.onDragonDismount();
         super.removePassenger(passenger);
     }
 
     @Override
-    protected void positionRider(Entity ridden, MoveFunction pCallback)
+    protected void positionRider(@NotNull Entity ridden, @NotNull MoveFunction pCallback)
     {
         int i = this.getPassengers().indexOf(ridden);
         if (i >= 0) {
@@ -1211,7 +1211,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 }
             }
 
-            Vec3 vec3 = (new Vec3(0.0D, 0.0D, (double)f)).yRot(-this.yBodyRot * ((float)Math.PI / 180F));
+            Vec3 vec3 = (new Vec3(0.0D, 0.0D, f)).yRot(-this.yBodyRot * ((float)Math.PI / 180F));
             pCallback.accept(ridden, this.getX() + vec3.x, this.getY() + (double)f1, this.getZ() + vec3.z);
             this.clampRotation(ridden);
         }
@@ -1276,7 +1276,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public EntityDimensions getDimensions(Pose poseIn)
+    public @NotNull EntityDimensions getDimensions(@NotNull Pose poseIn)
     {
         var height = isInSittingPose()? 2.15f : BASE_HEIGHT;
         var scale = getScale();
@@ -1405,7 +1405,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected void onChangedBlock(BlockPos pos)
+    protected void onChangedBlock(@NotNull BlockPos pos)
     {
         super.onChangedBlock(pos);
         for (var ability : getAbilities()) ability.onMove(this);
@@ -1428,13 +1428,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public Vec3 getLightProbePosition(float p_20309_)
+    public @NotNull Vec3 getLightProbePosition(float p_20309_)
     {
         return new Vec3(getX(), getY() + getBbHeight(), getZ());
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket()
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket()
     {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
@@ -1677,7 +1677,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public ChestMenu createMenu(int id, Inventory playerInventory, Player player) {
+    public ChestMenu createMenu(int id, @NotNull Inventory playerInventory, @NotNull Player player) {
 
         if (!hasChest())
             return null;

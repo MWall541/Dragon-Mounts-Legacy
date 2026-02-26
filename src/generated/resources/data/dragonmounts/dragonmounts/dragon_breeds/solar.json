@@ -1,0 +1,23 @@
+{
+  "attributes": {
+    "minecraft:generic.max_health": 100.0,
+    "minecraft:generic.armor": 8.0
+  },
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:solar_dragon_habitat_blocks",
+      "point_multiplier": 1.0
+    }
+  ],
+  "immunities": [
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "734F96",
+  "reproduction_limit": "config:solar",
+  "secondary_color": "ffff00"
+}

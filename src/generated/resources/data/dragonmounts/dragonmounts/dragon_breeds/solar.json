@@ -15,7 +15,8 @@
     "minecraft:in_fire",
     "minecraft:cactus",
     "minecraft:sweet_berry_bush",
-    "minecraft:dragon_breath"
+    "minecraft:dragon_breath",
+    "minecraft:wither"
   ],
   "primary_color": "734F96",
   "reproduction_limit": "config:solar",

@@ -611,12 +611,30 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // equip dragon armor
         DragonArmorType armorType = getArmorFromItem(stack);
 
-        if (isTamedFor(player) && armorType != DragonArmorType.NONE && !hasArmor()) {
+        if (isTamedFor(player) && armorType != DragonArmorType.NONE) {
 
             if (isServer()) {
+
+                // store old armor BEFORE replacing
+                DragonArmorType oldArmor = getArmorType();
+
+                // set new armor
                 setArmorType(armorType);
 
+                // consume held item
                 stack.shrink(1);
+
+                // give back old armor if present
+                if (oldArmor != DragonArmorType.NONE) {
+                    ItemStack oldStack = getItemFromArmor(oldArmor);
+
+                    if (!oldStack.isEmpty()) {
+                        if (!player.addItem(oldStack)) {
+                            player.drop(oldStack, false);
+                        }
+                    }
+                }
+
                 playSound(SoundEvents.HORSE_ARMOR, 1f, 1f);
             }
 

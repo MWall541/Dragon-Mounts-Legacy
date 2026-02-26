@@ -1,11 +1,11 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import net.minecraft.core.Direction;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.LlamaSpit;
+import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -16,14 +16,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Objects;
 
-public class IceDragonBreathBall extends LlamaSpit {
+public class StormDragonBreathBall extends Snowball {
 
     private final double startX;
     private final double startY;
     private final double startZ;
 
-    public IceDragonBreathBall(Level level, LivingEntity shooter) {
-        super(net.minecraft.world.entity.EntityType.LLAMA_SPIT, level);
+    public StormDragonBreathBall(Level level, LivingEntity shooter) {
+        super(level, shooter);
         this.setOwner(shooter);
         // Record starting position
         this.startX = shooter.getX();
@@ -69,7 +69,7 @@ public class IceDragonBreathBall extends LlamaSpit {
         }
 
         // Ignore other dragon breath balls
-        if (target instanceof IceDragonBreathBall) {
+        if (target instanceof StormDragonBreathBall) {
             return false;
         }
 
@@ -87,6 +87,21 @@ public class IceDragonBreathBall extends LlamaSpit {
             Entity owner = this.getOwner();
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
+
+                net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(this.level());
+                if (lightning != null) {
+                    // Position the lightning exactly where the projectile hit
+                    lightning.moveTo(this.getX(), this.getY(), this.getZ());
+
+                    // Link the lightning to the shooter (for death messages/advancements)
+                    if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
+                        lightning.setCause(player);
+                    }
+
+                    // Add it to the world
+                    this.level().addFreshEntity(lightning);
+                }
+
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
 
@@ -112,14 +127,6 @@ public class IceDragonBreathBall extends LlamaSpit {
                     if (!immuneEntities.contains(entity)) {
                         if (owner instanceof LivingEntity livingOwner) {
                             entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
-
-                            // Apply Status Effects if the target is a LivingEntity
-                            if (entity instanceof LivingEntity livingTarget) {
-                                // Slowness III (amplifier 2) for 5 seconds (100 ticks)
-                                livingTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2), livingOwner);
-                                // Mining Fatigue I (amplifier 0) for 5 seconds (100 ticks)
-                                livingTarget.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 0), livingOwner);
-                            }
                         }
                     }
                 }

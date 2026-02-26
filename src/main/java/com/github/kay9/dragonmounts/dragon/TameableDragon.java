@@ -1461,6 +1461,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     iceBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
                     iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
                     level().addFreshEntity(iceBall);
+                } else if (isStormBreed()) {
+                    StormDragonBreathBall stormBall = new StormDragonBreathBall(level(), this);
+                    stormBall.setOwner(keyPresser);
+                    stormBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
+                    stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
+                    level().addFreshEntity(stormBall);
                 } else {
                     DragonBreathBall fireBall = new DragonBreathBall(level(), this, look.x, look.y, look.z, 1);
                     fireBall.setOwner(keyPresser);
@@ -1575,6 +1581,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     iceBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
                     iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
                     dragon.level().addFreshEntity(iceBall);
+                } else if (dragon.isStormBreed()) {
+                    StormDragonBreathBall stormBall = new StormDragonBreathBall(dragon.level(), dragon);
+                    stormBall.setOwner(dragon);
+                    stormBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
+                    stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
+                    dragon.level().addFreshEntity(stormBall);
                 } else {
                     DragonBreathBall fireBall = new DragonBreathBall(dragon.level(), dragon, look.x, look.y, look.z, 1);
                     fireBall.setOwner(dragon);
@@ -1699,11 +1711,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (getBreed() == null) return false;
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
-        // This checks if the ID matches the built-in ice key or has "ice" in the path
         return  breedId.getPath().contains("ice") ||
                 breedId.getPath().contains("water") ||
                 breedId.getPath().contains("ocean") ||
                 breedId.getPath().contains("aether") ||
                 breedId.getPath().contains("ghost");
+    }
+
+    public boolean isStormBreed() {
+        if (getBreed() == null) return false;
+        ResourceLocation breedId = getBreed().id(level().registryAccess());
+
+        return  breedId.getPath().contains("storm");
     }
 }

@@ -1143,15 +1143,47 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean wantsToAttack(@NotNull LivingEntity target, @NotNull LivingEntity owner)
-    {
-        return !(target instanceof TamableAnimal tameable) || !Objects.equals(tameable.getOwner(), owner);
+    public boolean wantsToAttack(@NotNull LivingEntity target, @NotNull LivingEntity owner) {
+        // Never attack the owner or anyone the owner is allied with
+        if (target == owner || (owner != null && owner.isAlliedTo(target))) return false;
+
+        // If the target is another Tameable entity, check the owner
+        if (target instanceof OwnableEntity ownable) {
+            // If the other pet has the same owner, don't attack
+            if (Objects.equals(ownable.getOwnerUUID(), owner.getUUID())) {
+                return false;
+            }
+        }
+
+        // Check if the Dragon itself considers the target an ally
+        if (this.isAlliedTo(target)) return false;
+
+        return super.wantsToAttack(target, owner);
     }
 
     @Override
-    public boolean canAttack(@NotNull LivingEntity target)
-    {
-        return !isHatchling() && !hasControllingPassenger() && super.canAttack(target);
+    public boolean canAttack(@NotNull LivingEntity target) {
+        // Prevent attacking hatchlings or while being ridden
+        if (isHatchling() || hasControllingPassenger()) return false;
+
+        // Check if the target is an ally
+        if (this.isAlliedTo(target)) return false;
+
+        // If the target is another Tameable entity, check the owner
+        if (this.isTame()) {
+            LivingEntity owner = this.getOwner();
+
+            // Never attack the owner or anyone the owner is allied with
+            if (target == owner || (owner != null && owner.isAlliedTo(target))) return false;
+
+            if (target instanceof OwnableEntity ownable) {
+                if (this.getOwnerUUID() != null && this.getOwnerUUID().equals(ownable.getOwnerUUID())) {
+                    return false;
+                }
+            }
+        }
+
+        return super.canAttack(target);
     }
 
     public boolean canAddPassenger(@NotNull Entity passenger) {
@@ -1505,14 +1537,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         @Override public boolean canUse() {
             LivingEntity target = dragon.getTarget();
-            if (target == null || !target.isAlive()) return false;
+            if (target == null || !target.isAlive() || isFriendly(target)) return false;
             double distance = dragon.distanceToSqr(target);
             return distance <= MAX_ATTACK_DISTANCE_SQR && distance >= MIN_FIREBALL_DISTANCE_SQR;
         }
 
         @Override public boolean canContinueToUse() {
             LivingEntity target = dragon.getTarget();
-            if (target == null || !target.isAlive()) return false;
+            if (target == null || !target.isAlive() || isFriendly(target)) return false;
             double distance = dragon.distanceToSqr(target);
             return distance <= MAX_ATTACK_DISTANCE_SQR && distance >= MIN_FIREBALL_DISTANCE_SQR;
         }
@@ -1604,6 +1636,21 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     dragon.level().addFreshEntity(fireBall);
                 }
             }
+        }
+
+        private boolean isFriendly(LivingEntity target) {
+            // Check if the target is the owner
+            if (dragon.isOwnedBy(target)) return true;
+
+            // Check if the target is another tamed entity owned by the same person
+            if (target instanceof OwnableEntity ownableTarget) {
+                if (dragon.getOwnerUUID() != null && dragon.getOwnerUUID().equals(ownableTarget.getOwnerUUID())) {
+                    return true;
+                }
+            }
+
+            // Check if they are on the same Team (Scoreboard teams)
+            return dragon.isAlliedTo(target);
         }
     }
 

@@ -11,9 +11,9 @@ TWEAKS:
 - When ridden, dragons can shoot fireballs via keybind (default: G)
 
 - Dragons can be dual ridden by players
--- The owner is the only one that can control the dragon
--- The owner is the only one that can activate the fireball breath via keybind
--- When the owner dismounts, dies, or disconnects, the 2nd passenger will be forcefully dismounted as well
+- The owner is the only one that can control the dragon
+- The owner is the only one that can activate the fireball breath via keybind
+- When the owner dismounts, dies, or disconnects, the 2nd passenger will be forcefully dismounted as well
 
 - Dragons can now be given armor via Copper, Iron, Gold, Emerald, Diamond, and Netherite blocks. Each provide a different armor value. Armor can be retrieved via shear like the saddle. If given another block while wearing armor, the armor will swap and the player will get the previous armor's block back.
 
@@ -40,20 +40,20 @@ TWEAKS:
 - Added fish items to items that can heal dragons (I found it weird that you can tame them with fish but you can only heal them with meat).
 
 - Dragon variants' attribute tweaks
--- All dragons are fire immune
--- All dragons have increased health and armor
--- All dragons have natural regeneration
--- End Dragons and Water Dragons have their HP increased
--- Ice Dragons and Fire Dragons have their damage increased
--- Forest Dragons have increased movement speed
--- Aether Dragons are unchanged since their +flight speed attribute is enough as it is
--- Nether Dragons are also unchanged since their default +armor is enough as it is
--- Ghost Dragons have less HP but has armor toughness and immunity to arrows
+- All dragons are fire immune
+- All dragons have increased health and armor
+- All dragons have natural regeneration
+- End Dragons and Water Dragons have their HP increased
+- Ice Dragons and Fire Dragons have their damage increased
+- Forest Dragons have increased movement speed
+- Aether Dragons are unchanged since their +flight speed attribute is enough as it is
+- Nether Dragons are also unchanged since their default +armor is enough as it is
+- Ghost Dragons have less HP but has armor toughness and immunity to arrows
 
 - Dragon breath (fire) now sets entities on fire when it hits them directly if they are not fire immune and are in the explosion radius. 
--- It will also ensure that it has damage and sets things on fire more consistently. 
--- It respects doFireTick and mobGriefing gamerules. 
--- It now lights up blocks that can be lit like candles, campfires, redstone lamps, smokers, furnaces, blast furnaces, and tnt. If a modded block has the "LIT" blockstate, that will get lit as well.
+- It will also ensure that it has damage and sets things on fire more consistently. 
+- It respects doFireTick and mobGriefing gamerules. 
+- It now lights up blocks that can be lit like candles, campfires, redstone lamps, smokers, furnaces, blast furnaces, and tnt. If a modded block has the "LIT" blockstate, that will get lit as well.
 
 - Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact.
 
@@ -62,6 +62,8 @@ TWEAKS:
 - Updated JP and UK translations.
 
 - Tweaked dragon tails of Nether, Water, Ghost, and Forest dragons.
+
+Huge thanks to the Dragon Mounts 2 team for allowing me to use the updated textures for dragons!
 
 Dragon Mounts Discord: https://discord.gg/Ewm8aTTJ3K
 

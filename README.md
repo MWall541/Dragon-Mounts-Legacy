@@ -59,6 +59,8 @@ TWEAKS:
 
 - Dragon breath (end) has a chance of summoning a harming cloud upon explosion or impact.
 
+- Dragon breath (storm) has a chance of summoning lightning and a lightning field that damages mobs upon explosion or impact.
+
 - Updated JP and UK translations.
 
 - Tweaked dragon tails of Nether, Water, Ghost, and Forest dragons.

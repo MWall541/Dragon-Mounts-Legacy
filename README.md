@@ -55,7 +55,7 @@ TWEAKS:
 -- It respects doFireTick and mobGriefing gamerules. 
 -- It now lights up blocks that can be lit like candles, campfires, redstone lamps, smokers, furnaces, blast furnaces, and tnt. If a modded block has the "LIT" blockstate, that will get lit as well.
 
-- Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact which also damages enemies that step into it.
+- Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact.
 
 - Dragon breath (end) has a chance of summoning a harming cloud upon explosion or impact.
 

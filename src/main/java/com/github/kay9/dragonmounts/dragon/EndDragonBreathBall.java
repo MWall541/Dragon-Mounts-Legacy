@@ -16,7 +16,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Objects;
 
 public class EndDragonBreathBall extends DragonFireball {
 
@@ -98,7 +97,7 @@ public class EndDragonBreathBall extends DragonFireball {
 
                 // 10% chance to summon a cloud
                 if (this.random.nextFloat() < 0.10f) {
-                    AreaEffectCloud cloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
+                    DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
                     if (owner instanceof LivingEntity livingOwner) {
                         cloud.setOwner(livingOwner);
                     }
@@ -107,7 +106,6 @@ public class EndDragonBreathBall extends DragonFireball {
                     cloud.setRadius(2.0F);
                     cloud.setDuration(60); // 3 seconds
                     cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
-                    cloud.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
 
                     this.level().addFreshEntity(cloud);
                 }
@@ -115,35 +113,113 @@ public class EndDragonBreathBall extends DragonFireball {
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
 
-                // Build immune list
-                List<Entity> immuneEntities = List.of(Objects.requireNonNull(owner)); // owner (player or dragon)
-
-                // Add passengers of owner (mounted case)
-                immuneEntities = new java.util.ArrayList<>(immuneEntities);
-                immuneEntities.addAll(owner.getPassengers());
-
-                // Add the dragon itself if owner is a dragon riding entity (optional)
-                if (owner instanceof LivingEntity) {
-                    immuneEntities.add(owner);
-                }
-
-                // Add all nearby EndDragonBreathBall instances (to prevent chain fire)
-                immuneEntities.add(this); // the snowball itself
-
                 // Damage entities caught in the explosion
                 double radius = 1.5; // slightly larger than the explosion to catch entities around
                 List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
                 for (Entity entity : entities) {
-                    if (!immuneEntities.contains(entity)) {
-                        if (owner instanceof LivingEntity livingOwner) {
-                            entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                    if (entity instanceof LivingEntity livingTarget) {
+                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
+                        if (!isProtected) {
+                            if (owner instanceof LivingEntity livingOwner) {
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                            }
                         }
                     }
                 }
             }
 
-            // Remove the fireball entity
+            // Remove the ender fireball entity
             this.discard();
+        }
+    }
+
+    // Helper method to resolve the Iterable .contains issue
+    private static boolean isPartOfDragonCrew(Entity target, Entity shooter) {
+        if (shooter == null) return false;
+        if (target.equals(shooter)) return true;
+
+        // Check if they are sharing a vehicle or are passengers
+        if (target.isPassengerOfSameVehicle(shooter)) return true;
+
+        // Check if the target is a pet/dragon owned by the shooter
+        if (target instanceof net.minecraft.world.entity.OwnableEntity ownable) {
+            if (shooter.getUUID().equals(ownable.getOwnerUUID())) {
+                return true;
+            }
+        }
+
+        // If the shooter is the dragon, protect the player owner
+        if (shooter instanceof net.minecraft.world.entity.OwnableEntity ownableShooter) {
+            if (target.getUUID().equals(ownableShooter.getOwnerUUID())) {
+                return true;
+            }
+        }
+
+        // Manually iterate over indirect passengers since Iterable lacks .contains()
+        for (Entity passenger : shooter.getIndirectPassengers()) {
+            if (passenger.equals(target)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static class DragonBreathCloud extends AreaEffectCloud {
+        private final Entity dragonOwner;
+
+        public DragonBreathCloud(Level level, double x, double y, double z, Entity owner) {
+            super(level, x, y, z);
+            this.dragonOwner = owner;
+        }
+
+        @Override
+        public void tick() {
+            // Run base entity logic (movement, etc)
+            super.baseTick();
+
+            if (this.level().isClientSide) {
+                super.tick(); // Allow particles to render normally
+                return;
+            }
+
+            if (this.tickCount >= this.getWaitTime() + this.getDuration()) {
+                this.discard();
+                return;
+            }
+
+            // Handle Radius growth/shrink
+            float currentRadius = this.getRadius();
+            if (this.getRadiusPerTick() != 0.0F) {
+                currentRadius += this.getRadiusPerTick();
+                if (currentRadius < 0.5F) {
+                    this.discard();
+                    return;
+                }
+                this.setRadius(currentRadius);
+            }
+
+            // Application logic (every 5 ticks)
+            if (this.tickCount % 5 == 0) {
+                List<LivingEntity> targets = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
+
+                for (LivingEntity target : targets) {
+                    if (isPartOfDragonCrew(target, this.dragonOwner)) {
+                        continue;
+                    }
+
+                    if (target.isAffectedByPotions()) {
+                        double dx = target.getX() - this.getX();
+                        double dz = target.getZ() - this.getZ();
+                        double distSq = dx * dx + dz * dz;
+
+                        if (distSq <= (double) (currentRadius * currentRadius)) {
+                            // Apply effects manually to valid targets
+                            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -8,6 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -15,7 +17,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Objects;
 
 public class StormDragonBreathBall extends Snowball {
 
@@ -78,9 +79,7 @@ public class StormDragonBreathBall extends Snowball {
     }
 
     @Override
-    protected void onHitEntity(@NotNull EntityHitResult result) {
-        super.onHitEntity(result);
-    }
+    protected void onHitEntity(@NotNull EntityHitResult result) { super.onHitEntity(result); }
 
     @Override
     protected void onHit(@NotNull HitResult result) {
@@ -96,6 +95,9 @@ public class StormDragonBreathBall extends Snowball {
                         // Position the lightning exactly where the projectile hit
                         lightning.moveTo(this.getX(), this.getY(), this.getZ());
 
+                        // This prevents the bolt from damaging the crew or setting fire
+                        lightning.setVisualOnly(true);
+
                         // Link the lightning to the shooter (for death messages/advancements)
                         if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
                             lightning.setCause(player);
@@ -103,9 +105,29 @@ public class StormDragonBreathBall extends Snowball {
 
                         // Add it to the world
                         this.level().addFreshEntity(lightning);
+
+                        // MANUALLY TRIGGER VANILLA SECONDARY EFFECTS
+                        BlockPos hitPos = this.blockPosition();
+
+                        // Spawn fire exactly like vanilla
+                        int extraIgnitions = 4;
+                        this.spawnLightningFire(this.level(), hitPos, extraIgnitions);
+
+                        // Power lightning rods and clean oxidation off copper blocks
+                        this.cleanCopper(this.level(), hitPos);
+
+                        List<Entity> strikeTargets = this.level().getEntities(this, this.getBoundingBox().inflate(3.0D));
+                        for (Entity strikeTarget : strikeTargets) {
+                            if (strikeTarget instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
+                                // This ensures they get the "Struck by Lightning" tag/logic without hitting the crew
+                                if (!net.minecraftforge.event.ForgeEventFactory.onEntityStruckByLightning(livingTarget, lightning)) {
+                                    livingTarget.thunderHit((net.minecraft.server.level.ServerLevel)this.level(), lightning);
+                                }
+                            }
+                        }
                     }
 
-                    AreaEffectCloud cloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
+                    DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
                     if (owner instanceof LivingEntity livingOwner) {
                         cloud.setOwner(livingOwner);
                     }
@@ -114,7 +136,6 @@ public class StormDragonBreathBall extends Snowball {
                     cloud.setRadius(2.0F);
                     cloud.setDuration(60); // 3 seconds
                     cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
-                    cloud.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
 
                     this.level().addFreshEntity(cloud);
                 }
@@ -122,35 +143,145 @@ public class StormDragonBreathBall extends Snowball {
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
 
-                // Build immune list
-                List<Entity> immuneEntities = List.of(Objects.requireNonNull(owner)); // owner (player or dragon)
-
-                // Add passengers of owner (mounted case)
-                immuneEntities = new java.util.ArrayList<>(immuneEntities);
-                immuneEntities.addAll(owner.getPassengers());
-
-                // Add the dragon itself if owner is a dragon riding entity (optional)
-                if (owner instanceof LivingEntity) {
-                    immuneEntities.add(owner);
-                }
-
-                // Add all nearby StormDragonBreathBall instances (to prevent chain fire)
-                immuneEntities.add(this); // the snowball itself
-
                 // Damage entities caught in the explosion
                 double radius = 1.5; // slightly larger than the explosion to catch entities around
                 List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
                 for (Entity entity : entities) {
-                    if (!immuneEntities.contains(entity)) {
-                        if (owner instanceof LivingEntity livingOwner) {
-                            entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                    if (entity instanceof LivingEntity livingTarget) {
+                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
+                        if (!isProtected) {
+                            if (owner instanceof LivingEntity livingOwner) {
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                            }
                         }
                     }
                 }
             }
 
-            // Remove the fireball entity
+            // Remove the storm ball entity
             this.discard();
+        }
+    }
+
+    private void spawnLightningFire(Level level, BlockPos pos, int extraIgnitions) {
+        if (level.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK)) {
+            // Try to ignite the hit block
+            BlockState fireState = net.minecraft.world.level.block.BaseFireBlock.getState(level, pos);
+            if (level.getBlockState(pos).isAir() && fireState.canSurvive(level, pos)) {
+                level.setBlockAndUpdate(pos, fireState);
+            }
+
+            // Try to ignite neighbors (the extra sparks)
+            for (int i = 0; i < extraIgnitions; ++i) {
+                BlockPos randomPos = pos.offset(this.random.nextInt(3) - 1, this.random.nextInt(3) - 1, this.random.nextInt(3) - 1);
+                fireState = net.minecraft.world.level.block.BaseFireBlock.getState(level, randomPos);
+                if (level.getBlockState(randomPos).isAir() && fireState.canSurvive(level, randomPos)) {
+                    level.setBlockAndUpdate(randomPos, fireState);
+                }
+            }
+        }
+    }
+
+    private void cleanCopper(Level level, BlockPos pos) {
+        // This is essentially a manual call to the vanilla logic
+        // It's a bit complex to rewrite, but hitting a Lightning Rod or Copper with fire handles most visual cases.
+        BlockState state = level.getBlockState(pos);
+        if (state.is(net.minecraft.world.level.block.Blocks.LIGHTNING_ROD)) {
+            ((net.minecraft.world.level.block.LightningRodBlock)state.getBlock()).onLightningStrike(state, level, pos);
+        }
+        // Vanilla also cleans oxidation from copper in a small area
+        if (state.getBlock() instanceof net.minecraft.world.level.block.WeatheringCopper) {
+            level.setBlockAndUpdate(pos, net.minecraft.world.level.block.WeatheringCopper.getFirst(state));
+        }
+    }
+
+    // Helper method to resolve the Iterable .contains issue
+    private static boolean isPartOfDragonCrew(Entity target, Entity shooter) {
+        if (shooter == null) return false;
+        if (target.equals(shooter)) return true;
+
+        // Check if they are sharing a vehicle or are passengers
+        if (target.isPassengerOfSameVehicle(shooter)) return true;
+
+        // Check if the target is a pet/dragon owned by the shooter
+        if (target instanceof net.minecraft.world.entity.OwnableEntity ownable) {
+            if (shooter.getUUID().equals(ownable.getOwnerUUID())) {
+                return true;
+            }
+        }
+
+        // If the shooter is the dragon, protect the player owner
+        if (shooter instanceof net.minecraft.world.entity.OwnableEntity ownableShooter) {
+            if (target.getUUID().equals(ownableShooter.getOwnerUUID())) {
+                return true;
+            }
+        }
+
+        // Manually iterate over indirect passengers since Iterable lacks .contains()
+        for (Entity passenger : shooter.getIndirectPassengers()) {
+            if (passenger.equals(target)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static class DragonBreathCloud extends AreaEffectCloud {
+        private final Entity dragonOwner;
+
+        public DragonBreathCloud(Level level, double x, double y, double z, Entity owner) {
+            super(level, x, y, z);
+            this.dragonOwner = owner;
+        }
+
+        @Override
+        public void tick() {
+            // Run base entity logic (movement, etc)
+            super.baseTick();
+
+            if (this.level().isClientSide) {
+                super.tick(); // Allow particles to render normally
+                return;
+            }
+
+            if (this.tickCount >= this.getWaitTime() + this.getDuration()) {
+                this.discard();
+                return;
+            }
+
+            // Handle Radius growth/shrink
+            float currentRadius = this.getRadius();
+            if (this.getRadiusPerTick() != 0.0F) {
+                currentRadius += this.getRadiusPerTick();
+                if (currentRadius < 0.5F) {
+                    this.discard();
+                    return;
+                }
+                this.setRadius(currentRadius);
+            }
+
+            // Application logic (every 5 ticks)
+            if (this.tickCount % 5 == 0) {
+                List<LivingEntity> targets = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
+
+                for (LivingEntity target : targets) {
+                    if (isPartOfDragonCrew(target, this.dragonOwner)) {
+                        continue;
+                    }
+
+                    if (target.isAffectedByPotions()) {
+                        double dx = target.getX() - this.getX();
+                        double dz = target.getZ() - this.getZ();
+                        double distSq = dx * dx + dz * dz;
+
+                        if (distSq <= (double) (currentRadius * currentRadius)) {
+                            // Apply effects manually to valid targets
+                            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
+                        }
+                    }
+                }
+            }
         }
     }
 }

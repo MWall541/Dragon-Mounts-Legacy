@@ -15,7 +15,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Objects;
 
 public class DragonBreathBall extends LargeFireball {
 
@@ -82,10 +81,13 @@ public class DragonBreathBall extends LargeFireball {
         super.onHitEntity(result);
 
         Entity target = result.getEntity();
+        Entity owner = this.getOwner();
 
-        // Only set the entity on fire if it's not fire-immune
-        if (!target.fireImmune()) {
-            target.setSecondsOnFire(5); // 5 seconds of fire
+        if (!isPartOfDragonCrew(target, owner)) {
+            // Only set the entity on fire if it's not fire-immune
+            if (!target.fireImmune()) {
+                target.setSecondsOnFire(5);
+            }
         }
     }
 
@@ -95,69 +97,78 @@ public class DragonBreathBall extends LargeFireball {
             Entity owner = this.getOwner();
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
-                boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5f, flag, Level.ExplosionInteraction.MOB);
+                boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
+                boolean fireTicks = this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK);
 
-                // Build immune list
-                List<Entity> immuneEntities = List.of(Objects.requireNonNull(owner)); // owner (player or dragon)
-
-                // Add passengers of owner (mounted case)
-                immuneEntities = new java.util.ArrayList<>(immuneEntities);
-                immuneEntities.addAll(owner.getPassengers());
-
-                // Add the dragon itself if owner is a dragon riding entity (optional)
-                if (owner instanceof LivingEntity) {
-                    immuneEntities.add(owner);
-                }
-
-                // Add all nearby DragonBreathBall instances (to prevent chain fire)
-                immuneEntities.add(this); // the fireball itself
+                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5f, canGrief, Level.ExplosionInteraction.MOB);
 
                 // Set entities caught in the explosion on fire AND damage them
                 double radius = 1.5; // slightly larger than the explosion to catch entities around
                 List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
                 for (Entity entity : entities) {
-                    if (!immuneEntities.contains(entity)) {
-                        // Set on fire if possible
-                        if (!entity.fireImmune()) {
-                            entity.setSecondsOnFire(5);
-                        }
-                        // Deal damage to everyone not immune, even fire-immune mobs
-                        if (owner instanceof LivingEntity livingOwner) {
-                            entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                    if (entity instanceof LivingEntity livingTarget) {
+                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
+                        if (!isProtected) {
+                            if (owner instanceof LivingEntity livingOwner) {
+                                // Deal damage to everyone not immune, even fire-immune mobs
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                                // set on fire if possible
+                                if (!entity.fireImmune()) {
+                                    entity.setSecondsOnFire(5);
+                                }
+                            }
                         }
                     }
                 }
 
-                // Set fire to blocks hit
-                if (result.getType() == HitResult.Type.BLOCK) {
-                    BlockHitResult blockResult = (BlockHitResult) result;
+                if (result instanceof BlockHitResult blockResult) {
                     BlockPos hitPos = blockResult.getBlockPos();
+                    BlockState hitState = level().getBlockState(hitPos);
 
-                    // Iterate through the hit block and its immediate neighbors (3x3x3 area or just 6 faces)
-                    // For a "Breath" effect, checking the 6 cardinal directions is usually most efficient:
-                    for (Direction direction : Direction.values()) {
-                        BlockPos targetPos = hitPos.relative(direction);
-                        BlockState targetState = level().getBlockState(targetPos);
+                    // Ignite Special Blocks (Campfires, Candles, etc.), this mimics Flame arrows
+                    if (hitState.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
+                            && !hitState.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
+                        level().setBlockAndUpdate(hitPos, hitState.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, true));
+                    }
+                    // TNT Special Case
+                    else if (hitState.is(net.minecraft.world.level.block.Blocks.TNT)) {
+                        // We cast the owner to LivingEntity if possible to give the TNT a "source"
+                        LivingEntity igniter = (owner instanceof LivingEntity) ? (LivingEntity) owner : null;
 
-                        // CASE 1: The block is already flammable (Wood, Leaves, etc.)
-                        // We "consume" it instantly by replacing it with fire.
-                        if (targetState.isFlammable(level(), targetPos, direction.getOpposite())) {
-                            level().setBlockAndUpdate(targetPos, Blocks.FIRE.defaultBlockState());
-                        }
-                        // CASE 2: The block is air, but we want to set the "face" of the hit block on fire
-                        else if (level().isEmptyBlock(targetPos)) {
-                            BlockState hitState = level().getBlockState(hitPos);
-                            if (hitState.isFlammable(level(), hitPos, direction.getOpposite())) {
-                                level().setBlockAndUpdate(targetPos, Blocks.FIRE.defaultBlockState());
-                            }
-                        }
+                        // Instead of calling deprecated explode(), we call the block's caught fire logic
+                        (hitState.getBlock()).onCaughtFire(hitState, this.level(), hitPos, blockResult.getDirection(), igniter);
+
+                        // Remove the block after ignition
+                        this.level().removeBlock(hitPos, false);
                     }
 
-                    // Also try to replace the hit block itself if it's flammable
-                    BlockState hitState = level().getBlockState(hitPos);
-                    if (hitState.isFlammable(level(), hitPos, blockResult.getDirection())) {
-                        level().setBlockAndUpdate(hitPos, Blocks.FIRE.defaultBlockState());
+                    // Only spawn fire on blocks if the world allows fire to tick/spread
+                    if (fireTicks && canGrief) {
+                        if (result.getType() == HitResult.Type.BLOCK) {
+                            // Iterate through the hit block and its immediate neighbors (3x3x3 area or just 6 faces)
+                            // For a "Breath" effect, checking the 6 cardinal directions is usually most efficient:
+                            for (Direction direction : Direction.values()) {
+                                BlockPos targetPos = hitPos.relative(direction);
+                                BlockState targetState = level().getBlockState(targetPos);
+
+                                // CASE 1: The block is already flammable (Wood, Leaves, etc.)
+                                // We "consume" it instantly by replacing it with fire.
+                                if (targetState.isFlammable(level(), targetPos, direction.getOpposite())) {
+                                    level().setBlockAndUpdate(targetPos, Blocks.FIRE.defaultBlockState());
+                                }
+                                // CASE 2: The block is air, but we want to set the "face" of the hit block on fire
+                                else if (level().isEmptyBlock(targetPos)) {
+                                    if (hitState.isFlammable(level(), hitPos, direction.getOpposite())) {
+                                        level().setBlockAndUpdate(targetPos, Blocks.FIRE.defaultBlockState());
+                                    }
+                                }
+                            }
+
+                            // Also try to replace the hit block itself if it's flammable
+                            if (hitState.isFlammable(level(), hitPos, blockResult.getDirection())) {
+                                level().setBlockAndUpdate(hitPos, Blocks.FIRE.defaultBlockState());
+                            }
+                        }
                     }
                 }
             }
@@ -165,5 +176,37 @@ public class DragonBreathBall extends LargeFireball {
             // Remove the fireball entity
             this.discard();
         }
+    }
+
+    // Helper method to resolve the Iterable .contains issue
+    private static boolean isPartOfDragonCrew(Entity target, Entity shooter) {
+        if (shooter == null) return false;
+        if (target.equals(shooter)) return true;
+
+        // Check if they are sharing a vehicle or are passengers
+        if (target.isPassengerOfSameVehicle(shooter)) return true;
+
+        // Check if the target is a pet/dragon owned by the shooter
+        if (target instanceof net.minecraft.world.entity.OwnableEntity ownable) {
+            if (shooter.getUUID().equals(ownable.getOwnerUUID())) {
+                return true;
+            }
+        }
+
+        // If the shooter is the dragon, protect the player owner
+        if (shooter instanceof net.minecraft.world.entity.OwnableEntity ownableShooter) {
+            if (target.getUUID().equals(ownableShooter.getOwnerUUID())) {
+                return true;
+            }
+        }
+
+        // Manually iterate over indirect passengers since Iterable lacks .contains()
+        for (Entity passenger : shooter.getIndirectPassengers()) {
+            if (passenger.equals(target)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -107,14 +107,16 @@ public class StormDragonBreathBall extends Snowball {
                         this.level().addFreshEntity(lightning);
 
                         // MANUALLY TRIGGER VANILLA SECONDARY EFFECTS
-                        BlockPos hitPos = this.blockPosition();
+                        if (result instanceof BlockHitResult blockResult) {
+                            BlockPos hitPos = blockResult.getBlockPos();
+                            int extraIgnitions = 4;
 
-                        // Spawn fire exactly like vanilla
-                        int extraIgnitions = 4;
-                        this.spawnLightningFire(this.level(), hitPos, extraIgnitions);
+                            // Spawn fire only on the ground
+                            this.spawnLightningFire(this.level(), hitPos, extraIgnitions, owner);
 
-                        // Power lightning rods and clean oxidation off copper blocks
-                        this.cleanCopper(this.level(), hitPos);
+                            // Clean copper only on the ground
+                            this.cleanCopper(this.level(), hitPos);
+                        }
 
                         List<Entity> strikeTargets = this.level().getEntities(this, this.getBoundingBox().inflate(3.0D));
                         for (Entity strikeTarget : strikeTargets) {
@@ -163,8 +165,11 @@ public class StormDragonBreathBall extends Snowball {
         }
     }
 
-    private void spawnLightningFire(Level level, BlockPos pos, int extraIgnitions) {
-        if (level.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK)) {
+    private void spawnLightningFire(Level level, BlockPos pos, int extraIgnitions, Entity owner) {
+        boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
+        boolean fireTicks = this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK);
+
+        if (fireTicks && canGrief) {
             // Try to ignite the hit block
             BlockState fireState = net.minecraft.world.level.block.BaseFireBlock.getState(level, pos);
             if (level.getBlockState(pos).isAir() && fireState.canSurvive(level, pos)) {

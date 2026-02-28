@@ -103,8 +103,8 @@ public class DragonBreathBall extends LargeFireball {
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5f, canGrief, Level.ExplosionInteraction.MOB);
 
                 // Set entities caught in the explosion on fire AND damage them
-                double radius = 1.5; // slightly larger than the explosion to catch entities around
-                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
+                double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
+                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
                 for (Entity entity : entities) {
                     if (entity instanceof LivingEntity livingTarget) {
                         boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
@@ -125,21 +125,23 @@ public class DragonBreathBall extends LargeFireball {
                     BlockPos hitPos = blockResult.getBlockPos();
                     BlockState hitState = level().getBlockState(hitPos);
 
-                    // Ignite Special Blocks (Campfires, Candles, etc.), this mimics Flame arrows
-                    if (hitState.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
-                            && !hitState.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
-                        level().setBlockAndUpdate(hitPos, hitState.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, true));
-                    }
-                    // TNT Special Case
-                    else if (hitState.is(net.minecraft.world.level.block.Blocks.TNT)) {
-                        // We cast the owner to LivingEntity if possible to give the TNT a "source"
-                        LivingEntity igniter = (owner instanceof LivingEntity) ? (LivingEntity) owner : null;
+                    // Define the blast radius for lighting up blocks (1 = 3x3x3 area), this is different from the explosion radius above
+                    int radius = 1;
+                    for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
+                        BlockState targetState = level().getBlockState(targetPos);
 
-                        // Instead of calling deprecated explode(), we call the block's caught fire logic
-                        (hitState.getBlock()).onCaughtFire(hitState, this.level(), hitPos, blockResult.getDirection(), igniter);
+                        // Ignite Special Blocks (Campfires, Candles, etc.) in the area
+                        if (targetState.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
+                                && !targetState.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
+                            level().setBlockAndUpdate(targetPos, targetState.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, true));
+                        }
 
-                        // Remove the block after ignition
-                        this.level().removeBlock(hitPos, false);
+                        // TNT Special Case in the area
+                        else if (targetState.is(net.minecraft.world.level.block.Blocks.TNT)) {
+                            LivingEntity igniter = (owner instanceof LivingEntity) ? (LivingEntity) owner : null;
+                            (targetState.getBlock()).onCaughtFire(targetState, this.level(), targetPos, blockResult.getDirection(), igniter);
+                            this.level().removeBlock(targetPos, false);
+                        }
                     }
 
                     // Only spawn fire on blocks if the world allows fire to tick/spread

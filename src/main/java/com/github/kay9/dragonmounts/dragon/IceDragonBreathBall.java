@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -8,6 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -111,6 +113,30 @@ public class IceDragonBreathBall extends LlamaSpit {
                     cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
 
                     this.level().addFreshEntity(cloud);
+                }
+
+                // Extinguish fire in a cubic area
+                if (result instanceof BlockHitResult blockResult) {
+                    BlockPos hitPos = blockResult.getBlockPos();
+
+                    // Iterate in a small 3x3x3 area around the impact
+                    int radius = 1;
+                    for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
+                        BlockState state = this.level().getBlockState(targetPos);
+
+                        // Check for vanilla fire or soul fire
+                        if (state.is(net.minecraft.world.level.block.Blocks.FIRE) || state.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)) {
+                            this.level().removeBlock(targetPos, false);
+                            // Path fixed: net.minecraft.sounds.SoundSource
+                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F + (this.level().random.nextFloat() - this.level().random.nextFloat()) * 0.8F);
+                        }
+
+                        // Make blocks like campfire, candles, lamps, etc unlit
+                        if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
+                            this.level().setBlockAndUpdate(targetPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false));
+                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F);
+                        }
+                    }
                 }
 
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);

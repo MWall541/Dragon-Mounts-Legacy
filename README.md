@@ -29,7 +29,7 @@ TWEAKS:
 
 - Added the Terra Dragon. They have increased HP and armor. Can be hatched via andesite, granite, diorite, and terracotta blocks.
 
-- Added the Zombie Dragon. They have less armor and HP but they have poison and magic immunity. Can be hatched via bone blocks.
+- Added the Zombie Dragon. They have less armor and HP but they have drowning, poison and magic immunity. Can be hatched via bone blocks.
 
 - Added the Solar Dragon. They are immune to withering. Can be hatched via purpur blocks/pillars.
 
@@ -55,7 +55,7 @@ TWEAKS:
 - It respects doFireTick and mobGriefing gamerules. 
 - It now lights up blocks that can be lit like candles, campfires, redstone lamps, smokers, furnaces, blast furnaces, and tnt. If a modded block has the "LIT" blockstate, that will get lit as well.
 
-- Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact.
+- Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact. It will put fire out on block surfaces (fire extinguisher style) and unlight lit blocks like (campfires, candles, lamps, etc.)
 
 - Dragon breath (end) has a chance of summoning a harming cloud upon explosion or impact.
 

@@ -115,36 +115,12 @@ public class IceDragonBreathBall extends LlamaSpit {
                     this.level().addFreshEntity(cloud);
                 }
 
-                // Extinguish fire in a cubic area
-                if (result instanceof BlockHitResult blockResult) {
-                    BlockPos hitPos = blockResult.getBlockPos();
-
-                    // Iterate in a small 3x3x3 area around the impact
-                    int radius = 1;
-                    for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
-                        BlockState state = this.level().getBlockState(targetPos);
-
-                        // Check for vanilla fire or soul fire
-                        if (state.is(net.minecraft.world.level.block.Blocks.FIRE) || state.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)) {
-                            this.level().removeBlock(targetPos, false);
-                            // Path fixed: net.minecraft.sounds.SoundSource
-                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F + (this.level().random.nextFloat() - this.level().random.nextFloat()) * 0.8F);
-                        }
-
-                        // Make blocks like campfire, candles, lamps, etc unlit
-                        if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
-                            this.level().setBlockAndUpdate(targetPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false));
-                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F);
-                        }
-                    }
-                }
-
                 boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
 
                 // Damage entities caught in the explosion
-                double radius = 1.5; // slightly larger than the explosion to catch entities around
-                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
+                double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
+                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
                 for (Entity entity : entities) {
                     if (entity instanceof LivingEntity livingTarget) {
                         boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
@@ -157,10 +133,29 @@ public class IceDragonBreathBall extends LlamaSpit {
                                 }
                             }
                         }
-                        // else {
-                            // // FORCE clear freezing for the dragon crew just in case the explosion or vanilla logic tries to tick it up
-                            // entity.setTicksFrozen(0);
-                        // }
+                    }
+                }
+
+                // Extinguish fire in a cubic area
+                if (result instanceof BlockHitResult blockResult) {
+                    BlockPos hitPos = blockResult.getBlockPos();
+
+                    // Iterate in a small 3x3x3 area around the impact
+                    int radius = 1;
+                    for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
+                        BlockState state = this.level().getBlockState(targetPos);
+
+                        // Check for vanilla fire or soul fire
+                        if (state.is(net.minecraft.world.level.block.Blocks.FIRE) || state.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)) {
+                            this.level().removeBlock(targetPos, false);
+                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F + (this.level().random.nextFloat() - this.level().random.nextFloat()) * 0.8F);
+                        }
+
+                        // Make blocks like campfire, candles, lamps, etc unlit
+                        if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
+                            this.level().setBlockAndUpdate(targetPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false));
+                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F);
+                        }
                     }
                 }
             }

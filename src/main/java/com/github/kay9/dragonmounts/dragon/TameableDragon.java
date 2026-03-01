@@ -104,6 +104,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private static final DragonArmorType[] ARMOR_VALUES = DragonArmorType.values();
     private static final EntityDataAccessor<Boolean> DATA_HAS_CHEST = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.BOOLEAN);
     private SimpleContainer chestInventory;
+    private ItemStack chestItem = ItemStack.EMPTY;
 
     // data NBT IDs
     public static final String NBT_BREED = "Breed";
@@ -228,6 +229,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             for (var ability : getAbilities()) ability.write(this, compound);
         }
 
+        // Chest given
+        if (!this.chestItem.isEmpty()) {
+            compound.put("ChestItemType", this.chestItem.save(new CompoundTag()));
+        }
+
         // Chest inventory
         if (hasChest() && chestInventory != null) {
             CompoundTag invTag = new CompoundTag();
@@ -265,11 +271,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             setArmorType(DragonArmorType.valueOf(compound.getString("DragonArmor")));
         }
 
-        if (compound.contains("DragonChest")) {
-            setHasChest(true); // ensures inventory exists and syncs DATA_HAS_CHEST
+        if (compound.contains("ChestItemType", 10)) {
+            this.chestItem = ItemStack.of(compound.getCompound("ChestItemType"));
+        }
 
-            if (chestInventory == null)
-                chestInventory = new SimpleContainer(27);
+        if (!this.chestItem.isEmpty()) {
+            setHasChest(true);
+        }
+
+        if (compound.contains("DragonChest")) {
+            if (chestInventory == null) chestInventory = new SimpleContainer(27);
 
             CompoundTag invTag = compound.getCompound("DragonChest");
             for (int i = 0; i < chestInventory.getContainerSize(); i++) {
@@ -277,8 +288,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     chestInventory.setItem(i, ItemStack.of(invTag.getCompound("Slot" + i)));
                 }
             }
-        } else {
-            setHasChest(false); // fallback if NBT doesn't have chest
         }
     }
 
@@ -666,9 +675,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // put chest on dragon
-        if (isTamedFor(player) && !hasChest() && stack.is(Items.CHEST)) {
+        if (isTamedFor(player) && !hasChest() && stack.is(Tags.Items.CHESTS)) {
 
             if (isServer()) {
+                this.chestItem = stack.copy();
+                this.chestItem.setCount(1);
                 setHasChest(true);
                 stack.shrink(1);
                 playSound(SoundEvents.DONKEY_CHEST, 1f, 1f);
@@ -681,22 +692,25 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (isTamedFor(player) && hasChest() && stack.is(Tags.Items.SHEARS)) {
 
             if (isServer()) {
-
                 // drop contents first
                 if (chestInventory != null) {
                     for (int i = 0; i < chestInventory.getContainerSize(); i++) {
                         ItemStack stackInSlot = chestInventory.getItem(i);
                         if (!stackInSlot.isEmpty()) {
                             spawnAtLocation(stackInSlot);
-                            chestInventory.setItem(i, ItemStack.EMPTY); // clear after dropping
+                            // chestInventory.setItem(i, ItemStack.EMPTY); // clear after dropping
                         }
                     }
+                    chestInventory.clearContent();
                 }
 
+                // Drop chest used and fallback to a regular chest if something goes wrong
+                if (!this.chestItem.isEmpty()) {
+                    spawnAtLocation(this.chestItem);
+                } else {
+                    spawnAtLocation(Items.CHEST);
+                }
                 setHasChest(false);
-
-                // drop chest item
-                spawnAtLocation(Items.CHEST);
             }
 
             player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
@@ -981,15 +995,20 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // Drop chest + contents
-        if (hasChest() && chestInventory != null) {
+        if (hasChest()) {
+            if (!this.chestItem.isEmpty()) {
+                spawnAtLocation(this.chestItem);
+            } else {
+                spawnAtLocation(Items.CHEST);
+            }
+            this.chestItem = ItemStack.EMPTY;
 
-            spawnAtLocation(Items.CHEST);
-
-            for (int i = 0; i < chestInventory.getContainerSize(); i++) {
-                ItemStack stack = chestInventory.getItem(i);
-
-                if (!stack.isEmpty()) {
-                    spawnAtLocation(stack);
+            if (chestInventory != null) {
+                for (int i = 0; i < chestInventory.getContainerSize(); i++) {
+                    ItemStack stack = chestInventory.getItem(i);
+                    if (!stack.isEmpty()) {
+                        spawnAtLocation(stack);
+                    }
                 }
             }
         }
@@ -1736,11 +1755,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public void setHasChest(boolean value) {
         entityData.set(DATA_HAS_CHEST, value);
 
-        if (hasChest() && chestInventory == null) {
-            chestInventory = new SimpleContainer(27);
-        }
-        if (!hasChest()) {
-            chestInventory = null;
+        if (value) {
+            if (this.chestInventory == null) {
+                this.chestInventory = new SimpleContainer(27);
+            }
+        } else {
+            // Cleanup: Remove inventory and the stored chest item
+            this.chestInventory = null;
+            this.chestItem = ItemStack.EMPTY;
         }
     }
 

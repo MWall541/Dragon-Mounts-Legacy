@@ -1495,40 +1495,72 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return getControllingPassenger() instanceof Player p && p.isLocalPlayer();
     }
 
-    public double getMouthY() {
-        // Slightly below eyes.
-        return getEyeY() - getScale();
+    public Vec3 getApproximateMouthPos() {
+        float scale = this.getScale();
+
+        // 1. Get the direction the head is pointing
+        // Dampening the pitch (0.65f) keeps the projectile from spawning in the ground/sky
+        Vec3 rotVector = this.calculateViewVector(this.getXRot() * 0.65f, this.getYHeadRot());
+
+        // 2. Start at the eye position
+        Vec3 position = this.getEyePosition(1.0F);
+
+        // 3. SHIFT FORWARD FROM CENTER
+        // If it's in the chest, we need to push the origin forward along the body's axis.
+        // We use the body's yaw to move the "pivot point" toward the front of the dragon.
+        float bodyYaw = (float) Math.toRadians(-this.yBodyRot);
+        double bodyPush = 1.5D * scale; // Adjust this to move the "neck base" forward
+
+        double forwardX = position.x + (Math.sin(bodyYaw) * bodyPush);
+        double forwardZ = position.z + (Math.cos(bodyYaw) * bodyPush);
+        double adjustedY = position.y - (0.5D * scale); // Drop it slightly from eyes to mouth
+
+        position = new Vec3(forwardX, adjustedY, forwardZ);
+
+        // 4. PROJECT TO SNOUT
+        // We increase the 1.3D to 2.5D. This is the distance from the neck-base to the tip of the snout.
+        double snoutReach = this.getBbWidth() + (2.5D * scale);
+        position = position.add(rotVector.scale(snoutReach));
+
+        return position;
+    }
+
+    public void performBreathAttack(Entity owner, Vec3 look) {
+        if (!isServer()) return;
+
+        Vec3 spawnPos = this.getApproximateMouthPos();
+
+        if (isIceBreed()) {
+            IceDragonBreathBall iceBall = new IceDragonBreathBall(level(), this);
+            iceBall.setOwner(owner);
+            iceBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
+            level().addFreshEntity(iceBall);
+        } else if (isStormBreed()) {
+            StormDragonBreathBall stormBall = new StormDragonBreathBall(level(), this);
+            stormBall.setOwner(owner);
+            stormBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
+            level().addFreshEntity(stormBall);
+        } else if (isEndBreed()) {
+            EndDragonBreathBall endBall = new EndDragonBreathBall(level(), this, look.x, look.y, look.z);
+            endBall.setOwner(owner);
+            endBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            level().addFreshEntity(endBall);
+        } else {
+            DragonBreathBall fireBall = new DragonBreathBall(level(), this, look.x, look.y, look.z, 1);
+            fireBall.setOwner(owner);
+            fireBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            level().addFreshEntity(fireBall);
+        }
     }
 
     @Override
     public void onKeyPacket(Entity keyPresser) {
-        if (keyPresser.isPassengerOfSameVehicle(this)) {
-            if (isServer() && this.getOwner() != null && this.getOwner().equals(keyPresser)) {
+        if (keyPresser.isPassengerOfSameVehicle(this) && isServer()) {
+            if (this.getOwner() != null && this.getOwner().equals(keyPresser)) {
                 Vec3 look = this.getLookAngle();
-
-                if (isIceBreed()) {
-                    IceDragonBreathBall iceBall = new IceDragonBreathBall(level(), this);
-                    iceBall.setOwner(keyPresser);
-                    iceBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
-                    iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
-                    level().addFreshEntity(iceBall);
-                } else if (isStormBreed()) {
-                    StormDragonBreathBall stormBall = new StormDragonBreathBall(level(), this);
-                    stormBall.setOwner(keyPresser);
-                    stormBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
-                    stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
-                    level().addFreshEntity(stormBall);
-                } else if (isEndBreed()) {
-                    EndDragonBreathBall endBall = new EndDragonBreathBall(level(), this, look.x, look.y, look.z);
-                    endBall.setOwner(keyPresser);
-                    endBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
-                    level().addFreshEntity(endBall);
-                } else {
-                    DragonBreathBall fireBall = new DragonBreathBall(level(), this, look.x, look.y, look.z, 1);
-                    fireBall.setOwner(keyPresser);
-                    fireBall.setPos(this.getX() + look.x * 5.0D, getMouthY(), this.getZ() + look.z * 5.0D);
-                    level().addFreshEntity(fireBall);
-                }
+                this.performBreathAttack(keyPresser, look);
             }
         }
     }
@@ -1628,32 +1660,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         private void shootFireball(LivingEntity target) {
             if (isServer()) {
-                Vec3 look = dragon.getLookAngle();
-
-                // Create and shoot fireball
-                if (dragon.isIceBreed()) {
-                    IceDragonBreathBall iceBall = new IceDragonBreathBall(dragon.level(), dragon);
-                    iceBall.setOwner(dragon);
-                    iceBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
-                    iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
-                    dragon.level().addFreshEntity(iceBall);
-                } else if (dragon.isStormBreed()) {
-                    StormDragonBreathBall stormBall = new StormDragonBreathBall(dragon.level(), dragon);
-                    stormBall.setOwner(dragon);
-                    stormBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
-                    stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
-                    dragon.level().addFreshEntity(stormBall);
-                } else if (dragon.isEndBreed()) {
-                    EndDragonBreathBall endBall = new EndDragonBreathBall(dragon.level(), dragon, look.x, look.y, look.z);
-                    endBall.setOwner(dragon);
-                    endBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
-                    dragon.level().addFreshEntity(endBall);
-                } else {
-                    DragonBreathBall fireBall = new DragonBreathBall(dragon.level(), dragon, look.x, look.y, look.z, 1);
-                    fireBall.setOwner(dragon);
-                    fireBall.setPos(dragon.getX() + look.x * 5.0D, dragon.getMouthY(), dragon.getZ() + look.z * 5.0D);
-                    dragon.level().addFreshEntity(fireBall);
-                }
+                Vec3 mouthPos = dragon.getApproximateMouthPos();
+                // Aim exactly at the target's center from the mouth
+                Vec3 direction = target.getBoundingBox().getCenter().subtract(mouthPos).normalize();
+                dragon.performBreathAttack(dragon, direction);
             }
         }
 

@@ -16,6 +16,7 @@
   "dragon_breed.dragonmounts.terra": "テラドラゴン",
   "dragon_breed.dragonmounts.zombie": "ゾンビドラゴン",
   "dragon_breed.dragonmounts.solar": "ソーラードラゴン",
+  "dragon_breed.dragonmounts.primal_nether": "プライマルネザードラゴン",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "エーテルドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "ファイアドラゴンのスポーンエッグ",
@@ -32,6 +33,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.terra": "テラドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.zombie": "ゾンビドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.solar": "ソーラードラゴンのスポーンエッグ",
+  "item.dragonmounts.spawn_egg.dragonmounts.primal_nether": "プライマルネザードラゴンのスポーンエッグ",
 
   "block.dragonmounts.dragon_egg.remaining_time": "%s秒以内に孵化します。",
   "block.dragonmounts.dragon_egg.desc1": "ドラゴンとの交流:",
@@ -56,6 +58,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.terra": "テラドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.zombie": "ゾンビドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.solar": "ソーラードラゴンの卵",
+  "block.dragonmounts.dragon_egg.dragonmounts.primal_nether": "プライマルネザードラゴンの卵",
 
   "key.dragonmounts.flight_descent": "Dragon Mount フライト降下",
   "key.dragonmounts.camera_flight": "Dragon Mount フライトコマンド",

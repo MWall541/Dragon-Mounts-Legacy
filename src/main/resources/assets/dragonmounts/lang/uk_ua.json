@@ -16,6 +16,7 @@
   "dragon_breed.dragonmounts.terra": "Терра-дракон",
   "dragon_breed.dragonmounts.zombie": "Дракон-зомбі",
   "dragon_breed.dragonmounts.solar": "Сонячний дракон",
+  "dragon_breed.dragonmounts.primal_nether": "Первісний незерський дракон",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Яйце виклику дракона Етеру",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Яйце виклику вогневого дракона",
@@ -32,6 +33,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.terra": "Яйце виклику терра-дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.zombie": "Яйце виклику дракона-зомбі",
   "item.dragonmounts.spawn_egg.dragonmounts.solar": "Яйце заклику сонячного дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.primal_nether": "Яйце виклику первісного незерського дракона",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
   "block.dragonmounts.dragon_egg.desc1": "Взаємодія з драконом:",
@@ -49,13 +51,14 @@
   "block.dragonmounts.dragon_egg.dragonmounts.ice": "Яйце крижаного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.nether": "Яйце незерського дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.water": "Яйце водяного дракона",
-  "block.dragonmounts.dragon_egg.dragonmounts.storm": "Storm Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.storm": "Яйце штормового дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.soul_nether": "Яйце душевного незерського дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.ocean": "Яйце океанічного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.blue_fire": "Яйце синьополум'яного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.terra": "Яйце терра-дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.zombie": "Яйце дракона-зомбі",
   "block.dragonmounts.dragon_egg.dragonmounts.solar": "Яйце сонячного дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.primal_nether": "Яйце первісного незерського дракона",
 
   "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
   "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",

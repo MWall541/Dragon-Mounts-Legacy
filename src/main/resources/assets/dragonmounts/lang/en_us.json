@@ -16,6 +16,7 @@
   "dragon_breed.dragonmounts.terra": "Terra Dragon",
   "dragon_breed.dragonmounts.zombie": "Zombie Dragon",
   "dragon_breed.dragonmounts.solar": "Solar Dragon",
+  "dragon_breed.dragonmounts.primal_nether": "Primal Nether Dragon",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
@@ -32,6 +33,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.terra": "Terra Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.zombie": "Zombie Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.solar": "Solar Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.primal_nether": "Primal Nether Dragon Spawn Egg",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
@@ -56,6 +58,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.terra": "Terra Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.zombie": "Zombie Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.solar": "Solar Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.primal_nether": "Primal Nether Dragon Egg",
 
   "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
   "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",

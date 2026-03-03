@@ -1536,7 +1536,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             iceBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
             iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
             level().addFreshEntity(iceBall);
-        } else if (isStormBreed()) {
+        } else if (isWitherBreed()) {
+            WitherBreathBall witherBall = new WitherBreathBall(level(), this, 0, 0, 0, 1);
+            witherBall.setOwner(owner);
+            witherBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            witherBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
+            level().addFreshEntity(witherBall);
+        }
+        else if (isStormBreed()) {
             StormDragonBreathBall stormBall = new StormDragonBreathBall(level(), this);
             stormBall.setOwner(owner);
             stormBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
@@ -1819,5 +1826,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
         return  breedId.getPath().contains("end");
+    }
+
+    public boolean isWitherBreed() {
+        if (getBreed() == null) return false;
+        ResourceLocation breedId = getBreed().id(level().registryAccess());
+
+        return  breedId.getPath().contains("wither");
     }
 }

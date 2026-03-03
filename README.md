@@ -4,7 +4,7 @@ This mod is incompatible with Dragon Mounts Patches since it incorporated the is
 
 TWEAKS:
 
-- New Dragon Breaths! Besides Fire, there are Ice, Storm, and Ender Breaths now corresponding to appropriate dragon breeds.
+- New Dragon Breaths! Besides Fire, there are Ice, Storm, Wither, and Ender Breaths now corresponding to appropriate dragon breeds.
 
 - Dragons now shoot breath balls occasionally when in combat.
 
@@ -36,6 +36,10 @@ TWEAKS:
 - Soul Fire-able blocks can no longer hatch the Nether Dragon, it will instead hatch the new variant: Soul Nether Dragon (cosmetic change only). The Nether Dragon egg will emit normal fire particles while the Soul Nether Dragon egg will emit soul fire particles. They can be hatched by blocks that can emit soul fire.
 
 - Prismarine and Sea Lantern can no longer hatch the Water dragon, it will instead hatch the new variant: Ocean Dragon (cosmetic change only). The Water Dragon egg will emit dripping water particles while the Ocean Dragon egg will emit bubbles.
+
+- Added the Wither Dragon. They are immune to withering but has slightly low hp. They can shoot wither skulls which inflict wither.
+
+- Primal Nether Dragon can be hatched via glowstone blocks
 
 - Added fish items to items that can heal dragons (I found it weird that you can tame them with fish but you can only heal them with meat).
 

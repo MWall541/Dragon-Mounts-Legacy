@@ -88,7 +88,7 @@ public class WitherBreathBall extends WitherSkull {
 
                 this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, canGrief, Level.ExplosionInteraction.MOB);
 
-                // Set entities caught in the explosion on fire AND damage them
+                // Give entities caught in the explosion withering and damage them
                 double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
                 List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
                 for (Entity entity : entities) {
@@ -107,7 +107,7 @@ public class WitherBreathBall extends WitherSkull {
                 }
             }
 
-            // Remove the fireball entity
+            // Remove the wither breath ball entity
             this.discard();
         }
     }

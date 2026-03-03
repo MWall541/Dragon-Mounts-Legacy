@@ -18,6 +18,10 @@
   "dragon_breed.dragonmounts.solar": "Сонячний дракон",
   "dragon_breed.dragonmounts.primal_nether": "Первісний незерський дракон",
   "dragon_breed.dragonmounts.wither": "Візер-дракон",
+  "dragon_breed.dragonmounts.lunar": "Місячний дракон",
+  "dragon_breed.dragonmounts.aurora": "Аврора-дракон",
+  "dragon_breed.dragonmounts.magic": "Магічний дракон",
+  "dragon_breed.dragonmounts.crystal": "Кришталевий дракон",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Яйце виклику дракона Етеру",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Яйце виклику вогневого дракона",
@@ -36,6 +40,11 @@
   "item.dragonmounts.spawn_egg.dragonmounts.solar": "Яйце заклику сонячного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.primal_nether": "Яйце виклику первісного незерського дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.wither": "Яйце виклику візер-дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.lunar": "Яйце виклику місячного дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.aurora": "Яйце виклику аврора-дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.magic": "Яйце виклику магічного дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.crystal": "Яйце виклику кришталевого дракона",
+
 
   "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
   "block.dragonmounts.dragon_egg.desc1": "Взаємодія з драконом:",
@@ -62,6 +71,10 @@
   "block.dragonmounts.dragon_egg.dragonmounts.solar": "Яйце сонячного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.primal_nether": "Яйце первісного незерського дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.wither": "Яйце візер-дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.lunar": "Яйце місячного дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.aurora": "Яйце аврора-дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.magic": "Яйце магічного дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.crystal": "Яйце кришталевого дракона",
 
   "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
   "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",

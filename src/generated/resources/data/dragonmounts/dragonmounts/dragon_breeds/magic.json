@@ -6,19 +6,19 @@
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",
-      "block_tag": "dragonmounts:solar_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:magic_dragon_habitat_blocks",
       "point_multiplier": 1.0
     }
   ],
   "immunities": [
+    "minecraft:magic",
     "minecraft:on_fire",
     "minecraft:in_fire",
     "minecraft:cactus",
     "minecraft:sweet_berry_bush",
-    "minecraft:dragon_breath",
-    "minecraft:wither"
+    "minecraft:dragon_breath"
   ],
-  "primary_color": "D4AF37",
-  "reproduction_limit": "config:solar",
-  "secondary_color": "FFD700"
+  "primary_color": "160B20",
+  "reproduction_limit": "config:magic",
+  "secondary_color": "FF0000"
 }

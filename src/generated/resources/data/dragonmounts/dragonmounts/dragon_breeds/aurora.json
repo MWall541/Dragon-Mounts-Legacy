@@ -6,7 +6,7 @@
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",
-      "block_tag": "dragonmounts:solar_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:aurora_dragon_habitat_blocks",
       "point_multiplier": 1.0
     }
   ],
@@ -16,9 +16,9 @@
     "minecraft:cactus",
     "minecraft:sweet_berry_bush",
     "minecraft:dragon_breath",
-    "minecraft:wither"
+    "minecraft:freeze"
   ],
-  "primary_color": "D4AF37",
-  "reproduction_limit": "config:solar",
-  "secondary_color": "FFD700"
+  "primary_color": "734F96",
+  "reproduction_limit": "config:aurora",
+  "secondary_color": "ffff00"
 }

@@ -1811,21 +1811,25 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 breedId.getPath().contains("water") ||
                 breedId.getPath().contains("ocean") ||
                 breedId.getPath().contains("aether") ||
-                breedId.getPath().contains("ghost");
+                breedId.getPath().contains("ghost") ||
+                breedId.getPath().contains("lunar") ||
+                breedId.getPath().contains("aurora");
     }
 
     public boolean isStormBreed() {
         if (getBreed() == null) return false;
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
-        return  breedId.getPath().contains("storm");
+        return  breedId.getPath().contains("storm") ||
+                breedId.getPath().contains("crystal");
     }
 
     public boolean isEndBreed() {
         if (getBreed() == null) return false;
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
-        return  breedId.getPath().contains("end");
+        return  breedId.getPath().contains("end") ||
+                breedId.getPath().contains("magic");
     }
 
     public boolean isWitherBreed() {

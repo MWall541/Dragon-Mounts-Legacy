@@ -31,7 +31,15 @@ TWEAKS:
 
 - Added the Zombie Dragon. They have less armor and HP but they have drowning, poison and magic immunity. Can be hatched via bone blocks.
 
-- Added the Solar Dragon. They are immune to withering. Can be hatched via purpur blocks/pillars.
+- Added the Solar Dragon. Immune to withering. Can be hatched via gold blocks.
+
+- Added the Lunar Dragon. Immune to withering. Can be hatched via crying obsidian.
+
+- Added the Aurora Dragon. Immune to freezing. Can be hatched via purpur blocks.
+
+- Added the Magic Dragon. Immune to magic. Shoots ender breath balls. Can be hatched via enchantment table blocks.
+
+- Added the Crystal Dragon. They have increased HP and armor. Can be hatched via amethyst blocks.
 
 - Soul Fire-able blocks can no longer hatch the Nether Dragon, it will instead hatch the new variant: Soul Nether Dragon (cosmetic change only). The Nether Dragon egg will emit normal fire particles while the Soul Nether Dragon egg will emit soul fire particles. They can be hatched by blocks that can emit soul fire.
 

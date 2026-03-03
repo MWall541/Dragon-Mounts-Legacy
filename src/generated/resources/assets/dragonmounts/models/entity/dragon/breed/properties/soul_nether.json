@@ -1,4 +1,4 @@
 {
-  "tail_horns": true,
-  "middle_tail_scales": true
+  "tail_horns": false,
+  "middle_tail_scales": false
 }

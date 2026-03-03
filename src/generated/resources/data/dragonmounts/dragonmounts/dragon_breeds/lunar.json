@@ -6,7 +6,7 @@
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",
-      "block_tag": "dragonmounts:solar_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:lunar_dragon_habitat_blocks",
       "point_multiplier": 1.0
     }
   ],
@@ -18,7 +18,7 @@
     "minecraft:dragon_breath",
     "minecraft:wither"
   ],
-  "primary_color": "D4AF37",
-  "reproduction_limit": "config:solar",
-  "secondary_color": "FFD700"
+  "primary_color": "2C3E50",
+  "reproduction_limit": "config:lunar",
+  "secondary_color": "E1E8ED"
 }

@@ -22,6 +22,7 @@
   "dragon_breed.dragonmounts.aurora": "Аврора-дракон",
   "dragon_breed.dragonmounts.magic": "Магічний дракон",
   "dragon_breed.dragonmounts.crystal": "Кришталевий дракон",
+  "dragon_breed.dragonmounts.bronze": "Бронзовий дракон",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Яйце виклику дракона Етеру",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Яйце виклику вогневого дракона",
@@ -44,6 +45,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.aurora": "Яйце виклику аврора-дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.magic": "Яйце виклику магічного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.crystal": "Яйце виклику кришталевого дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.bronze": "Яйце виклику бронзового дракона",
 
 
   "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
@@ -75,6 +77,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.aurora": "Яйце аврора-дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.magic": "Яйце магічного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.crystal": "Яйце кришталевого дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.bronze": "Яйце бронзового дракона",
 
   "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
   "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",

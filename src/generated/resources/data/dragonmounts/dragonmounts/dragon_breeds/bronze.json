@@ -1,0 +1,29 @@
+{
+  "attributes": {
+    "minecraft:generic.max_health": 100.0,
+    "minecraft:generic.armor": 4.0,
+    "minecraft:generic.flying_speed": 0.35,
+    "minecraft:generic.movement_speed": 0.4
+  },
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:bronze_dragon_habitat_blocks",
+      "point_multiplier": 1.0
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:enchanted_hit"
+  },
+  "immunities": [
+    "minecraft:lightning_bolt",
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "613E1D",
+  "reproduction_limit": "config:bronze",
+  "secondary_color": "FFD700"
+}

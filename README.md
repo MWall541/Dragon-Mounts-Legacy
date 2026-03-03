@@ -41,6 +41,8 @@ TWEAKS:
 
 - Added the Crystal Dragon. They have increased HP and armor. Can be hatched via amethyst blocks.
 
+- Added the Bronze Dragon. They are the same as Storm Dragons. Can be hatched via redstone lamps.
+
 - Soul Fire-able blocks can no longer hatch the Nether Dragon, it will instead hatch the new variant: Soul Nether Dragon (cosmetic change only). The Nether Dragon egg will emit normal fire particles while the Soul Nether Dragon egg will emit soul fire particles. They can be hatched by blocks that can emit soul fire.
 
 - Prismarine and Sea Lantern can no longer hatch the Water dragon, it will instead hatch the new variant: Ocean Dragon (cosmetic change only). The Water Dragon egg will emit dripping water particles while the Ocean Dragon egg will emit bubbles.

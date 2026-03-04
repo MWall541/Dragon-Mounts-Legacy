@@ -24,6 +24,7 @@
   "dragon_breed.dragonmounts.crystal": "Crystal Dragon",
   "dragon_breed.dragonmounts.bronze": "Bronze Dragon",
   "dragon_breed.dragonmounts.gale": "Gale Dragon",
+  "dragon_breed.dragonmounts.sculk": "Sculk Dragon",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
@@ -48,6 +49,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.crystal": "Crystal Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.bronze": "Bronze Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.gale": "Gale Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.sculk": "Sculk Dragon Spawn Egg",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
@@ -80,6 +82,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.crystal": "Crystal Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.bronze": "Bronze Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.gale": "Gale Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.sculk": "Sculk Dragon Egg",
 
   "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
   "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",

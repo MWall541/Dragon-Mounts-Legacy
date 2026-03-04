@@ -51,6 +51,8 @@ TWEAKS:
 
 - Added the Gale Dragon. They are very similar to Aether Dragons. Can be hatched via blue terracotta blocks
 
+- Added the Sculk Dragon. Immune to in wall damage. Can be hatched via sculk blocks
+
 - Primal Nether Dragon can be hatched via red terracotta blocks
 
 - Added fish items to items that can heal dragons (I found it weird that you can tame them with fish but you can only heal them with meat).

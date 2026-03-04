@@ -1,0 +1,24 @@
+{
+  "attributes": {
+    "minecraft:generic.max_health": 100.0,
+    "minecraft:generic.armor": 8.0
+  },
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:sculk_dragon_habitat_blocks",
+      "point_multiplier": 1.0
+    }
+  ],
+  "immunities": [
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath",
+    "minecraft:in_wall"
+  ],
+  "primary_color": "2C3E50",
+  "reproduction_limit": "config:sculk",
+  "secondary_color": "E1E8ED"
+}

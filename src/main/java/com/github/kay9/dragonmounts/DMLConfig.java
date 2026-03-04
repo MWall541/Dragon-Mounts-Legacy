@@ -48,6 +48,9 @@ public class DMLConfig
     private static final ForgeConfigSpec.DoubleValue BREATH_DAMAGE;
     public static float getBreathDamage() { return BREATH_DAMAGE.get().floatValue(); }
 
+    private static final ForgeConfigSpec.BooleanValue BREATH_ENABLED;
+    public static boolean isBreathEnabled() { return BREATH_ENABLED.get(); }
+
     public static float getEggChanceFor(String configTarget)
     {
         var chance = EGG_CHANCES.get(configTarget);
@@ -111,7 +114,11 @@ public class DMLConfig
         REPRO_LIMITS = defineReproLimEntries(configurator);
         configurator.pop();
 
-        configurator.push("balancing");
+        configurator.push("balancing - requires restart");
+        BREATH_ENABLED = configurator.comment("Should dragons be able to use their breath attack?",
+                        "If false, the AI goal will not be added to the dragon.")
+                .define("breath_attack_enabled", true);
+
         BREATH_DAMAGE = configurator.comment("The base damage dealt by all dragon breaths. Default is 6.0 (3 hearts).")
                 .defineInRange("global_breath_damage", 6.0, 0.0, Double.MAX_VALUE);
         configurator.pop();

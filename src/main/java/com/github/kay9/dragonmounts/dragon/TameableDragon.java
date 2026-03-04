@@ -78,7 +78,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * Let the legacy live on.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
- * @author Kay9
+ * @author Kay9 and Xvareon
  */
 @SuppressWarnings({"deprecation", "SameReturnValue"})
 public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable, KeybindUsingMount, MenuProvider
@@ -167,14 +167,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected void registerGoals() // TODO: Much Smarter AI and features
+    protected void registerGoals()
     {
-        // goalSelector.addGoal(1, new DragonLandGoal(this));
         goalSelector.addGoal(1, new FloatGoal(this));
         goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        goalSelector.addGoal(3, new DragonFireballAttackGoal(this));
+
+        if (DMLConfig.isBreathEnabled()) {
+            this.goalSelector.addGoal(3, new DragonFireballAttackGoal(this));
+        }
+
         goalSelector.addGoal(4, new MeleeAttackGoal(this, 1, true));
-        // goalSelector.addGoal(4, new DragonBabuFollowParent(this, 10));
         goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1f, 24f, 3.5f, 32f));
         goalSelector.addGoal(6, new DragonBreedGoal(this));
         goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.85f));
@@ -1564,10 +1566,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     @Override
     public void onKeyPacket(Entity keyPresser) {
-        if (keyPresser.isPassengerOfSameVehicle(this) && isServer()) {
-            if (this.getOwner() != null && this.getOwner().equals(keyPresser)) {
-                Vec3 look = this.getLookAngle();
-                this.performBreathAttack(keyPresser, look);
+        if (DMLConfig.isBreathEnabled()) {
+            if (keyPresser.isPassengerOfSameVehicle(this) && isServer()) {
+                if (this.getOwner() != null && this.getOwner().equals(keyPresser)) {
+                    Vec3 look = this.getLookAngle();
+                    this.performBreathAttack(keyPresser, look);
+                }
             }
         }
     }

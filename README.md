@@ -83,6 +83,8 @@ TWEAKS:
 
 - Tweaked dragon tails of Nether, Water, Ghost, and Forest dragons.
 
+- Added configs for dragon breaths.
+
 Huge thanks to the Dragon Mounts 2 team for allowing me to use the updated textures for dragons!
 
 Dragon Mounts Discord: https://discord.gg/Ewm8aTTJ3K

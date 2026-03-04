@@ -25,6 +25,7 @@
   "dragon_breed.dragonmounts.bronze": "Бронзовий дракон",
   "dragon_breed.dragonmounts.gale": "Буревійний дракон",
   "dragon_breed.dragonmounts.sculk": "Дракон Скулк",
+  "dragon_breed.dragonmounts.primal_end": "Первісний дракон Енду",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Яйце виклику дракона Етеру",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Яйце виклику вогневого дракона",
@@ -50,7 +51,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.bronze": "Яйце виклику бронзового дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.gale": "Яйце виклику буревійного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.sculk": "Яйце спавна дракона Скалк",
-
+  "item.dragonmounts.spawn_egg.dragonmounts.primal_end": "Яйце виклику первісного дракона Енду",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
   "block.dragonmounts.dragon_egg.desc1": "Взаємодія з драконом:",
@@ -84,6 +85,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.bronze": "Яйце бронзового дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.gale": "Яйце буревійного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.sculk": "Яйце дракона Скалк",
+  "block.dragonmounts.dragon_egg.dragonmounts.primal_end": "Яйце первісного дракона Енду",
 
   "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
   "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",

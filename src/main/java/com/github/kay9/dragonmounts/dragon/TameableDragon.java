@@ -1836,7 +1836,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         return  breedId.getPath().contains("end") ||
                 breedId.getPath().contains("magic") ||
-                breedId.getPath().contains("sculk");
+                breedId.getPath().contains("sculk") ||
+                breedId.getPath().contains("primal_end");
     }
 
     public boolean isWitherBreed() {

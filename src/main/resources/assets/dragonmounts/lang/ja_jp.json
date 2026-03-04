@@ -23,6 +23,7 @@
   "dragon_breed.dragonmounts.magic": "マジックドラゴン",
   "dragon_breed.dragonmounts.crystal": "クリスタッルドラゴン",
   "dragon_breed.dragonmounts.bronze": "ブロンズドラゴン",
+  "dragon_breed.dragonmounts.gale": "ゲイルドラゴン",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "エーテルドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "ファイアドラゴンのスポーンエッグ",
@@ -46,6 +47,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.magic": "マジックドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.crystal": "クリスタッルドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.bronze": "ブロンズドラゴンのスポーンエッグ",
+  "item.dragonmounts.spawn_egg.dragonmounts.gale": "ゲイルドラゴンのスポーンエッグ",
 
 
   "block.dragonmounts.dragon_egg.remaining_time": "%s秒以内に孵化します。",
@@ -78,6 +80,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.magic": "マジックドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.crystal": "クリスタッルドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.bronze": "ブロンズドラゴンの卵",
+  "block.dragonmounts.dragon_egg.dragonmounts.gale": "ゲイルドラゴンの卵",
 
   "key.dragonmounts.flight_descent": "Dragon Mount フライト降下",
   "key.dragonmounts.camera_flight": "Dragon Mount フライトコマンド",

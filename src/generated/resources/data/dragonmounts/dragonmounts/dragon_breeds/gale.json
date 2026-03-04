@@ -6,12 +6,8 @@
   },
   "habitats": [
     {
-      "type": "dragonmounts:world_height",
-      "height": 200
-    },
-    {
       "type": "dragonmounts:nearby_blocks",
-      "block_tag": "dragonmounts:aether_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:gale_dragon_habitat_blocks",
       "point_multiplier": 1.0
     }
   ],
@@ -22,7 +18,7 @@
     "minecraft:sweet_berry_bush",
     "minecraft:dragon_breath"
   ],
-  "primary_color": "718aa9",
-  "reproduction_limit": "config:aether",
-  "secondary_color": "e6e6e6"
+  "primary_color": "003366",
+  "reproduction_limit": "config:gale",
+  "secondary_color": "FFBF00"
 }

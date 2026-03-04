@@ -45,6 +45,9 @@ public class DMLConfig
 
     private static final Map<String, ForgeConfigSpec.DoubleValue> EGG_CHANCES;
 
+    private static final ForgeConfigSpec.DoubleValue BREATH_DAMAGE;
+    public static float getBreathDamage() { return BREATH_DAMAGE.get().floatValue(); }
+
     public static float getEggChanceFor(String configTarget)
     {
         var chance = EGG_CHANCES.get(configTarget);
@@ -108,6 +111,10 @@ public class DMLConfig
         REPRO_LIMITS = defineReproLimEntries(configurator);
         configurator.pop();
 
+        configurator.push("balancing");
+        BREATH_DAMAGE = configurator.comment("The base damage dealt by all dragon breaths. Default is 6.0 (3 hearts).")
+                .defineInRange("global_breath_damage", 6.0, 0.0, Double.MAX_VALUE);
+        configurator.pop();
 
         COMMON_SPEC = configurator.build();
     }

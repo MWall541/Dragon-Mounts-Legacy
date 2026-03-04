@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.core.Direction;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -121,7 +122,7 @@ public class EndDragonBreathBall extends DragonFireball {
                         boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
                         if (!isProtected) {
                             if (owner instanceof LivingEntity livingOwner) {
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
                             }
                         }
                     }

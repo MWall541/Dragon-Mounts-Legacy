@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -153,7 +154,7 @@ public class StormDragonBreathBall extends Snowball {
                         boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
                         if (!isProtected) {
                             if (owner instanceof LivingEntity livingOwner) {
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
                             }
                         }
                     }

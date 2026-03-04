@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -111,7 +112,7 @@ public class DragonBreathBall extends LargeFireball {
                         if (!isProtected) {
                             if (owner instanceof LivingEntity livingOwner) {
                                 // Deal damage to everyone not immune, even fire-immune mobs
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
                                 // set on fire if possible
                                 if (!entity.fireImmune()) {
                                     entity.setSecondsOnFire(5);

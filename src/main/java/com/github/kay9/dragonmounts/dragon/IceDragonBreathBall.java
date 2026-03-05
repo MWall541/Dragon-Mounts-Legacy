@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -115,10 +114,6 @@ public class IceDragonBreathBall extends LlamaSpit {
 
                     this.level().addFreshEntity(cloud);
                 }
-
-                this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
-                        net.minecraft.sounds.SoundEvents.PLAYER_HURT_FREEZE,
-                        net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 1.0F);
 
                 // Damage entities caught in the explosion
                 double blastRadius = 1.5; // slightly larger than the explosion to catch entities around

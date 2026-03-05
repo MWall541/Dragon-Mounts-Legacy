@@ -55,11 +55,15 @@ TWEAKS:
 
 - Added the Primal End Dragon. Can be hatched via endstone
 
-- Primal Nether Dragon can be hatched via red terracotta blocks
+- Added the Primal Nether Dragon can be hatched via red terracotta blocks
 
 - Added fish items to items that can heal dragons (I found it weird that you can tame them with fish but you can only heal them with meat).
 
 - Aether Dragons can be hatched via glowstone blocks now
+
+- Added the Eclipse Dragon. Can be hatched via yellow terracotta blocks
+
+- Added the Dark Dragon. Can be hatched via black terracotta blocks
 
 - Dragon variants' attribute tweaks
 - All dragons are fire immune

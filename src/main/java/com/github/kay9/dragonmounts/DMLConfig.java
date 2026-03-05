@@ -116,7 +116,7 @@ public class DMLConfig
 
         configurator.push("balancing - requires restart");
         BREATH_ENABLED = configurator.comment("Should dragons be able to use their breath attack?",
-                        "If false, the AI goal will not be added to the dragon.")
+                        "If false, the AI goal will not be added to the dragon and the keybind for the breath attack will not work.")
                 .define("breath_attack_enabled", true);
 
         BREATH_DAMAGE = configurator.comment("The base damage dealt by all dragon breaths. Default is 6.0 (3 hearts).")

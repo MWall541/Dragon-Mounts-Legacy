@@ -26,8 +26,8 @@
   "dragon_breed.dragonmounts.gale": "Буревійний дракон",
   "dragon_breed.dragonmounts.sculk": "Дракон Скулк",
   "dragon_breed.dragonmounts.primal_end": "Первісний дракон Енду",
-  "dragon_breed.dragonmounts.eclipse": "Eclipse Dragon",
-  "dragon_breed.dragonmounts.dark": "Dark Dragon",
+  "dragon_breed.dragonmounts.eclipse": "Затемнений дракон",
+  "dragon_breed.dragonmounts.dark": "Темний дракон",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Яйце виклику дракона Етеру",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Яйце виклику вогневого дракона",
@@ -54,8 +54,8 @@
   "item.dragonmounts.spawn_egg.dragonmounts.gale": "Яйце виклику буревійного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.sculk": "Яйце спавна дракона Скалк",
   "item.dragonmounts.spawn_egg.dragonmounts.primal_end": "Яйце виклику первісного дракона Енду",
-  "item.dragonmounts.spawn_egg.dragonmounts.eclipse": "Eclipse Dragon Spawn Egg",
-  "item.dragonmounts.spawn_egg.dragonmounts.dark": "Dark Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.eclipse": "Яйце виклику затемненого дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.dark": "Яйце виклику темного дракона",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
   "block.dragonmounts.dragon_egg.desc1": "Взаємодія з драконом:",
@@ -90,8 +90,8 @@
   "block.dragonmounts.dragon_egg.dragonmounts.gale": "Яйце буревійного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.sculk": "Яйце дракона Скалк",
   "block.dragonmounts.dragon_egg.dragonmounts.primal_end": "Яйце первісного дракона Енду",
-  "block.dragonmounts.dragon_egg.dragonmounts.eclipse": "Eclipse Dragon Egg",
-  "block.dragonmounts.dragon_egg.dragonmounts.dark": "Dark Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.eclipse": "Яйце затемненого дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.dark": "Яйце темного дракона",
 
   "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
   "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",

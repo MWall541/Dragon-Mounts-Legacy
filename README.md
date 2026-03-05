@@ -27,7 +27,7 @@ TWEAKS:
 
 - Added the Blue Fire Dragon. Can be hatched via obsidian. Its egg looks like a fire dragon's egg but will emite soul fire particles.
 
-- Added the Terra Dragon. They have increased HP and armor. Can be hatched via andesite, granite, diorite, and terracotta blocks.
+- Added the Terra Dragon. They have increased HP and armor and are immune to stalagmite and stalactite. Can be hatched via andesite, granite, diorite, and terracotta blocks.
 
 - Added the Zombie Dragon. They have less armor and HP but they have drowning, poison and magic immunity. Can be hatched via bone blocks.
 
@@ -39,7 +39,7 @@ TWEAKS:
 
 - Added the Magic Dragon. Immune to magic. Shoots ender breath balls. Can be hatched via enchantment table blocks.
 
-- Added the Crystal Dragon. They have increased HP and armor. Can be hatched via amethyst blocks.
+- Added the Crystal Dragon. They have increased HP and armor and are immune to stalagmite and stalactite. Can be hatched via amethyst blocks.
 
 - Added the Bronze Dragon. They are the same as Storm Dragons. Can be hatched via redstone lamps.
 
@@ -51,7 +51,7 @@ TWEAKS:
 
 - Added the Gale Dragon. They are very similar to Aether Dragons. Can be hatched via blue terracotta blocks
 
-- Added the Sculk Dragon. Immune to in wall damage. Can be hatched via sculk blocks
+- Added the Sculk Dragon. Immune to in wall damage and sonicboom. Can be hatched via sculk blocks
 
 - Added the Primal End Dragon. Can be hatched via endstone
 
@@ -63,7 +63,7 @@ TWEAKS:
 
 - Added the Eclipse Dragon. Can be hatched via yellow terracotta blocks
 
-- Added the Dark Dragon. Can be hatched via black terracotta blocks
+- Added the Dark Dragon. Can be hatched via black terracotta blocks. Shoots wither breath balls. Immune to lightning bolts and freezing.
 
 - Dragon variants' attribute tweaks
 - All dragons are fire immune

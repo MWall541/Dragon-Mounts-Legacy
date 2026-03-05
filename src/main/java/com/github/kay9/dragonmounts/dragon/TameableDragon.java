@@ -1844,6 +1844,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (getBreed() == null) return false;
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
-        return  breedId.getPath().contains("wither");
+        return  breedId.getPath().contains("wither") ||
+                breedId.getPath().contains("dark");
     }
 }

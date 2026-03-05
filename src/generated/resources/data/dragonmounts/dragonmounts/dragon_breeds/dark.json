@@ -6,23 +6,23 @@
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",
-      "block_tag": "dragonmounts:sculk_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:dark_dragon_habitat_blocks",
       "point_multiplier": 1.0
     }
   ],
   "hatch_particles": {
-    "type": "minecraft:sculk_soul"
+    "type": "minecraft:ash"
   },
   "immunities": [
-    "minecraft:sonic_boom",
+    "minecraft:freeze",
+    "minecraft:lightning_bolt",
     "minecraft:on_fire",
     "minecraft:in_fire",
     "minecraft:cactus",
     "minecraft:sweet_berry_bush",
-    "minecraft:dragon_breath",
-    "minecraft:in_wall"
+    "minecraft:dragon_breath"
   ],
-  "primary_color": "2C3E50",
-  "reproduction_limit": "config:sculk",
-  "secondary_color": "E1E8ED"
+  "primary_color": "080808",
+  "reproduction_limit": "config:dark",
+  "secondary_color": "8B0000"
 }

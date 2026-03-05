@@ -14,6 +14,8 @@
     "type": "minecraft:enchanted_hit"
   },
   "immunities": [
+    "minecraft:falling_stalactite",
+    "minecraft:stalagmite",
     "minecraft:on_fire",
     "minecraft:in_fire",
     "minecraft:cactus",

@@ -283,7 +283,7 @@ public class StormDragonBreathBall extends Snowball {
 
                         if (distSq <= (double) (currentRadius * currentRadius)) {
                             // Apply effects manually to valid targets
-                            target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20, 3));
+                            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 9));
                         }
                     }
                 }

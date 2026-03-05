@@ -101,7 +101,7 @@ public class DragonBreathBall extends LargeFireball {
                 boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
                 boolean fireTicks = this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK);
 
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5f, canGrief, Level.ExplosionInteraction.MOB);
+                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.1f, canGrief, Level.ExplosionInteraction.MOB);
 
                 // Set entities caught in the explosion on fire AND damage them
                 double blastRadius = 1.5; // slightly larger than the explosion to catch entities around

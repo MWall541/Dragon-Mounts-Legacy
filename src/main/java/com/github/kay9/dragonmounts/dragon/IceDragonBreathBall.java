@@ -116,8 +116,9 @@ public class IceDragonBreathBall extends LlamaSpit {
                     this.level().addFreshEntity(cloud);
                 }
 
-                boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
+                this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                        net.minecraft.sounds.SoundEvents.PLAYER_HURT_FREEZE,
+                        net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 1.0F);
 
                 // Damage entities caught in the explosion
                 double blastRadius = 1.5; // slightly larger than the explosion to catch entities around

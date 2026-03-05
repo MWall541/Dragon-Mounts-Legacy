@@ -111,9 +111,6 @@ public class EndDragonBreathBall extends DragonFireball {
                     this.level().addFreshEntity(cloud);
                 }
 
-                boolean flag = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.0f, flag, Level.ExplosionInteraction.NONE);
-
                 // Damage entities caught in the explosion
                 double radius = 1.5; // slightly larger than the explosion to catch entities around
                 List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);

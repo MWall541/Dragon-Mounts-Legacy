@@ -1,5 +1,6 @@
 package com.github.kay9.dragonmounts.dragon;
 
+import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -97,7 +98,7 @@ public class WitherBreathBall extends WitherSkull {
                         if (!isProtected) {
                             if (owner instanceof LivingEntity livingOwner) {
                                 // Deal damage to everyone not immune
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), 6.0f);
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
                                 // Give target withering
                                 livingTarget.addEffect(new net.minecraft.world.effect.MobEffectInstance(
                                         net.minecraft.world.effect.MobEffects.WITHER, 100, 0));

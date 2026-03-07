@@ -1,11 +1,13 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -19,7 +21,7 @@ public class WitherBreathBall extends WitherSkull {
     private final double startY;
     private final double startZ;
 
-    public WitherBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz, int power) {
+    public WitherBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz) {
         super(level, shooter, dx, dy, dz);
         this.setOwner(shooter);
         // Record starting position
@@ -85,6 +87,7 @@ public class WitherBreathBall extends WitherSkull {
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
                 // Give entities caught in the explosion withering and damage them
+                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5F, false, Level.ExplosionInteraction.MOB);
                 double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
                 List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
                 for (Entity entity : entities) {
@@ -92,11 +95,19 @@ public class WitherBreathBall extends WitherSkull {
                         boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
                         if (!isProtected) {
                             if (owner instanceof LivingEntity livingOwner) {
-                                // Deal damage to everyone not immune
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
-                                // Give target withering
-                                livingTarget.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                                        net.minecraft.world.effect.MobEffects.WITHER, 100, 0));
+                                // Check if the entity is about to die from this hit
+                                float damage = DMLConfig.getBreathDamage();
+                                boolean willDie = livingTarget.getHealth() <= damage;
+                                // Deal the damage
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), damage);
+                                // If the entity died, try to spawn a Wither Rose
+                                if (willDie || !livingTarget.isAlive()) {
+                                    spawnWitherRose(livingTarget);
+                                } else {
+                                    // If they survived, give them the wither effect
+                                    livingTarget.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                                            net.minecraft.world.effect.MobEffects.WITHER, 100, 0));
+                                }
                             }
                         }
                     }
@@ -138,5 +149,17 @@ public class WitherBreathBall extends WitherSkull {
         }
 
         return false;
+    }
+
+    private void spawnWitherRose(LivingEntity target) {
+        if (!this.level().isClientSide) {
+            BlockPos pos = target.blockPosition();
+            BlockState state = net.minecraft.world.level.block.Blocks.WITHER_ROSE.defaultBlockState();
+
+            // Check if the block is air (or replaceable) and can sustain a Wither Rose
+            if (this.level().getBlockState(pos).isAir() && state.canSurvive(this.level(), pos)) {
+                this.level().setBlockAndUpdate(pos, state);
+            }
+        }
     }
 }

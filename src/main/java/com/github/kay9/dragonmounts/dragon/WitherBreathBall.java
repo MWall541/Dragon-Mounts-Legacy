@@ -95,13 +95,11 @@ public class WitherBreathBall extends WitherSkull {
                         boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
                         if (!isProtected) {
                             if (owner instanceof LivingEntity livingOwner) {
-                                // Check if the entity is about to die from this hit
-                                float damage = DMLConfig.getBreathDamage();
-                                boolean willDie = livingTarget.getHealth() <= damage;
+                                boolean wasAlreadyDead = livingTarget.deathTime > 0 || !livingTarget.isAlive();
                                 // Deal the damage
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), damage);
+                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
                                 // If the entity died, try to spawn a Wither Rose
-                                if (willDie || !livingTarget.isAlive()) {
+                                if (!wasAlreadyDead && !livingTarget.isAlive()) {
                                     spawnWitherRose(livingTarget);
                                 } else {
                                     // If they survived, give them the wither effect

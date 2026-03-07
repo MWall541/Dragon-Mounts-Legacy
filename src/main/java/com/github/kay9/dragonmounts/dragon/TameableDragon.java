@@ -1539,7 +1539,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
             level().addFreshEntity(iceBall);
         } else if (isWitherBreed()) {
-            WitherBreathBall witherBall = new WitherBreathBall(level(), this, 0, 0, 0, 1);
+            WitherBreathBall witherBall = new WitherBreathBall(level(), this, 0, 0, 0);
             witherBall.setOwner(owner);
             witherBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
             witherBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
@@ -1663,9 +1663,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         private void ensureFlying() {
             // Only lift off if not already flying
             if (!dragon.isFlying()) {
-                liftOff();
-                setFlying(true);
-                startedFlying = true;
+                if (this.dragon.getRandom().nextFloat() < 0.02f) {
+                    liftOff();
+                    setFlying(true);
+                    startedFlying = true;
+                }
             }
         }
 

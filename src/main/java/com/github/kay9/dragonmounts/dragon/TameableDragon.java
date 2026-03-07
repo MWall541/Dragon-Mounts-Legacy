@@ -1663,7 +1663,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         private void ensureFlying() {
             // Only lift off if not already flying
             if (!dragon.isFlying()) {
-                if (this.dragon.getRandom().nextFloat() < 0.02f) {
+                if (this.dragon.getRandom().nextFloat() < 0.025f) {
                     liftOff();
                     setFlying(true);
                     startedFlying = true;

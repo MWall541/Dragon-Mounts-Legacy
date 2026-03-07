@@ -87,6 +87,8 @@ TWEAKS:
 
 - Dragon breath (storm) has a chance of summoning lightning and a lightning field that damages mobs upon explosion or impact.
 
+- Dragon breath (wither) inflicts withering on entities caught in the radius. Places wither roses on victims.
+
 - Updated JP and UK translations.
 
 - Tweaked dragon tails of Nether, Water, Ghost, and Forest dragons.

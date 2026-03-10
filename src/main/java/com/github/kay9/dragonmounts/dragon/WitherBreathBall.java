@@ -87,7 +87,7 @@ public class WitherBreathBall extends WitherSkull {
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
                 // Give entities caught in the explosion withering and damage them
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5F, false, Level.ExplosionInteraction.MOB);
+                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.75F, false, Level.ExplosionInteraction.MOB);
                 double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
                 List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
                 for (Entity entity : entities) {

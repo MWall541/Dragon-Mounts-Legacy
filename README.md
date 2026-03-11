@@ -65,6 +65,8 @@ TWEAKS:
 
 - Added the Dark Dragon. Can be hatched via black terracotta blocks. Shoots wither breath balls. Immune to lightning bolts and freezing.
 
+- Added the Black Fire Dragon. Can be hatched via black concrete.
+
 - Dragon variants' attribute tweaks
 - All dragons are fire immune
 - All dragons have increased health and armor

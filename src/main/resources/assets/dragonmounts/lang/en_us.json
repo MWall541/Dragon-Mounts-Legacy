@@ -28,6 +28,7 @@
   "dragon_breed.dragonmounts.primal_end": "Primal End Dragon",
   "dragon_breed.dragonmounts.eclipse": "Eclipse Dragon",
   "dragon_breed.dragonmounts.dark": "Dark Dragon",
+  "dragon_breed.dragonmounts.black_fire": "Black Fire Dragon",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
@@ -56,6 +57,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.primal_end": "Primal End Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.eclipse": "Eclipse Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.dark": "Dark Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "Black Fire Dragon Spawn Egg",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
@@ -92,6 +94,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.primal_end": "Primal End Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.eclipse": "Eclipse Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.dark": "Dark Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "Black Fire Dragon Egg",
 
   "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
   "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",

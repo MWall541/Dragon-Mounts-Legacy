@@ -12,7 +12,7 @@
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",
-      "block_tag": "dragonmounts:blue_fire_dragon_habitat_blocks",
+      "block_tag": "dragonmounts:black_fire_dragon_habitat_blocks",
       "point_multiplier": 1.0
     }
   ],
@@ -29,6 +29,6 @@
     "minecraft:dragon_breath"
   ],
   "primary_color": "020412",
-  "reproduction_limit": "config:blue_fire",
-  "secondary_color": "00ccff"
+  "reproduction_limit": "config:black_fire",
+  "secondary_color": "020412"
 }

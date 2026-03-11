@@ -1819,7 +1819,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 breedId.getPath().contains("ghost") ||
                 breedId.getPath().contains("lunar") ||
                 breedId.getPath().contains("aurora") ||
-                breedId.getPath().contains("gale");
+                breedId.getPath().contains("gale") ||
+                breedId.getPath().contains("sylphid");
     }
 
     public boolean isStormBreed() {

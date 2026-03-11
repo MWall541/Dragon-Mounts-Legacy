@@ -29,6 +29,7 @@
   "dragon_breed.dragonmounts.eclipse": "Затемнений дракон",
   "dragon_breed.dragonmounts.dark": "Темний дракон",
   "dragon_breed.dragonmounts.black_fire": "Чорнополум'яний дракон",
+  "dragon_breed.dragonmounts.sylphid": "Сильфідний дракон",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Яйце виклику дракона Етеру",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Яйце виклику вогневого дракона",
@@ -58,6 +59,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.eclipse": "Яйце виклику затемненого дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.dark": "Яйце виклику темного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "Яйце виклику чорнополум'яного дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Яйце виклику сильфідного дракона",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Вилупиться через %s секунд.",
   "block.dragonmounts.dragon_egg.desc1": "Взаємодія з драконом:",
@@ -95,6 +97,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.eclipse": "Яйце затемненого дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.dark": "Яйце темного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "Яйце чорнополум'яного дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Яйце сильфідного дракона",
 
   "key.dragonmounts.camera_flight": "Керування польотом верхового дракона",
   "key.dragonmounts.flight_descent": "Зниження польоту верхового дракона",

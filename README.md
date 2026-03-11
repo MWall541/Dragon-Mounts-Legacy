@@ -67,6 +67,8 @@ TWEAKS:
 
 - Added the Black Fire Dragon. Can be hatched via black concrete.
 
+- Added the Sylphid Dragon. It is immune to drowning and has slightly faster flight speed. Can be hatched via light blue terracotta.
+
 - Dragon variants' attribute tweaks
 - All dragons are fire immune
 - All dragons have increased health and armor

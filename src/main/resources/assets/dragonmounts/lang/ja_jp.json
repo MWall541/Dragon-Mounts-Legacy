@@ -29,6 +29,7 @@
   "dragon_breed.dragonmounts.eclipse": "エクリプスドラゴン",
   "dragon_breed.dragonmounts.dark": "ダークドラゴン",
   "dragon_breed.dragonmounts.black_fire": "ブラックファイアドラゴン",
+  "dragon_breed.dragonmounts.sylphid": "シルフィードドラゴン",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "エーテルドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "ファイアドラゴンのスポーンエッグ",
@@ -58,6 +59,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.eclipse": "エクリプスドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.dark": "ダークドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "ブラックファイアドラゴンのスポーンエッグ",
+  "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "シルフィードドラゴンのスポーンエッグ",
 
   "block.dragonmounts.dragon_egg.remaining_time": "%s秒以内に孵化します。",
   "block.dragonmounts.dragon_egg.desc1": "ドラゴンとの交流:",
@@ -95,6 +97,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.eclipse": "エクリプスドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.dark": "ダークドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "ブラックファイアドラゴンの卵",
+  "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "シルフィードドラゴンの卵",
 
   "key.dragonmounts.flight_descent": "Dragon Mount フライト降下",
   "key.dragonmounts.camera_flight": "Dragon Mount フライトコマンド",

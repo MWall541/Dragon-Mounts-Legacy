@@ -1544,8 +1544,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             witherBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
             witherBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
             level().addFreshEntity(witherBall);
-        }
-        else if (isStormBreed()) {
+        } else if (isStormBreed()) {
             StormDragonBreathBall stormBall = new StormDragonBreathBall(level(), this);
             stormBall.setOwner(owner);
             stormBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);

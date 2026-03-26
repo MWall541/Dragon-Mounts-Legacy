@@ -49,9 +49,9 @@ public class BlueFireDragonBreathBall extends LargeFireball {
         this.reapplyPosition();
 
         // Manually set the movement direction (acceleration)
-        this.xPower = dx * 0.1D;
-        this.yPower = dy * 0.1D;
-        this.zPower = dz * 0.1D;
+        this.xPower = dx * 0.2D;
+        this.yPower = dy * 0.2D;
+        this.zPower = dz * 0.2D;
 
         // Record starting position for your distance check
         this.startX = shooter.getX();

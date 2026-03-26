@@ -3,6 +3,8 @@ package com.github.kay9.dragonmounts.dragon;
 import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.WitherSkull;
@@ -45,6 +47,11 @@ public class WitherBreathBall extends WitherSkull {
             // Explode even if it didn't hit a block
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
         }
+    }
+
+    @Override
+    protected @NotNull ParticleOptions getTrailParticle() {
+        return ParticleTypes.SOUL;
     }
 
     @Override

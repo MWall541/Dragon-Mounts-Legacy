@@ -1,6 +1,6 @@
 NOTICE: This is a fork of Dragon Mounts: Legacy by Kay9Unit, for the original mod please go to their page, all credits go to them and their contributors but do not report bugs caused by this fork to them! Report it to me instead.
 
-This mod is incompatible with Dragon Mounts Patches since it incorporated the issues that dragon mounts patches fixes. The mixins will be incompatible with the base code be advised.
+This mod is incompatible with Dragon Mounts Patches since it incorporated the issues that dragon mounts patches fixes. The mixins will be incompatible with the base code be advised. This is also incompatible with the original Dragon Mounts Legacy mod as this is a standalone mod, be advised.
 
 TWEAKS:
 
@@ -94,6 +94,8 @@ TWEAKS:
 - Dragon breath (wither) inflicts withering on entities caught in the radius. Places wither roses on victims.
 
 - Updated JP and UK translations.
+
+- Added Chinese, Russian, Spanish, French, Portuguese (South American and European) translation.
 
 - Tweaked dragon tails of Nether, Water, Ghost, and Forest dragons.
 

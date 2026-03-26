@@ -25,7 +25,7 @@ TWEAKS:
 
 - Added the Storm Dragon, lower armor with slightly fast movement speed, flight speed, and is immune to lightning bolt damage. Can be hatched when surrounded by copper blocks.
 
-- Added the Blue Fire Dragon. Can be hatched via obsidian. It breaths black fire (cosmetic change from normal fire breath).
+- Added the Blue Fire Dragon. Can be hatched via obsidian. It breathes blue fire (cosmetic change from normal fire breath).
 
 - Added the Terra Dragon. They have increased HP and armor and are immune to stalagmite and stalactite. Can be hatched via andesite, granite, diorite, and terracotta blocks.
 
@@ -65,7 +65,7 @@ TWEAKS:
 
 - Added the Dark Dragon. Can be hatched via black terracotta blocks. Shoots wither breath balls. Immune to lightning bolts and freezing.
 
-- Added the Black Fire Dragon. Can be hatched via black concrete. It breaths black fire (cosmetic change from normal fire breath).
+- Added the Black Fire Dragon. Can be hatched via black concrete. It breathes black fire (cosmetic change from normal fire breath).
 
 - Added the Sylphid Dragon. It is immune to drowning and has slightly faster flight speed. Can be hatched via light blue terracotta.
 

@@ -1,4 +1,4 @@
-NOTICE: This is a fork of Dragon Mounts: Legacy by Kay9Unit, for the original mod please go to their page, all credits go to them and their contributors but do not report bugs caused by this fork to them! Report it to me instead.
+NOTICE: This is a fork of Dragon Mounts: Legacy by Kay9Unit, for the original mod please go to their page, all credits go to them and their contributors but do not report bugs caused by this fork to them! Report it to me instead.
 
 This mod is incompatible with Dragon Mounts Patches since it incorporated the issues that dragon mounts patches fixes. The mixins will be incompatible with the base code be advised. This is also incompatible with the original Dragon Mounts Legacy mod as this is a standalone mod, be advised.
 
@@ -25,7 +25,7 @@ TWEAKS:
 
 - Added the Storm Dragon, lower armor with slightly fast movement speed, flight speed, and is immune to lightning bolt damage. Can be hatched when surrounded by copper blocks.
 
-- Added the Blue Fire Dragon. Can be hatched via obsidian. Its egg looks like a fire dragon's egg but will emite soul fire particles.
+- Added the Blue Fire Dragon. Can be hatched via obsidian.
 
 - Added the Terra Dragon. They have increased HP and armor and are immune to stalagmite and stalactite. Can be hatched via andesite, granite, diorite, and terracotta blocks.
 
@@ -43,11 +43,11 @@ TWEAKS:
 
 - Added the Bronze Dragon. They are the same as Storm Dragons. Can be hatched via redstone lamps.
 
-- Soul Fire-able blocks can no longer hatch the Nether Dragon, it will instead hatch the new variant: Soul Nether Dragon (cosmetic change only). The Nether Dragon egg will emit normal fire particles while the Soul Nether Dragon egg will emit soul fire particles. They can be hatched by blocks that can emit soul fire.
+- Soul Fire-able blocks can no longer hatch the Nether Dragon, it will instead hatch the new variant: Soul Nether Dragon (cosmetic change only). They can be hatched by blocks that can emit soul fire.
 
-- Prismarine and Sea Lantern can no longer hatch the Water dragon, it will instead hatch the new variant: Ocean Dragon (cosmetic change only). The Water Dragon egg will emit dripping water particles while the Ocean Dragon egg will emit bubbles.
+- Prismarine and Sea Lantern can no longer hatch the Water dragon, it will instead hatch the new variant: Ocean Dragon (cosmetic change only).
 
-- Added the Wither Dragon. They are immune to withering but has slightly low hp. They can shoot wither skulls which inflict wither.
+- Added the Wither Dragon. They are immune to withering but has slightly low hp. They can shoot wither skulls which inflict wither. Can be hatched via wither skeleton skulls.
 
 - Added the Gale Dragon. They are very similar to Aether Dragons. Can be hatched via blue terracotta blocks
 
@@ -85,7 +85,7 @@ TWEAKS:
 - It respects doFireTick and mobGriefing gamerules. 
 - It now lights up blocks that can be lit like candles, campfires, redstone lamps, smokers, furnaces, blast furnaces, and tnt. If a modded block has the "LIT" blockstate, that will get lit as well.
 
-- Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact. It will put fire out on block surfaces (fire extinguisher style) and unlight lit blocks like (campfires, candles, lamps, etc.)
+- Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact. It will put fire out on block surfaces (fire extinguisher style) and unlight lit blocks like (campfires, candles, lamps, etc.). When it hits water, it will turn it to ice. When it hits lava, it will turn it to cobblestone or obsidian.
 
 - Dragon breath (end) has a chance of summoning a harming cloud upon explosion or impact.
 

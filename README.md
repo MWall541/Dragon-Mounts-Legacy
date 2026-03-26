@@ -107,6 +107,19 @@ Dragon Mounts Discord: https://discord.gg/Ewm8aTTJ3K
 
 Please checkout https://www.curseforge.com/minecraft/mc-mods/dragon-mounts-2 made by the Dragon Mounts 2 team if you want to play in 1.12.2 !
 
+FAQs:
+
+Q: How do I get dragons?
+A: If you want dragons to spawn in some chests in structures, you need to enable them in the configs ("use_loot_tables = true") first then restart the game. The new variants of dragons will share the spawn weight of some dragons. For example, if you ramp up the spawn weight of aether dragons, the gale dragon will also have a high chance to spawn.
+
+Q: I can't open my dragon's inventory, why is this happening?
+A: Your keybind might have conflicts with other mods. Like Curious which uses the "I" keybind. You can change the keybind of the dragon inventory to amend this.
+
+Q: My game is crashing. What could be the problem?
+A: You could be playing with the Dragon Mounts Patches mod which is incompatible with this mod from version 9983 onwards since its fixes has been incorporated to the base mod. If that is not the cause, you can comment your crashlog via textfile in the comments section or the github issues page. Without a crashlog, I cannot help you.
+
+Q: I switched from the base Dragon Mounts Legacy mod to this one and my dragon's attributes are not reflecting correctly, like the HP, flight speed, and armor values are not the same with other dragons. What could be the cause?
+A: Previous versions preserve the attribute of dragons in existing worlds. The new attributes would only reflect when you use the later versions of the mod or when hatching new dragons. I suggest you update to the latest version and hatch some new dragons. Consider your old dragons "Legacy" dragons.
 
 === DO NOT DOWNLOAD FROM OTHER WEBSITES, I ONLY UPLOADED THIS TO CURSEFORGE ===
 

@@ -9,11 +9,13 @@ import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LlamaSpit;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -35,6 +37,42 @@ public class IceDragonBreathBall extends LlamaSpit {
 
     @Override
     public void tick() {
+        // Perform custom fluid detection on the Server side only
+        if (!this.level().isClientSide) {
+            Vec3 currentPos = this.position();
+            Vec3 movement = this.getDeltaMovement();
+            Vec3 futurePos = currentPos.add(movement);
+
+            // Manually check for blocks/fluids along the path
+            BlockHitResult blockHit = this.level().clip(new net.minecraft.world.level.ClipContext(
+                    currentPos,
+                    futurePos,
+                    net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                    net.minecraft.world.level.ClipContext.Fluid.ANY, // This catches the water surface!
+                    this
+            ));
+
+            // Check for entities along the path (using the existing helper)
+            EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
+                    this.level(),
+                    this,
+                    currentPos,
+                    futurePos,
+                    this.getBoundingBox().expandTowards(movement).inflate(1.0D),
+                    this::canHitEntity
+            );
+
+            // Decide what we hit first
+            HitResult finalHit = blockHit;
+            if (entityHit != null) {
+                finalHit = entityHit;
+            }
+
+            if (finalHit.getType() != HitResult.Type.MISS) {
+                this.onHit(finalHit);
+            }
+        }
+
         super.tick();
 
         // Check max distance
@@ -136,6 +174,11 @@ public class IceDragonBreathBall extends LlamaSpit {
                 // Extinguish fire in a cubic area
                 if (result instanceof BlockHitResult blockResult) {
                     BlockPos hitPos = blockResult.getBlockPos();
+
+                    // Turn water into ice and turn lava into obsidian
+                    BlockPos fluidPos = this.blockPosition();
+                    transformFluids(fluidPos);
+                    transformFluids(hitPos);
 
                     // Iterate in a small 3x3x3 area around the impact
                     int radius = 1;
@@ -249,6 +292,36 @@ public class IceDragonBreathBall extends LlamaSpit {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void transformFluids(BlockPos pos) {
+        // Check the hit block
+        BlockState state = this.level().getBlockState(pos);
+        // Also check the block above it (in case we hit the floor of a pool)
+        BlockPos abovePos = pos.above();
+        BlockState stateAbove = this.level().getBlockState(abovePos);
+
+        processFluidConversion(pos, state);
+        processFluidConversion(abovePos, stateAbove);
+    }
+
+    private void processFluidConversion(BlockPos pos, BlockState state) {
+        net.minecraft.world.level.material.FluidState fluidState = state.getFluidState();
+
+        if (!fluidState.isEmpty()) {
+            if (fluidState.is(net.minecraft.tags.FluidTags.WATER)) {
+                this.level().setBlockAndUpdate(pos, net.minecraft.world.level.block.Blocks.ICE.defaultBlockState());
+                this.level().levelEvent(2001, pos, net.minecraft.world.level.block.Block.getId(net.minecraft.world.level.block.Blocks.ICE.defaultBlockState()));
+            }
+            else if (fluidState.is(net.minecraft.tags.FluidTags.LAVA)) {
+                BlockState newState = fluidState.isSource() ?
+                        net.minecraft.world.level.block.Blocks.OBSIDIAN.defaultBlockState() :
+                        net.minecraft.world.level.block.Blocks.COBBLESTONE.defaultBlockState();
+
+                this.level().setBlockAndUpdate(pos, newState);
+                this.level().playSound(null, pos, net.minecraft.sounds.SoundEvents.LAVA_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F);
             }
         }
     }

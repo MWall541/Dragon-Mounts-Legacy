@@ -113,7 +113,7 @@ Q: How do I get dragons?
 A: There's two ways. OPTION ONE: is by killing the Ender Dragon again by respawning it, then you can transform the egg to what variant you like. In the config, the dragon egg will always spawn at the dragon fountain unless a mod is conflicting with it. OPTION TWO: is by chests like the original mod but this is disabled by default. If you want dragon eggs to spawn in some chests in structures, you need to enable them in the configs ("use_loot_tables = true") first then restart the game. The new variants of dragon eggs will share the spawn weight of the base dragons. For example, if you ramp up the spawn weight of aether dragons, the gale dragon will also have a high chance to spawn and if you ramp up the spawn weight of the fire dragon, the blue fire dragon will follow.
 
 Q: I can't open my dragon's inventory, why is this happening?
-A: Your keybind might have conflicts with other mods. Like Curious which uses the "I" keybind. You can change the keybind of the dragon inventory to amend this.
+A: Your keybind might have conflicts with other mods. Like Curious which uses the "G" keybind. You can change the keybind of the dragon inventory to amend this.
 
 Q: My game is crashing. What could be the problem?
 A: You could be playing with the Dragon Mounts Patches mod which is incompatible with this mod from version 9983 onwards since its fixes has been incorporated to the base mod. If that is not the cause, you can comment your crashlog via textfile in the comments section or the github issues page. Without a crashlog, I cannot help you.

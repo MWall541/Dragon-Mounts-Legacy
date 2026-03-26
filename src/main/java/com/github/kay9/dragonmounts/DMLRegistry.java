@@ -2,6 +2,8 @@ package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
 import com.github.kay9.dragonmounts.data.loot.conditions.RandomChanceByConfig;
+import com.github.kay9.dragonmounts.dragon.BlackFireDragonBreathBall;
+import com.github.kay9.dragonmounts.dragon.BlueFireDragonBreathBall;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
@@ -78,4 +80,12 @@ public class DMLRegistry
         });
         return registry.register(name, sup);
     }
+
+    public static final RegistryObject<EntityType<BlackFireDragonBreathBall>> BLACK_FIRE_BREATH = entity("black_fire_breath",
+            EntityType.Builder.<BlackFireDragonBreathBall>of(BlackFireDragonBreathBall::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10));
+
+    public static final RegistryObject<EntityType<BlueFireDragonBreathBall>> BLUE_FIRE_BREATH = entity("blue_fire_breath",
+            EntityType.Builder.<BlueFireDragonBreathBall>of(BlueFireDragonBreathBall::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10));
 }

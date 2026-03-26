@@ -1555,6 +1555,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             endBall.setOwner(owner);
             endBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
             level().addFreshEntity(endBall);
+        } else if (isBlackFireBreed()) {
+            BlackFireDragonBreathBall blackFireBall = new BlackFireDragonBreathBall(level(), this, look.x, look.y, look.z, 1);
+            blackFireBall.setOwner(owner);
+            blackFireBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            level().addFreshEntity(blackFireBall);
+        } else if (isBlueFireBreed()) {
+            BlueFireDragonBreathBall blueFireBall = new BlueFireDragonBreathBall(level(), this, look.x, look.y, look.z, 1);
+            blueFireBall.setOwner(owner);
+            blueFireBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            level().addFreshEntity(blueFireBall);
         } else {
             DragonBreathBall fireBall = new DragonBreathBall(level(), this, look.x, look.y, look.z, 1);
             fireBall.setOwner(owner);
@@ -1848,5 +1858,19 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         return  breedId.getPath().contains("wither") ||
                 breedId.getPath().contains("dark");
+    }
+
+    public boolean isBlackFireBreed() {
+        if (getBreed() == null) return false;
+        ResourceLocation breedId = getBreed().id(level().registryAccess());
+
+        return  breedId.getPath().contains("black_fire");
+    }
+
+    public boolean isBlueFireBreed() {
+        if (getBreed() == null) return false;
+        ResourceLocation breedId = getBreed().id(level().registryAccess());
+
+        return  breedId.getPath().contains("blue_fire");
     }
 }

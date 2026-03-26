@@ -109,7 +109,7 @@ Please checkout https://www.curseforge.com/minecraft/mc-mods/dragon-mounts-2 mad
 
 FAQs:
 
-Q: How do I get dragons?
+Q: How do I get dragons/dragon eggs?
 A: There's two ways. OPTION ONE: is by killing the Ender Dragon again by respawning it, then you can transform the egg to what variant you like. In the config, the dragon egg will always spawn at the dragon fountain unless a mod is conflicting with it. OPTION TWO: is by chests like the original mod but this is disabled by default. If you want dragon eggs to spawn in some chests in structures, you need to enable them in the configs ("use_loot_tables = true") first then restart the game. The new variants of dragon eggs will share the spawn weight of the base dragons. For example, if you ramp up the spawn weight of aether dragons, the gale dragon will also have a high chance to spawn and if you ramp up the spawn weight of the fire dragon, the blue fire dragon will follow.
 
 Q: I can't open my dragon's inventory, why is this happening?

@@ -110,7 +110,7 @@ Please checkout https://www.curseforge.com/minecraft/mc-mods/dragon-mounts-2 mad
 FAQs:
 
 Q: How do I get dragons?
-A: If you want dragons to spawn in some chests in structures, you need to enable them in the configs ("use_loot_tables = true") first then restart the game. The new variants of dragons will share the spawn weight of some dragons. For example, if you ramp up the spawn weight of aether dragons, the gale dragon will also have a high chance to spawn.
+A: There's two ways. The first one is by killing the Ender Dragon again. In the config, the dragon egg will always spawn at the dragon fountain unless a mod is conflicting with it. The second is by chests like the original mod but this is disabled by default. If you want dragons to spawn in some chests in structures, you need to enable them in the configs ("use_loot_tables = true") first then restart the game. The new variants of dragons will share the spawn weight of some dragons. For example, if you ramp up the spawn weight of aether dragons, the gale dragon will also have a high chance to spawn.
 
 Q: I can't open my dragon's inventory, why is this happening?
 A: Your keybind might have conflicts with other mods. Like Curious which uses the "I" keybind. You can change the keybind of the dragon inventory to amend this.

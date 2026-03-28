@@ -18,7 +18,7 @@
     "minecraft:sweet_berry_bush",
     "minecraft:dragon_breath"
   ],
-  "primary_color": "4A5D8A",
+  "primary_color": "62ff",
   "reproduction_limit": "config:sylphid",
-  "secondary_color": "FBCFE8"
+  "secondary_color": "5999ff"
 }

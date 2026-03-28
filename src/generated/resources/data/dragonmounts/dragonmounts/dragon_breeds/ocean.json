@@ -20,7 +20,7 @@
     }
   ],
   "hatch_particles": {
-    "type": "minecraft:bubble"
+    "type": "minecraft:bubble_column_up"
   },
   "immunities": [
     "minecraft:on_fire",

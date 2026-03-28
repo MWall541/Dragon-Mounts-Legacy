@@ -15,6 +15,9 @@
       "point_multiplier": 1.0
     }
   ],
+  "hatch_particles": {
+    "type": "minecraft:cloud"
+  },
   "immunities": [
     "minecraft:on_fire",
     "minecraft:in_fire",

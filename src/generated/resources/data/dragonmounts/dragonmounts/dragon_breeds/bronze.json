@@ -13,7 +13,7 @@
     }
   ],
   "hatch_particles": {
-    "type": "minecraft:enchanted_hit"
+    "type": "minecraft:wax_on"
   },
   "immunities": [
     "minecraft:lightning_bolt",
@@ -25,5 +25,5 @@
   ],
   "primary_color": "613E1D",
   "reproduction_limit": "config:bronze",
-  "secondary_color": "FFD700"
+  "secondary_color": "ADFF2F"
 }

@@ -17,7 +17,7 @@
     }
   ],
   "hatch_particles": {
-    "type": "minecraft:soul_fire_flame"
+    "type": "minecraft:squid_ink"
   },
   "immunities": [
     "minecraft:on_fire",

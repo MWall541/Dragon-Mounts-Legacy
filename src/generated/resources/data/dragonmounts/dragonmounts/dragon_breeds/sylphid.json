@@ -19,6 +19,6 @@
     "minecraft:dragon_breath"
   ],
   "primary_color": "62ff",
-  "reproduction_limit": "config:sylphid",
+  "reproduction_limit": "config:water",
   "secondary_color": "5999ff"
 }

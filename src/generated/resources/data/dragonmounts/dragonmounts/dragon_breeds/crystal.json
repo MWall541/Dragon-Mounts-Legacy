@@ -23,6 +23,6 @@
     "minecraft:dragon_breath"
   ],
   "primary_color": "4E3524",
-  "reproduction_limit": "config:crystal",
+  "reproduction_limit": "config:forest",
   "secondary_color": "FFD700"
 }

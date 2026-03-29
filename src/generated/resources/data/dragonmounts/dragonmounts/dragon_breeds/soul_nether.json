@@ -27,6 +27,6 @@
     "minecraft:dragon_breath"
   ],
   "primary_color": "00fbff",
-  "reproduction_limit": "config:soul_nether",
+  "reproduction_limit": "config:nether",
   "secondary_color": "00424d"
 }

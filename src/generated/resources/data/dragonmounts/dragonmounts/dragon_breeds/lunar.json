@@ -22,6 +22,6 @@
     "minecraft:wither"
   ],
   "primary_color": "0B132B",
-  "reproduction_limit": "config:lunar",
+  "reproduction_limit": "config:ice",
   "secondary_color": "A8DADC"
 }

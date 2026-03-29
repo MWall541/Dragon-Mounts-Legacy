@@ -28,6 +28,6 @@
     "minecraft:wither"
   ],
   "primary_color": "241E1E",
-  "reproduction_limit": "config:wither",
+  "reproduction_limit": "config:ghost",
   "secondary_color": "4A3B37"
 }

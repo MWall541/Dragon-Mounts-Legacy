@@ -19,6 +19,6 @@
     "minecraft:wither"
   ],
   "primary_color": "D4AF37",
-  "reproduction_limit": "config:solar",
+  "reproduction_limit": "config:fire",
   "secondary_color": "FFD700"
 }

@@ -31,6 +31,6 @@
     "minecraft:dragon_breath"
   ],
   "primary_color": "9efff3",
-  "reproduction_limit": "config:ocean",
+  "reproduction_limit": "config:water",
   "secondary_color": "4dc9ff"
 }

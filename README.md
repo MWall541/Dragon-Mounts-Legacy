@@ -51,7 +51,7 @@ TWEAKS:
 
 - Added the Gale Dragon. They are very similar to Aether Dragons. Can be hatched via blue terracotta blocks
 
-- Added the Sculk Dragon. Immune to in wall damage and sonicboom. Can be hatched via sculk blocks
+- Added the Sculk Dragon. Immune to in wall damage and sonicboom. Can be hatched via sculk blocks. Shoots Sonic Boom breaths.
 
 - Added the Primal End Dragon. Can be hatched via endstone
 

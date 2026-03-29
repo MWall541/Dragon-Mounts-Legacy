@@ -14,5 +14,8 @@ public class ClientEvents {
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(DMLRegistry.BLACK_FIRE_BREATH.get(), BlackFireBreathRenderer::new);
         event.registerEntityRenderer(DMLRegistry.BLUE_FIRE_BREATH.get(), BlueFireBreathRenderer::new);
+        event.registerEntityRenderer(DMLRegistry.STORM_BREATH.get(), StormBreathRenderer::new);
+        event.registerEntityRenderer(DMLRegistry.ICE_BREATH.get(), IceBreathRenderer::new);
+        event.registerEntityRenderer(DMLRegistry.SCULK_BREATH.get(), SculkBreathRenderer::new);
     }
 }

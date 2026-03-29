@@ -1,14 +1,18 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
+import com.github.kay9.dragonmounts.DMLRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -19,16 +23,39 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class StormDragonBreathBall extends Snowball {
+public class StormDragonBreathBall extends LargeFireball {
 
-    private final double startX;
-    private final double startY;
-    private final double startZ;
+    private double startX;
+    private double startY;
+    private double startZ;
 
-    public StormDragonBreathBall(Level level, LivingEntity shooter) {
-        super(level, shooter);
+    // Constructor for the Registry and Loading from NBT
+    public StormDragonBreathBall(EntityType<? extends StormDragonBreathBall> type, Level level) {
+        super(type, level);
+        // These might be 0 until the entity is actually spawned
+        this.startX = this.getX();
+        this.startY = this.getY();
+        this.startZ = this.getZ();
+    }
+
+    // Constructor for Dragon to use
+    public StormDragonBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz, int power) {
+        // Call our OWN first constructor using the Registry Type
+        this(DMLRegistry.STORM_BREATH.get(), level);
+
+        // Manually set the owner (shooter)
         this.setOwner(shooter);
-        // Record starting position
+
+        // Manually set starting position to the shooter
+        this.moveTo(shooter.getX(), shooter.getY(), shooter.getZ(), shooter.getYRot(), shooter.getXRot());
+        this.reapplyPosition();
+
+        // Manually set the movement direction (acceleration)
+        this.xPower = dx * 0.12D;
+        this.yPower = dy * 0.12D;
+        this.zPower = dz * 0.12D;
+
+        // Record starting position for distance check
         this.startX = shooter.getX();
         this.startY = shooter.getY();
         this.startZ = shooter.getZ();
@@ -38,17 +65,21 @@ public class StormDragonBreathBall extends Snowball {
     public void tick() {
         super.tick();
 
-        // Check max distance
-        double dx = this.getX() - startX;
-        double dy = this.getY() - startY;
-        double dz = this.getZ() - startZ;
-        double distanceSq = dx*dx + dy*dy + dz*dz;
-        // max distance in blocks
-        double maxDistance = 20.0;
-        if (distanceSq > maxDistance * maxDistance) {
-            // Explode even if it didn't hit a block
+        // Max distance check
+        double distSq = this.distanceToSqr(startX, startY, startZ);
+        if (distSq > 400.0) { // 20.0 * 20.0
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
         }
+    }
+
+    @Override
+    protected boolean shouldBurn() {
+        return false;
+    }
+
+    @Override
+    protected @NotNull ParticleOptions getTrailParticle() {
+        return ParticleTypes.ELECTRIC_SPARK;
     }
 
     @Override
@@ -86,84 +117,96 @@ public class StormDragonBreathBall extends Snowball {
     protected void onHit(@NotNull HitResult result) {
         if (!this.level().isClientSide) {
             Entity owner = this.getOwner();
-            // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
-
-                // 10% chance to summon a lightning and a cloud
+                // 1. Roll for the 10% Storm Event (Lightning + Cloud)
                 if (this.random.nextFloat() < 0.10f) {
-                    net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(this.level());
-                    if (lightning != null) {
-                        // Position the lightning exactly where the projectile hit
-                        lightning.moveTo(this.getX(), this.getY(), this.getZ());
-
-                        // This prevents the bolt from damaging the crew or setting fire
-                        lightning.setVisualOnly(true);
-
-                        // Link the lightning to the shooter (for death messages/advancements)
-                        if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
-                            lightning.setCause(player);
-                        }
-
-                        // Add it to the world
-                        this.level().addFreshEntity(lightning);
-
-                        // MANUALLY TRIGGER VANILLA SECONDARY EFFECTS
-                        if (result instanceof BlockHitResult blockResult) {
-                            BlockPos hitPos = blockResult.getBlockPos();
-                            int extraIgnitions = 4;
-
-                            // Spawn fire only on the ground
-                            this.spawnLightningFire(this.level(), hitPos, extraIgnitions, owner);
-
-                            // Clean copper only on the ground
-                            this.cleanCopper(this.level(), hitPos);
-                        }
-
-                        List<Entity> strikeTargets = this.level().getEntities(this, this.getBoundingBox().inflate(3.0D));
-                        for (Entity strikeTarget : strikeTargets) {
-                            if (strikeTarget instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
-                                // This ensures they get the "Struck by Lightning" tag/logic without hitting the crew
-                                if (!net.minecraftforge.event.ForgeEventFactory.onEntityStruckByLightning(livingTarget, lightning)) {
-                                    livingTarget.thunderHit((net.minecraft.server.level.ServerLevel)this.level(), lightning);
-                                }
-                            }
-                        }
-                    }
-
-                    DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
-                    if (owner instanceof LivingEntity livingOwner) {
-                        cloud.setOwner(livingOwner);
-                    }
-
-                    cloud.setParticle(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK);
-                    cloud.setRadius(2.0F);
-                    cloud.setDuration(60); // 3 seconds
-                    cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
-
-                    this.level().addFreshEntity(cloud);
+                    this.triggerStormEvent(result, owner);
                 }
 
-                // Damage entities caught in the explosion
-                double radius = 1.5; // slightly larger than the explosion to catch entities around
-                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
-                for (Entity entity : entities) {
-                    if (entity instanceof LivingEntity livingTarget) {
-                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
-                        if (!isProtected) {
-                            if (owner instanceof LivingEntity livingOwner) {
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
-                            }
-                        }
-                    }
-                }
+                // 2. Handle standard projectile damage
+                this.applyAreaEffectDamage(owner);
             }
-
-            // Remove the storm ball entity
             this.discard();
         }
     }
 
-    private void spawnLightningFire(Level level, BlockPos pos, int extraIgnitions, Entity owner) {
+    /**
+     * Handles the creation of the lightning bolt, secondary lightning effects, and the static cloud.
+     */
+    private void triggerStormEvent(HitResult result, Entity owner) {
+        net.minecraft.world.entity.LightningBolt lightning = EntityType.LIGHTNING_BOLT.create(this.level());
+        if (lightning != null) {
+            lightning.moveTo(this.getX(), this.getY(), this.getZ());
+            lightning.setVisualOnly(true);
+
+            if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
+                lightning.setCause(player);
+            }
+
+            this.level().addFreshEntity(lightning);
+
+            // Handle Block-based lightning logic
+            if (result instanceof BlockHitResult blockResult) {
+                BlockPos hitPos = blockResult.getBlockPos();
+                this.spawnLightningFire(this.level(), hitPos, owner);
+                this.onCopperHit(this.level(), hitPos);
+            }
+
+            // Handle Entity-based lightning strikes
+            this.applyLightningStrikeToEntities(lightning, owner);
+        }
+
+        // Spawn the lingering static cloud
+        this.spawnStormCloud(owner);
+    }
+
+    /**
+     * Specifically handles the "thunderHit" logic for entities near the strike point.
+     */
+    private void applyLightningStrikeToEntities(net.minecraft.world.entity.LightningBolt lightning, Entity owner) {
+        List<Entity> strikeTargets = this.level().getEntities(this, this.getBoundingBox().inflate(3.0D));
+        for (Entity strikeTarget : strikeTargets) {
+            if (strikeTarget instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
+                if (!ForgeEventFactory.onEntityStruckByLightning(livingTarget, lightning)) {
+                    livingTarget.thunderHit((net.minecraft.server.level.ServerLevel)this.level(), lightning);
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates the AreaEffectCloud that slows down enemies with electric sparks.
+     */
+    private void spawnStormCloud(Entity owner) {
+        DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
+        if (owner instanceof LivingEntity livingOwner) {
+            cloud.setOwner(livingOwner);
+        }
+
+        cloud.setParticle(ParticleTypes.ELECTRIC_SPARK);
+        cloud.setRadius(2.0F);
+        cloud.setDuration(60);
+        cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
+
+        this.level().addFreshEntity(cloud);
+    }
+
+    /**
+     * Finds and damages entities within the blast radius, protecting the 'Dragon Crew'.
+     */
+    private void applyAreaEffectDamage(Entity owner) {
+        double blastRadius = 1.5;
+        List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
+                if (owner instanceof LivingEntity livingOwner) {
+                    entity.hurt(this.level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
+                }
+            }
+        }
+    }
+
+    private void spawnLightningFire(Level level, BlockPos pos, Entity owner) {
         boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
         boolean fireTicks = this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK);
 
@@ -175,7 +218,7 @@ public class StormDragonBreathBall extends Snowball {
             }
 
             // Try to ignite neighbors (the extra sparks)
-            for (int i = 0; i < extraIgnitions; ++i) {
+            for (int i = 0; i < 4; ++i) {
                 BlockPos randomPos = pos.offset(this.random.nextInt(3) - 1, this.random.nextInt(3) - 1, this.random.nextInt(3) - 1);
                 fireState = net.minecraft.world.level.block.BaseFireBlock.getState(level, randomPos);
                 if (level.getBlockState(randomPos).isAir() && fireState.canSurvive(level, randomPos)) {
@@ -185,16 +228,30 @@ public class StormDragonBreathBall extends Snowball {
         }
     }
 
-    private void cleanCopper(Level level, BlockPos pos) {
-        // This is essentially a manual call to the vanilla logic
-        // It's a bit complex to rewrite, but hitting a Lightning Rod or Copper with fire handles most visual cases.
-        BlockState state = level.getBlockState(pos);
-        if (state.is(net.minecraft.world.level.block.Blocks.LIGHTNING_ROD)) {
-            ((net.minecraft.world.level.block.LightningRodBlock)state.getBlock()).onLightningStrike(state, level, pos);
-        }
-        // Vanilla also cleans oxidation from copper in a small area
-        if (state.getBlock() instanceof net.minecraft.world.level.block.WeatheringCopper) {
-            level.setBlockAndUpdate(pos, net.minecraft.world.level.block.WeatheringCopper.getFirst(state));
+    private void onCopperHit(Level level, BlockPos pos) {
+        // Define the 3x3x3 area (radius of 1 around the hit position)
+        int radius = 1;
+        for (BlockPos targetPos : BlockPos.betweenClosed(pos.offset(-radius, -radius, -radius), pos.offset(radius, radius, radius))) {
+            BlockState state = level.getBlockState(targetPos);
+
+            // 1. Handle Lightning Rods (Powering + Visuals)
+            if (state.is(net.minecraft.world.level.block.Blocks.LIGHTNING_ROD)) {
+                ((net.minecraft.world.level.block.LightningRodBlock) state.getBlock()).onLightningStrike(state, level, targetPos);
+            }
+
+            // 2. Handle Weathering Copper (Cleaning Oxidation)
+            // This checks if the block is any form of copper that can oxidize (stairs, slabs, blocks, etc.)
+            if (state.getBlock() instanceof net.minecraft.world.level.block.WeatheringCopper) {
+                // getFirst() returns the "Unaffected" (clean) version of that specific copper block
+                level.setBlockAndUpdate(targetPos, net.minecraft.world.level.block.WeatheringCopper.getFirst(state));
+
+                // Add a small visual "clean" particle effect
+                if (level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                    serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                            targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5,
+                            5, 0.2, 0.2, 0.2, 0.05);
+                }
+            }
         }
     }
 

@@ -2,10 +2,7 @@ package com.github.kay9.dragonmounts;
 
 import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
 import com.github.kay9.dragonmounts.data.loot.conditions.RandomChanceByConfig;
-import com.github.kay9.dragonmounts.dragon.BlackFireDragonBreathBall;
-import com.github.kay9.dragonmounts.dragon.BlueFireDragonBreathBall;
-import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.*;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlockEntity;
 import com.mojang.serialization.Codec;
@@ -87,5 +84,17 @@ public class DMLRegistry
 
     public static final RegistryObject<EntityType<BlueFireDragonBreathBall>> BLUE_FIRE_BREATH = entity("blue_fire_breath",
             EntityType.Builder.<BlueFireDragonBreathBall>of(BlueFireDragonBreathBall::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10));
+
+    public static final RegistryObject<EntityType<StormDragonBreathBall>> STORM_BREATH = entity("storm_breath",
+            EntityType.Builder.<StormDragonBreathBall>of(StormDragonBreathBall::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10));
+
+    public static final RegistryObject<EntityType<IceDragonBreathBall>> ICE_BREATH = entity("ice_breath",
+            EntityType.Builder.<IceDragonBreathBall>of(IceDragonBreathBall::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10));
+
+    public static final RegistryObject<EntityType<SculkDragonBreathBall>> SCULK_BREATH = entity("sculk_breath",
+            EntityType.Builder.<SculkDragonBreathBall>of(SculkDragonBreathBall::new, MobCategory.MISC)
                     .sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10));
 }

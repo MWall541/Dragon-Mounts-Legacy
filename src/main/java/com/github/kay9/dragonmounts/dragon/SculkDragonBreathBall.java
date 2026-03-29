@@ -2,33 +2,36 @@ package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import com.github.kay9.dragonmounts.DMLRegistry;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BlackFireDragonBreathBall extends LargeFireball {
+public class SculkDragonBreathBall extends LargeFireball {
 
     private double startX;
     private double startY;
     private double startZ;
 
     // Constructor for the Registry and Loading from NBT
-    public BlackFireDragonBreathBall(EntityType<? extends BlackFireDragonBreathBall> type, Level level) {
+    public SculkDragonBreathBall(EntityType<? extends SculkDragonBreathBall> type, Level level) {
         super(type, level);
         // These might be 0 until the entity is actually spawned
         this.startX = this.getX();
@@ -37,9 +40,9 @@ public class BlackFireDragonBreathBall extends LargeFireball {
     }
 
     // Constructor for Dragon to use
-    public BlackFireDragonBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz, int power) {
+    public SculkDragonBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz, int power) {
         // Call our OWN first constructor using the Registry Type
-        this(DMLRegistry.BLACK_FIRE_BREATH.get(), level);
+        this(DMLRegistry.SCULK_BREATH.get(), level);
 
         // Manually set the owner (shooter)
         this.setOwner(shooter);
@@ -77,7 +80,7 @@ public class BlackFireDragonBreathBall extends LargeFireball {
 
     @Override
     protected @NotNull ParticleOptions getTrailParticle() {
-        return ParticleTypes.SCULK_SOUL;
+        return ParticleTypes.SONIC_BOOM;
     }
 
     @Override
@@ -101,7 +104,7 @@ public class BlackFireDragonBreathBall extends LargeFireball {
         }
 
         // Ignore other dragon breath balls
-        if (target instanceof BlackFireDragonBreathBall) {
+        if (target instanceof SculkDragonBreathBall) {
             return false;
         }
 
@@ -109,104 +112,49 @@ public class BlackFireDragonBreathBall extends LargeFireball {
     }
 
     @Override
-    protected void onHitEntity(@NotNull EntityHitResult result) {
-        super.onHitEntity(result);
-
-        Entity target = result.getEntity();
-        Entity owner = this.getOwner();
-
-        if (!isPartOfDragonCrew(target, owner)) {
-            // Only set the entity on fire if it's not fire-immune
-            if (!target.fireImmune()) {
-                target.setSecondsOnFire(5);
-            }
-        }
-    }
+    protected void onHitEntity(@NotNull EntityHitResult result) { super.onHitEntity(result); }
 
     @Override
     protected void onHit(@NotNull HitResult result) {
         if (!this.level().isClientSide) {
             Entity owner = this.getOwner();
             if (owner != null) {
-                boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
+                // 1. Play the iconic Warden Sonic Boom sound
+                this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                        SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 1.0F, 1.0F);
 
-                // 1. Initial Explosion
-                // this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5f, canGrief, Level.ExplosionInteraction.MOB);
+                // 2. Trigger a Game Event (Sculk Sensors will hear this!)
+                this.level().gameEvent(owner, GameEvent.EXPLODE, this.position());
 
-                // 2. Handle Entity Damage & Ignite
-                this.applyAreaEffectDamage(owner);
+                // 3. Apply the custom Sonic/Sculk damage
+                this.applySculkAreaEffect(owner);
 
-                // 3. Handle Block Interactions (Ignition, TNT, etc.)
-                if (result instanceof BlockHitResult blockResult) {
-                    this.applyAreaBlockEffects(blockResult, owner, canGrief);
+                // 4. Visual "Burst" of sonic particles
+                if (this.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.SONIC_BOOM,
+                            this.getX(), this.getY(), this.getZ(), 1, 0, 0, 0, 0);
                 }
             }
             this.discard();
         }
     }
 
-    /**
-     * Finds and damages entities within the blast radius, protecting the 'Dragon Crew'.
-     */
-    private void applyAreaEffectDamage(Entity owner) {
-        double blastRadius = 1.5;
+    private void applySculkAreaEffect(Entity owner) {
+        double blastRadius = 2.5; // Slightly larger blast because it's "sound"
         List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
+
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
                 if (owner instanceof LivingEntity livingOwner) {
-                    entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
-                    if (!entity.fireImmune()) {
-                        entity.setSecondsOnFire(5);
-                    }
-                }
-            }
-        }
-    }
+                    // Standard damage
+                    entity.hurt(level().damageSources().sonicBoom(owner), DMLConfig.getBreathDamage());
 
-    /**
-     * Handles lighting campfires, candles, TNT, and spreading fire to air blocks near surfaces.
-     */
-    private void applyAreaBlockEffects(BlockHitResult blockResult, Entity owner, boolean canGrief) {
-        BlockPos hitPos = blockResult.getBlockPos();
-        boolean fireTicks = this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK);
+                    // Apply Darkness effect (Iconic to the Deep Dark)
+                    livingTarget.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 100, 0));
 
-        // CASE A: Logic for specific blocks (Lamps, TNT, Campfires)
-        int radius = 1;
-        for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
-            BlockState targetState = level().getBlockState(targetPos);
-
-            // Light campfires/candles/lamps WITHOUT replacing the block
-            if (targetState.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
-                if (!targetState.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
-                    level().setBlockAndUpdate(targetPos, targetState.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, true));
-                }
-            }
-            // Ignite TNT
-            else if (targetState.is(Blocks.TNT)) {
-                LivingEntity igniter = (owner instanceof LivingEntity) ? (LivingEntity) owner : null;
-                targetState.getBlock().onCaughtFire(targetState, this.level(), targetPos, blockResult.getDirection(), igniter);
-                this.level().removeBlock(targetPos, false);
-            }
-        }
-
-        // CASE B: Spreading Fire to AIR blocks only
-        if (fireTicks && canGrief) {
-            for (Direction direction : Direction.values()) {
-                BlockPos sidePos = hitPos.relative(direction);
-
-                if (level().isEmptyBlock(sidePos)) {
-                    // Get the default fire state to check if it can survive there
-                    BlockState fireState = Blocks.FIRE.defaultBlockState();
-
-                    // Check 1: Is the block we actually hit flammable?
-                    boolean isFlammable = level().getBlockState(hitPos).isFlammable(level(), hitPos, direction.getOpposite());
-
-                    // Check 2: Can fire actually sit on the block at sidePos? (This handles Dirt/Stone)
-                    boolean canSurvive = fireState.canSurvive(level(), sidePos);
-
-                    if (isFlammable || canSurvive) {
-                        level().setBlockAndUpdate(sidePos, fireState);
-                    }
+                    // Sonic Knockback (Horizontal and Vertical)
+                    Vec3 knockbackVec = entity.position().subtract(this.position()).normalize().scale(0.5);
+                    entity.push(knockbackVec.x, 0.3D, knockbackVec.z);
                 }
             }
         }

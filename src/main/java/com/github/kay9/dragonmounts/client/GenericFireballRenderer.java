@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -25,6 +26,8 @@ public abstract class GenericFireballRenderer<T extends Entity> extends EntityRe
     @Override
     public void render(@NotNull T entity, float yaw, float partialTicks, PoseStack ps, MultiBufferSource buffer, int light) {
         ps.pushPose();
+        // We ignore the 'light' parameter passed by the method and use FULL_BRIGHT instead
+        int emissiveLight = LightTexture.FULL_BRIGHT;
         ps.scale(this.scale, this.scale, this.scale);
         ps.mulPose(this.entityRenderDispatcher.cameraOrientation());
         ps.mulPose(Axis.YP.rotationDegrees(180.0F));
@@ -35,10 +38,10 @@ public abstract class GenericFireballRenderer<T extends Entity> extends EntityRe
         VertexConsumer vertexconsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(entity)));
 
         // Helper to produce the "Cross" faces
-        vertex(vertexconsumer, matrix4f, matrix3f, light, 0.0F, 0, 0, 1);
-        vertex(vertexconsumer, matrix4f, matrix3f, light, 1.0F, 0, 1, 1);
-        vertex(vertexconsumer, matrix4f, matrix3f, light, 1.0F, 1, 1, 0);
-        vertex(vertexconsumer, matrix4f, matrix3f, light, 0.0F, 1, 0, 0);
+        vertex(vertexconsumer, matrix4f, matrix3f, emissiveLight, 0.0F, 0, 0, 1);
+        vertex(vertexconsumer, matrix4f, matrix3f, emissiveLight, 1.0F, 0, 1, 1);
+        vertex(vertexconsumer, matrix4f, matrix3f, emissiveLight, 1.0F, 1, 1, 0);
+        vertex(vertexconsumer, matrix4f, matrix3f, emissiveLight, 0.0F, 1, 0, 0);
 
         ps.popPose();
         super.render(entity, yaw, partialTicks, ps, buffer, light);

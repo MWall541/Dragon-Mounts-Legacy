@@ -1,17 +1,25 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
+import com.github.kay9.dragonmounts.DMLRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.LlamaSpit;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -20,16 +28,39 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class IceDragonBreathBall extends LlamaSpit {
+public class IceDragonBreathBall extends LargeFireball {
 
-    private final double startX;
-    private final double startY;
-    private final double startZ;
+    private double startX;
+    private double startY;
+    private double startZ;
 
-    public IceDragonBreathBall(Level level, LivingEntity shooter) {
-        super(net.minecraft.world.entity.EntityType.LLAMA_SPIT, level);
+    // Constructor for the Registry and Loading from NBT
+    public IceDragonBreathBall(EntityType<? extends IceDragonBreathBall> type, Level level) {
+        super(type, level);
+        // These might be 0 until the entity is actually spawned
+        this.startX = this.getX();
+        this.startY = this.getY();
+        this.startZ = this.getZ();
+    }
+
+    // Constructor for Dragon to use
+    public IceDragonBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz, int power) {
+        // Call our OWN first constructor using the Registry Type
+        this(DMLRegistry.ICE_BREATH.get(), level);
+
+        // Manually set the owner (shooter)
         this.setOwner(shooter);
-        // Record starting position
+
+        // Manually set starting position to the shooter
+        this.moveTo(shooter.getX(), shooter.getY(), shooter.getZ(), shooter.getYRot(), shooter.getXRot());
+        this.reapplyPosition();
+
+        // Manually set the movement direction (acceleration)
+        this.xPower = dx * 0.12D;
+        this.yPower = dy * 0.12D;
+        this.zPower = dz * 0.12D;
+
+        // Record starting position for distance check
         this.startX = shooter.getX();
         this.startY = shooter.getY();
         this.startZ = shooter.getZ();
@@ -37,55 +68,37 @@ public class IceDragonBreathBall extends LlamaSpit {
 
     @Override
     public void tick() {
-        // Perform custom fluid detection on the Server side only
+        // FLUID DETECTION: LargeFireball normally ignores water.
+        // We perform a manual clip to catch water surfaces.
         if (!this.level().isClientSide) {
-            Vec3 currentPos = this.position();
-            Vec3 movement = this.getDeltaMovement();
-            Vec3 futurePos = currentPos.add(movement);
+            Vec3 pos = this.position();
+            Vec3 nextPos = pos.add(this.getDeltaMovement());
+            BlockHitResult fluidHit = this.level().clip(new net.minecraft.world.level.ClipContext(
+                    pos, nextPos, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                    net.minecraft.world.level.ClipContext.Fluid.ANY, this));
 
-            // Manually check for blocks/fluids along the path
-            BlockHitResult blockHit = this.level().clip(new net.minecraft.world.level.ClipContext(
-                    currentPos,
-                    futurePos,
-                    net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                    net.minecraft.world.level.ClipContext.Fluid.ANY, // This catches the water surface!
-                    this
-            ));
-
-            // Check for entities along the path (using the existing helper)
-            EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
-                    this.level(),
-                    this,
-                    currentPos,
-                    futurePos,
-                    this.getBoundingBox().expandTowards(movement).inflate(1.0D),
-                    this::canHitEntity
-            );
-
-            // Decide what we hit first
-            HitResult finalHit = blockHit;
-            if (entityHit != null) {
-                finalHit = entityHit;
-            }
-
-            if (finalHit.getType() != HitResult.Type.MISS) {
-                this.onHit(finalHit);
+            if (fluidHit.getType() != HitResult.Type.MISS) {
+                this.onHit(fluidHit);
             }
         }
 
         super.tick();
 
-        // Check max distance
-        double dx = this.getX() - startX;
-        double dy = this.getY() - startY;
-        double dz = this.getZ() - startZ;
-        double distanceSq = dx*dx + dy*dy + dz*dz;
-        // max distance in blocks
-        double maxDistance = 20.0;
-        if (distanceSq > maxDistance * maxDistance) {
-            // Explode even if it didn't hit a block
+        // Max distance check
+        double distSq = this.distanceToSqr(startX, startY, startZ);
+        if (distSq > 400.0) { // 20.0 * 20.0
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
         }
+    }
+
+    @Override
+    protected boolean shouldBurn() {
+        return false;
+    }
+
+    @Override
+    protected @NotNull ParticleOptions getTrailParticle() {
+        return ParticleTypes.SNOWFLAKE;
     }
 
     @Override
@@ -137,71 +150,97 @@ public class IceDragonBreathBall extends LlamaSpit {
             Entity owner = this.getOwner();
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
-
-                // 10% chance to summon a cloud
+                // 1. Roll for 10% Cloud Event
                 if (this.random.nextFloat() < 0.10f) {
-                    DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
-                    if (owner instanceof LivingEntity livingOwner) {
-                        cloud.setOwner(livingOwner);
-                    }
-
-                    cloud.setParticle(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE);
-                    cloud.setRadius(2.0F);
-                    cloud.setDuration(60); // 3 seconds
-                    cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
-
-                    this.level().addFreshEntity(cloud);
+                    this.spawnIceCloud(owner);
                 }
 
-                // Damage entities caught in the explosion
-                double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
-                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
-                for (Entity entity : entities) {
-                    if (entity instanceof LivingEntity livingTarget) {
-                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
-                        if (!isProtected) {
-                            if (owner instanceof LivingEntity livingOwner) {
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
-                                // apply freeze effect to the entity if possible
-                                if (entity.canFreeze()) {
-                                    entity.setTicksFrozen(560);
-                                }
-                            }
-                        }
-                    }
-                }
+                // 2. Handle Entity Freeze & Damage
+                this.applyAreaEffectDamage(owner);
 
-                // Extinguish fire in a cubic area
+                // 3. Handle Block/Fluid Transformations
                 if (result instanceof BlockHitResult blockResult) {
-                    BlockPos hitPos = blockResult.getBlockPos();
-
-                    // Turn water into ice and turn lava into obsidian
-                    BlockPos fluidPos = this.blockPosition();
-                    transformFluids(fluidPos);
-                    transformFluids(hitPos);
-
-                    // Iterate in a small 3x3x3 area around the impact
-                    int radius = 1;
-                    for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
-                        BlockState state = this.level().getBlockState(targetPos);
-
-                        // Check for vanilla fire or soul fire
-                        if (state.is(net.minecraft.world.level.block.Blocks.FIRE) || state.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)) {
-                            this.level().removeBlock(targetPos, false);
-                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F + (this.level().random.nextFloat() - this.level().random.nextFloat()) * 0.8F);
-                        }
-
-                        // Make blocks like campfire, candles, lamps, etc unlit
-                        if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
-                            this.level().setBlockAndUpdate(targetPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false));
-                            this.level().playSound(null, targetPos, net.minecraft.sounds.SoundEvents.FIRE_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F);
-                        }
-                    }
+                    this.applyAreaBlockEffects(blockResult);
                 }
             }
 
             // Remove the iceball entity
             this.discard();
+        }
+    }
+
+    private void spawnIceCloud(Entity owner) {
+        DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
+        if (owner instanceof LivingEntity livingOwner) cloud.setOwner(livingOwner);
+
+        cloud.setParticle(ParticleTypes.SNOWFLAKE);
+        cloud.setRadius(2.0F);
+        cloud.setDuration(60);
+        cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / 60.0F);
+        this.level().addFreshEntity(cloud);
+    }
+
+    private void applyAreaEffectDamage(Entity owner) {
+        double radius = 1.5;
+        List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
+                if (owner instanceof LivingEntity livingOwner) {
+                    entity.hurt(this.level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
+                    if (entity.canFreeze()) {
+                        entity.setTicksFrozen(560);
+                    }
+                }
+            }
+        }
+    }
+
+    private void applyAreaBlockEffects(BlockHitResult blockResult) {
+        BlockPos hitPos = blockResult.getBlockPos();
+        int radius = 1;
+
+        // Iterate in a 3x3x3 area around the impact
+        for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
+            BlockState state = this.level().getBlockState(targetPos);
+
+            // 1. Transform Fluids (Water to Ice, Lava to Obsidian/Cobble)
+            this.processFluidConversion(targetPos);
+
+            // 2. Extinguish Fire
+            if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
+                this.level().removeBlock(targetPos, false);
+                this.playExtinguishSound(targetPos);
+            }
+
+            // 3. Un-light blocks (Campfires, Candles, etc.)
+            if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
+                    && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
+                this.level().setBlockAndUpdate(targetPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false));
+                this.playExtinguishSound(targetPos);
+            }
+        }
+
+        // Also check the projectile's exact current position just in case it's inside a fluid
+        this.processFluidConversion(this.blockPosition());
+    }
+
+    private void playExtinguishSound(BlockPos pos) {
+        this.level().playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (this.level().random.nextFloat() - this.level().random.nextFloat()) * 0.8F);
+    }
+
+    private void processFluidConversion(BlockPos pos) {
+        BlockState state = this.level().getBlockState(pos);
+        FluidState fluidState = state.getFluidState();
+
+        if (!fluidState.isEmpty()) {
+            if (fluidState.is(FluidTags.WATER)) {
+                this.level().setBlockAndUpdate(pos, Blocks.ICE.defaultBlockState());
+                this.level().levelEvent(2001, pos, net.minecraft.world.level.block.Block.getId(Blocks.ICE.defaultBlockState()));
+            } else if (fluidState.is(FluidTags.LAVA)) {
+                BlockState newState = fluidState.isSource() ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState();
+                this.level().setBlockAndUpdate(pos, newState);
+                this.level().playSound(null, pos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F);
+            }
         }
     }
 
@@ -292,36 +331,6 @@ public class IceDragonBreathBall extends LlamaSpit {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private void transformFluids(BlockPos pos) {
-        // Check the hit block
-        BlockState state = this.level().getBlockState(pos);
-        // Also check the block above it (in case we hit the floor of a pool)
-        BlockPos abovePos = pos.above();
-        BlockState stateAbove = this.level().getBlockState(abovePos);
-
-        processFluidConversion(pos, state);
-        processFluidConversion(abovePos, stateAbove);
-    }
-
-    private void processFluidConversion(BlockPos pos, BlockState state) {
-        net.minecraft.world.level.material.FluidState fluidState = state.getFluidState();
-
-        if (!fluidState.isEmpty()) {
-            if (fluidState.is(net.minecraft.tags.FluidTags.WATER)) {
-                this.level().setBlockAndUpdate(pos, net.minecraft.world.level.block.Blocks.ICE.defaultBlockState());
-                this.level().levelEvent(2001, pos, net.minecraft.world.level.block.Block.getId(net.minecraft.world.level.block.Blocks.ICE.defaultBlockState()));
-            }
-            else if (fluidState.is(net.minecraft.tags.FluidTags.LAVA)) {
-                BlockState newState = fluidState.isSource() ?
-                        net.minecraft.world.level.block.Blocks.OBSIDIAN.defaultBlockState() :
-                        net.minecraft.world.level.block.Blocks.COBBLESTONE.defaultBlockState();
-
-                this.level().setBlockAndUpdate(pos, newState);
-                this.level().playSound(null, pos, net.minecraft.sounds.SoundEvents.LAVA_EXTINGUISH, net.minecraft.sounds.SoundSource.BLOCKS, 0.5F, 2.6F);
             }
         }
     }

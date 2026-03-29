@@ -4,7 +4,7 @@ This mod is incompatible with Dragon Mounts Patches since it incorporated the is
 
 TWEAKS:
 
-- New Dragon Breaths! Besides Fire, there are Ice, Storm, Wither, and Ender Breaths now corresponding to appropriate dragon breeds.
+- New Dragon Breaths! Besides Fire, there are Ice, Storm, Wither, Sculk, and Ender Breaths now corresponding to appropriate dragon breeds.
 
 - Dragons now shoot breath balls occasionally when in combat.
 
@@ -89,9 +89,11 @@ TWEAKS:
 
 - Dragon breath (end) has a chance of summoning a harming cloud upon explosion or impact.
 
-- Dragon breath (storm) has a chance of summoning lightning and a lightning field that damages mobs upon explosion or impact.
+- Dragon breath (storm) has a chance of summoning lightning and a lightning field that damages mobs upon explosion or impact. It gives redstone signals when it hits lightning rods. It can also transform mobs like creepers into charged creepers, pigs into zombie piglins, etc.
 
 - Dragon breath (wither) inflicts withering on entities caught in the radius. Places wither roses on victims.
+
+- Dragon breath (sculk) inflicts darkness and knockback on entities caught in a larger radius compared to other breaths. It also triggers a sound event so it triggers sculk sensors and other stuff relying on it.
 
 - Updated JP and UK translations.
 

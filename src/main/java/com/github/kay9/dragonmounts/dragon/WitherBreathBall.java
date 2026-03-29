@@ -36,15 +36,9 @@ public class WitherBreathBall extends WitherSkull {
     public void tick() {
         super.tick();
 
-        // Check max distance
-        double dx = this.getX() - startX;
-        double dy = this.getY() - startY;
-        double dz = this.getZ() - startZ;
-        double distanceSq = dx*dx + dy*dy + dz*dz;
-        // max distance in blocks
-        double maxDistance = 20.0;
-        if (distanceSq > maxDistance * maxDistance) {
-            // Explode even if it didn't hit a block
+        // Max distance check
+        double distSq = this.distanceToSqr(startX, startY, startZ);
+        if (distSq > 400.0) { // 20.0 * 20.0
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
         }
     }

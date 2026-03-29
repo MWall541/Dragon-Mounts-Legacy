@@ -36,15 +36,9 @@ public class DragonBreathBall extends LargeFireball {
     public void tick() {
         super.tick();
 
-        // Check max distance
-        double dx = this.getX() - startX;
-        double dy = this.getY() - startY;
-        double dz = this.getZ() - startZ;
-        double distanceSq = dx*dx + dy*dy + dz*dz;
-        // max distance in blocks
-        double maxDistance = 20.0;
-        if (distanceSq > maxDistance * maxDistance) {
-            // Explode even if it didn't hit a block
+        // Max distance check
+        double distSq = this.distanceToSqr(startX, startY, startZ);
+        if (distSq > 400.0) { // 20.0 * 20.0
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
         }
     }
@@ -96,88 +90,88 @@ public class DragonBreathBall extends LargeFireball {
     protected void onHit(@NotNull HitResult result) {
         if (!this.level().isClientSide) {
             Entity owner = this.getOwner();
-            // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
                 boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
-                boolean fireTicks = this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK);
 
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5f, canGrief, Level.ExplosionInteraction.MOB);
+                // 1. Initial Explosion
+                // this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.5f, canGrief, Level.ExplosionInteraction.MOB);
 
-                // Set entities caught in the explosion on fire AND damage them
-                double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
-                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
-                for (Entity entity : entities) {
-                    if (entity instanceof LivingEntity livingTarget) {
-                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
-                        if (!isProtected) {
-                            if (owner instanceof LivingEntity livingOwner) {
-                                // Deal damage to everyone not immune, even fire-immune mobs
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
-                                // set on fire if possible
-                                if (!entity.fireImmune()) {
-                                    entity.setSecondsOnFire(5);
-                                }
-                            }
-                        }
-                    }
-                }
+                // 2. Handle Entity Damage & Ignite
+                this.applyAreaEffectDamage(owner);
 
+                // 3. Handle Block Interactions (Ignition, TNT, etc.)
                 if (result instanceof BlockHitResult blockResult) {
-                    BlockPos hitPos = blockResult.getBlockPos();
-                    BlockState hitState = level().getBlockState(hitPos);
+                    this.applyAreaBlockEffects(blockResult, owner, canGrief);
+                }
+            }
+            this.discard();
+        }
+    }
 
-                    // Define the blast radius for lighting up blocks (1 = 3x3x3 area), this is different from the explosion radius above
-                    int radius = 1;
-                    for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
-                        BlockState targetState = level().getBlockState(targetPos);
-
-                        // Ignite Special Blocks (Campfires, Candles, etc.) in the area
-                        if (targetState.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)
-                                && !targetState.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
-                            level().setBlockAndUpdate(targetPos, targetState.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, true));
-                        }
-
-                        // TNT Special Case in the area
-                        else if (targetState.is(net.minecraft.world.level.block.Blocks.TNT)) {
-                            LivingEntity igniter = (owner instanceof LivingEntity) ? (LivingEntity) owner : null;
-                            (targetState.getBlock()).onCaughtFire(targetState, this.level(), targetPos, blockResult.getDirection(), igniter);
-                            this.level().removeBlock(targetPos, false);
-                        }
-                    }
-
-                    // Only spawn fire on blocks if the world allows fire to tick/spread
-                    if (fireTicks && canGrief) {
-                        if (result.getType() == HitResult.Type.BLOCK) {
-                            // Iterate through the hit block and its immediate neighbors (3x3x3 area or just 6 faces)
-                            // For a "Breath" effect, checking the 6 cardinal directions is usually most efficient:
-                            for (Direction direction : Direction.values()) {
-                                BlockPos targetPos = hitPos.relative(direction);
-                                BlockState targetState = level().getBlockState(targetPos);
-
-                                // CASE 1: The block is already flammable (Wood, Leaves, etc.)
-                                // We "consume" it instantly by replacing it with fire.
-                                if (targetState.isFlammable(level(), targetPos, direction.getOpposite())) {
-                                    level().setBlockAndUpdate(targetPos, Blocks.FIRE.defaultBlockState());
-                                }
-                                // CASE 2: The block is air, but we want to set the "face" of the hit block on fire
-                                else if (level().isEmptyBlock(targetPos)) {
-                                    if (hitState.isFlammable(level(), hitPos, direction.getOpposite())) {
-                                        level().setBlockAndUpdate(targetPos, Blocks.FIRE.defaultBlockState());
-                                    }
-                                }
-                            }
-
-                            // Also try to replace the hit block itself if it's flammable
-                            if (hitState.isFlammable(level(), hitPos, blockResult.getDirection())) {
-                                level().setBlockAndUpdate(hitPos, Blocks.FIRE.defaultBlockState());
-                            }
-                        }
+    /**
+     * Finds and damages entities within the blast radius, protecting the 'Dragon Crew'.
+     */
+    private void applyAreaEffectDamage(Entity owner) {
+        double blastRadius = 1.5;
+        List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
+                if (owner instanceof LivingEntity livingOwner) {
+                    entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
+                    if (!entity.fireImmune()) {
+                        entity.setSecondsOnFire(5);
                     }
                 }
             }
+        }
+    }
 
-            // Remove the fireball entity
-            this.discard();
+    /**
+     * Handles lighting campfires, candles, TNT, and spreading fire to air blocks near surfaces.
+     */
+    private void applyAreaBlockEffects(BlockHitResult blockResult, Entity owner, boolean canGrief) {
+        BlockPos hitPos = blockResult.getBlockPos();
+        boolean fireTicks = this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOFIRETICK);
+
+        // CASE A: Logic for specific blocks (Lamps, TNT, Campfires)
+        int radius = 1;
+        for (BlockPos targetPos : BlockPos.betweenClosed(hitPos.offset(-radius, -radius, -radius), hitPos.offset(radius, radius, radius))) {
+            BlockState targetState = level().getBlockState(targetPos);
+
+            // Light campfires/candles/lamps WITHOUT replacing the block
+            if (targetState.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
+                if (!targetState.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) {
+                    level().setBlockAndUpdate(targetPos, targetState.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, true));
+                }
+            }
+            // Ignite TNT
+            else if (targetState.is(Blocks.TNT)) {
+                LivingEntity igniter = (owner instanceof LivingEntity) ? (LivingEntity) owner : null;
+                targetState.getBlock().onCaughtFire(targetState, this.level(), targetPos, blockResult.getDirection(), igniter);
+                this.level().removeBlock(targetPos, false);
+            }
+        }
+
+        // CASE B: Spreading Fire to AIR blocks only
+        if (fireTicks && canGrief) {
+            for (Direction direction : Direction.values()) {
+                BlockPos sidePos = hitPos.relative(direction);
+
+                if (level().isEmptyBlock(sidePos)) {
+                    // Get the default fire state to check if it can survive there
+                    BlockState fireState = Blocks.FIRE.defaultBlockState();
+
+                    // Check 1: Is the block we actually hit flammable?
+                    boolean isFlammable = level().getBlockState(hitPos).isFlammable(level(), hitPos, direction.getOpposite());
+
+                    // Check 2: Can fire actually sit on the block at sidePos? (This handles Dirt/Stone)
+                    boolean canSurvive = fireState.canSurvive(level(), sidePos);
+
+                    if (isFlammable || canSurvive) {
+                        level().setBlockAndUpdate(sidePos, fireState);
+                    }
+                }
+            }
         }
     }
 

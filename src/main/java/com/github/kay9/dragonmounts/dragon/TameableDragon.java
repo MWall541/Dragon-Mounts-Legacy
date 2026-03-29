@@ -1533,10 +1533,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         Vec3 spawnPos = this.getApproximateMouthPos();
 
         if (isIceBreed()) {
-            IceDragonBreathBall iceBall = new IceDragonBreathBall(level(), this);
+            IceDragonBreathBall iceBall = new IceDragonBreathBall(level(), this, look.x, look.y, look.z, 1);
             iceBall.setOwner(owner);
             iceBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
-            iceBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
             level().addFreshEntity(iceBall);
         } else if (isWitherBreed()) {
             WitherBreathBall witherBall = new WitherBreathBall(level(), this, 0, 0, 0);
@@ -1545,10 +1544,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             witherBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
             level().addFreshEntity(witherBall);
         } else if (isStormBreed()) {
-            StormDragonBreathBall stormBall = new StormDragonBreathBall(level(), this);
+            StormDragonBreathBall stormBall = new StormDragonBreathBall(level(), this, look.x, look.y, look.z, 1);
             stormBall.setOwner(owner);
             stormBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
-            stormBall.shoot(look.x, look.y, look.z, 2.0F, 1.0F);
             level().addFreshEntity(stormBall);
         } else if (isEndBreed()) {
             EndDragonBreathBall endBall = new EndDragonBreathBall(level(), this, look.x, look.y, look.z);
@@ -1565,6 +1563,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             blueFireBall.setOwner(owner);
             blueFireBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
             level().addFreshEntity(blueFireBall);
+        } else if (isSculkBreed()) {
+            SculkDragonBreathBall sculkBall = new SculkDragonBreathBall(level(), this, look.x, look.y, look.z, 1);
+            sculkBall.setOwner(owner);
+            sculkBall.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
+            level().addFreshEntity(sculkBall);
         } else {
             DragonBreathBall fireBall = new DragonBreathBall(level(), this, look.x, look.y, look.z, 1);
             fireBall.setOwner(owner);
@@ -1848,7 +1851,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         return  breedId.getPath().contains("end") ||
                 breedId.getPath().contains("magic") ||
-                breedId.getPath().contains("sculk") ||
                 breedId.getPath().contains("primal_end");
     }
 
@@ -1872,5 +1874,12 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
         return  breedId.getPath().contains("blue_fire");
+    }
+
+    public boolean isSculkBreed() {
+        if (getBreed() == null) return false;
+        ResourceLocation breedId = getBreed().id(level().registryAccess());
+
+        return  breedId.getPath().contains("sculk");
     }
 }

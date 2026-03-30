@@ -89,7 +89,7 @@ TWEAKS:
 
 - Dragon breath (end) has a chance of summoning a harming cloud upon explosion or impact.
 
-- Dragon breath (storm) has a chance of summoning lightning and a lightning field that damages mobs upon explosion or impact. It gives redstone signals when it hits lightning rods. It can also transform mobs like creepers into charged creepers, pigs into zombie piglins, etc.
+- Dragon breath (storm) has a chance of summoning lightning and a lightning field that damages mobs upon explosion or impact. It gives redstone signals when it hits lightning rods and can clean copper. It can also transform mobs like creepers into charged creepers, pigs into zombie piglins, etc.
 
 - Dragon breath (wither) inflicts withering on entities caught in the radius. Places wither roses on victims.
 

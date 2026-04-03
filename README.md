@@ -91,7 +91,7 @@ TWEAKS:
 
 - Dragon breath (storm) has a chance of summoning lightning and a lightning field that damages mobs upon explosion or impact. It gives redstone signals when it hits lightning rods and can clean copper. It can also transform mobs like creepers into charged creepers, pigs into zombie piglins, etc.
 
-- Dragon breath (wither) inflicts withering on entities caught in the radius. Places wither roses on victims.
+- Dragon breath (wither) inflicts withering on entities caught in the radius. Places wither roses on victims. The explosion respects minecraft griefing rules.
 
 - Dragon breath (sculk) inflicts darkness and knockback on entities caught in a larger radius compared to other breaths. It also triggers a sound event so it triggers sculk sensors and other stuff relying on it.
 

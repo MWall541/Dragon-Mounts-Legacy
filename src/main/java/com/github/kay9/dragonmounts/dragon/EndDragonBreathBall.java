@@ -2,6 +2,7 @@ package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -90,38 +91,40 @@ public class EndDragonBreathBall extends DragonFireball {
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
 
-                // 10% chance to summon a cloud
+                // 1. 10% chance to summon a cloud
                 if (this.random.nextFloat() < 0.10f) {
-                    DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
-                    if (owner instanceof LivingEntity livingOwner) {
-                        cloud.setOwner(livingOwner);
-                    }
-
-                    cloud.setParticle(net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH);
-                    cloud.setRadius(2.0F);
-                    cloud.setDuration(60); // 3 seconds
-                    cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
-
-                    this.level().addFreshEntity(cloud);
+                    this.spawnBreathCloud(owner);
                 }
 
-                // Damage entities caught in the explosion
-                double radius = 1.5; // slightly larger than the explosion to catch entities around
-                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
-                for (Entity entity : entities) {
-                    if (entity instanceof LivingEntity livingTarget) {
-                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
-                        if (!isProtected) {
-                            if (owner instanceof LivingEntity livingOwner) {
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
-                            }
-                        }
-                    }
-                }
+                // 2. Damage entities caught in the explosion
+                this.applyAreaEffectDamage(owner);
             }
 
             // Remove the ender fireball entity
             this.discard();
+        }
+    }
+
+    private void spawnBreathCloud(Entity owner) {
+        DragonBreathCloud cloud = new DragonBreathCloud(this.level(), this.getX(), this.getY(), this.getZ(), owner);
+        if (owner instanceof LivingEntity livingOwner) cloud.setOwner(livingOwner);
+
+        cloud.setParticle(ParticleTypes.DRAGON_BREATH);
+        cloud.setRadius(2.0F);
+        cloud.setDuration(60); // 3 seconds
+        cloud.setRadiusPerTick((2.0F - cloud.getRadius()) / (float)cloud.getDuration());
+        this.level().addFreshEntity(cloud);
+    }
+
+    private void applyAreaEffectDamage(Entity owner) {
+        double radius = 1.5;
+        List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(radius), e -> e != this);
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
+                if (owner instanceof LivingEntity livingOwner) {
+                    entity.hurt(this.level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
+                }
+            }
         }
     }
 

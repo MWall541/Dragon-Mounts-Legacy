@@ -5,14 +5,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -88,34 +92,42 @@ public class WitherBreathBall extends WitherSkull {
             Entity owner = this.getOwner();
             // Check if owner is alive to prevent null pointer crashes
             if (owner != null) {
-                // Give entities caught in the explosion withering and damage them
-                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.75F, false, Level.ExplosionInteraction.MOB);
-                double blastRadius = 1.5; // slightly larger than the explosion to catch entities around
-                List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
-                for (Entity entity : entities) {
-                    if (entity instanceof LivingEntity livingTarget) {
-                        boolean isProtected = isPartOfDragonCrew(livingTarget, owner);
-                        if (!isProtected) {
-                            if (owner instanceof LivingEntity livingOwner) {
-                                boolean wasAlreadyDead = livingTarget.deathTime > 0 || !livingTarget.isAlive();
-                                // Deal the damage
-                                entity.hurt(level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
-                                // If the entity died, try to spawn a Wither Rose
-                                if (!wasAlreadyDead && !livingTarget.isAlive()) {
-                                    spawnWitherRose(livingTarget);
-                                } else {
-                                    // If they survived, give them the wither effect
-                                    livingTarget.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                                            net.minecraft.world.effect.MobEffects.WITHER, 100, 0));
-                                }
-                            }
-                        }
-                    }
+                boolean canGrief = ForgeEventFactory.getMobGriefingEvent(this.level(), owner);
+                // 1. Trigger the visual/block explosion
+                if (canGrief){
+                    this.level().explode(this, this.getX(), this.getY(), this.getZ(), 0.75F, false, Level.ExplosionInteraction.MOB);
                 }
+                // 2. Handle damage, wither effects, and Wither Rose spawning
+                this.applyAreaEffectDamage(owner);
             }
 
             // Remove the wither breath ball entity
             this.discard();
+        }
+    }
+
+    private void applyAreaEffectDamage(Entity owner) {
+        double blastRadius = 1.5;
+        List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(blastRadius), e -> e != this);
+
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity livingTarget && !isPartOfDragonCrew(livingTarget, owner)) {
+                if (owner instanceof LivingEntity livingOwner) {
+                    // Check if the entity was already dead to avoid redundant rose spawning
+                    boolean wasAlreadyDead = !livingTarget.isAlive();
+
+                    // Deal config-driven damage
+                    entity.hurt(this.level().damageSources().mobProjectile(this, livingOwner), DMLConfig.getBreathDamage());
+
+                    if (!wasAlreadyDead && !livingTarget.isAlive()) {
+                        // Spawns a rose if the projectile was the killing blow
+                        this.spawnWitherRose(livingTarget);
+                    } else if (livingTarget.isAlive()) {
+                        // Apply Wither effect to survivors
+                        livingTarget.addEffect(new MobEffectInstance(MobEffects.WITHER, 100, 0));
+                    }
+                }
+            }
         }
     }
 
@@ -154,7 +166,7 @@ public class WitherBreathBall extends WitherSkull {
     private void spawnWitherRose(LivingEntity target) {
         if (!this.level().isClientSide) {
             BlockPos pos = target.blockPosition();
-            BlockState state = net.minecraft.world.level.block.Blocks.WITHER_ROSE.defaultBlockState();
+            BlockState state = Blocks.WITHER_ROSE.defaultBlockState();
 
             // Check if the block is air (or replaceable) and can sustain a Wither Rose
             if (this.level().getBlockState(pos).isAir() && state.canSurvive(this.level(), pos)) {

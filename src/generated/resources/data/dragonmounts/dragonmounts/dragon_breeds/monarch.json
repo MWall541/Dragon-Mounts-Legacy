@@ -22,7 +22,7 @@
     "minecraft:cactus",
     "minecraft:sweet_berry_bush"
   ],
-  "primary_color": "545152",
+  "primary_color": "912400",
   "reproduction_limit": "config:nether",
   "secondary_color": "FFD700"
 }

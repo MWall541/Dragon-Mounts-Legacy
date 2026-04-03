@@ -48,6 +48,9 @@ public class DMLConfig
     private static final ForgeConfigSpec.DoubleValue BREATH_DAMAGE;
     public static float getBreathDamage() { return BREATH_DAMAGE.get().floatValue(); }
 
+    private static final ForgeConfigSpec.DoubleValue BREATH_RANGE;
+    public static double getBreathRange() { return BREATH_RANGE.get().floatValue(); }
+
     private static final ForgeConfigSpec.BooleanValue BREATH_ENABLED;
     public static boolean isBreathEnabled() { return BREATH_ENABLED.get(); }
 
@@ -121,6 +124,9 @@ public class DMLConfig
 
         BREATH_DAMAGE = configurator.comment("The base damage dealt by all dragon breaths. Default is 6.0 (3 hearts).")
                 .defineInRange("global_breath_damage", 6.0, 0.0, Double.MAX_VALUE);
+
+        BREATH_RANGE = configurator.comment("The max distance a dragon breath projectile can travel. Default is 20.0 blocks.")
+                .defineInRange("global_breath_range", 20.0, 1.0, Double.MAX_VALUE);
         configurator.pop();
 
         COMMON_SPEC = configurator.build();

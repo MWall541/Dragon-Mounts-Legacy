@@ -66,8 +66,9 @@ public class StormDragonBreathBall extends LargeFireball {
         super.tick();
 
         // Max distance check
+        double maxRange = DMLConfig.getBreathRange();
         double distSq = this.distanceToSqr(startX, startY, startZ);
-        if (distSq > 400.0) { // 20.0 * 20.0
+        if (distSq > (maxRange * maxRange)) {
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
         }
     }

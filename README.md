@@ -69,6 +69,8 @@ TWEAKS:
 
 - Added the Sylphid Dragon. It is immune to drowning and has slightly faster flight speed. Can be hatched via light blue terracotta.
 
+- Added the Monarch Dragon. It has increased HP, armor, and damage but it is the only dragon susceptible to minecraft's dragon breath damage. Can be hatched via red glazed terracotta.
+
 - Dragon variants' attribute tweaks
 - All dragons are fire immune
 - All dragons have increased health and armor

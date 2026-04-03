@@ -30,6 +30,7 @@
   "dragon_breed.dragonmounts.dark": "Dragón Oscuro",
   "dragon_breed.dragonmounts.black_fire": "Dragón de Fogo Negro",
   "dragon_breed.dragonmounts.sylphid": "Dragón Sílfide",
+  "dragon_breed.dragonmounts.monarch": "Dragón monarca",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Huevo de generación de dragón del Éter",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Huevo de generación de dragón de fuego",
@@ -60,6 +61,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.dark": "Huevo de generación de dragón oscuro",
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "Huevo de generación de dragón de fuego negro",
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Huevo de generación de dragón sílfide",
+  "item.dragonmounts.spawn_egg.dragonmounts.monarch": "Huevo generador de dragón monarca",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Eclosiona en %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interactuar con el dragón:",
@@ -98,6 +100,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.dark": "Huevo de dragón oscuro",
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "Huevo de dragón de fuego negro",
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Huevo de dragón sílfide",
+  "block.dragonmounts.dragon_egg.dragonmounts.monarch": "Huevo de dragón monarca",
 
   "key.dragonmounts.flight_descent": "Descenso de montura de dragón",
   "key.dragonmounts.camera_flight": "Controles de vuelo de montura de dragón",

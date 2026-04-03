@@ -30,6 +30,7 @@
   "dragon_breed.dragonmounts.dark": "Dragão Sombrio",
   "dragon_breed.dragonmounts.black_fire": "Dragão do Fogo Negro",
   "dragon_breed.dragonmounts.sylphid": "Dragão Sílfide",
+  "dragon_breed.dragonmounts.monarch": "Dragão Monarca",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Ovo de Invocação de Dragão do Éter",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Ovo de Invocação de Dragão do Fogo",
@@ -60,6 +61,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.dark": "Ovo de Invocação de Dragão Sombrio",
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "Ovo de Invocação de Dragão do Fogo Negro",
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Ovo de Invocação de Dragão Sílfide",
+  "item.dragonmounts.spawn_egg.dragonmounts.monarch": "Ovo de Gerador de Dragão Monarca",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Choca em %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interagir com o Dragão:",
@@ -98,6 +100,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.dark": "Ovo de Dragão Sombrio",
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "Ovo de Dragão do Fogo Negro",
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Ovo de Dragão Sílfide",
+  "block.dragonmounts.dragon_egg.dragonmounts.monarch": "Ovo de Dragão Monarca",
 
   "key.dragonmounts.flight_descent": "Descer Voo da Montada",
   "key.dragonmounts.camera_flight": "Controlos de Voo da Montada",

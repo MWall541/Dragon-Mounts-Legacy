@@ -30,6 +30,7 @@
   "dragon_breed.dragonmounts.dark": "Dragon Sombre",
   "dragon_breed.dragonmounts.black_fire": "Dragon de Feu Noir",
   "dragon_breed.dragonmounts.sylphid": "Dragon Sylphide",
+  "dragon_breed.dragonmounts.monarch": "Dragon Monarque",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Œuf d'apparition de dragon de l'Aether",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Œuf d'apparition de dragon de feu",
@@ -60,6 +61,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.dark": "Œuf d'apparition de dragon sombre",
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "Œuf d'apparition de dragon de feu noir",
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Œuf d'apparition de dragon sylphide",
+  "item.dragonmounts.spawn_egg.dragonmounts.monarch": "Œuf d'apparition de dragon monarque",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Éclôt dans %s secondes.",
   "block.dragonmounts.dragon_egg.desc1": "Interagir avec le dragon :",
@@ -98,6 +100,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.dark": "Œuf de dragon sombre",
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "Œuf de dragon de feu noir",
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Œuf de dragon sylphide",
+  "block.dragonmounts.dragon_egg.dragonmounts.monarch": "Œuf de dragon monarque",
 
   "key.dragonmounts.flight_descent": "Descente de la monture",
   "key.dragonmounts.camera_flight": "Commandes de vol de la monture",

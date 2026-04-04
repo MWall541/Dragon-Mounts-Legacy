@@ -1873,7 +1873,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         if (getBreed() == null) return false;
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
-        return  breedId.getPath().contains("blue_fire");
+        return  breedId.getPath().contains("blue_fire") ||
+                breedId.getPath().contains("soul_nether");
     }
 
     public boolean isSculkBreed() {

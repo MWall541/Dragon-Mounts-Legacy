@@ -51,6 +51,8 @@ public class SculkDragonBreathBall extends LargeFireball {
         this.moveTo(shooter.getX(), shooter.getY(), shooter.getZ(), shooter.getYRot(), shooter.getXRot());
         this.reapplyPosition();
 
+        this.setDeltaMovement(dx * 1.5D, dy * 1.5D, dz * 1.5D);
+
         // Manually set the movement direction (acceleration)
         this.xPower = dx * 0.12D;
         this.yPower = dy * 0.12D;

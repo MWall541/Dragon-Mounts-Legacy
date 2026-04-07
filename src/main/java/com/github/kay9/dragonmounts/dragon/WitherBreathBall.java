@@ -30,6 +30,7 @@ public class WitherBreathBall extends WitherSkull {
     public WitherBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz) {
         super(level, shooter, dx, dy, dz);
         this.setOwner(shooter);
+        this.setDeltaMovement(dx * 1.5D, dy * 1.5D, dz * 1.5D);
         // Record starting position
         this.startX = shooter.getX();
         this.startY = shooter.getY();

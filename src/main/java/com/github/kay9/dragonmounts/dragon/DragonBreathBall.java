@@ -26,6 +26,9 @@ public class DragonBreathBall extends LargeFireball {
     public DragonBreathBall(Level level, LivingEntity shooter, double dx, double dy, double dz, int power) {
         super(level, shooter, dx, dy, dz, power);
         this.setOwner(shooter);
+
+        this.setDeltaMovement(dx * 1.5D, dy * 1.5D, dz * 1.5D);
+
         // Record starting position
         this.startX = shooter.getX();
         this.startY = shooter.getY();

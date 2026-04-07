@@ -29,7 +29,8 @@
     "dragonmounts:dragonmounts/terra/chests/desert_pyramid",
     "dragonmounts:dragonmounts/wither/chests/abandoned_mineshaft",
     "dragonmounts:dragonmounts/zombie/chests/abandoned_mineshaft",
-    "dragonmounts:dragonmounts/monarch/chests/simple_dungeon"
+    "dragonmounts:dragonmounts/monarch/chests/simple_dungeon",
+    "dragonmounts:dragonmounts/jade/chests/buried_treasure"
   ],
   "replace": false
 }

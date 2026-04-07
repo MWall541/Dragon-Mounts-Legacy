@@ -31,6 +31,7 @@
   "dragon_breed.dragonmounts.black_fire": "黑火龙",
   "dragon_breed.dragonmounts.sylphid": "西尔芙龙",
   "dragon_breed.dragonmounts.monarch": "帝王龙",
+  "dragon_breed.dragonmounts.jade": "玉龙",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "以太龙刷怪蛋",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "火龙刷怪蛋",
@@ -62,6 +63,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "黑火龙刷怪蛋",
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "西尔芙龙刷怪蛋",
   "item.dragonmounts.spawn_egg.dragonmounts.monarch": "帝王龙刷怪蛋",
+  "item.dragonmounts.spawn_egg.dragonmounts.jade": "玉龙刷怪蛋",
 
   "block.dragonmounts.dragon_egg.remaining_time": "将在 %s 秒后孵化。",
   "block.dragonmounts.dragon_egg.desc1": "与龙互动：",
@@ -101,6 +103,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "黑火龙蛋",
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "西尔芙龙蛋",
   "block.dragonmounts.dragon_egg.dragonmounts.monarch": "帝王龙蛋",
+  "block.dragonmounts.dragon_egg.dragonmounts.jade": "玉龙蛋",
 
   "key.dragonmounts.flight_descent": "龙坐骑下降飞行",
   "key.dragonmounts.camera_flight": "龙坐骑飞行指令",

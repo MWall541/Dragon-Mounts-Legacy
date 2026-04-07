@@ -31,6 +31,7 @@
   "dragon_breed.dragonmounts.black_fire": "Black Fire Dragon",
   "dragon_breed.dragonmounts.sylphid": "Sylphid Dragon",
   "dragon_breed.dragonmounts.monarch": "Monarch Dragon",
+  "dragon_breed.dragonmounts.jade": "Jade Dragon",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
@@ -62,6 +63,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "Black Fire Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Sylphid Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.monarch": "Monarch Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.jade": "Jade Dragon Spawn Egg",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
@@ -101,6 +103,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "Black Fire Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Sylphid Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.monarch": "Monarch Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.jade": "Jade Dragon Egg",
 
   "key.dragonmounts.flight_descent": "Dragon Mount Flight Descent",
   "key.dragonmounts.camera_flight": "Dragon Mount Flight Commands",

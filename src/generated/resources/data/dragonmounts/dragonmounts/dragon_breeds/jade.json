@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "minecraft:generic.max_health": 100.0,
+    "minecraft:generic.armor": 8.0,
+    "minecraft:generic.movement_speed": 0.6
+  },
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:jade_dragon_habitat_blocks"
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:happy_villager"
+  },
+  "immunities": [
+    "minecraft:on_fire",
+    "minecraft:in_fire",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "00a86b",
+  "reproduction_limit": "config:forest",
+  "secondary_color": "50c878"
+}

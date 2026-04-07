@@ -31,6 +31,7 @@
   "dragon_breed.dragonmounts.black_fire": "Чернопламенный дракон",
   "dragon_breed.dragonmounts.sylphid": "Сильфидный дракон",
   "dragon_breed.dragonmounts.monarch": "Монарший дракон",
+  "dragon_breed.dragonmounts.jade": "Нефритовый дракон",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Яйцо призыва эфирного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Яйцо призыва огненного дракона",
@@ -62,6 +63,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.black_fire": "Яйцо призыва чернопламенного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Яйцо призыва сильфидного дракона",
   "item.dragonmounts.spawn_egg.dragonmounts.monarch": "Яйцо призыва монаршего дракона",
+  "item.dragonmounts.spawn_egg.dragonmounts.jade": "Яйцо призыва нефритового дракона",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Вылупится через %s сек.",
   "block.dragonmounts.dragon_egg.desc1": "Взаимодействие с драконом:",
@@ -101,6 +103,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.black_fire": "Яйцо чернопламенного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Яйцо сильфидного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.monarch": "Яйцо монаршего дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.jade": "Яйцо нефритового дракона",
 
   "key.dragonmounts.flight_descent": "Снижение на драконе",
   "key.dragonmounts.camera_flight": "Команды полёта на драконе",

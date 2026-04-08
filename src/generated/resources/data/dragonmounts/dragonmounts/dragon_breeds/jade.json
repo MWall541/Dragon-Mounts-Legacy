@@ -1,8 +1,8 @@
 {
   "attributes": {
-    "minecraft:generic.max_health": 100.0,
-    "minecraft:generic.armor": 8.0,
-    "minecraft:generic.movement_speed": 0.6
+    "minecraft:generic.max_health": 80.0,
+    "minecraft:generic.armor": 12.0,
+    "minecraft:generic.movement_speed": 0.4
   },
   "habitats": [
     {
@@ -20,7 +20,7 @@
     "minecraft:sweet_berry_bush",
     "minecraft:dragon_breath"
   ],
-  "primary_color": "00a86b",
+  "primary_color": "046307",
   "reproduction_limit": "config:forest",
-  "secondary_color": "50c878"
+  "secondary_color": "00A86B"
 }

@@ -71,7 +71,7 @@ TWEAKS:
 
 - Added the Monarch Dragon. It has increased HP, armor, and damage but it is the only dragon susceptible to minecraft's dragon breath damage. Can be hatched via red glazed terracotta.
 
-- Added the Jade Dragon. It is similar to the Forest Dragon but has no green toes. Can be hatched via emerald blocks.
+- Added the Jade Dragon. It has high armor but reduced HP. It also has slightly faster movement speed. Can be hatched via emerald blocks.
 
 - Dragon variants' attribute tweaks
 - All dragons are fire immune

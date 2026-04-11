@@ -117,5 +117,9 @@
   "subtitles.entity.dragon.ambient": "Дракон рычит",
   "subtitles.entity.dragon.step": "Дракон топает",
   "subtitles.entity.dragon.death": "Дракон вскрикивает",
-  "subtitles.entity.dragon.ambient.ghost": "Дракон шепчет"
+  "subtitles.entity.dragon.ambient.ghost": "Дракон шепчет",
+
+  "commands.dragon.follow": "Дракон следует за вами",
+  "commands.dragon.sit": "Дракон сидит",
+  "commands.dragon.wander": "Дракон бродит вокруг текущей позиции"
 }

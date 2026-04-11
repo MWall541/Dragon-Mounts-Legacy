@@ -117,5 +117,9 @@
   "subtitles.entity.dragon.ambient": "Le dragon rugit",
   "subtitles.entity.dragon.step": "Bruit de pas du dragon",
   "subtitles.entity.dragon.death": "Le dragon hurle",
-  "subtitles.entity.dragon.ambient.ghost": "Le dragon murmure"
+  "subtitles.entity.dragon.ambient.ghost": "Le dragon murmure",
+
+  "commands.dragon.follow": "Le dragon vous suit",
+  "commands.dragon.sit": "Le dragon est assis",
+  "commands.dragon.wander": "Le dragon erre autour de la position actuelle"
 }

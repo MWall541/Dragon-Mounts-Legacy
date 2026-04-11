@@ -117,5 +117,9 @@
   "subtitles.entity.dragon.ambient": "Dragão a rugir",
   "subtitles.entity.dragon.step": "Passos de dragão",
   "subtitles.entity.dragon.death": "Dragão a morrer",
-  "subtitles.entity.dragon.ambient.ghost": "Dragão a sussurrar"
+  "subtitles.entity.dragon.ambient.ghost": "Dragão a sussurrar",
+
+  "commands.dragon.follow": "O dragão está a seguir",
+  "commands.dragon.sit": "O dragão está sentado",
+  "commands.dragon.wander": "O dragão está a vaguear pela posição atual"
 }

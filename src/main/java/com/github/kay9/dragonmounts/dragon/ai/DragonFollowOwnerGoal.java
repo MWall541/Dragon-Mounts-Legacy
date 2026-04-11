@@ -68,6 +68,7 @@ public class DragonFollowOwnerGoal extends Goal
         {
             return false;
         }
+        if (dragon.getCommandState() != TameableDragon.STATE_FOLLOW) return false;
 
         this.owner = livingentity;
         return true;

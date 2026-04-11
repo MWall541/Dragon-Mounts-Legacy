@@ -117,5 +117,9 @@
   "subtitles.entity.dragon.ambient": "ドラゴンが話す",
   "subtitles.entity.dragon.step": "ドラゴンが踏み鳴らす",
   "subtitles.entity.dragon.death": "ドラゴンの金切り声",
-  "subtitles.entity.dragon.ambient.ghost": "ドラゴンが話す"
+  "subtitles.entity.dragon.ambient.ghost": "ドラゴンが話す",
+
+  "commands.dragon.follow": "ドラゴンがついてきています",
+  "commands.dragon.sit": "ドラゴンがお座りしています",
+  "commands.dragon.wander": "ドラゴンが現在の位置を徘徊しています"
 }

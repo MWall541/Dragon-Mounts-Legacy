@@ -54,6 +54,9 @@ public class DMLConfig
     private static final ForgeConfigSpec.BooleanValue BREATH_ENABLED;
     public static boolean isBreathEnabled() { return BREATH_ENABLED.get(); }
 
+    private static final ForgeConfigSpec.IntValue WANDER_RANGE;
+    public static int getWanderRange() { return WANDER_RANGE.get(); }
+
     public static float getEggChanceFor(String configTarget)
     {
         var chance = EGG_CHANCES.get(configTarget);
@@ -128,6 +131,11 @@ public class DMLConfig
         BREATH_RANGE = configurator.comment("The max distance a dragon breath projectile can travel. Default is 20.0 blocks.")
                 .defineInRange("global_breath_range", 20.0, 1.0, Double.MAX_VALUE);
         configurator.pop();
+
+        WANDER_RANGE = configurator.comment(
+                        "The radius of the area a dragon will patrol when in 'Wander' mode.",
+                        "The total area will be a cube of (range * 2). Default is 30 (30x30x30 area).")
+                .defineInRange("dragon_wander_range", 30, 1, 128);
 
         COMMON_SPEC = configurator.build();
     }

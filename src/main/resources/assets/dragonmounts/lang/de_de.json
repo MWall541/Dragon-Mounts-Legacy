@@ -117,5 +117,9 @@
   "subtitles.entity.dragon.ambient": "Drache brüllt",
   "subtitles.entity.dragon.step": "Drache stampft",
   "subtitles.entity.dragon.death": "Drache kreischt",
-  "subtitles.entity.dragon.ambient.ghost": "Drache flüstert"
+  "subtitles.entity.dragon.ambient.ghost": "Drache flüstert",
+
+  "commands.dragon.follow": "Drache folgt nun",
+  "commands.dragon.sit": "Drache sitzt nun",
+  "commands.dragon.wander": "Drache streift um die aktuelle Position herum"
 }

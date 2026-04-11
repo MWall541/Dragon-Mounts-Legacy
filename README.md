@@ -19,6 +19,8 @@ TWEAKS:
 
 - Added Chest Mechanics. Players can give dragons a chest and they can access them via keybind (default: H) whenever they are riding them or looking at them (vanilla interaction range). Chest can be retrieved via shear like the saddle. If the dragon dies or the chest is sheared away from the dragon, the contents drop to the ground.
 
+- Added Wander Mode. In this state, the dragon will be anchored in an area. The area size is configurable.
+
 - New Dragon textures and Dragon Types!
 
 - Updated the textures of some of the original dragons.

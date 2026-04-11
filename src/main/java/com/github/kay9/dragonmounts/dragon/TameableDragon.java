@@ -43,6 +43,8 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Inventory;
@@ -129,6 +131,21 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private final GroundPathNavigation groundNavigation;
     private final FlyingPathNavigation flyingNavigation;
 
+    // Data Accessor for the State
+    private static final EntityDataAccessor<Integer> DATA_COMMAND_STATE = SynchedEntityData.defineId(TameableDragon.class, EntityDataSerializers.INT);
+    private BlockPos wanderHomePos;
+
+    // Constants for the cycle
+    public static final int STATE_FOLLOW = 0;
+    public static final int STATE_SIT = 1;
+    public static final int STATE_WANDER = 2;
+
+    // Wander Behavior helpers
+    public int getCommandState() { return entityData.get(DATA_COMMAND_STATE); }
+    public void setCommandState(int state) { entityData.set(DATA_COMMAND_STATE, state); }
+    public BlockPos getWanderHomePos() { return wanderHomePos; }
+    public void setWanderHomePos(BlockPos pos) { this.wanderHomePos = pos; }
+
     public TameableDragon(EntityType<? extends TameableDragon> type, Level level)
     {
         super(type, level);
@@ -178,10 +195,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         goalSelector.addGoal(4, new MeleeAttackGoal(this, 1, true));
         goalSelector.addGoal(5, new DragonFollowOwnerGoal(this, 1f, 24f, 3.5f, 32f));
-        goalSelector.addGoal(6, new DragonBreedGoal(this));
-        goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.85f));
-        goalSelector.addGoal(8, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
-        goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+        goalSelector.addGoal(6, new DragonWanderAreaGoal(this, 0.85f));
+        goalSelector.addGoal(7, new DragonBreedGoal(this));
+        goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.85f) {
+            @Override
+            public boolean canUse() {
+                return getCommandState() != STATE_WANDER && super.canUse();
+            }
+        });
+        goalSelector.addGoal(9, new LookAtPlayerGoal(this, LivingEntity.class, 16f));
+        goalSelector.addGoal(10, new RandomLookAroundGoal(this));
 
         targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
@@ -199,6 +222,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         entityData.define(DATA_AGE, 0); // default to adult stage
         entityData.define(DATA_ARMOR_TYPE, DragonArmorType.NONE.ordinal());
         entityData.define(DATA_HAS_CHEST, false);
+        entityData.define(DATA_COMMAND_STATE, STATE_FOLLOW);
     }
 
     @Override
@@ -221,6 +245,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         super.addAdditionalSaveData(compound);
         compound.putBoolean(NBT_SADDLED, isSaddled());
         compound.putInt(NBT_REPRO_COUNT, reproCount);
+        compound.putInt("CommandState", getCommandState());
 
         if (getBreed() != null) // breed is not read by the time the packet is being sent...
         {
@@ -248,6 +273,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             }
 
             compound.put("DragonChest", invTag);
+        }
+
+        if (wanderHomePos != null) {
+            compound.putLong("WanderHomePos", wanderHomePos.asLong());
         }
     }
 
@@ -290,6 +319,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     chestInventory.setItem(i, ItemStack.of(invTag.getCompound("Slot" + i)));
                 }
             }
+        }
+
+        if (compound.contains("CommandState")) {
+            setCommandState(compound.getInt("CommandState"));
+        }
+        if (compound.contains("WanderHomePos")) {
+            setWanderHomePos(BlockPos.of(compound.getLong("WanderHomePos")));
         }
     }
 
@@ -608,13 +644,30 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // sit!
-        if (isTamedFor(player) && (player.isSecondaryUseActive() || stack.is(Items.BONE))) // "bone sitting" for legacy reasons
-        {
-            if (isServer())
-            {
-                navigation.stop();
-                setOrderedToSit(!isOrderedToSit());
-                if (isOrderedToSit()) setTarget(null);
+        if (isTamedFor(player) && (player.isSecondaryUseActive() || stack.is(Items.BONE))) {
+            if (isServer()) {
+                int nextState = (getCommandState() + 1) % 3;
+                setCommandState(nextState);
+
+                switch (nextState) {
+                    case STATE_FOLLOW -> {
+                        setOrderedToSit(false);
+                        setInSittingPose(false);
+                        player.displayClientMessage(Component.translatable("commands.dragon.follow"), true);
+                    }
+                    case STATE_SIT -> {
+                        setOrderedToSit(true);
+                        setInSittingPose(true);
+                        navigation.stop();
+                        player.displayClientMessage(Component.translatable("commands.dragon.sit"), true);
+                    }
+                    case STATE_WANDER -> {
+                        setOrderedToSit(false);
+                        setInSittingPose(false);
+                        setWanderHomePos(this.blockPosition());
+                        player.displayClientMessage(Component.translatable("commands.dragon.wander"), true);
+                    }
+                }
             }
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
@@ -1882,5 +1935,67 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
         return  breedId.getPath().contains("sculk");
+    }
+
+    public static class DragonWanderAreaGoal extends Goal {
+        private final TameableDragon dragon;
+        private final double speed;
+
+        public DragonWanderAreaGoal(TameableDragon dragon, double speed) {
+            this.dragon = dragon;
+            this.speed = speed;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            // Only trigger a new walk if we aren't already walking
+            if (dragon.getNavigation().isInProgress()) return false;
+
+            return dragon.getCommandState() == TameableDragon.STATE_WANDER
+                    && dragon.getWanderHomePos() != null
+                    && dragon.getRandom().nextInt(reducedTickDelay(30)) == 0;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            // Continue moving until the path is finished
+            return !dragon.getNavigation().isDone() && dragon.getCommandState() == TameableDragon.STATE_WANDER;
+        }
+
+        @Override
+        public void start() {
+            Vec3 target = findTarget();
+            if (target != null) {
+                dragon.getNavigation().moveTo(target.x, target.y, target.z, speed);
+            }
+        }
+
+        @Nullable
+        private Vec3 findTarget() {
+            BlockPos home = dragon.getWanderHomePos();
+            int RANGE = DMLConfig.getWanderRange();
+            int max_dist_x = 16;
+            int max_dist_y = 16;
+
+            // Try to find a random position within xy blocks of current location
+            Vec3 target;
+            if (dragon.isFlying()) {
+                target = AirAndWaterRandomPos.getPos(dragon, max_dist_x, max_dist_y, 0,
+                        dragon.getViewVector(0).x, dragon.getViewVector(0).z, (double)Math.PI / 2
+                );
+            } else {
+                target = DefaultRandomPos.getPos(dragon, max_dist_x, max_dist_y);
+            }
+
+            if (target == null) return Vec3.atCenterOf(home);
+
+            // If the chosen target is outside the area, pull it back toward home
+            if (target.distanceToSqr(Vec3.atCenterOf(home)) > RANGE * RANGE) {
+                return DefaultRandomPos.getPosTowards(dragon, max_dist_x, max_dist_y, Vec3.atCenterOf(home), (float)Math.PI / 2);
+            }
+
+            return target;
+        }
     }
 }

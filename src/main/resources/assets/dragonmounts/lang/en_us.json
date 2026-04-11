@@ -117,5 +117,9 @@
   "subtitles.entity.dragon.ambient": "Dragon speaks",
   "subtitles.entity.dragon.step": "Dragon stomps",
   "subtitles.entity.dragon.death": "Dragon screeches",
-  "subtitles.entity.dragon.ambient.ghost": "Dragon speaks"
+  "subtitles.entity.dragon.ambient.ghost": "Dragon speaks",
+
+  "commands.dragon.follow": "Dragon is following",
+  "commands.dragon.sit": "Dragon is sitting",
+  "commands.dragon.wander": "Dragon is wandering around the current position"
 }

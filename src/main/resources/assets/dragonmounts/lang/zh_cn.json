@@ -117,5 +117,9 @@
   "subtitles.entity.dragon.ambient": "龙鸣",
   "subtitles.entity.dragon.step": "龙脚步声",
   "subtitles.entity.dragon.death": "龙尖叫",
-  "subtitles.entity.dragon.ambient.ghost": "龙鸣（幽灵）"
+  "subtitles.entity.dragon.ambient.ghost": "龙鸣（幽灵）",
+
+  "commands.dragon.follow": "龙正跟随中",
+  "commands.dragon.sit": "龙正坐下中",
+  "commands.dragon.wander": "龙正在当前位置附近游荡"
 }

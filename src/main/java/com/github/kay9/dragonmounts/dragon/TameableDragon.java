@@ -1296,6 +1296,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected void removePassenger(@NotNull Entity passenger)
     {
         if (hasLocalDriver()) MountCameraManager.onDragonDismount();
+        if (isServer() && passenger instanceof Player && this.getCommandState() == STATE_WANDER) {
+            // Update the anchor to the dragon's current position
+            this.setWanderHomePos(this.blockPosition());
+        }
         super.removePassenger(passenger);
     }
 

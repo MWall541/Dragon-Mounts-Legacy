@@ -130,12 +130,13 @@ public class DMLConfig
 
         BREATH_RANGE = configurator.comment("The max distance a dragon breath projectile can travel. Default is 20.0 blocks.")
                 .defineInRange("global_breath_range", 20.0, 1.0, Double.MAX_VALUE);
-        configurator.pop();
 
         WANDER_RANGE = configurator.comment(
                         "The radius of the area a dragon will patrol when in 'Wander' mode.",
-                        "The total area will be a cube of (range * 2). Default is 30 (30x30x30 area).")
+                        "The total area will be a cube of (range * 2). Default is 30 (60x60x60 area). Setting this to lower numbers might restrict your dragons too much.")
                 .defineInRange("dragon_wander_range", 30, 1, 128);
+
+        configurator.pop();
 
         COMMON_SPEC = configurator.build();
     }

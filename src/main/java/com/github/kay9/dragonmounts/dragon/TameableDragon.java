@@ -58,6 +58,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -643,7 +644,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
 
-        // sit!
+        // sit or follow or wander!
         if (isTamedFor(player) && (player.isSecondaryUseActive() || stack.is(Items.BONE))) {
             if (isServer()) {
                 int nextState = (getCommandState() + 1) % 3;
@@ -664,7 +665,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     case STATE_WANDER -> {
                         setOrderedToSit(false);
                         setInSittingPose(false);
-                        setWanderHomePos(this.blockPosition());
+                        BlockPos groundPos = level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition());
+                        setWanderHomePos(groundPos);
                         player.displayClientMessage(Component.translatable("commands.dragon.wander"), true);
                     }
                 }
@@ -1296,9 +1298,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected void removePassenger(@NotNull Entity passenger)
     {
         if (hasLocalDriver()) MountCameraManager.onDragonDismount();
-        if (isServer() && passenger instanceof Player && this.getCommandState() == STATE_WANDER) {
-            // Update the anchor to the dragon's current position
-            this.setWanderHomePos(this.blockPosition());
+        if (isServer() && passenger instanceof Player player && this.getCommandState() == STATE_WANDER) {
+            this.getNavigation().stop();
+            BlockPos groundPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.blockPosition());
+            this.setWanderHomePos(groundPos);
+            player.displayClientMessage(Component.translatable("commands.dragon.wander"), true);
         }
         super.removePassenger(passenger);
     }
@@ -1981,6 +1985,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             int RANGE = DMLConfig.getWanderRange();
             int max_dist_x = 16;
             int max_dist_y = 16;
+            Vec3 homeVec = Vec3.atCenterOf(home);
 
             // Try to find a random position within xy blocks of current location
             Vec3 target;
@@ -1992,11 +1997,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 target = DefaultRandomPos.getPos(dragon, max_dist_x, max_dist_y);
             }
 
-            if (target == null) return Vec3.atCenterOf(home);
+            if (target == null) return null;
 
-            // If the chosen target is outside the area, pull it back toward home
-            if (target.distanceToSqr(Vec3.atCenterOf(home)) > RANGE * RANGE) {
-                return DefaultRandomPos.getPosTowards(dragon, max_dist_x, max_dist_y, Vec3.atCenterOf(home), (float)Math.PI / 2);
+            // Calculate distance ignoring the Y-axis (Horizontal only)
+            // This prevents the dragon from thinking it's "too far away" just because it's high up.
+            double dx = target.x - homeVec.x;
+            double dz = target.z - homeVec.z;
+            double distSq2D = dx * dx + dz * dz;
+
+            if (distSq2D > (double)RANGE * RANGE) {
+                return DefaultRandomPos.getPosTowards(dragon, max_dist_x, max_dist_y, homeVec, (float)Math.PI / 2);
             }
 
             return target;

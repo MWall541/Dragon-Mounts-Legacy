@@ -469,6 +469,12 @@ public class DragonAnimator
                 // display horns near the tip
                 var atIndex = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
                 model.tailHornLeft.visible = model.tailHornRight.visible = atIndex;
+                if (model.tailWebRight != null && model.tailWebLeft != null) {
+                    model.tailWebLeft.visible = model.tailWebRight.visible = atIndex;
+                    if (model.tailWebRightBottom != null && model.tailWebLeftBottom != null) {
+                        model.tailWebRightBottom.visible = model.tailWebLeftBottom.visible = atIndex;
+                    }
+                }
             }
 
             // update scale

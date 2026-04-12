@@ -3,12 +3,11 @@ package com.github.kay9.dragonmounts.data.providers;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.client.DragonModel;
 import com.github.kay9.dragonmounts.dragon.breed.DragonBreed;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -22,12 +21,12 @@ public class ModelPropertiesProvider implements DataProvider
     }
 
     @Override
-    public CompletableFuture<?> run(CachedOutput pOutput)
+    public @NotNull CompletableFuture<?> run(@NotNull CachedOutput pOutput)
     {
         return CompletableFuture.allOf(
-                save(pOutput, DragonBreed.BuiltIn.FIRE.location().getPath(), new DragonModel.Properties(false, false, false)),
-                save(pOutput, DragonBreed.BuiltIn.GHOST.location().getPath(), new DragonModel.Properties(true, false, true)),
-                save(pOutput, DragonBreed.BuiltIn.WATER.location().getPath(), new DragonModel.Properties(true, true, false)));
+                save(pOutput, DragonBreed.BuiltIn.FIRE.location().getPath(), new DragonModel.Properties(false, false, false, false)),
+                save(pOutput, DragonBreed.BuiltIn.GHOST.location().getPath(), new DragonModel.Properties(true, false, true, false)),
+                save(pOutput, DragonBreed.BuiltIn.WATER.location().getPath(), new DragonModel.Properties(true, true, false, true)));
     }
 
     private CompletableFuture<?> save(CachedOutput cache, String id, DragonModel.Properties instance)
@@ -38,7 +37,7 @@ public class ModelPropertiesProvider implements DataProvider
     }
 
     @Override
-    public String getName()
+    public @NotNull String getName()
     {
         return DragonMountsLegacy.MOD_ID + ": Dragon Model Properties";
     }

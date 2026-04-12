@@ -14,11 +14,10 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 /**
  * Generic model for all winged tetrapod dragons.
@@ -42,6 +41,10 @@ public class DragonModel extends EntityModel<TameableDragon>
     public final ModelPart tail;
     public final ModelPart tailHornLeft;
     public final ModelPart tailHornRight;
+    public final ModelPart tailWebLeft;
+    public final ModelPart tailWebRight;
+    public final ModelPart tailWebLeftBottom;
+    public final ModelPart tailWebRightBottom;
     public final ModelPart jaw;
     public final ModelPart body;
     public final ModelPart back;
@@ -77,6 +80,10 @@ public class DragonModel extends EntityModel<TameableDragon>
         this.tail = root.getChild("tail");
         this.tailHornRight = getNullableChild(tail, "right_tail_spike");
         this.tailHornLeft = getNullableChild(tail, "left_tail_spike");
+        this.tailWebRight = getNullableChild(tail, "right_tail_web");
+        this.tailWebLeft = getNullableChild(tail, "left_tail_web");
+        this.tailWebRightBottom = getNullableChild(tail, "right_tail_web_bottom");
+        this.tailWebLeftBottom = getNullableChild(tail, "left_tail_web_bottom");
 
         var rightWingArm = root.getChild("right_wing_arm");
         var leftWingArm = root.getChild("left_wing_arm");
@@ -107,9 +114,16 @@ public class DragonModel extends EntityModel<TameableDragon>
         for (int i = 0; i < neckProxy.length; i++) neckProxy[i] = new ModelPartProxy(neck);
         for (int i = 0; i < tailProxy.length; i++) tailProxy[i] = new ModelPartProxy(tail);
 
-        if (tailHornRight != null)
+        if (tailHornRight != null) {
             //noinspection ConstantConditions
             tailHornRight.visible = tailHornLeft.visible = false;
+            if (tailWebRight != null && tailWebLeft != null) {
+                tailWebRight.visible = tailWebLeft.visible = false;
+                if (tailWebRightBottom != null && tailWebLeftBottom != null){
+                    tailWebRightBottom.visible = tailWebLeftBottom.visible = false;
+                }
+            }
+        }
     }
 
 
@@ -188,10 +202,10 @@ public class DragonModel extends EntityModel<TameableDragon>
             tail.addOrReplaceChild("right_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, -0.785398f));
         }
 
-        if (properties.tailHorns()) addTailSpikes(tail);
+        if (properties.tailHorns()) addTailSpikes(tail, properties.tailWeb());
     }
 
-    private static void addTailSpikes(PartDefinition tail)
+    private static void addTailSpikes(PartDefinition tail, boolean hasWeb)
     {
         int hornThick = 3;
         int hornLength = 32;
@@ -212,6 +226,28 @@ public class DragonModel extends EntityModel<TameableDragon>
         tail.addOrReplaceChild("left_tail_spike",
                 CubeListBuilder.create().texOffs(0, 117).mirror().addBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength),
                 PartPose.offsetAndRotation(hornPosX * -1, hornPosY, hornPosZ, hornRotX, hornRotY * -1, hornRotZ));
+
+        if (hasWeb) {
+            float webPosY = hornPosY + 10.5F;
+            float webRotZ = 3.14159F;
+            float webRotY = 2.8f;
+
+            tail.addOrReplaceChild("right_tail_web",
+                    CubeListBuilder.create().texOffs(0, 118).addBox(-6.0F, 0.0F, 0.0F, 12.0F, 3.0F, hornLength),
+                    PartPose.offsetAndRotation(hornPosX, hornPosY, hornPosZ, hornRotX, hornRotY, hornRotZ));
+
+            tail.addOrReplaceChild("right_tail_web_bottom",
+                    CubeListBuilder.create().texOffs(0, 118).addBox(-6.0F, 0.0F, 0.0F, 12.0F, 0.0F, hornLength),
+                    PartPose.offsetAndRotation(hornPosX, webPosY, hornPosZ, hornRotX, webRotY, webRotZ));
+
+            tail.addOrReplaceChild("left_tail_web",
+                    CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-6.0F, 0.0F, 0.0F, 12.0F, 3.0F, hornLength),
+                    PartPose.offsetAndRotation(hornPosX * -1, hornPosY, hornPosZ, hornRotX, hornRotY * -1, hornRotZ));
+
+            tail.addOrReplaceChild("left_tail_web_bottom",
+                    CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-6.0F, 0.0F, 0.0F, 12.0F, 0.0F, hornLength),
+                    PartPose.offsetAndRotation(hornPosX * -1, webPosY, hornPosZ, hornRotX, webRotY * -1, webRotZ));
+        }
     }
 
     private static void buildWings(PartDefinition root)
@@ -348,7 +384,7 @@ public class DragonModel extends EntityModel<TameableDragon>
     }
 
     @Override
-    public void renderToBuffer(PoseStack ps, VertexConsumer vertices, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
+    public void renderToBuffer(@NotNull PoseStack ps, @NotNull VertexConsumer vertices, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha)
     {
         body.render(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
         renderHead(ps, vertices, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
@@ -411,14 +447,14 @@ public class DragonModel extends EntityModel<TameableDragon>
         }
     }
 
-    public record Properties(boolean middleTailScales, boolean tailHorns, boolean thinLegs)
-    {
-        public static final Properties STANDARD = new Properties(true, false, false);
+    public record Properties(boolean middleTailScales, boolean tailHorns, boolean thinLegs, boolean tailWeb) {
+        public static final Properties STANDARD = new Properties(true, false, false, false);
 
         public static final Codec<Properties> CODEC = RecordCodecBuilder.create(func -> func.group(
                 Codec.BOOL.optionalFieldOf("middle_tail_scales", true).forGetter(Properties::middleTailScales),
                 Codec.BOOL.optionalFieldOf("tail_horns", false).forGetter(Properties::tailHorns),
-                Codec.BOOL.optionalFieldOf("thin_legs", false).forGetter(Properties::thinLegs)
+                Codec.BOOL.optionalFieldOf("thin_legs", false).forGetter(Properties::thinLegs),
+                Codec.BOOL.optionalFieldOf("tail_web", false).forGetter(Properties::tailWeb)
         ).apply(func, Properties::new));
     }
 }

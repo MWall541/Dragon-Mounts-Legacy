@@ -91,7 +91,7 @@ TWEAKS:
 - It respects doFireTick and mobGriefing gamerules. 
 - It now lights up blocks that can be lit like candles, campfires, redstone lamps, smokers, furnaces, blast furnaces, and tnt. If a modded block has the "LIT" blockstate, that will get lit as well.
 - If the block (vanilla or modded) has the minecraft tag SOUL_FIRE_BASE_BLOCKS, it will set that to soulfire instead.
-- It expires immediately if it hits water (It cannot go through water).
+- It expires immediately if it hits water, it cannot go through water) with the exception of the black fire breath.
 
 - Dragon breath (ice) will apply the freeze effect to mobs if they are not freeze immune. It also has a chance of summoning a snow field that slows and gives mining fatigue to mobs upon explosion or impact. It will put fire out on block surfaces (fire extinguisher style) and unlight lit blocks like (campfires, candles, lamps, etc.). When it hits water, it will turn it to ice. When it hits lava, it will turn it to cobblestone or obsidian.
 

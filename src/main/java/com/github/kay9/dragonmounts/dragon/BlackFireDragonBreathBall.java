@@ -69,8 +69,7 @@ public class BlackFireDragonBreathBall extends LargeFireball {
         // Max distance check
         double maxRange = DMLConfig.getBreathRange();
         double distSq = this.distanceToSqr(startX, startY, startZ);
-        boolean isInWater = this.isInWater();
-        if (distSq > (maxRange * maxRange) || isInWater) {
+        if (distSq > (maxRange * maxRange)) {
             this.onHit(new BlockHitResult(this.position(), Direction.UP, this.blockPosition(), false));
         }
     }

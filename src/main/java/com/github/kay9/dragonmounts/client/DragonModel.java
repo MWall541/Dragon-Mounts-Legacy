@@ -202,10 +202,11 @@ public class DragonModel extends EntityModel<TameableDragon>
             tail.addOrReplaceChild("right_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, -0.785398f));
         }
 
-        if (properties.tailHorns()) addTailSpikes(tail, properties.tailWeb());
+        if (properties.tailHorns()) addTailSpikes(tail);
+        if (properties.tailWeb()) addTailWebs(tail);
     }
 
-    private static void addTailSpikes(PartDefinition tail, boolean hasWeb)
+    private static void addTailSpikes(PartDefinition tail)
     {
         int hornThick = 3;
         int hornLength = 32;
@@ -226,28 +227,42 @@ public class DragonModel extends EntityModel<TameableDragon>
         tail.addOrReplaceChild("left_tail_spike",
                 CubeListBuilder.create().texOffs(0, 117).mirror().addBox(hornOfs, hornOfs, hornOfs, hornThick, hornThick, hornLength),
                 PartPose.offsetAndRotation(hornPosX * -1, hornPosY, hornPosZ, hornRotX, hornRotY * -1, hornRotZ));
+    }
 
-        if (hasWeb) {
-            float webPosY = hornPosY + 10.5F;
-            float webRotZ = 3.14159F;
-            float webRotY = 2.8f;
+    private static void addTailWebs(PartDefinition tail)
+    {
+        int hornThick = 3;
+        int hornLength = 32;
 
-            tail.addOrReplaceChild("right_tail_web",
-                    CubeListBuilder.create().texOffs(0, 118).addBox(-6.0F, 0.0F, 0.0F, 12.0F, 3.0F, hornLength),
-                    PartPose.offsetAndRotation(hornPosX, hornPosY, hornPosZ, hornRotX, hornRotY, hornRotZ));
+        float hornOfs = -(hornThick / 2f);
 
-            tail.addOrReplaceChild("right_tail_web_bottom",
-                    CubeListBuilder.create().texOffs(0, 118).addBox(-6.0F, 0.0F, 0.0F, 12.0F, 0.0F, hornLength),
-                    PartPose.offsetAndRotation(hornPosX, webPosY, hornPosZ, hornRotX, webRotY, webRotZ));
+        float hornPosX = 0;
+        float hornPosY = hornOfs;
+        float hornPosZ = TAIL_SIZE / 2f;
 
-            tail.addOrReplaceChild("left_tail_web",
-                    CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-6.0F, 0.0F, 0.0F, 12.0F, 3.0F, hornLength),
-                    PartPose.offsetAndRotation(hornPosX * -1, hornPosY, hornPosZ, hornRotX, hornRotY * -1, hornRotZ));
+        float hornRotX = -0.261799f;
+        float hornRotY = -2.53073f;
+        float hornRotZ = 0;
 
-            tail.addOrReplaceChild("left_tail_web_bottom",
-                    CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-6.0F, 0.0F, 0.0F, 12.0F, 0.0F, hornLength),
-                    PartPose.offsetAndRotation(hornPosX * -1, webPosY, hornPosZ, hornRotX, webRotY * -1, webRotZ));
-        }
+        float webPosY = hornPosY + 10.5F;
+        float webRotZ = 3.14159F;
+        float webRotY = 2.8f;
+
+        tail.addOrReplaceChild("right_tail_web",
+                CubeListBuilder.create().texOffs(0, 118).addBox(-6.0F, 0.0F, 0.0F, 12.0F, 3.0F, hornLength),
+                PartPose.offsetAndRotation(hornPosX, hornPosY, hornPosZ, hornRotX, hornRotY, hornRotZ));
+
+        tail.addOrReplaceChild("right_tail_web_bottom",
+                CubeListBuilder.create().texOffs(0, 118).addBox(-6.0F, 0.0F, 0.0F, 12.0F, 0.0F, hornLength),
+                PartPose.offsetAndRotation(hornPosX, webPosY, hornPosZ, hornRotX, webRotY, webRotZ));
+
+        tail.addOrReplaceChild("left_tail_web",
+                CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-6.0F, 0.0F, 0.0F, 12.0F, 3.0F, hornLength),
+                PartPose.offsetAndRotation(hornPosX * -1, hornPosY, hornPosZ, hornRotX, hornRotY * -1, hornRotZ));
+
+        tail.addOrReplaceChild("left_tail_web_bottom",
+                CubeListBuilder.create().texOffs(0, 118).mirror().addBox(-6.0F, 0.0F, 0.0F, 12.0F, 0.0F, hornLength),
+                PartPose.offsetAndRotation(hornPosX * -1, webPosY, hornPosZ, hornRotX, webRotY * -1, webRotZ));
     }
 
     private static void buildWings(PartDefinition root)

@@ -3,6 +3,7 @@ package com.github.kay9.dragonmounts.dragon;
 import com.github.kay9.dragonmounts.DMLConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -162,17 +163,21 @@ public class DragonBreathBall extends LargeFireball {
                 BlockPos sidePos = hitPos.relative(direction);
 
                 if (level().isEmptyBlock(sidePos)) {
-                    // Get the default fire state to check if it can survive there
-                    BlockState fireState = Blocks.FIRE.defaultBlockState();
+                    // LOOK DOWN: Check the block beneath the potential fire
+                    BlockState baseBlockState = level().getBlockState(sidePos.below());
 
-                    // Check 1: Is the block we actually hit flammable?
+                    // CHECK TAG: Does this block belong to the #minecraft:soul_fire_base_blocks tag?
+                    boolean startsSoulFire = baseBlockState.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
+
+                    // SELECT TYPE: Pick Soul Fire if the base is valid, otherwise use normal Fire
+                    BlockState fireToPlace = startsSoulFire ? Blocks.SOUL_FIRE.defaultBlockState() : Blocks.FIRE.defaultBlockState();
+
+                    // VALIDATE: Ensure the fire can actually exist there (standard Minecraft physics)
                     boolean isFlammable = level().getBlockState(hitPos).isFlammable(level(), hitPos, direction.getOpposite());
-
-                    // Check 2: Can fire actually sit on the block at sidePos? (This handles Dirt/Stone)
-                    boolean canSurvive = fireState.canSurvive(level(), sidePos);
+                    boolean canSurvive = fireToPlace.canSurvive(level(), sidePos);
 
                     if (isFlammable || canSurvive) {
-                        level().setBlockAndUpdate(sidePos, fireState);
+                        level().setBlockAndUpdate(sidePos, fireToPlace);
                     }
                 }
             }

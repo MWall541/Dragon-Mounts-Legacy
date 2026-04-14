@@ -1,3 +1,5 @@
 {
-  "middle_tail_scales": false
+  "tail_horns": false,
+  "middle_tail_scales": false,
+  "tail_web": true
 }

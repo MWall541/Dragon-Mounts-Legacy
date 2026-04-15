@@ -25,7 +25,7 @@ TWEAKS:
 
 - Updated the textures of some of the original dragons.
 
-- Added the Storm Dragon, lower armor with slightly fast movement speed, flight speed, and is immune to lightning bolt damage. Can be hatched when surrounded by copper blocks.
+- Added the Storm Dragon, lower armor with slightly fast movement speed, flight speed, melee damage, and is immune to lightning bolt damage. Can be hatched when surrounded by copper blocks.
 
 - Added the Blue Fire Dragon. Can be hatched via obsidian. It breathes blue fire (cosmetic change from normal fire breath).
 

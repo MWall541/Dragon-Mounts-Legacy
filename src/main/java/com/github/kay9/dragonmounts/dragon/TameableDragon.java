@@ -652,11 +652,13 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                     case STATE_FOLLOW -> {
                         setOrderedToSit(false);
                         setInSittingPose(false);
+                        setWanderHomePos(null);
                         player.displayClientMessage(Component.translatable("commands.dragon.follow"), true);
                     }
                     case STATE_SIT -> {
                         setOrderedToSit(true);
                         setInSittingPose(true);
+                        setWanderHomePos(null);
                         navigation.stop();
                         player.displayClientMessage(Component.translatable("commands.dragon.sit"), true);
                     }
@@ -1293,14 +1295,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected void removePassenger(@NotNull Entity passenger)
-    {
+    protected void removePassenger(@NotNull Entity passenger) {
         if (hasLocalDriver()) MountCameraManager.onDragonDismount();
-        if (isServer() && passenger instanceof Player player && this.getCommandState() == STATE_WANDER) {
+        if (isServer() && passenger instanceof Player player) {
             this.getNavigation().stop();
-            BlockPos groundPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.blockPosition());
-            this.setWanderHomePos(groundPos);
-            player.displayClientMessage(Component.translatable("commands.dragon.wander"), true);
+            if (this.getCommandState() == STATE_WANDER) {
+                BlockPos groundPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.blockPosition());
+                this.setWanderHomePos(groundPos);
+                player.displayClientMessage(Component.translatable("commands.dragon.wander"), true);
+            } else {
+                this.setWanderHomePos(null);
+            }
         }
         super.removePassenger(passenger);
     }

@@ -32,6 +32,7 @@
   "dragon_breed.dragonmounts.sylphid": "Sylphendrache",
   "dragon_breed.dragonmounts.monarch": "Monarchdrache",
   "dragon_breed.dragonmounts.jade": "Jadedrache",
+  "dragon_breed.dragonmounts.red": "Rotdrache",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aetherdrachen-Spawnei",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Feuerdrachen-Spawnei",
@@ -64,6 +65,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Sylphendrachen-Spawnei",
   "item.dragonmounts.spawn_egg.dragonmounts.monarch": "Monarchdrachen-Spawn-Ei",
   "item.dragonmounts.spawn_egg.dragonmounts.jade": "Jadedrachen-Spawn-Ei",
+  "item.dragonmounts.spawn_egg.dragonmounts.red": "Rotdrachen-Spawnei",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Schlüpft in %s Sekunden.",
   "block.dragonmounts.dragon_egg.desc1": "Interaktion mit Drache:",
@@ -104,6 +106,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Sylphendrachenei",
   "block.dragonmounts.dragon_egg.dragonmounts.monarch": "Monarchdrachenei",
   "block.dragonmounts.dragon_egg.dragonmounts.jade": "Jadedrachenei",
+  "block.dragonmounts.dragon_egg.dragonmounts.red": "Rotdrachenei",
 
   "key.dragonmounts.flight_descent": "Drachenreit-Sinkflug",
   "key.dragonmounts.camera_flight": "Drachenreit-Flugbefehle",

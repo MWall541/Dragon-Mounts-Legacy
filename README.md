@@ -75,6 +75,8 @@ TWEAKS:
 
 - Added the Jade Dragon. It has high armor but reduced HP. It also has slightly faster movement speed. Can be hatched via emerald blocks.
 
+- Added the Red Dragon. It has slightly higher HP. Can be hatched via red concrete.
+
 - Dragon variants' attribute tweaks
 - All dragons are fire immune
 - All dragons have increased health and armor

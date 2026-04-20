@@ -32,6 +32,7 @@
   "dragon_breed.dragonmounts.sylphid": "Dragón Sílfide",
   "dragon_breed.dragonmounts.monarch": "Dragón Monarca",
   "dragon_breed.dragonmounts.jade": "Dragón de Jade",
+  "dragon_breed.dragonmounts.red": "Dragón Rojo",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Huevo de generación de dragón del Éter",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Huevo de generación de dragón de fuego",
@@ -64,6 +65,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "Huevo de generación de dragón sílfide",
   "item.dragonmounts.spawn_egg.dragonmounts.monarch": "Huevo generador de dragón monarca",
   "item.dragonmounts.spawn_egg.dragonmounts.jade": "Huevo de generación de dragón de jade",
+  "item.dragonmounts.spawn_egg.dragonmounts.red": "Huevo de generación de dragón rojo",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Eclosiona en %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interactuar con el dragón:",
@@ -104,6 +106,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "Huevo de dragón sílfide",
   "block.dragonmounts.dragon_egg.dragonmounts.monarch": "Huevo de dragón monarca",
   "block.dragonmounts.dragon_egg.dragonmounts.jade": "Huevo de dragón de jade",
+  "block.dragonmounts.dragon_egg.dragonmounts.red": "Huevo de dragón rojo",
 
   "key.dragonmounts.flight_descent": "Descenso de montura de dragón",
   "key.dragonmounts.camera_flight": "Controles de vuelo de montura de dragón",

@@ -32,6 +32,7 @@
   "dragon_breed.dragonmounts.sylphid": "シルフィードドラゴン",
   "dragon_breed.dragonmounts.monarch": "モナーク・ドラゴン",
   "dragon_breed.dragonmounts.jade": "翡翠のドラゴン",
+  "dragon_breed.dragonmounts.red": "レッドドラゴン",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "エーテルドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "ファイアドラゴンのスポーンエッグ",
@@ -64,6 +65,7 @@
   "item.dragonmounts.spawn_egg.dragonmounts.sylphid": "シルフィードドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.monarch": "モナーク・ドラゴンのスポーンエッグ",
   "item.dragonmounts.spawn_egg.dragonmounts.jade": "翡翠のドラゴンのスポーンエッグ",
+  "item.dragonmounts.spawn_egg.dragonmounts.red": "レッドドラゴンのスポーンエッグ",
 
   "block.dragonmounts.dragon_egg.remaining_time": "%s秒以内に孵化します。",
   "block.dragonmounts.dragon_egg.desc1": "ドラゴンとの交流:",
@@ -104,6 +106,7 @@
   "block.dragonmounts.dragon_egg.dragonmounts.sylphid": "シルフィードドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.monarch": "モナーク・ドラゴンの卵",
   "block.dragonmounts.dragon_egg.dragonmounts.jade": "翡翠のドラゴンの卵",
+  "block.dragonmounts.dragon_egg.dragonmounts.red": "レッドドラゴンの卵",
 
   "key.dragonmounts.flight_descent": "Dragon Mount フライト降下",
   "key.dragonmounts.camera_flight": "Dragon Mount フライトコマンド",

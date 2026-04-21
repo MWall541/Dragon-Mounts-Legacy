@@ -1786,7 +1786,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
         return  breedId.getPath().contains("storm") ||
                 breedId.getPath().contains("crystal") ||
-                breedId.getPath().contains("bronze");
+                breedId.getPath().contains("bronze") ||
+                breedId.getPath().contains("light");
     }
 
     public boolean isEndBreed() {
@@ -1818,7 +1819,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         ResourceLocation breedId = getBreed().id(level().registryAccess());
 
         return  breedId.getPath().contains("blue_fire") ||
-                breedId.getPath().contains("soul_nether");
+                breedId.getPath().contains("soul_nether") ||
+                breedId.getPath().contains("elder");
     }
 
     public boolean isSculkBreed() {

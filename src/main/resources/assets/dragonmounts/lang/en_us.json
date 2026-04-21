@@ -129,6 +129,14 @@
   "item.dragonmounts.spawn_egg.dragonmounts.red": "Red Dragon Spawn Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.red": "Red Dragon Egg",
 
+  "dragon_breed.dragonmounts.elder": "Elder Dragon",
+  "item.dragonmounts.spawn_egg.dragonmounts.elder": "Elder Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.elder": "Elder Dragon Egg",
+
+  "dragon_breed.dragonmounts.light": "Light Dragon",
+  "item.dragonmounts.spawn_egg.dragonmounts.light": "Light Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.light": "Light Dragon Egg",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
   "block.dragonmounts.dragon_egg.desc2": "Changes Breed Type",

@@ -71,11 +71,15 @@ TWEAKS:
 
 - Added the Sylphid Dragon. It is immune to drowning and has slightly faster flight speed. Can be hatched via light blue terracotta.
 
-- Added the Monarch Dragon. It has increased HP, armor, and damage but it is the only dragon susceptible to minecraft's dragon breath damage. Can be hatched via red glazed terracotta.
+- Added the Monarch Dragon. It has increased HP, armor, and damage, but it is susceptible to minecraft's dragon breath damage. Can be hatched via red glazed terracotta.
 
 - Added the Jade Dragon. It has high armor but reduced HP. It also has slightly faster movement speed. Can be hatched via emerald blocks.
 
 - Added the Red Dragon. It has slightly higher HP. Can be hatched via red concrete.
+
+- Added the Elder Dragon. It is similar to the Monarch Dragon but breaths blue fire. Can be hatched via gray terracotta.
+
+- Added the Light Dragon. Shoots storm breath balls. Immune to lightning bolts and freezing. Can be hatched via white terracotta.
 
 - Dragon variants' attribute tweaks
 - All dragons are fire immune

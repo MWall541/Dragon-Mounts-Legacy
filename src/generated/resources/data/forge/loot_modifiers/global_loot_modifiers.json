@@ -31,7 +31,9 @@
     "dragonmounts:dragonmounts/zombie/chests/abandoned_mineshaft",
     "dragonmounts:dragonmounts/monarch/chests/simple_dungeon",
     "dragonmounts:dragonmounts/jade/chests/buried_treasure",
-    "dragonmounts:dragonmounts/red/chests/bastion_treasure"
+    "dragonmounts:dragonmounts/red/chests/bastion_treasure",
+    "dragonmounts:dragonmounts/elder/chests/igloo_chest",
+    "dragonmounts:dragonmounts/light/chests/jungle_temple"
   ],
   "replace": false
 }

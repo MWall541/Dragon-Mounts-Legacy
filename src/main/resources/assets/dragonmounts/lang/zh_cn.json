@@ -129,6 +129,14 @@
   "item.dragonmounts.spawn_egg.dragonmounts.red": "红龙刷怪蛋",
   "block.dragonmounts.dragon_egg.dragonmounts.red": "红龙蛋",
 
+  "dragon_breed.dragonmounts.elder": "远古龙",
+  "item.dragonmounts.spawn_egg.dragonmounts.elder": "远古龙刷怪蛋",
+  "block.dragonmounts.dragon_egg.dragonmounts.elder": "远古龙蛋",
+
+  "dragon_breed.dragonmounts.light": "光之龙",
+  "item.dragonmounts.spawn_egg.dragonmounts.light": "光之龙刷怪蛋",
+  "block.dragonmounts.dragon_egg.dragonmounts.light": "光之龙蛋",
+
   "block.dragonmounts.dragon_egg.remaining_time": "将在 %s 秒后孵化。",
   "block.dragonmounts.dragon_egg.desc1": "与龙互动：",
   "block.dragonmounts.dragon_egg.desc2": "改变龙的种类",

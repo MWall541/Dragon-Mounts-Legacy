@@ -129,6 +129,14 @@
   "item.dragonmounts.spawn_egg.dragonmounts.red": "Ovo de Invocação de Dragão Vermelho",
   "block.dragonmounts.dragon_egg.dragonmounts.red": "Ovo de Dragão Vermelho",
 
+  "dragon_breed.dragonmounts.elder": "Dragão Ancião",
+  "item.dragonmounts.spawn_egg.dragonmounts.elder": "Ovo de Invocação de Dragão Ancião",
+  "block.dragonmounts.dragon_egg.dragonmounts.elder": "Ovo de Dragão Ancião",
+
+  "dragon_breed.dragonmounts.light": "Dragão da Luz",
+  "item.dragonmounts.spawn_egg.dragonmounts.light": "Ovo de Invocação de Dragão da Luz",
+  "block.dragonmounts.dragon_egg.dragonmounts.light": "Ovo de Dragão da Luz",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Choca em %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interagir com o Dragão:",
   "block.dragonmounts.dragon_egg.desc2": "Altera a Raça do Dragão",

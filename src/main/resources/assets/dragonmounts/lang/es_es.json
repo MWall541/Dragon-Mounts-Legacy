@@ -129,6 +129,14 @@
   "item.dragonmounts.spawn_egg.dragonmounts.red": "Huevo de generación de dragón rojo",
   "block.dragonmounts.dragon_egg.dragonmounts.red": "Huevo de dragón rojo",
 
+  "dragon_breed.dragonmounts.elder": "Dragón Anciano",
+  "item.dragonmounts.spawn_egg.dragonmounts.elder": "Huevo de Invocación de Dragón Anciano",
+  "block.dragonmounts.dragon_egg.dragonmounts.elder": "Huevo de Dragón Anciano",
+
+  "dragon_breed.dragonmounts.light": "Dragón de Luz",
+  "item.dragonmounts.spawn_egg.dragonmounts.light": "Huevo de Invocación de Dragón de Luz",
+  "block.dragonmounts.dragon_egg.dragonmounts.light": "Huevo de Dragón de Luz",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Eclosiona en %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interactuar con el dragón:",
   "block.dragonmounts.dragon_egg.desc2": "Cambia el tipo de raza",

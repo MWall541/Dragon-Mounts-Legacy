@@ -129,6 +129,14 @@
   "item.dragonmounts.spawn_egg.dragonmounts.red": "Яйцо призыва красного дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.red": "Яйцо красного дракона",
 
+  "dragon_breed.dragonmounts.elder": "Древний дракон",
+  "item.dragonmounts.spawn_egg.dragonmounts.elder": "Яйцо призыва древнего дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.elder": "Яйцо древнего дракона",
+
+  "dragon_breed.dragonmounts.light": "Световой дракон",
+  "item.dragonmounts.spawn_egg.dragonmounts.light": "Яйцо призыва светового дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.light": "Яйцо светового дракона",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Вылупится через %s сек.",
   "block.dragonmounts.dragon_egg.desc1": "Взаимодействие с драконом:",
   "block.dragonmounts.dragon_egg.desc2": "Изменяет породу дракона",

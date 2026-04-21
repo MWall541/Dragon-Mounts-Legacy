@@ -129,6 +129,14 @@
   "item.dragonmounts.spawn_egg.dragonmounts.red": "Œuf d'apparition de dragon rouge",
   "block.dragonmounts.dragon_egg.dragonmounts.red": "Œuf de dragon rouge",
 
+  "dragon_breed.dragonmounts.elder": "Dragon Ancien",
+  "item.dragonmounts.spawn_egg.dragonmounts.elder": "Œuf d'apparition de Dragon Ancien",
+  "block.dragonmounts.dragon_egg.dragonmounts.elder": "Œuf de Dragon Ancien",
+
+  "dragon_breed.dragonmounts.light": "Dragon de Lumière",
+  "item.dragonmounts.spawn_egg.dragonmounts.light": "Œuf d'apparition de Dragon de Lumière",
+  "block.dragonmounts.dragon_egg.dragonmounts.light": "Œuf de Dragon de Lumière",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Éclôt dans %s secondes.",
   "block.dragonmounts.dragon_egg.desc1": "Interagir avec le dragon :",
   "block.dragonmounts.dragon_egg.desc2": "Changer la race du dragon",

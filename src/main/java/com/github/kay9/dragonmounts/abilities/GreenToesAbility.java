@@ -4,7 +4,6 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +25,7 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
         var level = dragon.level();
+        if (!(level instanceof ServerLevel serverLevel)) return;
         var groundPos = pos.below();
         var steppingOn = level.getBlockState(groundPos);
         var steppingOver = level.getBlockState(pos);
@@ -46,8 +46,6 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
             else if (steppingOn.is(BlockTags.DIRT) && !steppingOn.is(Blocks.MOSS_BLOCK)) // different from the actual dirt block, could be grass or podzol.
             {
                 // while grass blocks etc. do have defined bone meal behavior, I think our own is more viable.
-
-                //noinspection deprecation
                 placing = level.registryAccess().registryOrThrow(Registries.BLOCK)
                         .getTag(BlockTags.SMALL_FLOWERS)
                         .flatMap(tag -> tag.getRandomElement(dragon.getRandom()))
@@ -86,7 +84,7 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
 
             if (b.isBonemealSuccess(level, dragon.getRandom(), caret, state))
             {
-                b.performBonemeal((ServerLevel) level, level.getRandom(), caret, state);
+                b.performBonemeal(serverLevel, level.getRandom(), caret, state);
                 level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, caret, 0);
                 return;
             }

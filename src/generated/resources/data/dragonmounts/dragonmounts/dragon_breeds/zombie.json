@@ -3,6 +3,11 @@
     "minecraft:generic.armor": 4.0,
     "minecraft:generic.max_health": 80.0
   },
+  "abilities": [
+    {
+      "type": "dragonmounts:putrid_step"
+    }
+  ],
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",

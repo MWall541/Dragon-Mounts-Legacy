@@ -49,7 +49,7 @@ TWEAKS:
 
 - Prismarine and Sea Lantern can no longer hatch the Water dragon, it will instead hatch the new variant: Ocean Dragon (cosmetic change only).
 
-- Added the Wither Dragon. They are immune to withering but has slightly low hp. They can shoot wither skulls which inflict wither. Can be hatched via wither skeleton skulls. They have the wither step ability that spawns wither roses occasionally on the blocks they walk on.
+- Added the Wither Dragon. They are immune to withering but has slightly low hp. They can shoot wither skulls which inflict wither. Can be hatched via wither skeleton skulls. They have the wither step ability that spawns wither roses and soul soil occasionally on the blocks they walk on.
 
 - Added the Gale Dragon. They are very similar to Aether Dragons. Can be hatched via blue terracotta blocks
 

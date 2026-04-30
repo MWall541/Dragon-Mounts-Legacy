@@ -21,14 +21,15 @@ public class ElectroStepAbility extends FootprintAbility implements Ability.Fact
         var groundPos = pos.below();
         var steppingOn = level.getBlockState(groundPos);
 
-        ((ServerLevel) level).sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX(), pos.getY(), pos.getZ(), 10, 0.25, 0, 0.25, 0);
+        if (level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX(), pos.getY(), pos.getZ(), 10, 0.25, 0, 0.25, 0);
 
-        // copper -> clean
-        WeatheringCopper.getPrevious(steppingOn.getBlock()).ifPresent(previousBlock -> {
-            level.setBlockAndUpdate(groundPos, previousBlock.withPropertiesOf(steppingOn));
-            level.playSound(null, pos, SoundEvents.COPPER_HIT, dragon.getSoundSource(), 0.1f, 2f);
-            ((ServerLevel) level).sendParticles(ParticleTypes.WAX_ON, pos.getX(), pos.getY(), pos.getZ(), 5, 0.1, 0.1, 0.1, 0.05);
-        });
+            WeatheringCopper.getPrevious(steppingOn.getBlock()).ifPresent(previousBlock -> {
+                level.setBlockAndUpdate(groundPos, previousBlock.withPropertiesOf(steppingOn));
+                level.playSound(null, pos, SoundEvents.COPPER_HIT, dragon.getSoundSource(), 0.1f, 2f);
+                serverLevel.sendParticles(ParticleTypes.WAX_ON, pos.getX(), pos.getY(), pos.getZ(), 5, 0.1, 0.1, 0.1, 0.05);
+            });
+        }
     }
 
     @Override

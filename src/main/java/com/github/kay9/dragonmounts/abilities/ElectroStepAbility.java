@@ -22,7 +22,7 @@ public class ElectroStepAbility extends FootprintAbility implements Ability.Fact
         var steppingOn = level.getBlockState(groundPos);
 
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX(), pos.getY(), pos.getZ(), 10, 0.25, 0, 0.25, 0);
+            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK, pos.getX(), pos.getY(), pos.getZ(), 5, 0.25, 0, 0.25, 0);
 
             WeatheringCopper.getPrevious(steppingOn.getBlock()).ifPresent(previousBlock -> {
                 level.setBlockAndUpdate(groundPos, previousBlock.withPropertiesOf(steppingOn));

@@ -81,6 +81,8 @@ TWEAKS:
 
 - Added the Light Dragon. Shoots storm breath balls. Immune to lightning bolts and freezing. Can be hatched via white terracotta.
 
+- Hotfeet ability can turn wet sponge to sponge and blackstone to magma block now (inverse of Hydrostep)
+
 - Dragon variants' attribute tweaks
 - All dragons are fire immune
 - All dragons have increased health and armor

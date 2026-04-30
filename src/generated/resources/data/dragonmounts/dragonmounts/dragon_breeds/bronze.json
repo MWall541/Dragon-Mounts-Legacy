@@ -3,7 +3,8 @@
     "minecraft:generic.max_health": 100.0,
     "minecraft:generic.armor": 4.0,
     "minecraft:generic.flying_speed": 0.35,
-    "minecraft:generic.movement_speed": 0.4
+    "minecraft:generic.movement_speed": 0.4,
+    "minecraft:generic.attack_damage": 10.0
   },
   "habitats": [
     {

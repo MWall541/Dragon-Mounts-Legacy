@@ -23,43 +23,45 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
         var groundPos = pos.below();
         var steppingOn = level.getBlockState(groundPos);
 
-        ((ServerLevel) level).sendParticles(ParticleTypes.FALLING_WATER, pos.getX(), pos.getY(), pos.getZ(), 10, 0.25, 0, 0.25, 0);
-
-        // moisten farmland
-        // soak sponges
-        // extinguish fire
-        // magmablock -> blackstone
-        // copper -> rust
-
-        if (steppingOn.is(Blocks.FARMLAND))
+        if (level instanceof ServerLevel serverLevel)
         {
-            level.setBlockAndUpdate(groundPos, steppingOn.setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
-            return;
-        }
+            serverLevel.sendParticles(ParticleTypes.FALLING_WATER, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, 10, 0.25, 0, 0.25, 0);
 
-        if (steppingOn.is(Blocks.SPONGE))
-        {
-            level.setBlockAndUpdate(groundPos, Blocks.WET_SPONGE.defaultBlockState());
-            return;
-        }
+            // Moisten Farmland
+            if (steppingOn.is(Blocks.FARMLAND))
+            {
+                level.setBlockAndUpdate(groundPos, steppingOn.setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+                return;
+            }
 
-        if (steppingOn.is(Blocks.MAGMA_BLOCK))
-        {
-            level.setBlockAndUpdate(groundPos, Blocks.BLACKSTONE.defaultBlockState());
-            return;
-        }
+            // Soak Sponges
+            if (steppingOn.is(Blocks.SPONGE))
+            {
+                level.setBlockAndUpdate(groundPos, Blocks.WET_SPONGE.defaultBlockState());
+                return;
+            }
 
-        var steppingOnName = steppingOn.getBlock().builtInRegistryHolder().key().location();
-        if (steppingOnName.getNamespace().equals("minecraft") && steppingOnName.getPath().contains("copper")) // yeah fuck that copper complex this game's got going on
-        {
-            WeatheringCopper.getNext(steppingOn.getBlock()).ifPresent(b -> level.setBlockAndUpdate(groundPos, b.withPropertiesOf(steppingOn)));
-            return;
-        }
+            // Magma Block -> Blackstone
+            if (steppingOn.is(Blocks.MAGMA_BLOCK))
+            {
+                level.setBlockAndUpdate(groundPos, Blocks.BLACKSTONE.defaultBlockState());
+                return;
+            }
 
-        if (level.getBlockState(pos).is(BlockTags.FIRE))
-        {
-            level.removeBlock(pos, false);
-            return;
+            // Copper -> Rust
+            var steppingOnName = steppingOn.getBlock().builtInRegistryHolder().key().location();
+            if (steppingOnName.getNamespace().equals("minecraft") && steppingOnName.getPath().contains("copper")) // yeah fuck that copper complex this game's got going on
+            {
+                WeatheringCopper.getNext(steppingOn.getBlock()).ifPresent(b -> level.setBlockAndUpdate(groundPos, b.withPropertiesOf(steppingOn)));
+                return;
+            }
+
+            // Extinguish Fire
+            if (level.getBlockState(pos).is(BlockTags.FIRE))
+            {
+                level.removeBlock(pos, false);
+                return;
+            }
         }
     }
 

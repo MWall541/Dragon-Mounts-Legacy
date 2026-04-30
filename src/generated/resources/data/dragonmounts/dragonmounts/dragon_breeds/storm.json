@@ -6,6 +6,11 @@
     "minecraft:generic.movement_speed": 0.4,
     "minecraft:generic.attack_damage": 10.0
   },
+  "abilities": [
+    {
+      "type": "dragonmounts:electro_step"
+    }
+  ],
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",

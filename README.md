@@ -31,7 +31,7 @@ TWEAKS:
 
 - Added the Terra Dragon. They have increased HP and armor and are immune to stalagmite and stalactite. Can be hatched via andesite, granite, diorite, and terracotta blocks.
 
-- Added the Zombie Dragon. They have less armor and HP but they have drowning, poison and magic immunity. Can be hatched via bone blocks.
+- Added the Zombie Dragon. They have less armor and HP but they have drowning, suffocation, poison and magic immunity. Can be hatched via bone blocks.
 
 - Added the Solar Dragon. Immune to withering. Can be hatched via gold blocks.
 

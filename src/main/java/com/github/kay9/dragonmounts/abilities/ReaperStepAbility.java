@@ -31,12 +31,13 @@ public class ReaperStepAbility extends FootprintAbility implements Ability.Facto
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)
     {
         var level = dragon.level();
+        if (!(level instanceof ServerLevel serverLevel)) return;
         var steppingOn = level.getBlockState(pos);
         if (steppingOn.is(PLANT_DEATH_TAG))
         {
             level.removeBlock(pos, false);
             level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, dragon.getSoundSource(), 0.1f, 2f);
-            ((ServerLevel) level).sendParticles(ParticleTypes.SOUL, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 1, 0, 0.05);
+            serverLevel.sendParticles(ParticleTypes.SOUL, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 1, 0, 0.05);
 
             var bs = (dragon.getRandom().nextDouble() < 0.05? Blocks.WITHER_ROSE : Blocks.DEAD_BUSH).defaultBlockState();
             level.setBlock(pos, bs, Block.UPDATE_ALL);
@@ -45,7 +46,7 @@ public class ReaperStepAbility extends FootprintAbility implements Ability.Facto
         {
             level.destroyBlock(pos, false);
             level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, dragon.getSoundSource(), 0.1f, 2f);
-            ((ServerLevel) level).sendParticles(ParticleTypes.SOUL, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 1, 0, 0.05);
+            serverLevel.sendParticles(ParticleTypes.SOUL, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 1, 0, 0.05);
 
             var sticks = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.STICK));
             sticks.setPickUpDelay(40);

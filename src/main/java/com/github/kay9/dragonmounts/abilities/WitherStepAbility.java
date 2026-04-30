@@ -49,7 +49,7 @@ public class WitherStepAbility extends FootprintAbility implements Ability.Facto
     @Override
     protected float getFootprintChance(TameableDragon dragon)
     {
-        return 0.04f;
+        return 0.02f;
     }
 
     @Override

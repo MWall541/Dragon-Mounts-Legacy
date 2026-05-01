@@ -79,7 +79,7 @@ TWEAKS:
 
 - Added the Monarch Dragon. It has increased HP, armor, and damage, but it is susceptible to minecraft's dragon breath damage. Can be hatched via red glazed terracotta.
 
-- Added the Jade Dragon. It has high armor but reduced HP. It also has slightly faster movement speed. Can be hatched via emerald blocks. It has the jade step ability that can occasionally turn stone or deepslate to emerald ore.
+- Added the Jade Dragon. It has high armor, armor toughness but reduced HP. It also has slightly faster movement speed. Can be hatched via emerald blocks. It has the jade step ability that can occasionally turn stone or deepslate to emerald ore.
 
 - Added the Red Dragon. It has slightly higher HP. Can be hatched via red concrete.
 

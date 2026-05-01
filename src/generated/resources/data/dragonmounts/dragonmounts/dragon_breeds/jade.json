@@ -2,8 +2,14 @@
   "attributes": {
     "minecraft:generic.max_health": 80.0,
     "minecraft:generic.armor": 12.0,
+    "minecraft:generic.armor_toughness": 4.0,
     "minecraft:generic.movement_speed": 0.4
   },
+  "abilities": [
+    {
+      "type": "dragonmounts:jade_step"
+    }
+  ],
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",

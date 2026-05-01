@@ -3,6 +3,11 @@
     "minecraft:generic.max_health": 100.0,
     "minecraft:generic.armor": 8.0
   },
+  "abilities": [
+    {
+      "type": "dragonmounts:sculk_step"
+    }
+  ],
   "habitats": [
     {
       "type": "dragonmounts:nearby_blocks",

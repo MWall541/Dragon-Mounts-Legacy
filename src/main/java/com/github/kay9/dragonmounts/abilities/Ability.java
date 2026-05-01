@@ -49,6 +49,7 @@ public interface Ability
     ResourceLocation ELECTRO_STEP = reg("electro_step", ElectroStepAbility.CODEC);
     ResourceLocation WITHER_STEP = reg("wither_step", WitherStepAbility.CODEC);
     ResourceLocation PUTRID_STEP = reg("putrid_step", PutridStepAbility.CODEC);
+    ResourceLocation SCULK_STEP = reg("sculk_step", SculkStepAbility.CODEC);
 
     static <T extends Ability> ResourceLocation register(ResourceLocation name, Codec<? extends Factory<T>> codec)
     {

@@ -35,7 +35,7 @@ public class JadeStepAbility extends FootprintAbility implements Ability.Factory
 
     @Override
     protected float getFootprintChance(TameableDragon dragon) {
-        return 0.005f;
+        return 0.002f;
     }
 
     @Override

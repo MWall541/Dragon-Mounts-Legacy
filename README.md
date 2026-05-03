@@ -84,6 +84,8 @@ TWEAKS:
 
 - Added the Elder Dragon. It is similar to the Monarch Dragon but breaths blue fire. Can be hatched via gray terracotta.
 
+- Added the Shadow Dragon. It is similar to the Monarch Dragon but breaths black fire. Can be hatched via black glazed terracotta.
+
 - Added the Light Dragon. Shoots storm breath balls. Immune to lightning bolts and freezing. Can be hatched via white terracotta.
 
 - Hotfeet ability can turn wet sponge to sponge and blackstone to magma block now (inverse of Hydrostep)

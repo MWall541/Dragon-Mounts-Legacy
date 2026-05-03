@@ -137,6 +137,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.light": "Œuf d'apparition de Dragon de Lumière",
   "block.dragonmounts.dragon_egg.dragonmounts.light": "Œuf de Dragon de Lumière",
 
+  "dragon_breed.dragonmounts.shadow": "Dragon d'Ombre",
+  "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Œuf d'apparition de Dragon d'Ombre",
+  "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Œuf de Dragon d'Ombre",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Éclôt dans %s secondes.",
   "block.dragonmounts.dragon_egg.desc1": "Interagir avec le dragon :",
   "block.dragonmounts.dragon_egg.desc2": "Changer la race du dragon",

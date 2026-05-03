@@ -137,6 +137,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.light": "Huevo de Invocación de Dragón de Luz",
   "block.dragonmounts.dragon_egg.dragonmounts.light": "Huevo de Dragón de Luz",
 
+  "dragon_breed.dragonmounts.shadow": "Dragón de Sombras",
+  "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Huevo de Invocación de Dragón de Sombras",
+  "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Huevo de Dragón de Sombras",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Eclosiona en %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interactuar con el dragón:",
   "block.dragonmounts.dragon_egg.desc2": "Cambia el tipo de raza",

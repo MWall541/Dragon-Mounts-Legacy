@@ -137,6 +137,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.light": "Lichtdrache-Spawn-Ei",
   "block.dragonmounts.dragon_egg.dragonmounts.light": "Lichtdrachenei",
 
+  "dragon_breed.dragonmounts.shadow": "Schattendrache",
+  "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Schattendrache-Spawn-Ei",
+  "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Schattendrachenei",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Schlüpft in %s Sekunden.",
   "block.dragonmounts.dragon_egg.desc1": "Interaktion mit Drache:",
   "block.dragonmounts.dragon_egg.desc2": "Ändert die Drachenart",

@@ -137,6 +137,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.light": "Light Dragon Spawn Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.light": "Light Dragon Egg",
 
+  "dragon_breed.dragonmounts.shadow": "Shadow Dragon",
+  "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Shadow Dragon Spawn Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Shadow Dragon Egg",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.desc1": "Interact With Dragon:",
   "block.dragonmounts.dragon_egg.desc2": "Changes Breed Type",

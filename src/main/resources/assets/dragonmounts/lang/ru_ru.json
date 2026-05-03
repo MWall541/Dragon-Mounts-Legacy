@@ -137,6 +137,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.light": "Яйцо призыва светового дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.light": "Яйцо светового дракона",
 
+  "dragon_breed.dragonmounts.shadow": "Теневой дракон",
+  "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Яйцо призыва теневого дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Яйцо теневого дракона",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Вылупится через %s сек.",
   "block.dragonmounts.dragon_egg.desc1": "Взаимодействие с драконом:",
   "block.dragonmounts.dragon_egg.desc2": "Изменяет породу дракона",

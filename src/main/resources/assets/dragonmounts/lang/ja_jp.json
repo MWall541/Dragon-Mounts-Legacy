@@ -137,6 +137,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.light": "ライト・ドラゴンのスポーンエッグ",
   "block.dragonmounts.dragon_egg.dragonmounts.light": "ライト・ドラゴンの卵",
 
+  "dragon_breed.dragonmounts.shadow": "シャドウ・ドラゴン",
+  "item.dragonmounts.spawn_egg.dragonmounts.shadow": "シャドウ・ドラゴンのスポーンエッグ",
+  "block.dragonmounts.dragon_egg.dragonmounts.shadow": "シャドウ・ドラゴンの卵",
+
   "block.dragonmounts.dragon_egg.remaining_time": "%s秒以内に孵化します。",
   "block.dragonmounts.dragon_egg.desc1": "ドラゴンとの交流:",
   "block.dragonmounts.dragon_egg.desc2": "品種タイプの変更",

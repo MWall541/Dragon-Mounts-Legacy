@@ -141,6 +141,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Ovo de Invocação de Dragão das Sombras",
   "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Ovo de Dragão das Sombras",
 
+  "dragon_breed.dragonmounts.blood": "Dragão de Sangue",
+  "item.dragonmounts.spawn_egg.dragonmounts.blood": "Ovo de Invocação de Dragão de Sangue",
+  "block.dragonmounts.dragon_egg.dragonmounts.blood": "Ovo de Dragão de Sangue",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Choca em %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interagir com o Dragão:",
   "block.dragonmounts.dragon_egg.desc2": "Altera a Raça do Dragão",

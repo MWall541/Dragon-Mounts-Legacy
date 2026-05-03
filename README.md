@@ -88,6 +88,8 @@ TWEAKS:
 
 - Added the Light Dragon. Shoots storm breath balls. Immune to lightning bolts and freezing. Can be hatched via white terracotta.
 
+- Added the Blood Dragon. It is similar to the Monarch Dragon as well. Can be hatched via redstone.
+
 - Hotfeet ability can turn wet sponge to sponge and blackstone to magma block now (inverse of Hydrostep)
 
 - Dragon variants' attribute tweaks

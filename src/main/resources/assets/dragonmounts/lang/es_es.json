@@ -141,6 +141,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Huevo de Invocación de Dragón de Sombras",
   "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Huevo de Dragón de Sombras",
 
+  "dragon_breed.dragonmounts.blood": "Dragón de Sangre",
+  "item.dragonmounts.spawn_egg.dragonmounts.blood": "Huevo de Invocación de Dragón de Sangre",
+  "block.dragonmounts.dragon_egg.dragonmounts.blood": "Huevo de Dragón de Sangre",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Eclosiona en %s segundos.",
   "block.dragonmounts.dragon_egg.desc1": "Interactuar con el dragón:",
   "block.dragonmounts.dragon_egg.desc2": "Cambia el tipo de raza",

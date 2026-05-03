@@ -141,6 +141,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.shadow": "暗影龙刷怪蛋",
   "block.dragonmounts.dragon_egg.dragonmounts.shadow": "暗影龙蛋",
 
+  "dragon_breed.dragonmounts.blood": "血龙",
+  "item.dragonmounts.spawn_egg.dragonmounts.blood": "血龙刷怪蛋",
+  "block.dragonmounts.dragon_egg.dragonmounts.blood": "血龙蛋",
+
   "block.dragonmounts.dragon_egg.remaining_time": "将在 %s 秒后孵化。",
   "block.dragonmounts.dragon_egg.desc1": "与龙互动：",
   "block.dragonmounts.dragon_egg.desc2": "改变龙的种类",

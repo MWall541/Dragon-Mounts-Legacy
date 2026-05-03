@@ -141,6 +141,10 @@
   "item.dragonmounts.spawn_egg.dragonmounts.shadow": "Яйцо призыва теневого дракона",
   "block.dragonmounts.dragon_egg.dragonmounts.shadow": "Яйцо теневого дракона",
 
+  "dragon_breed.dragonmounts.blood": "Кровавый дракон",
+  "item.dragonmounts.spawn_egg.dragonmounts.blood": "Яйцо призыва кровавого дракона",
+  "block.dragonmounts.dragon_egg.dragonmounts.blood": "Яйцо кровавого дракона",
+
   "block.dragonmounts.dragon_egg.remaining_time": "Вылупится через %s сек.",
   "block.dragonmounts.dragon_egg.desc1": "Взаимодействие с драконом:",
   "block.dragonmounts.dragon_egg.desc2": "Изменяет породу дракона",

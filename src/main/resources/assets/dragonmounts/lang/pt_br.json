@@ -169,5 +169,6 @@
 
   "commands.dragon.follow": "O dragão está seguindo",
   "commands.dragon.sit": "O dragão está sentado",
-  "commands.dragon.wander": "O dragão está perambulando pela posição atual"
+  "commands.dragon.wander": "O dragão está perambulando pela posição atual",
+  "commands.dragon.standby": "O dragão está em espera"
 }

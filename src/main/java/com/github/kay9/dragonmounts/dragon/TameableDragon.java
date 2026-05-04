@@ -1304,6 +1304,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 this.setWanderHomePos(groundPos);
                 player.displayClientMessage(Component.translatable("commands.dragon.wander"), true);
             } else {
+                if (this.getCommandState() == STATE_FOLLOW) {
+                    player.displayClientMessage(Component.translatable("commands.dragon.follow"), true);
+                } else if (this.getCommandState() == STATE_SIT) {
+                    player.displayClientMessage(Component.translatable("commands.dragon.standby"), true);
+                }
                 this.setWanderHomePos(null);
             }
         }

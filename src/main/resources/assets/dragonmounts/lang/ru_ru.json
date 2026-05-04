@@ -169,5 +169,6 @@
 
   "commands.dragon.follow": "Дракон следует за вами",
   "commands.dragon.sit": "Дракон сидит",
-  "commands.dragon.wander": "Дракон бродит вокруг текущей позиции"
+  "commands.dragon.wander": "Дракон бродит вокруг текущей позиции",
+  "commands.dragon.standby": "Дракон находится в режиме ожидания"
 }

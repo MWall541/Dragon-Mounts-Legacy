@@ -169,5 +169,6 @@
 
   "commands.dragon.follow": "龙正跟随中",
   "commands.dragon.sit": "龙正坐下中",
-  "commands.dragon.wander": "龙正在当前位置附近游荡"
+  "commands.dragon.wander": "龙正在当前位置附近游荡",
+  "commands.dragon.standby": "龙正在待命"
 }

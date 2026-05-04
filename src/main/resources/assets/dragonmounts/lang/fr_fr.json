@@ -169,5 +169,6 @@
 
   "commands.dragon.follow": "Le dragon vous suit",
   "commands.dragon.sit": "Le dragon est assis",
-  "commands.dragon.wander": "Le dragon erre autour de la position actuelle"
+  "commands.dragon.wander": "Le dragon erre autour de la position actuelle",
+  "commands.dragon.standby": "Le dragon est en attente"
 }

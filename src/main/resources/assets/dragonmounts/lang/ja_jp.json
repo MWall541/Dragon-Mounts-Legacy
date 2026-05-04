@@ -169,5 +169,6 @@
 
   "commands.dragon.follow": "ドラゴンがついてきています",
   "commands.dragon.sit": "ドラゴンがお座りしています",
-  "commands.dragon.wander": "ドラゴンが現在の位置を徘徊しています"
+  "commands.dragon.wander": "ドラゴンが現在の位置を徘徊しています",
+  "commands.dragon.standby": "ドラゴンが待機しています"
 }

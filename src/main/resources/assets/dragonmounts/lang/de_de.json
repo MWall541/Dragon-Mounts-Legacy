@@ -169,5 +169,6 @@
 
   "commands.dragon.follow": "Drache folgt nun",
   "commands.dragon.sit": "Drache sitzt nun",
-  "commands.dragon.wander": "Drache streift um die aktuelle Position herum"
+  "commands.dragon.wander": "Drache streift um die aktuelle Position herum",
+  "commands.dragon.standby": "Drache ist in Bereitschaft"
 }

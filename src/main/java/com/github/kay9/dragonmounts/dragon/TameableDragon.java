@@ -1307,6 +1307,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 if (this.getCommandState() == STATE_FOLLOW) {
                     player.displayClientMessage(Component.translatable("commands.dragon.follow"), true);
                 } else if (this.getCommandState() == STATE_SIT) {
+                    // This is the weird state the dragon is in, its technically not sitting after being ridden so we do "stand by" text instead
                     player.displayClientMessage(Component.translatable("commands.dragon.standby"), true);
                 }
                 this.setWanderHomePos(null);

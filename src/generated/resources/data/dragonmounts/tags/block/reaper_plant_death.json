@@ -1,6 +1,9 @@
 {
   "values": [
-    "#minecraft:tall_flowers",
+    "minecraft:sunflower",
+    "minecraft:lilac",
+    "minecraft:rose_bush",
+    "minecraft:peony",
     "#minecraft:crops",
     "#minecraft:saplings",
     "minecraft:tall_grass",

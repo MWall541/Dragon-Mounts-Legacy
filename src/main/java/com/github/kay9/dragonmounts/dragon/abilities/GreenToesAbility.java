@@ -6,7 +6,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
@@ -18,6 +18,10 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
 {
     public static final GreenToesAbility INSTANCE = new GreenToesAbility();
     public static final MapCodec<GreenToesAbility> CODEC = MapCodec.unit(INSTANCE);
+
+    // BlockTags.SAPLINGS no longer exists as a constant, but the data tag is still shipped
+    private static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> SAPLINGS =
+            net.minecraft.tags.TagKey.create(Registries.BLOCK, Identifier.withDefaultNamespace("saplings"));
 
     protected GreenToesAbility() {}
 
@@ -41,15 +45,14 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
         {
             BlockState placing = null;
 
-            if (steppingOn.is(BlockTags.MUSHROOM_GROW_BLOCK))
+            if (steppingOn.is(Blocks.MYCELIUM) || steppingOn.is(Blocks.PODZOL)) // mushroom_grow_block tag no longer exists
                 placing = (level.getRandom().nextBoolean()? Blocks.RED_MUSHROOM : Blocks.BROWN_MUSHROOM).defaultBlockState();
             else if (steppingOn.is(BlockTags.DIRT) && !steppingOn.is(Blocks.MOSS_BLOCK)) // different from the actual dirt block, could be grass or podzol.
             {
                 // while grass blocks etc. do have defined bone meal behavior, I think our own is more viable.
 
-                //noinspection deprecation
-                placing = level.registryAccess().registryOrThrow(Registries.BLOCK)
-                        .getTag(BlockTags.SMALL_FLOWERS)
+                placing = level.registryAccess().lookupOrThrow(Registries.BLOCK)
+                        .get(BlockTags.SMALL_FLOWERS)
                         .flatMap(tag -> tag.getRandomElement(dragon.getRandom()))
                         .map(Holder::value)
                         .filter(b -> b != Blocks.WITHER_ROSE)
@@ -65,8 +68,8 @@ public class GreenToesAbility extends FootprintAbility implements Ability.Factor
             }
         }
 
-        if (steppingOn.is(BlockTags.SAPLINGS) ||
-                steppingOver.is(BlockTags.SAPLINGS) ||
+        if (steppingOn.is(SAPLINGS) ||
+                steppingOver.is(SAPLINGS) ||
                 steppingOver.is(Blocks.BROWN_MUSHROOM) ||
                 steppingOver.is(Blocks.RED_MUSHROOM) ||
                 steppingOver.is(Blocks.WARPED_FUNGUS) ||

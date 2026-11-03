@@ -1,121 +1,72 @@
 package com.github.kay9.dragonmounts.dragon;
 
 import com.github.kay9.dragonmounts.DMLRegistry;
-import com.mojang.serialization.Codec;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
+import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.server.ServerLifecycleHooks;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.component.TypedEntityData;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
-public class DragonSpawnEgg extends ForgeSpawnEggItem
+public class DragonSpawnEgg extends SpawnEggItem
 {
-    public DragonSpawnEgg()
+    public DragonSpawnEgg(Item.Properties props)
     {
-        super(DMLRegistry.DRAGON, 0, 0, new Item.Properties());
+        super(props.spawnEgg(DMLRegistry.DRAGON));
     }
 
     public static ItemStack create(Holder<DragonBreed> breed)
     {
-        ItemStack stack = new ItemStack(DMLRegistry.SPAWN_EGG.get());
+        ItemStack stack = new ItemStack(DMLRegistry.SPAWN_EGG);
         setBreed(stack, breed);
         return stack;
     }
 
-    @Override
-    public void verifyComponentsAfterLoad(ItemStack stack)
-    {
-        super.verifyComponentsAfterLoad(stack);
-
-        // ensure a breed exists for this egg. if not, assign a random one.
-        // possible cause is through commands, or other unnatural means.
-        // todo: find a better way
-        RegistryAccess reg = DistExecutor.safeRunForDist(() -> Minecraft.getInstance().level::registryAccess, () -> ServerLifecycleHooks.getCurrentServer()::registryAccess);
-        RegistryOps<Tag> ops = reg.createSerializationContext(NbtOps.INSTANCE);
-        Holder<DragonBreed> breed = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY)
-                .read(ops, DragonBreed.CODEC.fieldOf(TameableDragon.NBT_BREED))
-                .result()
-                .orElse(null);
-        if (breed == null)
-            setBreed(stack, DragonBreed.getRandom(reg, RandomSource.create()));
-    }
+    // Note: verifyComponentsAfterLoad no longer exists in 26.2. Eggs without a breed
+    // component keep working: the dragon picks a random breed on spawn, and name/color
+    // accessors are null-safe.
 
     private static void setBreed(ItemStack stack, Holder<DragonBreed> breed)
     {
-        // add breed data, used by entity type spawning in general. annoying, but necessary.
-        CustomData entityBreedId = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY)
-                .update(t ->
-                {
-                    t.putString("id", DMLRegistry.DRAGON.getId().toString()); // necessary otherwise CustomData throws an exception...
-                    t.putString(TameableDragon.NBT_BREED, breed.getRegisteredName());
-                });
-        stack.set(DataComponents.ENTITY_DATA, entityBreedId);
+        // add breed data, used by entity type spawning in general.
+        var tag = new CompoundTag();
+        tag.putString(TameableDragon.NBT_BREED, breed.getRegisteredName());
+        stack.set(DataComponents.ENTITY_DATA, TypedEntityData.of(DMLRegistry.DRAGON, tag));
 
         // for colors and item name
-        stack.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), breed);
+        stack.set(DMLRegistry.DRAGON_BREED_COMPONENT, breed);
     }
 
     @Override
     public Component getName(ItemStack stack)
     {
-        Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
+        Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT);
 
         if (breed == null) return super.getName(stack);
-        return Component.translatable(String.join(".", stack.getDescriptionId(), breed.getRegisteredName().replace(':', '.')));
+        return Component.translatable(String.join(".", getDescriptionId(), breed.getRegisteredName().replace(':', '.')));
     }
 
-    @Override
-    public Optional<Mob> spawnOffspringFromSpawnEgg(Player pPlayer, Mob pMob, EntityType<? extends Mob> pEntityType, ServerLevel server, Vec3 pPos, ItemStack stack)
+    // Note: spawnOffspringFromSpawnEgg is static in 26.2 and can no longer be overridden;
+    // the "matching breed offspring" restriction from the Forge version is lost for now.
+
+    public static void populateTab(Consumer<ItemStack> registrar, HolderLookup.Provider registries)
     {
-        // don't spawn an offspring if the breed doesn't match!
-
-        CompoundTag tag = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY).copyTag();
-        Holder.Reference<DragonBreed> breed = DragonBreed.parse(tag.getString(TameableDragon.NBT_BREED), server.registryAccess());
-        if (breed == null || !breed.is(((TameableDragon) pMob).getBreedHolder()))
-            return Optional.empty();
-
-        return super.spawnOffspringFromSpawnEgg(pPlayer, pMob, pEntityType, server, pPos, stack);
+        registries.lookupOrThrow(DragonBreed.REGISTRY_KEY).listElements().forEach(breed -> registrar.accept(create(breed)));
     }
 
-    public static void populateTab(Consumer<ItemStack> registrar)
-    {
-        if (Minecraft.getInstance().level != null)
-        {
-            var reg = Minecraft.getInstance().level.registryAccess();
-            DragonBreed.registry(reg).holders().forEach(breed -> registrar.accept(create(breed)));
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions") // ensured by item properties.
+    @SuppressWarnings("ConstantConditions")
     public static int getColor(ItemStack stack, int tintIndex)
     {
-        Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT.get());
+        Holder<DragonBreed> breed = stack.get(DMLRegistry.DRAGON_BREED_COMPONENT);
         if (breed == null || !breed.isBound()) return 0xff;
-        return (tintIndex == 0? breed.get().primaryColor() : breed.get().secondaryColor()) | (255 << 24);
+        return (tintIndex == 0? breed.value().primaryColor() : breed.value().secondaryColor()) | (255 << 24);
     }
 }

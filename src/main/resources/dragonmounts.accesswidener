@@ -1,0 +1,5 @@
+classTweaker	v1	official
+
+accessible field net/minecraft/world/entity/LivingEntity jumping Z
+accessible method net/minecraft/client/Camera move (FFF)V
+accessible method net/minecraft/client/Camera getMaxZoom (F)F

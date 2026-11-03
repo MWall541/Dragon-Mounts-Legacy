@@ -1,6 +1,7 @@
 {
     "pack": {
-        "description": "${mod_id} resources",
-        "pack_format": ${game_pack_format}
+        "description": "dragonmounts resources",
+        "min_format": 88,
+        "max_format": 88
     }
 }

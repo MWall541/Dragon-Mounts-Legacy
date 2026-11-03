@@ -1,7 +1,9 @@
 {
-  "variants": {
-    "": {
-      "model": "dragonmounts:block/dragon_egg_models"
+  "multipart": [
+    {
+      "apply": {
+        "model": "dragonmounts:block/dragon_eggs/end_dragon_egg"
+      }
     }
-  }
+  ]
 }

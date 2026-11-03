@@ -4,11 +4,11 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.WeatheringCopper;
 
 public class HydroStepAbility extends FootprintAbility implements Ability.Factory<HydroStepAbility>
@@ -33,7 +33,7 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
 
         if (steppingOn.is(Blocks.FARMLAND))
         {
-            level.setBlockAndUpdate(groundPos, steppingOn.setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+            level.setBlockAndUpdate(groundPos, steppingOn.setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE));
             return;
         }
 
@@ -49,7 +49,7 @@ public class HydroStepAbility extends FootprintAbility implements Ability.Factor
             return;
         }
 
-        var steppingOnName = steppingOn.getBlock().builtInRegistryHolder().key().location();
+        var steppingOnName = steppingOn.getBlock().builtInRegistryHolder().key().identifier();
         if (steppingOnName.getNamespace().equals("minecraft") && steppingOnName.getPath().contains("copper")) // yeah fuck that copper complex this game's got going on
         {
             WeatheringCopper.getNext(steppingOn.getBlock()).ifPresent(b -> level.setBlockAndUpdate(groundPos, b.withPropertiesOf(steppingOn)));

@@ -5,7 +5,7 @@
     "type": "minecraft:heart"
   },
   "attributes": {
-    "minecraft:generic.armor": 10.0
+    "minecraft:armor": 10.0
   },
   "abilities": [
     {
@@ -51,11 +51,10 @@
     "minecraft:magic"
   ],
   "ambient_sound": "example_addon:entity.dragon.ambient.example",
-  "death_loot": "minecraft:chests/bastion_treasure",
   "growth_time": 120,
   "hatch_chance": 1.0,
   "size_modifier": 2,
-  "taming_items": "#forge:eggs",
-  "breeding_items": "#forge:ender_pearls",
+  "taming_items": ["minecraft:golden_apple"],
+  "breeding_items": ["minecraft:ender_pearl"],
   "reproduction_limit": 12
 }

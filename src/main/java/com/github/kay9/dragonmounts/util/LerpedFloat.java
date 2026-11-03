@@ -19,7 +19,7 @@ public class LerpedFloat
 
     public float get(float x)
     {
-        return Mth.clampedLerp(previous, current, x);
+        return Mth.clampedLerp(x, previous, current);
     }
 
     public float get()

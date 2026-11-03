@@ -1,6 +1,5 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.accessors.ModelPartAccess;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.github.kay9.dragonmounts.util.CircularBuffer;
 import com.github.kay9.dragonmounts.util.LerpedFloat;
@@ -163,14 +162,11 @@ public class DragonAnimator
         if (newWingsDown && !wingsDown && flutter != 0) dragon.onWingsDown(speed);
         wingsDown = newWingsDown;
 
-        // update flags
-        model.back.visible = !dragon.isSaddled();
-
         cycleOfs = (cycleOfs * cycleOfs + cycleOfs * 2) * 0.05f;
 
         // reduce up/down amplitude
-        cycleOfs *= Mth.clampedLerp(0.5f, 1, flutter);
-        cycleOfs *= Mth.clampedLerp(1, 0.5f, ground);
+        cycleOfs *= Mth.clampedLerp(flutter, 0.5f, 1);
+        cycleOfs *= Mth.clampedLerp(ground, 1, 0.5f);
 
         // animate body parts
         animHeadAndNeck(model);
@@ -275,56 +271,60 @@ public class DragonAnimator
 
     protected void animHeadAndNeck(DragonModel model)
     {
-        model.neck.setPos(0, 14, -8);
-        model.neck.setRotation(0, 0, 0);
+        float x = 0, y = 14, z = -8;
+        float lastYRot = 0;
 
         float health = dragon.getHealthFraction();
         float neckSize;
 
-        for (int i = 0; i < model.neckProxy.length; i++)
+        for (int i = 0; i < model.neckSegments.length; i++)
         {
-            float vertMulti = (i + 1) / (float) model.neckProxy.length;
+            var segment = model.neckSegments[i];
+            float vertMulti = (i + 1) / (float) model.neckSegments.length;
 
             float baseRotX = Mth.cos((float) i * 0.45f + animBase) * 0.15f;
-            baseRotX *= Mth.clampedLerp(0.2f, 1, flutter);
-            baseRotX *= Mth.clampedLerp(1, 0.2f, sit);
+            baseRotX *= Mth.clampedLerp(flutter, 0.2f, 1);
+            baseRotX *= Mth.clampedLerp(sit, 1, 0.2f);
             float ofsRotX = Mth.sin(vertMulti * ((float) Math.PI) * 0.9f) * 0.75f;
 
+            segment.setPos(x, y, z);
+
             // basic up/down movement
-            model.neck.xRot = baseRotX;
+            segment.xRot = baseRotX;
             // reduce rotation when on ground
-            model.neck.xRot *= terpSmoothStep(1, 0.5f, walk);
+            segment.xRot *= terpSmoothStep(1, 0.5f, walk);
             // flex neck down when hovering
-            model.neck.xRot += (1 - speed) * vertMulti;
+            segment.xRot += (1 - speed) * vertMulti;
             // lower neck on low health
-            model.neck.xRot -= Mth.clampedLerp(0, ofsRotX, ground * health);
+            segment.xRot -= Mth.clampedLerp(ground * health, 0, ofsRotX);
             // use looking yaw
-            model.neck.yRot = (float) Math.toRadians(lookYaw) * vertMulti * speed;
+            segment.yRot = (float) Math.toRadians(lookYaw) * vertMulti * speed;
+            segment.zRot = 0;
+            lastYRot = segment.yRot;
 
             // update scale
-            float v = Mth.clampedLerp(1.6f, 1, vertMulti);
-            ((ModelPartAccess) (Object) model.neck).setRenderScale(v, v, 0.6f);
+            float v = Mth.clampedLerp(vertMulti, 1.6f, 1);
+            segment.xScale = v;
+            segment.yScale = v;
+            segment.zScale = 0.6f;
 
             // hide the first and every second scale
-            model.neckScale.visible = i % 2 != 0 || i == 0;
+            model.neckScales[i].visible = i % 2 != 0 || i == 0;
 
-            // update proxy
-            model.neckProxy[i].update();
-
-            // move next proxy behind the current one
-            neckSize = DragonModel.NECK_SIZE * ((ModelPartAccess) (Object) model.neck).getZScale() - 1.4f;
-            model.neck.x -= Mth.sin(model.neck.yRot) * Mth.cos(model.neck.xRot) * neckSize;
-            model.neck.y += Mth.sin(model.neck.xRot) * neckSize;
-            model.neck.z -= Mth.cos(model.neck.yRot) * Mth.cos(model.neck.xRot) * neckSize;
+            // move the next segment behind the current one
+            neckSize = DragonModel.NECK_SIZE * segment.zScale - 1.4f;
+            x -= Mth.sin(segment.yRot) * Mth.cos(segment.xRot) * neckSize;
+            y += Mth.sin(segment.xRot) * neckSize;
+            z -= Mth.cos(segment.yRot) * Mth.cos(segment.xRot) * neckSize;
         }
 
         model.head.xRot = (float) Math.toRadians(lookPitch) + (1 - speed);
-        model.head.yRot = model.neck.yRot;
-        model.head.zRot = model.neck.zRot * 0.2f;
+        model.head.yRot = lastYRot;
+        model.head.zRot = 0;
 
-        model.head.x = model.neck.x;
-        model.head.y = model.neck.y;
-        model.head.z = model.neck.z;
+        model.head.x = x;
+        model.head.y = y;
+        model.head.z = z;
 
         model.jaw.xRot = jaw * 0.75f;
         model.jaw.xRot += (1 - Mth.sin(animBase)) * 0.1f * flutter;
@@ -416,13 +416,9 @@ public class DragonAnimator
     @SuppressWarnings("UnusedAssignment")
     protected void animTail(DragonModel model)
     {
-        model.tail.x = 0;
-        model.tail.y = 16;
-        model.tail.z = 62;
-
-        model.tail.xRot = 0;
-        model.tail.yRot = 0;
-        model.tail.zRot = 0;
+        float x = 0;
+        float y = 16;
+        float z = 62;
 
         float rotXStand = 0;
         float rotYStand = 0;
@@ -431,58 +427,61 @@ public class DragonAnimator
         float rotXAir = 0;
         float rotYAir = 0;
 
-        for (int i = 0; i < model.tailProxy.length; i++)
+        for (int i = 0; i < model.tailSegments.length; i++)
         {
-            float vertMulti = (i + 1) / (float) model.tailProxy.length;
+            var segment = model.tailSegments[i];
+            float vertMulti = (i + 1) / (float) model.tailSegments.length;
 
             // idle
-            float amp = 0.1f + i / (model.tailProxy.length * 2f);
+            float amp = 0.1f + i / (model.tailSegments.length * 2f);
 
-            rotXStand = (i - model.tailProxy.length * 0.6f) * -amp * 0.4f;
+            rotXStand = (i - model.tailSegments.length * 0.6f) * -amp * 0.4f;
             rotXStand += (Mth.sin(animBase * 0.2f) * Mth.sin(animBase * 0.37f) * 0.4f * amp - 0.1f) * (1 - sit);
             rotXSit = rotXStand * 0.8f;
 
             rotYStand = (rotYStand + Mth.sin(i * 0.45f + animBase * 0.5f)) * amp * 0.4f;
             rotYSit = Mth.sin(vertMulti * ((float) Math.PI)) * ((float) Math.PI) * 1.2f - 0.5f; // curl to the left
 
-            rotXAir -= Mth.sin(i * 0.45f + animBase) * 0.04f * Mth.clampedLerp(0.3f, 1, flutter);
+            rotXAir -= Mth.sin(i * 0.45f + animBase) * 0.04f * Mth.clampedLerp(flutter, 0.3f, 1);
+
+            segment.setPos(x, y, z);
+            segment.zRot = 0;
 
             // interpolate between sitting and standing
-            model.tail.xRot = Mth.clampedLerp(rotXStand, rotXSit, sit);
-            model.tail.yRot = Mth.clampedLerp(rotYStand, rotYSit, sit);
+            segment.xRot = Mth.clampedLerp(sit, rotXStand, rotXSit);
+            segment.yRot = Mth.clampedLerp(sit, rotYStand, rotYSit);
 
             // interpolate between flying and grounded
-            model.tail.xRot = Mth.clampedLerp(rotXAir, model.tail.xRot, ground);
-            model.tail.yRot = Mth.clampedLerp(rotYAir, model.tail.yRot, ground);
+            segment.xRot = Mth.clampedLerp(ground, rotXAir, segment.xRot);
+            segment.yRot = Mth.clampedLerp(ground, rotYAir, segment.yRot);
 
             // body movement
             float angleLimit = 160 * vertMulti;
             float yawOfs = Mth.clamp(yawTrail.get(partialTicks, 0, i + 1) * 2, -angleLimit, angleLimit);
             float pitchOfs = Mth.clamp(pitchTrail.get(partialTicks, 0, i + 1) * 2, -angleLimit, angleLimit);
 
-            model.tail.xRot += Math.toRadians(pitchOfs);
-            model.tail.xRot -= (1 - speed) * vertMulti * 2;
-            model.tail.yRot += Math.toRadians(180 - yawOfs);
+            segment.xRot += Math.toRadians(pitchOfs);
+            segment.xRot -= (1 - speed) * vertMulti * 2;
+            segment.yRot += Math.toRadians(180 - yawOfs);
 
-            if (model.tailHornRight != null)
+            if (model.tailHornsRight[i] != null)
             {
                 // display horns near the tip
-                var atIndex = i > model.tailProxy.length - 7 && i < model.tailProxy.length - 3;
-                model.tailHornLeft.visible = model.tailHornRight.visible = atIndex;
+                var atIndex = i > model.tailSegments.length - 7 && i < model.tailSegments.length - 3;
+                model.tailHornsLeft[i].visible = model.tailHornsRight[i].visible = atIndex;
             }
 
             // update scale
-            float neckScale = Mth.clampedLerp(1.5f, 0.3f, vertMulti);
-            ((ModelPartAccess) (Object) model.tail).setRenderScale(neckScale, neckScale, neckScale);
+            float segmentScale = Mth.clampedLerp(vertMulti, 1.5f, 0.3f);
+            segment.xScale = segmentScale;
+            segment.yScale = segmentScale;
+            segment.zScale = segmentScale;
 
-            // update proxy
-            model.tailProxy[i].update();
-
-            // move next proxy behind the current one
-            float tailSize = DragonModel.TAIL_SIZE * ((ModelPartAccess) (Object) model.tail).getZScale() - 0.7f;
-            model.tail.y += Mth.sin(model.tail.xRot) * tailSize;
-            model.tail.z -= Mth.cos(model.tail.yRot) * Mth.cos(model.tail.xRot) * tailSize;
-            model.tail.x -= Mth.sin(model.tail.yRot) * Mth.cos(model.tail.xRot) * tailSize;
+            // move the next segment behind the current one
+            float tailSize = DragonModel.TAIL_SIZE * segment.zScale - 0.7f;
+            y += Mth.sin(segment.xRot) * tailSize;
+            z -= Mth.cos(segment.yRot) * Mth.cos(segment.xRot) * tailSize;
+            x -= Mth.sin(segment.yRot) * Mth.cos(segment.xRot) * tailSize;
         }
     }
 

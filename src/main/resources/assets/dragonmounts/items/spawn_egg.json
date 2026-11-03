@@ -1,0 +1,10 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "dragonmounts:item/spawn_egg",
+    "tints": [
+      { "type": "dragonmounts:dragon_breed", "layer": 0 },
+      { "type": "dragonmounts:dragon_breed", "layer": 1 }
+    ]
+  }
+}

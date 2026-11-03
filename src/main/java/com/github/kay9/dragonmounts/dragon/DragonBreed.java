@@ -23,7 +23,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
@@ -32,6 +32,7 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTable;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,16 +61,22 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
             Codec.INT.optionalFieldOf("growth_time", TameableDragon.BASE_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.FLOAT.optionalFieldOf("hatch_chance", HatchableEggBlock.DEFAULT_HATCH_CHANCE).forGetter(DragonBreed::hatchChance),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("taming_items", BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::tamingItems),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("breeding_items", BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.FISHES)).forGetter(DragonBreed::breedingItems),
+            // empty = fall back to the #minecraft:fishes tag; see isTamingItem()/isBreedingItem().
+            // Can't default to that tag directly here: it isn't bound yet while this registry loads.
+            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("taming_items", HolderSet.direct()).forGetter(DragonBreed::tamingItems),
+            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("breeding_items", HolderSet.direct()).forGetter(DragonBreed::breedingItems),
             Codec.either(Codec.INT, Codec.STRING).optionalFieldOf("reproduction_limit", Either.left(-1)).forGetter(DragonBreed::reproLimit)
     ).apply(instance, DragonBreed::new));
+    // Must stay format-compatible with DIRECT_CODEC: in singleplayer/local play the client re-parses
+    // the same on-disk datapack JSON with THIS codec instead of receiving bytes over the network
+    // (see NetworkRegistryLoadTask#load, the "known data" fallback branch), it does not just decode
+    // a slimmed-down wire payload.
     public static final Codec<DragonBreed> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
-            Codec.INT.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
+            DMLUtil.HEX_CODEC.fieldOf("primary_color").forGetter(DragonBreed::primaryColor),
+            DMLUtil.HEX_CODEC.fieldOf("secondary_color").forGetter(DragonBreed::secondaryColor),
             ParticleTypes.CODEC.optionalFieldOf("hatch_particles").forGetter(DragonBreed::hatchParticles),
             SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(DragonBreed::ambientSound),
-            Codec.INT.fieldOf("growth_time").forGetter(DragonBreed::growthTime),
+            Codec.INT.optionalFieldOf("growth_time", TameableDragon.BASE_GROWTH_TIME).forGetter(DragonBreed::growthTime),
             Codec.FLOAT.optionalFieldOf("size_modifier", TameableDragon.BASE_SIZE_MODIFIER).forGetter(DragonBreed::sizeModifier)
     ).apply(instance, DragonBreed::fromNetwork));
 
@@ -84,7 +91,7 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     @Nullable
     public static Holder.Reference<DragonBreed> parse(String byString, HolderLookup.Provider reg)
     {
-        ResourceLocation id = ResourceLocation.tryParse(byString);
+        Identifier id = Identifier.tryParse(byString);
         if (id == null) return null;
         return reg.lookupOrThrow(REGISTRY_KEY).get(ResourceKey.create(REGISTRY_KEY, id)).orElse(null);
     }
@@ -97,12 +104,12 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
 
     public static Holder.Reference<DragonBreed> getRandom(RegistryAccess reg, RandomSource random)
     {
-        return reg.registryOrThrow(REGISTRY_KEY).getRandom(random).orElseThrow();
+        return reg.lookupOrThrow(REGISTRY_KEY).getRandom(random).orElseThrow();
     }
 
     public static Registry<DragonBreed> registry(RegistryAccess reg)
     {
-        return reg.registryOrThrow(REGISTRY_KEY);
+        return reg.lookupOrThrow(REGISTRY_KEY);
     }
 
     public void initialize(TameableDragon dragon)
@@ -121,9 +128,21 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
         return reproLimit().map(Function.identity(), DMLConfig::getReproLimitFor);
     }
 
+    /** Whether the given item can tame a dragon of this breed. Falls back to {@code #minecraft:fishes} if unset. */
+    public boolean isTamingItem(ItemStack stack)
+    {
+        return tamingItems.size() == 0 ? stack.is(ItemTags.FISHES) : tamingItems.contains(stack.getItem().builtInRegistryHolder());
+    }
+
+    /** Whether the given item can put a dragon of this breed in love mode. Falls back to {@code #minecraft:fishes} if unset. */
+    public boolean isBreedingItem(ItemStack stack)
+    {
+        return breedingItems.size() == 0 ? stack.is(ItemTags.FISHES) : stack.is(breedingItems);
+    }
+
     public static Component getTranslation(Holder<DragonBreed> breed)
     {
-        if (!breed.isBound()) return DMLRegistry.DRAGON.get().getDescription();
+        if (!breed.isBound()) return DMLRegistry.DRAGON.getDescription();
         return Component.translatable("dragon_breed." + breed.getRegisteredName().replace(':', '.'));
     }
 
@@ -141,9 +160,8 @@ public record DragonBreed(int primaryColor, int secondaryColor, Optional<Particl
     {
         if (b instanceof Holder.Reference<DragonBreed> breed)
         {
-            Registry<LootTable> lootTables = reg.get().registryOrThrow(Registries.LOOT_TABLE);
-            ResourceLocation path = breed.key().location().withPrefix("entities/dragon_breeds/");
-            if (lootTables.containsKey(path))
+            Identifier path = breed.key().identifier().withPrefix("entities/dragon_breeds/");
+            if (reg.lookup().lookupOrThrow(Registries.LOOT_TABLE).get(ResourceKey.create(Registries.LOOT_TABLE, path)).isPresent())
                 return ResourceKey.create(Registries.LOOT_TABLE, path);
         }
 

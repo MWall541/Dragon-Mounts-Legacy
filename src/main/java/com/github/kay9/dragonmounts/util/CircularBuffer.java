@@ -39,7 +39,7 @@ public class CircularBuffer
     {
         int i = index - offset;
         int len = buffer.length - 1;
-        return Mth.clampedLerp(buffer[i - 1 & len], buffer[i & len], x);
+        return Mth.clampedLerp(x, buffer[i - 1 & len], buffer[i & len]);
     }
 
     public float get(float x, int offset1, int offset2)

@@ -8,6 +8,12 @@ ___
 
 GitHub Repository for the Dragon Mounts: Legacy Minecraft Mod.
 
+> **This fork is a Fabric port for Minecraft 26.2.** The upstream project
+> ([Kay9Unit/Dragon-Mounts-Legacy](https://github.com/Kay9Unit/Dragon-Mounts-Legacy))
+> targets Forge; this branch replaces the Forge toolchain with Fabric Loader
+> and Fabric API, and adds two extra dragon breeds (Amethyst and Sculk) along
+> with a French translation.
+
 > "A Minecraft mod that allows you to breed dragon eggs and foster them to ridable dragons."
 >
 > BarracudaATA

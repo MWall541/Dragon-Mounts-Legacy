@@ -1,124 +1,161 @@
 package com.github.kay9.dragonmounts;
 
-import com.github.kay9.dragonmounts.client.*;
 import com.github.kay9.dragonmounts.data.CrossBreedingManager;
-import com.github.kay9.dragonmounts.data.model.DragonModelPropertiesListener;
+import com.github.kay9.dragonmounts.data.loot.DragonEggLootMod;
 import com.github.kay9.dragonmounts.dragon.DragonBreed;
 import com.github.kay9.dragonmounts.dragon.DragonSpawnEgg;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
+import com.github.kay9.dragonmounts.dragon.abilities.*;
 import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
-import com.mojang.serialization.Codec;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.client.renderer.entity.EntityRenderers;
+import com.github.kay9.dragonmounts.dragon.egg.habitats.*;
+import com.mojang.serialization.MapCodec;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.TriConsumer;
-
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
- * Dragon Mounts Legacy
+ * Dragon Mounts Legacy - Fabric 26.2
  * <br>
- * Main mod information like the ID and logger is found here.
- * Events that pertain to the game are also present here.
- * Everything in the mod is a network with this at the core of it all.
- * Load events register our custom content into the game,
- * Game events are the way the mod interacts with the game's behavior.
- * Event methods can be triggered by:
- *  - Mod loader event dispatchers ({@link ForgeModImpl})
- *  - Mixins that inject callbacks to here
+ * Main mod initializer. All registration and event setup is done here.
  */
-public class DragonMountsLegacy
+public class DragonMountsLegacy implements ModInitializer
 {
     public static final String MOD_ID = "dragonmounts";
     public static final Logger LOG = LogManager.getLogger(MOD_ID);
 
-    public static ResourceLocation id(String path)
+    /** Cached server reference for server-side registry access. Null on dedicated clients. */
+    public static MinecraftServer SERVER;
+
+    public static Identifier id(String path)
     {
-        return ResourceLocation.tryBuild(MOD_ID, path);
+        return Identifier.tryBuild(MOD_ID, path);
     }
 
-    // ========================
-    //       Load Events
-    // ========================
-
-    static void registerRenderers()
+    @Override
+    public void onInitialize()
     {
-        EntityRenderers.register(DMLRegistry.DRAGON.get(), DragonRenderer::new);
-        ForgeHooksClient.registerLayerDefinition(DragonRenderer.MODEL_LOCATION, () -> DragonModel.createBodyLayer(DragonModel.Properties.STANDARD));
-    }
+        // Load config
+        DMLConfig.load();
 
-    static void registerEggModelLoader(BiConsumer<String, IGeometryLoader<DragonEggModel>> registrar)
-    {
-        registrar.accept("dragon_egg", DragonEggModel.Loader.INSTANCE);
-    }
+        // Build custom registries for Ability and Habitat types
+        buildCustomRegistries();
 
-    static void registerItemColors(ItemColors colors)
-    {
-        colors.register(DragonSpawnEgg::getColor, DMLRegistry.SPAWN_EGG.get());
-    }
+        // Register the data-driven dragon breed registry (synced to clients with the slimmer network codec)
+        net.fabricmc.fabric.api.event.registry.DynamicRegistries.registerSynced(
+                DragonBreed.REGISTRY_KEY, DragonBreed.DIRECT_CODEC, DragonBreed.NETWORK_CODEC);
 
-    @SuppressWarnings("ConstantConditions") // client instance is null on data gen
-    static void registerReloadListenersEarly()
-    {
-        if (Minecraft.getInstance() != null)
+        // Register ability types
+        registerAbilityTypes();
+
+        // Register habitat types
+        registerHabitatTypes();
+
+        // Force-load DMLRegistry (triggers all static Registry.register calls)
+        DMLRegistry.init();
+
+        // Initialize egg chance defaults (uses BUILT_IN_CHANCES from DragonEggLootMod)
+        DMLConfig.initEggChanceDefaults();
+
+        // Register Fabric loot table modification for dragon eggs
+        DragonEggLootMod.register();
+
+        // Register entity data serializers
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityDataRegistry.register(
+                id("dragon_breed"), TameableDragon.DRAGON_BREED_SERIALIZER);
+
+        // Register server-side reload listeners
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(CrossBreedingManager.INSTANCE);
+
+        // Handle vanilla dragon egg override
+        UseBlockCallback.EVENT.register((player, world, hand, hitResult) ->
         {
-            ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(DragonModelPropertiesListener.INSTANCE); // Dragon Model Properties need to be reloaded before Entity Models are!
-        }
+            if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+            if (overrideVanillaDragonEgg(world, hitResult.getBlockPos(), player))
+                return InteractionResult.SUCCESS;
+            return InteractionResult.PASS;
+        });
+
+        // Prevent destruction of un-hatching end dragon eggs (they teleport away instead)
+        net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.BEFORE.register(
+                (world, player, pos, state, blockEntity) -> HatchableEggBlock.canDestroy(world, player, pos, state));
+
+        // Cache server reference for registry access in shared code
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> SERVER = server);
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> SERVER = null);
+
+        // Register creative tab population
+        // In Fabric, creative tab items are added via ItemGroupEvents
+        registerCreativeTabItems();
+
+        LOG.info("Dragon Mounts: Legacy initialized on Fabric.");
     }
 
-    static void registerKeyBindings(Consumer<KeyMapping> registrar)
+    // ========================
+    //   Custom Registries
+    // ========================
+
+    private void buildCustomRegistries()
     {
-        KeyMappings.registerKeybinds(registrar);
+        DMLRegistry.ABILITY_REGISTRY = FabricRegistryBuilder.create(Ability.REGISTRY_KEY)
+                .buildAndRegister();
+
+        DMLRegistry.HABITAT_REGISTRY = FabricRegistryBuilder.create(Habitat.REGISTRY_KEY)
+                .buildAndRegister();
     }
 
-    static void registerReloadListeners(Consumer<PreparableReloadListener> registrar)
+    private void registerAbilityTypes()
     {
-        registrar.accept(CrossBreedingManager.INSTANCE);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("frost_walker"), FrostWalkerAbility.CODEC);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("green_toes"), GreenToesAbility.CODEC);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("snow_stepper"), SnowStepperAbility.CODEC);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("hot_feet"), HotFeetAbility.CODEC);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("reaper_step"), ReaperStepAbility.CODEC);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("hydro_step"), HydroStepAbility.CODEC);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("crystal_growth"), CrystalGrowthAbility.CODEC);
+        Registry.register(DMLRegistry.ABILITY_REGISTRY, id("echolocation"), EcholocationAbility.CODEC);
     }
 
-    static void registerDatapacks(TriConsumer<ResourceKey<Registry<DragonBreed>>, Codec<DragonBreed>, Codec<DragonBreed>> registrar)
+    private void registerHabitatTypes()
     {
-        registrar.accept(DragonBreed.REGISTRY_KEY, DragonBreed.DIRECT_CODEC, DragonBreed.NETWORK_CODEC);
+        Registry.register(DMLRegistry.HABITAT_REGISTRY, id("picky"), PickyHabitat.CODEC);
+        Registry.register(DMLRegistry.HABITAT_REGISTRY, id("biome"), BiomeHabitat.CODEC);
+        Registry.register(DMLRegistry.HABITAT_REGISTRY, id("in_fluid"), FluidHabitat.CODEC);
+        Registry.register(DMLRegistry.HABITAT_REGISTRY, id("world_height"), HeightHabitat.CODEC);
+        Registry.register(DMLRegistry.HABITAT_REGISTRY, id("light"), LightHabitat.CODEC);
+        Registry.register(DMLRegistry.HABITAT_REGISTRY, id("nearby_blocks"), NearbyBlocksHabitat.CODEC);
+        Registry.register(DMLRegistry.HABITAT_REGISTRY, id("dragon_breath"), DragonBreathHabitat.CODEC);
     }
 
-    static void registerCreativeTabItems(ResourceKey<CreativeModeTab> tab, Consumer<ItemStack> registrar)
-    {
-        if (tab == CreativeModeTabs.SPAWN_EGGS) DragonSpawnEgg.populateTab(registrar);
-        if (tab == CreativeModeTabs.FUNCTIONAL_BLOCKS) HatchableEggBlock.populateTab(registrar);
-    }
+    // ========================
+    //   Creative Tab Items
+    // ========================
 
-    static void registerEntityAttributes(BiConsumer<EntityType<? extends LivingEntity>, AttributeSupplier> registrar)
+    private void registerCreativeTabItems()
     {
-        registrar.accept(DMLRegistry.DRAGON.get(), TameableDragon.createAttributes().build());
-    }
+        net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS)
+                .register(output -> DragonSpawnEgg.populateTab(output::accept, output.getContext().holders()));
 
-    static void registerEntityDataSerializers()
-    {
-        EntityDataSerializers.registerSerializer(TameableDragon.DRAGON_BREED_SERIALIZER);
+        net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
+                .register(output -> HatchableEggBlock.populateTab(output::accept, output.getContext().holders()));
     }
 
     // ========================
@@ -129,28 +166,18 @@ public class DragonMountsLegacy
     {
         if (DMLConfig.allowEggOverride() && level.getBlockState(pos).is(Blocks.DRAGON_EGG))
         {
-            var end = DragonBreed.registry(level.registryAccess()).getHolder(DragonBreed.BuiltIn.END);
+            var end = DragonBreed.registry(level.registryAccess()).get(DragonBreed.BuiltIn.END);
             if (end.isPresent())
             {
-                if (level.isClientSide) player.swing(InteractionHand.MAIN_HAND);
+                if (level.isClientSide()) player.swing(InteractionHand.MAIN_HAND);
                 else
                 {
-                    var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
+                    var state = DMLRegistry.EGG_BLOCK.defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
                     HatchableEggBlock.place((ServerLevel) level, pos, state, end.get());
                 }
                 return true;
             }
         }
         return false;
-    }
-
-    static void clientTick(boolean head)
-    {
-        if (!head) MountControlsMessenger.tick();
-    }
-
-    static void onKeyPress(int key, int action, int modifiers)
-    {
-        KeyMappings.handleKeyPress(key, action);
     }
 }

@@ -16,7 +16,7 @@ public class HotFeetAbility extends FootprintAbility implements Ability.Factory<
     public static final HotFeetAbility INSTANCE = new HotFeetAbility();
     public static final MapCodec<HotFeetAbility> CODEC = MapCodec.unit(INSTANCE);
 
-    public static final TagKey<Block> BURNABLES_TAG = BlockTags.create(DragonMountsLegacy.id("hot_feet_burnables"));
+    public static final TagKey<Block> BURNABLES_TAG = TagKey.create(net.minecraft.core.registries.Registries.BLOCK, DragonMountsLegacy.id("hot_feet_burnables"));
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)

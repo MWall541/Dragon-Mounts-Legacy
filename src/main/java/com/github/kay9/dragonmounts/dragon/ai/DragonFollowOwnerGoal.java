@@ -159,7 +159,7 @@ public class DragonFollowOwnerGoal extends Goal
         {
             return false;
         }
-        dragon.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ(), dragon.getYRot(), dragon.getXRot());
+        dragon.snapTo(pos.getX() + 0.5D, pos.getY(), pos.getZ(), dragon.getYRot(), dragon.getXRot());
         dragon.getNavigation().stop();
         return true;
     }

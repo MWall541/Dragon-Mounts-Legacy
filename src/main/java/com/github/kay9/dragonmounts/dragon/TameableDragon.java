@@ -17,7 +17,6 @@ import com.github.kay9.dragonmounts.dragon.egg.HatchableEggBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -25,7 +24,7 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -47,27 +46,25 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SaddleItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.fluids.FluidType;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -84,7 +81,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.*;
  * @author Kay9
  */
 @SuppressWarnings({"deprecation", "SameReturnValue"})
-public class TameableDragon extends TamableAnimal implements Saddleable, FlyingAnimal, PlayerRideable, VariantHolder<Holder<DragonBreed>>
+public class TameableDragon extends TamableAnimal implements PlayerRideable
 {
     // base attributes
     public static final double BASE_SPEED_GROUND = 0.3; // actual speed varies from ground friction
@@ -112,8 +109,10 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     // other constants
     public static final int AGE_UPDATE_INTERVAL = 100; // every 5 seconds
-    public static final ResourceLocation AGE_ATTR_MODIFIER_ID = DragonMountsLegacy.id("age_scale_modifier");
+    public static final Identifier AGE_ATTR_MODIFIER_ID = DragonMountsLegacy.id("age_scale_modifier");
     public static final int GROUND_CLEARENCE_THRESHOLD = 3; // height in blocks (multiplied by scale of dragon)
+    public static final int FLIGHT_CHANGE_COOLDOWN = 10; // min ticks between flying-state flips, to avoid thrashing nav/animation
+    public static final int NEAR_GROUND_DEBOUNCE = 3; // min consecutive ticks the raw check must disagree before nearGround flips
     private final EntityDimensions SITTING_DIMENSIONS = EntityDimensions.scalable(BASE_WIDTH, 2.15f).withEyeHeight(2.58f);
 
     // server/client delegates
@@ -123,6 +122,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     private float ageProgress = 1; // default to adult
     private boolean flying;
     private boolean nearGround;
+    private int nearGroundStreak;
+    private int lastFlightChangeTick = -FLIGHT_CHANGE_COOLDOWN;
+    private boolean updatingAgeProperties;
 
     private final GroundPathNavigation groundNavigation;
     private final FlyingPathNavigation flyingNavigation;
@@ -131,10 +133,8 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         super(type, level);
 
-        noCulling = true;
-
         moveControl = new DragonMoveController(this);
-        animator = level.isClientSide? new DragonAnimator(this) : null;
+        animator = level.isClientSide()? new DragonAnimator(this) : null;
 
         flyingNavigation = new FlyingPathNavigation(this, level);
         groundNavigation = new GroundPathNavigation(this, level);
@@ -180,7 +180,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
         targetSelector.addGoal(2, new HurtByTargetGoal(this));
-        targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Animal.class, false, e -> !(e instanceof TameableDragon)));
+        targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Animal.class, false, (e, l) -> !(e instanceof TameableDragon)));
     }
 
     @Override
@@ -207,37 +207,37 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound)
+    public void addAdditionalSaveData(ValueOutput output)
     {
-        super.addAdditionalSaveData(compound);
+        super.addAdditionalSaveData(output);
 
         if (getBreedHolder() != null) // entity creation sometimes looks to merge already existing data, which we don't have at creation...
         {
-            compound.putString(NBT_BREED, getBreedHolder().getRegisteredName());
-            for (var ability : getAbilities()) ability.write(this, compound);
+            output.putString(NBT_BREED, getBreedHolder().getRegisteredName());
+            for (var ability : getAbilities()) ability.write(this, output);
         }
 
-        compound.putBoolean(NBT_SADDLED, isSaddled());
-        compound.putInt(NBT_REPRO_COUNT, reproductionCount);
+        output.putBoolean(NBT_SADDLED, isSaddled());
+        output.putInt(NBT_REPRO_COUNT, reproductionCount);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound)
+    public void readAdditionalSaveData(ValueInput input)
     {
         // read and set breed first before reading everything else so things can override correctly,
         // e.g. attributes.
-        Holder<DragonBreed> breed = DragonBreed.parse(compound.getString(NBT_BREED), registryAccess());
+        Holder<DragonBreed> breed = DragonBreed.parse(input.getStringOr(NBT_BREED, ""), registryAccess());
         if (breed == null)
             breed = DragonBreed.getRandom(registryAccess(), getRandom()); // wasn't assigned one (summon command?)
 
         setBreed(breed);
 
-        super.readAdditionalSaveData(compound);
+        super.readAdditionalSaveData(input);
 
-        setSaddled(compound.getBoolean(NBT_SADDLED));
-        this.reproductionCount = compound.getInt(NBT_REPRO_COUNT);
+        setSaddled(input.getBooleanOr(NBT_SADDLED, false));
+        this.reproductionCount = input.getIntOr(NBT_REPRO_COUNT, 0);
 
-        for (var ability : getAbilities()) ability.read(this, compound);
+        for (var ability : getAbilities()) ability.read(this, input);
 
         // set sync age data after we read it in AgeableMob
         getEntityData().set(DATA_AGE, getAge());
@@ -260,7 +260,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     public DragonBreed getBreed()
     {
         if (getBreedHolder() == null) return null;
-        return getBreedHolder().get();
+        return getBreedHolder().value();
     }
 
     /**
@@ -274,13 +274,11 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return getEntityData().get(DATA_BREED).orElse(null);
     }
 
-    @Override
     public void setVariant(Holder<DragonBreed> variant)
     {
         setBreed(variant);
     }
 
-    @Override
     public Holder<DragonBreed> getVariant()
     {
         return getBreedHolder();
@@ -299,18 +297,15 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return entityData.get(DATA_SADDLED);
     }
 
-    @Override
     public boolean isSaddleable()
     {
         return isAlive() && !isHatchling() && isTame();
     }
 
-
-    @Override
     public void equipSaddle(ItemStack itemStack, @org.jetbrains.annotations.Nullable SoundSource soundSource)
     {
         setSaddled(true);
-        level().playSound(null, getX(), getY(), getZ(), SoundEvents.HORSE_SADDLE, getSoundSource(), 1, 1);
+        level().playSound(null, getX(), getY(), getZ(), SoundEvents.HORSE_SADDLE.value(), getSoundSource(), 1, 1);
     }
 
     /**
@@ -386,18 +381,30 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
             // because vanilla age does not increment on client...
             int age = getAge();
-            if (age < 0) setAge(++age);
+            if (age < 0 && !isAgeLocked()) setAge(++age);
             else if (age > 0) setAge(--age);
         }
 
         // update nearGround state when moving for flight and animation logic
-        nearGround = onGround() || !level().noCollision(this, new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getAgeScale()), getZ()));
+        // debounced: this is a thin raycast-like check that can flip every tick from tiny vertical
+        // jitter alone; consumers (shouldFly(), the walk/fly animation blend) treat it as a stable
+        // state, so an un-debounced flip-every-tick value here shows up as constant head/neck twitch.
+        boolean rawNearGround = onGround() || !level().noCollision(this, new AABB(getX(), getY(), getZ(), getX(), getY() - (GROUND_CLEARENCE_THRESHOLD * getAgeScale()), getZ()));
+        if (rawNearGround == nearGround) nearGroundStreak = 0;
+        else if (++nearGroundStreak >= NEAR_GROUND_DEBOUNCE)
+        {
+            nearGround = rawNearGround;
+            nearGroundStreak = 0;
+        }
 
         // update flying state based on the distance to the ground
+        // debounced: onGround()/isNearGround() flicker tick-to-tick near their threshold, and
+        // reacting immediately thrashes the nav (setNavigation swap) and wing animation every flip
         boolean flying = shouldFly();
-        if (flying != isFlying())
+        if (flying != isFlying() && tickCount - lastFlightChangeTick >= FLIGHT_CHANGE_COOLDOWN)
         {
             setFlying(flying);
+            lastFlightChangeTick = tickCount;
 
             // update pathfinding method
             if (isServer()) setNavigation(flying);
@@ -412,7 +419,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     {
         if (isFlying())
         {
-            if (isControlledByLocalInstance())
+            if (isLocalInstanceAuthoritative())
             {
                 // Move relative to yaw - handled in the move controller or by driver
                 moveRelative(getSpeed(), vec3);
@@ -466,7 +473,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // rotate body towards the head
         setYRot(Mth.rotateIfNecessary(yHeadRot, getYRot(), 4));
 
-        if (isControlledByLocalInstance())
+        if (isLocalInstanceAuthoritative())
         {
             if (!isFlying() && canFly() && driver.jumping) liftOff();
         }
@@ -487,10 +494,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         var stackResult = stack.interactLivingEntity(player, this, hand);
         if (stackResult.consumesAction()) return stackResult;
 
+        // golden dandelion age-locking is vanilla behavior (AgeableMob) that doesn't require
+        // taming; let it through before the "block everything but taming on untamed" gate below.
+        if (stack.is(Items.GOLDEN_DANDELION)) return super.mobInteract(player, hand);
+
         // tame
         if (!isTame())
         {
-            if (isServer() && getBreed().tamingItems().contains(stack.getItem().builtInRegistryHolder()))
+            if (isServer() && getBreed().isTamingItem(stack))
             {
                 stack.shrink(1);
                 tamedFor(player, getRandom().nextInt(5) == 0);
@@ -508,27 +519,27 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             heal(stack.get(DataComponents.FOOD).nutrition());
             playSound(getEatingSound(stack), 0.7f, 1);
             stack.shrink(1);
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
         // saddle up!
-        if (isTamedFor(player) && isSaddleable() && !isSaddled() && stack.getItem() instanceof SaddleItem)
+        if (isTamedFor(player) && isSaddleable() && !isSaddled() && stack.is(Items.SADDLE))
         {
             stack.shrink(1);
             equipSaddle(stack, getSoundSource());
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
         // give the saddle back!
-        if (isTamedFor(player) && isSaddled() && stack.is(Tags.Items.SHEARS))
+        if (isTamedFor(player) && isSaddled() && stack.is(Items.SHEARS))
         {
-            spawnAtLocation(Items.SADDLE);
+            if (level() instanceof ServerLevel serverLevel) spawnAtLocation(serverLevel, Items.SADDLE);
             player.playSound(SoundEvents.SHEEP_SHEAR, 1f, 1f);
             setSaddled(false);
             gameEvent(GameEvent.SHEAR, player);
-            stack.hurtAndBreak(1, player, getSlotForHand(hand));
+            stack.hurtAndBreak(1, player, hand);
 
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
         // sit!
@@ -540,7 +551,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
                 setOrderedToSit(!isOrderedToSit());
                 if (isOrderedToSit()) setTarget(null);
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
         // ride on
@@ -554,7 +565,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             }
             setOrderedToSit(false);
             setInSittingPose(false);
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
         return super.mobInteract(player, hand);
@@ -573,7 +584,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource)
+    public boolean causeFallDamage(double pFallDistance, float pMultiplier, DamageSource pSource)
     {
         return !canFly() && super.causeFallDamage(pFallDistance, pMultiplier, pSource);
     }
@@ -598,9 +609,9 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     protected SoundEvent getAmbientSound()
     {
         return Optional.ofNullable(getBreedHolder())
-                .flatMap(b -> b.get().ambientSound())
-                .map(Holder::get)
-                .orElse(DMLRegistry.DRAGON_AMBIENT_SOUND.get());
+                .flatMap(b -> b.value().ambientSound())
+                .map(Holder::value)
+                .orElse(DMLRegistry.DRAGON_AMBIENT_SOUND);
     }
 
     @Nullable
@@ -612,7 +623,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
 
     public SoundEvent getStepSound()
     {
-        return DMLRegistry.DRAGON_STEP_SOUND.get();
+        return DMLRegistry.DRAGON_STEP_SOUND;
     }
 
     /**
@@ -621,18 +632,17 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @Override
     protected SoundEvent getDeathSound()
     {
-        return DMLRegistry.DRAGON_DEATH_SOUND.get();
+        return DMLRegistry.DRAGON_DEATH_SOUND;
     }
 
-    @Override
     public SoundEvent getEatingSound(ItemStack itemStackIn)
     {
-        return SoundEvents.GENERIC_EAT;
+        return SoundEvents.GENERIC_EAT.value();
     }
 
     public SoundEvent getAttackSound()
     {
-        return SoundEvents.GENERIC_EAT;
+        return SoundEvents.GENERIC_EAT.value();
     }
 
     public SoundEvent getWingsSound()
@@ -657,7 +667,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         // override sound type if the top block is snowy
         var soundType = state.getSoundType();
         if (level().getBlockState(entityPos.above()).getBlock() == Blocks.SNOW)
-            soundType = Blocks.SNOW.getSoundType(state, level(), entityPos, this);
+            soundType = Blocks.SNOW.defaultBlockState().getSoundType();
 
         // play stomping for bigger dragons
         playSound(getStepSound(), soundType.getVolume(), soundType.getPitch() * getVoicePitch());
@@ -689,7 +699,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public ItemStack getPickedResult(HitResult target)
+    public ItemStack getPickResult()
     {
         if (getBreed() == null) return ItemStack.EMPTY;
         return DragonSpawnEgg.create(getBreedHolder());
@@ -713,7 +723,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @SuppressWarnings("ConstantConditions") // I bet the breed exists at this point...
     public boolean isFood(ItemStack stack)
     {
-        return stack.is(getBreed().breedingItems());
+        return getBreed().isBreedingItem(stack);
     }
 
     public void tamedFor(Player player, boolean successful)
@@ -723,7 +733,6 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
             tame(player);
             navigation.stop();
             setTarget(null);
-            setOwnerUUID(player.getUUID());
             level().broadcastEntityEvent(this, (byte) 7);
         }
         else
@@ -757,23 +766,27 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    protected void dropEquipment()
+    protected void dropEquipment(ServerLevel level)
     {
-        super.dropEquipment();
-        if (isSaddled()) spawnAtLocation(Items.SADDLE);
+        super.dropEquipment(level);
+        if (isSaddled()) spawnAtLocation(level, Items.SADDLE);
     }
 
     @Override
-    protected ResourceKey<LootTable> getDefaultLootTable()
+    protected void dropFromLootTable(ServerLevel level, DamageSource damageSource, boolean playerKill)
     {
-        if (isServer() && getBreed() != null)
+        if (getBreed() != null)
         {
             // needs to use server's reloadable resources; loot tables aren't present on the normal registry
-            ResourceKey<LootTable> table = DragonBreed.getLootTableKey(getBreedHolder(), level().getServer().reloadableRegistries());
-            if (table != null) return table;
+            ResourceKey<LootTable> table = DragonBreed.getLootTableKey(getBreedHolder(), level.getServer().reloadableRegistries());
+            if (table != null)
+            {
+                dropFromLootTable(level, damageSource, playerKill, table);
+                return;
+            }
         }
 
-        return super.getDefaultLootTable();
+        super.dropFromLootTable(level, damageSource, playerKill);
     }
 
     //todo what was this for?
@@ -813,14 +826,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
      * Called when the entity is attacked.
      */
     @Override
-    public boolean hurt(DamageSource src, float par2)
+    public boolean hurtServer(ServerLevel level, DamageSource src, float amount)
     {
-        if (isInvulnerableTo(src)) return false;
+        if (isInvulnerableTo(level, src)) return false;
 
         // don't just sit there!
         setOrderedToSit(false);
 
-        return super.hurt(src, par2);
+        return super.hurtServer(level, src, amount);
     }
 
     /**
@@ -858,7 +871,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         }
 
         // pick a breed to inherit from, and place hatching.
-        var state = DMLRegistry.EGG_BLOCK.get().defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
+        var state = DMLRegistry.EGG_BLOCK.defaultBlockState().setValue(HatchableEggBlock.HATCHING, true);
         var offSpringBreed = CrossBreedingManager.INSTANCE.getCrossBreed(getBreedHolder(), mate.getBreedHolder(), level.registryAccess());
         if (offSpringBreed == null) offSpringBreed = getRandom().nextBoolean()? getBreedHolder() : mate.getBreedHolder();
 
@@ -912,7 +925,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @SuppressWarnings("ConstantConditions")
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob mob)
     {
-        var offspring = DMLRegistry.DRAGON.get().create(level);
+        var offspring = DMLRegistry.DRAGON.create(level, EntitySpawnReason.BREEDING);
         if (getBreed() != null) offspring.setBreed(getBreedHolder());
         return offspring;
     }
@@ -982,14 +995,14 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean isInvulnerableTo(DamageSource src)
+    public boolean isInvulnerableTo(ServerLevel level, DamageSource src)
     {
         Entity srcEnt = src.getEntity();
         if (srcEnt != null && (srcEnt == this || hasPassenger(srcEnt))) return true;
 
         if (getBreed() != null) return getBreed().immunities().contains(src.typeHolder());
 
-        return super.isInvulnerableTo(src);
+        return super.isInvulnerableTo(level, src);
     }
 
     /**
@@ -1069,27 +1082,40 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     @SuppressWarnings("ConstantConditions")
     private void updateAgeProperties()
     {
-        setAge(entityData.get(DATA_AGE));
-        updateAgeProgress();
-        refreshDimensions();
-
-        getAttribute(STEP_HEIGHT).setBaseValue(Math.max(2 * getAgeProgress(), 1));
-
-        // update attributes and health only on the server
-        if (isServer())
+        // setAge() below writes back to entityData, which re-fires onSyncedDataUpdated(DATA_AGE)
+        // synchronously (SynchedEntityData.set() calls the listener directly, not just on network
+        // receipt) and would otherwise re-enter this method every single call, redundantly redoing
+        // refreshDimensions()/attribute work each tick while a dragon is still growing.
+        if (updatingAgeProperties) return;
+        updatingAgeProperties = true;
+        try
         {
-            // health does not update on modifier application, so have to store the health frac first
-            var healthFrac = getHealthFraction();
+            setAge(entityData.get(DATA_AGE));
+            updateAgeProgress();
+            refreshDimensions();
 
-            // negate modifier value since the operation is as follows: base_value += modifier * base_value
-            double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
-            var mod = new AttributeModifier(AGE_ATTR_MODIFIER_ID, modValue, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+            getAttribute(STEP_HEIGHT).setBaseValue(Math.max(2 * getAgeProgress(), 1));
 
-            getAttribute(MAX_HEALTH).addOrReplacePermanentModifier(mod); // needs to be serialized otherwise health fraction gets weird at deserialization time
-            getAttribute(ATTACK_DAMAGE).addOrUpdateTransientModifier(mod);
+            // update attributes and health only on the server
+            if (isServer())
+            {
+                // health does not update on modifier application, so have to store the health frac first
+                var healthFrac = getHealthFraction();
 
-            // restore health fraction
-            setHealth(healthFrac * getMaxHealth());
+                // negate modifier value since the operation is as follows: base_value += modifier * base_value
+                double modValue = -(1d - Math.max(getAgeProgress(), 0.1));
+                var mod = new AttributeModifier(AGE_ATTR_MODIFIER_ID, modValue, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+
+                getAttribute(MAX_HEALTH).addOrReplacePermanentModifier(mod); // needs to be serialized otherwise health fraction gets weird at deserialization time
+                getAttribute(ATTACK_DAMAGE).addOrUpdateTransientModifier(mod);
+
+                // restore health fraction
+                setHealth(healthFrac * getMaxHealth());
+            }
+        }
+        finally
+        {
+            updatingAgeProperties = false;
         }
     }
 
@@ -1109,17 +1135,16 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     }
 
     @Override
-    public boolean isBaby()
+    protected int getBabyStartAge()
     {
-        return !isAdult();
+        if (getBreed() != null) return -getBreed().growthTime();
+        return -BASE_GROWTH_TIME;
     }
 
     @Override
-    public void setBaby(boolean baby)
+    public void setAge(int newAge)
     {
-        var growth = -BASE_GROWTH_TIME;
-        if (getBreed() != null) growth = -getBreed().growthTime();
-        setAge(baby? growth : 0);
+        super.setAge(newAge);
         entityData.set(DATA_AGE, age);
     }
 
@@ -1133,7 +1158,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
     // simple helper method to determine if we're on the server thread.
     public boolean isServer()
     {
-        return !level().isClientSide;
+        return !level().isClientSide();
     }
 
     public DragonAnimator getAnimator()
@@ -1141,12 +1166,7 @@ public class TameableDragon extends TamableAnimal implements Saddleable, FlyingA
         return animator;
     }
 
-    @Override
-    public boolean canDrownInFluidType(FluidType type)
-    {
-        if (getBreed() == null) return super.canDrownInFluidType(type);
-        return !getBreed().immunities().contains(damageSources().drown().typeHolder());
-    }
+    // Note: canDrownInFluidType is Forge-specific. Drowning immunity is handled via the breed's damage immunities.
 
     @Override
     public boolean fireImmune()

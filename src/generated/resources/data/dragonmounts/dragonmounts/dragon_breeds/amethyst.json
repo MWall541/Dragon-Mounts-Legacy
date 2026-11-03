@@ -1,0 +1,30 @@
+{
+  "attributes": {
+    "minecraft:armor": 4.0
+  },
+  "abilities": [
+    {
+      "type": "dragonmounts:crystal_growth"
+    }
+  ],
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:amethyst_dragon_habitat_blocks",
+      "point_multiplier": 1.0
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:reverse_portal"
+  },
+  "ambient_sound": "minecraft:block.amethyst_block.chime",
+  "immunities": [
+    "minecraft:magic",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "c264d1",
+  "secondary_color": "f2b8ff",
+  "reproduction_limit": 8
+}

@@ -38,9 +38,9 @@ public class MountControlsMessenger
             --delay;
 
             if (delay == 0)
-                player.displayClientMessage(Component.translatable("mount.dragon.vertical_controls",
+                player.sendOverlayMessage(Component.translatable("mount.dragon.vertical_controls",
                         Minecraft.getInstance().options.keyJump.getTranslatedKeyMessage(),
-                        KeyMappings.FLIGHT_DESCENT_KEY.getTranslatedKeyMessage()), true);
+                        KeyMappings.FLIGHT_DESCENT_KEY.getTranslatedKeyMessage()));
         }
     }
 }

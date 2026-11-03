@@ -1,9 +1,5 @@
 package com.github.kay9.dragonmounts.client;
 
-import com.github.kay9.dragonmounts.accessors.ModelPartAccess;
-import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.model.EntityModel;
@@ -13,18 +9,22 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
 
 /**
  * Generic model for all winged tetrapod dragons.
+ * <p>
+ * Since 26.x, models are rendered in a single pass from their root part, so the neck and tail
+ * are made of real part instances ({@code neck_0..neck_6}, {@code tail_0..tail_11}) instead of
+ * being the same part rendered multiple times through proxies.
  *
  * @author Nico Bergemann <barracuda415 at yahoo.de>
  */
 @SuppressWarnings("UnnecessaryLocalVariable")
-public class DragonModel extends EntityModel<TameableDragon>
+public class DragonModel extends EntityModel<DragonRenderState>
 {
     // model constants
     public static final int NECK_SIZE = 10;
@@ -35,14 +35,16 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     // model parts
     public final ModelPart head;
-    public final ModelPart neck;
-    public final ModelPart neckScale;
-    public final ModelPart tail;
-    public final ModelPart tailHornLeft;
-    public final ModelPart tailHornRight;
     public final ModelPart jaw;
     public final ModelPart body;
     public final ModelPart back;
+
+    // neck and tail segments, ordered from body to tip
+    public final ModelPart[] neckSegments = new ModelPart[VERTS_NECK];
+    public final ModelPart[] neckScales = new ModelPart[VERTS_NECK];
+    public final ModelPart[] tailSegments = new ModelPart[VERTS_TAIL];
+    public final ModelPart[] tailHornsLeft = new ModelPart[VERTS_TAIL];
+    public final ModelPart[] tailHornsRight = new ModelPart[VERTS_TAIL];
 
     // [0][]: right fore  [1][]: right hind  [2][]: left fore  [3][]: left hind
     // [][0]: thigh       [][1]: crus        [][2]: foot       [][3]: toe
@@ -55,26 +57,32 @@ public class DragonModel extends EntityModel<TameableDragon>
     // [][0]: finger 1  [][1]: finger 2  [][2]: finger 3  [][3]: finger 4
     public final ModelPart[][] wingFingers = new ModelPart[2][4];
 
-
-    // model attributes
-    public final ModelPartProxy[] neckProxy = new ModelPartProxy[VERTS_NECK];
-    public final ModelPartProxy[] tailProxy = new ModelPartProxy[VERTS_TAIL];
-
     public float size;
 
     public DragonModel(ModelPart root)
     {
-        super(RenderType::entityCutout);
+        super(root, RenderTypes::entityCutout);
 
         this.body = root.getChild("body");
         this.back = body.getChild("back");
-        this.neck = root.getChild("neck");
-        this.neckScale = neck.getChild("neck_scale");
         this.head = root.getChild("head");
         this.jaw = head.getChild("jaw");
-        this.tail = root.getChild("tail");
-        this.tailHornRight = getNullableChild(tail, "right_tail_spike");
-        this.tailHornLeft = getNullableChild(tail, "left_tail_spike");
+
+        for (int i = 0; i < VERTS_NECK; i++)
+        {
+            neckSegments[i] = root.getChild("neck_" + i);
+            neckScales[i] = neckSegments[i].getChild("neck_scale");
+        }
+
+        for (int i = 0; i < VERTS_TAIL; i++)
+        {
+            tailSegments[i] = root.getChild("tail_" + i);
+            tailHornsRight[i] = getNullableChild(tailSegments[i], "right_tail_spike");
+            tailHornsLeft[i] = getNullableChild(tailSegments[i], "left_tail_spike");
+            if (tailHornsRight[i] != null)
+                //noinspection ConstantConditions
+                tailHornsRight[i].visible = tailHornsLeft[i].visible = false;
+        }
 
         var rightWingArm = root.getChild("right_wing_arm");
         var leftWingArm = root.getChild("left_wing_arm");
@@ -100,14 +108,6 @@ public class DragonModel extends EntityModel<TameableDragon>
             for (int j = 0; j < parts.length; j++)
                 parent = legs[i][j] = parent.getChild(dirName + type + parts[j]);
         }
-
-        // initialize model proxies
-        for (int i = 0; i < neckProxy.length; i++) neckProxy[i] = new ModelPartProxy(neck);
-        for (int i = 0; i < tailProxy.length; i++) tailProxy[i] = new ModelPartProxy(tail);
-
-        if (tailHornRight != null)
-            //noinspection ConstantConditions
-            tailHornRight.visible = tailHornLeft.visible = false;
     }
 
 
@@ -137,8 +137,11 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     private static void buildNeck(PartDefinition root)
     {
-        PartDefinition neck = root.addOrReplaceChild("neck", CubeListBuilder.create().texOffs(112, 88).addBox(-5, -5, -5, NECK_SIZE, NECK_SIZE, NECK_SIZE), PartPose.ZERO);
-        neck.addOrReplaceChild("neck_scale", CubeListBuilder.create().texOffs(0, 0).addBox(-1, -7, -3, 2, 4, 6), PartPose.ZERO);
+        for (int i = 0; i < VERTS_NECK; i++)
+        {
+            PartDefinition neck = root.addOrReplaceChild("neck_" + i, CubeListBuilder.create().texOffs(112, 88).addBox(-5, -5, -5, NECK_SIZE, NECK_SIZE, NECK_SIZE), PartPose.ZERO);
+            neck.addOrReplaceChild("neck_scale", CubeListBuilder.create().texOffs(0, 0).addBox(-1, -7, -3, 2, 4, 6), PartPose.ZERO);
+        }
     }
 
     private static void buildHead(PartDefinition root)
@@ -176,17 +179,20 @@ public class DragonModel extends EntityModel<TameableDragon>
 
     private static void buildTail(PartDefinition root, Properties properties)
     {
-        PartDefinition tail = root.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(152, 88).addBox(-5, -5, -5, TAIL_SIZE, TAIL_SIZE, TAIL_SIZE), PartPose.ZERO);
-        CubeListBuilder tailSpikeCube = CubeListBuilder.create().texOffs(0, 0).addBox(-1, -8, -3, 2, 4, 6);
-        if (properties.middleTailScales())
-            tail.addOrReplaceChild("middle_tail_scale", tailSpikeCube, PartPose.ZERO);
-        else
+        for (int i = 0; i < VERTS_TAIL; i++)
         {
-            tail.addOrReplaceChild("left_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, 0.785398f));
-            tail.addOrReplaceChild("right_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, -0.785398f));
-        }
+            PartDefinition tail = root.addOrReplaceChild("tail_" + i, CubeListBuilder.create().texOffs(152, 88).addBox(-5, -5, -5, TAIL_SIZE, TAIL_SIZE, TAIL_SIZE), PartPose.ZERO);
+            CubeListBuilder tailSpikeCube = CubeListBuilder.create().texOffs(0, 0).addBox(-1, -8, -3, 2, 4, 6);
+            if (properties.middleTailScales())
+                tail.addOrReplaceChild("middle_tail_scale", tailSpikeCube, PartPose.ZERO);
+            else
+            {
+                tail.addOrReplaceChild("left_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, 0.785398f));
+                tail.addOrReplaceChild("right_tail_scale", tailSpikeCube, PartPose.rotation(0, 0, -0.785398f));
+            }
 
-        if (properties.tailHorns()) addTailSpikes(tail);
+            if (properties.tailHorns()) addTailSpikes(tail);
+        }
     }
 
     private static void addTailSpikes(PartDefinition tail)
@@ -330,55 +336,28 @@ public class DragonModel extends EntityModel<TameableDragon>
     }
 
     @Override
-    public void prepareMobModel(TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pPartialTick)
+    public void setupAnim(DragonRenderState state)
     {
-        size = Math.min(dragon.getAgeScale(), 1);
-        dragon.getAnimator().setPartialTicks(pPartialTick);
-    }
+        super.setupAnim(state);
 
-    @Override
-    public void setupAnim(TameableDragon dragon, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch)
-    {
-        DragonAnimator animator = dragon.getAnimator();
-        animator.setLook(pNetHeadYaw, pHeadPitch);
-        animator.setMovement(pLimbSwing, pLimbSwingAmount * dragon.getAgeScale());
-        dragon.getAnimator().animate(this);
-    }
+        size = Math.min(state.ageScale, 1);
 
-    @Override
-    public void renderToBuffer(PoseStack ps, VertexConsumer vertices, int pPackedLight, int pPackedOverlay, int pColor)
-    {
-        body.render(ps, vertices, pPackedLight, pPackedOverlay, pColor);
-        renderHead(ps, vertices, pPackedLight, pPackedOverlay, pColor);
-        for (ModelPartProxy proxy : neckProxy)
-            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pColor);
-        for (ModelPartProxy proxy : tailProxy)
-            proxy.render(ps, vertices, pPackedLight, pPackedOverlay, pColor);
-        renderWings(ps, vertices, pPackedLight, pPackedOverlay, pColor);
-        renderLegs(ps, vertices, pPackedLight, pPackedOverlay, pColor);
-    }
+        var animator = state.animator;
+        if (animator != null)
+        {
+            animator.setLook(state.yRot, state.xRot);
+            animator.setMovement(state.walkAnimationPos, state.walkAnimationSpeed * state.ageScale);
+            animator.animate(this);
+        }
 
-    protected void renderHead(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, int pColor)
-    {
+        back.visible = !state.isSaddled;
+
+        // head is scaled down on older dragons
         float headScale = 1.4f / (size + 0.4f);
-        //noinspection DataFlowIssue
-        ((ModelPartAccess) (Object) head).setRenderScale(headScale, headScale, headScale);
-        head.render(ps, vertices, packedLight, packedOverlay, pColor);
-    }
+        head.xScale = head.yScale = head.zScale = headScale;
 
-    public void renderWings(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, int pColor)
-    {
-        ps.pushPose();
-        ps.scale(1.1f, 1.1f, 1.1f);
-        wingArms[0].render(ps, vertices, packedLight, packedOverlay, pColor);
-        wingArms[1].render(ps, vertices, packedLight, packedOverlay, pColor);
-        ps.popPose();
-    }
-
-    protected void renderLegs(PoseStack ps, VertexConsumer vertices, int packedLight, int packedOverlay, int pColor)
-    {
-        for (ModelPart[] leg : legs)
-            leg[0].render(ps, vertices, packedLight, packedOverlay, pColor);
+        // wings are slightly bigger than the body
+        for (var arm : wingArms) arm.xScale = arm.yScale = arm.zScale = 1.1f;
     }
 
     private static CubeListBuilder centerMirroredBox(CubeListBuilder builder, boolean mirror, float pOriginX, float pOriginY, float pOriginZ, float pDimensionX, float pDimensionY, float pDimensionZ)

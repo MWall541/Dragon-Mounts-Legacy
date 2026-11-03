@@ -1,0 +1,35 @@
+{
+  "attributes": {
+    "minecraft:armor": 6.0
+  },
+  "abilities": [
+    {
+      "type": "dragonmounts:echolocation"
+    }
+  ],
+  "habitats": [
+    {
+      "type": "dragonmounts:nearby_blocks",
+      "block_tag": "dragonmounts:sculk_dragon_habitat_blocks",
+      "point_multiplier": 1.0
+    },
+    {
+      "type": "dragonmounts:biome",
+      "biome_tag": "dragonmounts:sculk_dragon_habitat_biomes",
+      "points": 3
+    }
+  ],
+  "hatch_particles": {
+    "type": "minecraft:sculk_soul"
+  },
+  "ambient_sound": "minecraft:entity.warden.ambient",
+  "immunities": [
+    "minecraft:sonic_boom",
+    "minecraft:cactus",
+    "minecraft:sweet_berry_bush",
+    "minecraft:dragon_breath"
+  ],
+  "primary_color": "0c1a1a",
+  "secondary_color": "3ddbd0",
+  "reproduction_limit": 4
+}

@@ -5,7 +5,8 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -23,9 +24,9 @@ public class ReaperStepAbility extends FootprintAbility implements Ability.Facto
     public static final ReaperStepAbility INSTANCE = new ReaperStepAbility();
     public static final MapCodec<ReaperStepAbility> CODEC = MapCodec.unit(INSTANCE);
 
-    public static final TagKey<Block> PLANT_DEATH_TAG = BlockTags.create(DragonMountsLegacy.id("reaper_plant_death"));
-    public static final TagKey<Block> PLANT_DESTRUCTION_TAG = BlockTags.create(DragonMountsLegacy.id("reaper_plant_destruction"));
-    public static final TagKey<Block> REAPER_TRANSFORM = BlockTags.create(DragonMountsLegacy.id("reaper_transform"));
+    public static final TagKey<Block> PLANT_DEATH_TAG = TagKey.create(Registries.BLOCK, DragonMountsLegacy.id("reaper_plant_death"));
+    public static final TagKey<Block> PLANT_DESTRUCTION_TAG = TagKey.create(Registries.BLOCK, DragonMountsLegacy.id("reaper_plant_destruction"));
+    public static final TagKey<Block> REAPER_TRANSFORM = TagKey.create(Registries.BLOCK, DragonMountsLegacy.id("reaper_transform"));
 
     @Override
     protected void placeFootprint(TameableDragon dragon, BlockPos pos)

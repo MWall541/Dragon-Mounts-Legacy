@@ -9,11 +9,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.function.Consumer;
-
 public class KeyMappings
 {
-    private static final String KEY_CATEGORY = "key.category." + DragonMountsLegacy.MOD_ID;
+    private static final KeyMapping.Category KEY_CATEGORY = KeyMapping.Category.register(DragonMountsLegacy.id(DragonMountsLegacy.MOD_ID));
 
     public static final KeyMapping FLIGHT_DESCENT_KEY = keymap("flight_descent", GLFW.GLFW_KEY_Z);
     public static final KeyMapping CAMERA_CONTROLS = keymap("camera_flight", GLFW.GLFW_KEY_F6);
@@ -24,22 +22,17 @@ public class KeyMappings
         return new KeyMapping(String.format("key.%s.%s", DragonMountsLegacy.MOD_ID, name), defaultMapping, KEY_CATEGORY);
     }
 
-    public static void registerKeybinds(Consumer<KeyMapping> registrar)
+    /** Called every client tick; consumes camera-toggle key presses. */
+    public static void tick()
     {
-        registrar.accept(FLIGHT_DESCENT_KEY);
-        registrar.accept(CAMERA_CONTROLS);
-    }
-
-    public static void handleKeyPress(int key, int action)
-    {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (key == CAMERA_CONTROLS.getKey().getValue()
-                && action == GLFW.GLFW_PRESS
-                && player != null
-                && player.getVehicle() instanceof TameableDragon d)
+        while (CAMERA_CONTROLS.consumeClick())
         {
-            DMLConfig.CAMERA_DRIVEN_FLIGHT.set(!DMLConfig.cameraDrivenFlight());
-            player.displayClientMessage(Component.translatable("mount.dragon.camera_controls." + (DMLConfig.cameraDrivenFlight()? "enabled" : "disabled"), d.getDisplayName()), true);
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null && player.getVehicle() instanceof TameableDragon d)
+            {
+                DMLConfig.setCameraDrivenFlight(!DMLConfig.cameraDrivenFlight());
+                player.sendOverlayMessage(Component.translatable("mount.dragon.camera_controls." + (DMLConfig.cameraDrivenFlight()? "enabled" : "disabled"), d.getDisplayName()));
+            }
         }
     }
 }

@@ -4,14 +4,11 @@ import com.github.kay9.dragonmounts.dragon.TameableDragon;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FrostedIceBlock;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
 
 
 public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerAbility>
@@ -60,9 +57,6 @@ public class FrostWalkerAbility implements Ability, Ability.Factory<FrostWalkerA
 
             if (currentState != FrostedIceBlock.meltsInto())
                 continue;
-            if (ForgeEventFactory.onBlockPlace(dragon, BlockSnapshot.create(level.dimension(), level, carat), Direction.UP))
-                continue;
-
             var ice = Blocks.FROSTED_ICE.defaultBlockState();
 
             if (!ice.canSurvive(level, carat) || !level.isUnobstructed(ice, carat, CollisionContext.empty()))

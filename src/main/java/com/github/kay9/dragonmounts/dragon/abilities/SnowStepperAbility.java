@@ -31,7 +31,7 @@ public class SnowStepperAbility extends FootprintAbility implements Ability.Fact
     protected float getFootprintChance(TameableDragon dragon)
     {
         var pos = dragon.blockPosition();
-        return dragon.level().getBiome(pos).value().coldEnoughToSnow(pos)? 0.5f : 0;
+        return dragon.level().getBiome(pos).value().coldEnoughToSnow(pos, dragon.level().getSeaLevel())? 0.5f : 0;
     }
 
     @Override

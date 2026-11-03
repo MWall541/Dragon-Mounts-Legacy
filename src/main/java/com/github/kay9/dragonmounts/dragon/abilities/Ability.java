@@ -1,18 +1,16 @@
 package com.github.kay9.dragonmounts.dragon.abilities;
 
+import com.github.kay9.dragonmounts.DMLRegistry;
 import com.github.kay9.dragonmounts.DragonMountsLegacy;
 import com.github.kay9.dragonmounts.dragon.TameableDragon;
-import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Each ability type has its own number of factories. One type can have multiple factories
@@ -42,14 +40,13 @@ import java.util.function.Supplier;
 public interface Ability
 {
     ResourceKey<Registry<MapCodec<? extends Factory<? extends Ability>>>> REGISTRY_KEY = ResourceKey.createRegistryKey(DragonMountsLegacy.id("ability_type"));
-    Supplier<IForgeRegistry<MapCodec<? extends Factory<? extends Ability>>>> REGISTRY = Suppliers.memoize(() -> RegistryManager.ACTIVE.getRegistry(REGISTRY_KEY));
-    Codec<Factory<? extends Ability>> CODEC = Codec.lazyInitialized(() -> REGISTRY.get().getCodec().dispatch(Factory::codec, Function.identity()));
+    Codec<Factory<? extends Ability>> CODEC = Codec.lazyInitialized(() -> DMLRegistry.ABILITY_REGISTRY.byNameCodec().dispatch(Factory::codec, Function.identity()));
 
     default void initialize(TameableDragon dragon) {}
 
-    default void write(TameableDragon dragon, CompoundTag nbt) {}
+    default void write(TameableDragon dragon, ValueOutput output) {}
 
-    default void read(TameableDragon dragon, CompoundTag nbt) {}
+    default void read(TameableDragon dragon, ValueInput input) {}
 
     default void tick(TameableDragon dragon) {}
 
@@ -94,7 +91,7 @@ public interface Ability
 //     *  .codec();}
 //     * </pre>
 //     */
-//    static <T extends Ability> Factory<T> simpleFactory(ResourceLocation id, Supplier<T> factory)
+//    static <T extends Ability> Factory<T> simpleFactory(Identifier id, Supplier<T> factory)
 //    {
 //        return new Factory<>()
 //        {
@@ -105,7 +102,7 @@ public interface Ability
 //            }
 //
 //            @Override
-//            public ResourceLocation codec()
+//            public Identifier codec()
 //            {
 //                return id;
 //            }

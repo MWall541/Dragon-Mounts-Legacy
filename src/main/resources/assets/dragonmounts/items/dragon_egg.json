@@ -1,0 +1,41 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "dragonmounts:dragon_breed",
+    "cases": [
+      {
+        "when": "dragonmounts:aether",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/aether_dragon_egg" }
+      },
+      {
+        "when": "dragonmounts:end",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/end_dragon_egg" }
+      },
+      {
+        "when": "dragonmounts:fire",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/fire_dragon_egg" }
+      },
+      {
+        "when": "dragonmounts:forest",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/forest_dragon_egg" }
+      },
+      {
+        "when": "dragonmounts:ghost",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/ghost_dragon_egg" }
+      },
+      {
+        "when": "dragonmounts:ice",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/ice_dragon_egg" }
+      },
+      {
+        "when": "dragonmounts:nether",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/nether_dragon_egg" }
+      },
+      {
+        "when": "dragonmounts:water",
+        "model": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/water_dragon_egg" }
+      }
+    ],
+    "fallback": { "type": "minecraft:model", "model": "dragonmounts:block/dragon_eggs/end_dragon_egg" }
+  }
+}

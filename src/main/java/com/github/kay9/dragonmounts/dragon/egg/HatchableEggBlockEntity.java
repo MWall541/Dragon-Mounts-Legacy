@@ -8,10 +8,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -21,6 +23,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 public class HatchableEggBlockEntity extends BlockEntity implements Nameable
@@ -38,49 +42,44 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
     public HatchableEggBlockEntity(BlockPos pPos, BlockState pBlockState)
     {
-        super(DMLRegistry.EGG_BLOCK_ENTITY.get(), pPos, pBlockState);
+        super(DMLRegistry.EGG_BLOCK_ENTITY, pPos, pBlockState);
     }
 
     // for saving to world
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider lookup)
+    protected void saveAdditional(ValueOutput output)
     {
-        super.saveAdditional(tag, lookup);
+        super.saveAdditional(output);
 
         // necessary if the breed is not set intentionally
         // perhaps by /setblock or other natural means
-        if (breed == null)
-            setBreed(DragonBreed.getRandom(((RegistryAccess) lookup), RandomSource.create()));
+        if (breed == null && getLevel() != null)
+            setBreed(DragonBreed.getRandom(getLevel().registryAccess(), RandomSource.create()));
 
-        tag.putString(NBT_BREED, getBreedHolder().getRegisteredName());
+        if (breed != null)
+            output.putString(NBT_BREED, getBreedHolder().getRegisteredName());
 
         if (customName != null)
-            tag.putString(NBT_NAME, Component.Serializer.toJson(customName, lookup));
+            output.store(NBT_NAME, ComponentSerialization.CODEC, customName);
 
         if (getTransition().isRunning())
-        {
-            var transitionTag = new CompoundTag();
-            getTransition().save(transitionTag);
-            tag.put(TransitionHandler.NBT_TRANSITIONER, transitionTag);
-        }
+            getTransition().save(output.child(TransitionHandler.NBT_TRANSITIONER));
     }
 
     // for loading from world
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider lookup)
+    protected void loadAdditional(ValueInput input)
     {
-        super.loadAdditional(tag, lookup);
+        super.loadAdditional(input);
 
-        Holder.Reference<DragonBreed> parsedBreed = DragonBreed.parse(tag.getString(NBT_BREED), lookup);
+        Holder.Reference<DragonBreed> parsedBreed = DragonBreed.parse(input.getStringOr(NBT_BREED, ""), input.lookup());
         if (parsedBreed != null)
             setBreed(parsedBreed);
 
-        if (tag.contains(NBT_NAME, 8))
-            setCustomName(parseCustomNameSafe(tag.getString("CustomName"), lookup));
+        setCustomName(parseCustomNameSafe(input, NBT_NAME));
 
-        var transitioner = tag.getCompound(TransitionHandler.NBT_TRANSITIONER);
-        if (!transitioner.isEmpty())
-            getTransition().load(transitioner, lookup);
+        input.child(TransitionHandler.NBT_TRANSITIONER)
+                .ifPresent(tag -> getTransition().load(tag, input.lookup()));
     }
 
     // for destroying block to item
@@ -89,26 +88,24 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
     {
         super.collectImplicitComponents(components);
 
-        components.set(DMLRegistry.DRAGON_BREED_COMPONENT.get(), getBreedHolder());
+        components.set(DMLRegistry.DRAGON_BREED_COMPONENT, getBreedHolder());
         components.set(DataComponents.CUSTOM_NAME, getCustomName());
     }
 
     // for placing block from item
     @Override
-    protected void applyImplicitComponents(DataComponentInput components)
+    protected void applyImplicitComponents(DataComponentGetter components)
     {
         super.applyImplicitComponents(components);
 
-        setBreed(components.get(DMLRegistry.DRAGON_BREED_COMPONENT.get()));
+        setBreed(components.get(DMLRegistry.DRAGON_BREED_COMPONENT));
         setCustomName(components.get(DataComponents.CUSTOM_NAME));
     }
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider lookup)
     {
-        CompoundTag tag = new CompoundTag();
-        saveAdditional(tag, lookup);
-        return tag;
+        return saveWithoutMetadata(lookup);
     }
 
     @Nullable
@@ -120,7 +117,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
 
     public DragonBreed getBreed()
     {
-        return breed.get();
+        return breed.value();
     }
 
     public Holder<DragonBreed> getBreedHolder()
@@ -157,7 +154,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         Component customName = getCustomName();
         if (customName != null) return customName;
 
-        return Component.translatable(DMLRegistry.EGG_BLOCK_ITEM.get().getDescriptionId(), DragonBreed.getTranslation(getBreedHolder()));
+        return Component.translatable(DMLRegistry.EGG_BLOCK_ITEM.getDescriptionId(), DragonBreed.getTranslation(getBreedHolder()));
     }
 
     public TransitionHandler getTransition()
@@ -177,10 +174,10 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         Holder.Reference<DragonBreed> winner = null;
         int prevPoints = 0;
 
-        for (Holder.Reference<DragonBreed> breed : DragonBreed.registry(getLevel().registryAccess()).holders().toList())
+        for (Holder.Reference<DragonBreed> breed : DragonBreed.registry(getLevel().registryAccess()).listElements().toList())
         {
             int points = 0;
-            for (Habitat habitat : breed.get().habitats()) points += habitat.getHabitatPoints(level, getBlockPos());
+            for (Habitat habitat : breed.value().habitats()) points += habitat.getHabitatPoints(level, getBlockPos());
             if (points > MIN_HABITAT_POINTS && points > prevPoints)
             {
                 winner = breed;
@@ -209,7 +206,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
         {
             if (isRunning())
             {
-                if (transitioningBreed.get() == null) // invalid breed id, etc.
+                if (!transitioningBreed.isBound()) // invalid breed id, etc.
                 {
                     transitionTime = 0;
                     return;
@@ -221,7 +218,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
                     getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_IMMEDIATE);
                 }
 
-                if (getLevel().isClientSide)
+                if (getLevel().isClientSide())
                 {
                     for (var i = 0; i < (BREED_TRANSITION_TIME - transitionTime) * 0.25; i++)
                     {
@@ -229,7 +226,7 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
                         var px = pos.getX() + random.nextDouble();
                         var py = pos.getY() + random.nextDouble();
                         var pz = pos.getZ() + random.nextDouble();
-                        var particle = HatchableEggBlock.dustParticleFor(transitioningBreed.get(), random);
+                        var particle = HatchableEggBlock.dustParticleFor(transitioningBreed.value(), random);
 
                         getLevel().addParticle(particle, px, py, pz, 0, 0, 0);
                     }
@@ -253,17 +250,17 @@ public class HatchableEggBlockEntity extends BlockEntity implements Nameable
             return transitionTime > 0;
         }
 
-        public void save(CompoundTag tag)
+        public void save(ValueOutput output)
         {
-            tag.putString(NBT_TRANSITION_BREED, transitioningBreed.key().location().toString());
-            tag.putInt(NBT_TRANSITION_TIME,  transitionTime);
+            output.putString(NBT_TRANSITION_BREED, transitioningBreed.key().identifier().toString());
+            output.putInt(NBT_TRANSITION_TIME,  transitionTime);
         }
 
-        public void load(CompoundTag tag, HolderLookup.Provider lookup)
+        public void load(ValueInput input, HolderLookup.Provider lookup)
         {
-            Holder.Reference<DragonBreed> parsedBreed = DragonBreed.parse(tag.getString(NBT_TRANSITION_BREED), lookup);
+            Holder.Reference<DragonBreed> parsedBreed = DragonBreed.parse(input.getStringOr(NBT_TRANSITION_BREED, ""), lookup);
             if (parsedBreed != null)
-                startFrom(parsedBreed, tag.getInt(NBT_TRANSITION_TIME));
+                startFrom(parsedBreed, input.getIntOr(NBT_TRANSITION_TIME, 0));
         }
     }
 }

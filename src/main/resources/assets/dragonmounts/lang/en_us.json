@@ -9,6 +9,8 @@
   "dragon_breed.dragonmounts.ice": "Ice Dragon",
   "dragon_breed.dragonmounts.nether": "Nether Dragon",
   "dragon_breed.dragonmounts.water": "Water Dragon",
+  "dragon_breed.dragonmounts.amethyst": "Amethyst Dragon",
+  "dragon_breed.dragonmounts.sculk": "Sculk Dragon",
 
   "item.dragonmounts.spawn_egg.dragonmounts.aether": "Aether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.fire": "Fire Dragon Spawn Egg",
@@ -18,6 +20,8 @@
   "item.dragonmounts.spawn_egg.dragonmounts.ice": "Ice Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.nether": "Nether Dragon Spawn Egg",
   "item.dragonmounts.spawn_egg.dragonmounts.water": "Water Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.amethyst": "Amethyst Dragon Spawn Egg",
+  "item.dragonmounts.spawn_egg.dragonmounts.sculk": "Sculk Dragon Spawn Egg",
 
   "block.dragonmounts.dragon_egg.remaining_time": "Hatches in %s seconds.",
   "block.dragonmounts.dragon_egg.hatch_stage.0": "It looks like this Egg will take a long time to hatch.",
@@ -33,8 +37,10 @@
   "block.dragonmounts.dragon_egg.dragonmounts.ice": "Ice Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.nether": "Nether Dragon Egg",
   "block.dragonmounts.dragon_egg.dragonmounts.water": "Water Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.amethyst": "Amethyst Dragon Egg",
+  "block.dragonmounts.dragon_egg.dragonmounts.sculk": "Sculk Dragon Egg",
 
-  "key.category.dragonmounts": "Dragon Mounts",
+  "key.category.dragonmounts.dragonmounts": "Dragon Mounts",
   "key.dragonmounts.flight_descent": "Flight Descent",
   "key.dragonmounts.camera_flight": "Flight Commands",
 

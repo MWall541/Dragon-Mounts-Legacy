@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "example_addon",
+  "version": "1.0.0",
+  "name": "Example Breed Addon",
+  "description": "This is a long form description of the addon. You can write whatever you want here.",
+  "authors": [
+    "Love, Cheese and small house plants"
+  ],
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "minecraft": ">=26.1",
+    "fabric-api": "*",
+    "dragonmounts": ">=26.2"
+  }
+}

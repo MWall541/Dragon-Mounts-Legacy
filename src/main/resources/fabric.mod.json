@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "This is a mod that allows you to hatch previously useless dragon eggs. Once fostered and tamed, they'll be your faithful companion in all situations and, of course, can be used for a ride!",
+  "authors": [
+    "Kay9"
+  ],
+  "contact": {
+    "issues": "https://github.com/Kay9Unit/Dragon-Mounts-Legacy/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/dragonmounts/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.github.kay9.dragonmounts.DragonMountsLegacy"
+    ],
+    "client": [
+      "com.github.kay9.dragonmounts.client.DragonMountsClient"
+    ]
+  },
+  "mixins": [
+    "dragonmounts.mixins.json"
+  ],
+  "accessWidener": "dragonmounts.accesswidener",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=26.1",
+    "fabric-api": "*"
+  }
+}
